@@ -121,11 +121,6 @@ export default function LandingPage() {
       <main>
         <section className="container mx-auto px-4 py-20 md:py-32">
           <div className="flex flex-col items-center text-center max-w-4xl mx-auto">
-            <Badge variant="secondary" className="mb-6">
-              <Sparkles className="mr-1 h-3 w-3" />
-              AI-Powered Trip Planning
-            </Badge>
-            
             <h1 className="text-4xl md:text-6xl font-bold tracking-tight mb-6">
               Plan group trips in{" "}
               <span className="text-primary">10 minutes</span>
