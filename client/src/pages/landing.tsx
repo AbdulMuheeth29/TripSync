@@ -50,39 +50,6 @@ const features = [
   },
 ];
 
-const pricingPlans = [
-  {
-    name: "Free",
-    price: "$0",
-    period: "/forever",
-    description: "Perfect for trying out TripSync",
-    features: [
-      "1 active trip",
-      "Up to 4 group members",
-      "AI itinerary generation",
-      "Basic expense tracking",
-    ],
-    cta: "Start Free",
-    popular: false,
-  },
-  {
-    name: "Pro",
-    price: "$19",
-    period: "/month",
-    description: "For frequent travelers and planners",
-    features: [
-      "Unlimited trips",
-      "Unlimited group members",
-      "Priority AI generation",
-      "Advanced expense splitting",
-      "Calendar export",
-      "Photo albums",
-    ],
-    cta: "Start Pro Trial",
-    popular: true,
-  },
-];
-
 export default function LandingPage() {
   return (
     <div className="min-h-screen bg-background">
@@ -100,9 +67,6 @@ export default function LandingPage() {
           <nav className="hidden md:flex items-center gap-6">
             <a href="#features" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
               Features
-            </a>
-            <a href="#pricing" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
-              Pricing
             </a>
           </nav>
 
@@ -211,60 +175,6 @@ export default function LandingPage() {
                 </div>
               ))}
             </div>
-          </div>
-        </section>
-
-        <section id="pricing" className="container mx-auto px-4 py-20 md:py-32">
-          <div className="text-center mb-16">
-            <Badge variant="outline" className="mb-4">Pricing</Badge>
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">
-              Simple, transparent pricing
-            </h2>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              Start free and upgrade when you're ready. No hidden fees, no surprises.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-            {pricingPlans.map((plan, index) => (
-              <Card
-                key={index}
-                className={`relative ${plan.popular ? "border-primary" : ""}`}
-              >
-                {plan.popular && (
-                  <Badge className="absolute -top-3 left-1/2 -translate-x-1/2">
-                    Most Popular
-                  </Badge>
-                )}
-                <CardContent className="p-8">
-                  <h3 className="text-2xl font-bold mb-2">{plan.name}</h3>
-                  <div className="flex items-baseline gap-1 mb-2">
-                    <span className="text-4xl font-bold">{plan.price}</span>
-                    <span className="text-muted-foreground">{plan.period}</span>
-                  </div>
-                  <p className="text-muted-foreground mb-6">{plan.description}</p>
-                  
-                  <ul className="space-y-3 mb-8">
-                    {plan.features.map((feature, i) => (
-                      <li key={i} className="flex items-center gap-2">
-                        <Check className="h-4 w-4 text-primary flex-shrink-0" />
-                        <span className="text-sm">{feature}</span>
-                      </li>
-                    ))}
-                  </ul>
-
-                  <Link href="/login">
-                    <Button
-                      className="w-full"
-                      variant={plan.popular ? "default" : "outline"}
-                      data-testid={`button-pricing-${plan.name.toLowerCase()}`}
-                    >
-                      {plan.cta}
-                    </Button>
-                  </Link>
-                </CardContent>
-              </Card>
-            ))}
           </div>
         </section>
 
