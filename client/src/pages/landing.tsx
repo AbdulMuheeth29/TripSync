@@ -13,7 +13,6 @@ import {
   Check,
   ArrowRight,
   MapPin,
-  Clock,
   ThumbsUp,
 } from "lucide-react";
 import { SiX, SiInstagram, SiFacebook } from "react-icons/si";
@@ -146,10 +145,6 @@ export default function LandingPage() {
                   <ArrowRight className="h-4 w-4" />
                 </Button>
               </Link>
-              <Button size="lg" variant="outline" className="gap-2">
-                Watch Demo
-                <Clock className="h-4 w-4" />
-              </Button>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-3xl">
