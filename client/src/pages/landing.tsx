@@ -169,29 +169,6 @@ export default function LandingPage() {
           </div>
         </section>
 
-        <section className="bg-muted/50 py-16">
-          <div className="container mx-auto px-4">
-            <div className="flex flex-wrap justify-center items-center gap-8 md:gap-16">
-              <div className="text-center">
-                <div className="text-3xl font-bold text-primary">50K+</div>
-                <div className="text-sm text-muted-foreground">Trips Planned</div>
-              </div>
-              <div className="text-center">
-                <div className="text-3xl font-bold text-primary">200K+</div>
-                <div className="text-sm text-muted-foreground">Happy Travelers</div>
-              </div>
-              <div className="text-center">
-                <div className="text-3xl font-bold text-primary">4.9/5</div>
-                <div className="text-sm text-muted-foreground">Average Rating</div>
-              </div>
-              <div className="text-center">
-                <div className="text-3xl font-bold text-primary">10min</div>
-                <div className="text-sm text-muted-foreground">Avg. Planning Time</div>
-              </div>
-            </div>
-          </div>
-        </section>
-
         <section id="features" className="container mx-auto px-4 py-20 md:py-32">
           <div className="text-center mb-16">
             <Badge variant="outline" className="mb-4">Features</Badge>
