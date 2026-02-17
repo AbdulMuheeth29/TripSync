@@ -11,7 +11,10 @@ import DashboardPage from "@/pages/dashboard";
 import CreateTripPage from "@/pages/create-trip";
 import TripDetailPage from "@/pages/trip-detail";
 import JoinTripPage from "@/pages/join-trip";
+import InviteRespondPage from "@/pages/invite-respond";
+import ForgotPasswordPage from "@/pages/forgot-password";
 import NotFound from "@/pages/not-found";
+import MetricsDashboard from "@/admin/MetricsDashboard";
 
 function ProtectedRoute({ component: Component }: { component: React.ComponentType }) {
   const { user, isLoading } = useAuth();
@@ -36,6 +39,7 @@ function Router() {
     <Switch>
       <Route path="/" component={LandingPage} />
       <Route path="/login" component={LoginPage} />
+      <Route path="/forgot-password" component={ForgotPasswordPage} />
       <Route path="/dashboard">
         {() => <ProtectedRoute component={DashboardPage} />}
       </Route>
@@ -46,6 +50,10 @@ function Router() {
         {() => <ProtectedRoute component={TripDetailPage} />}
       </Route>
       <Route path="/join/:code" component={JoinTripPage} />
+      <Route path="/invite/:inviteId" component={InviteRespondPage} />
+      <Route path="/admin/metrics">
+        {() => <ProtectedRoute component={MetricsDashboard} />}
+      </Route>
       <Route component={NotFound} />
     </Switch>
   );

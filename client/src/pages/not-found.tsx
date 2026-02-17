@@ -1,15 +1,14 @@
 import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Plane, Home } from "lucide-react";
+import { AppLogo } from "@/components/app-logo";
+import { Home } from "lucide-react";
 
 export default function NotFound() {
   return (
     <div className="min-h-screen bg-background flex flex-col items-center justify-center p-4">
       <div className="flex items-center gap-2 mb-8">
-        <div className="flex h-10 w-10 items-center justify-center rounded-md bg-primary">
-          <Plane className="h-5 w-5 text-primary-foreground" />
-        </div>
+        <AppLogo className="h-10 w-10 object-contain" />
         <span className="text-2xl font-bold">TripSync</span>
       </div>
 

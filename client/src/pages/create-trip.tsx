@@ -11,8 +11,8 @@ import { ThemeToggle } from "@/components/theme-toggle";
 import { useAuth } from "@/lib/auth-context";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
+import { AppLogo } from "@/components/app-logo";
 import {
-  Plane,
   ArrowLeft,
   ArrowRight,
   MapPin,
@@ -25,10 +25,14 @@ import {
   Wine,
   Palmtree,
   Building,
+  Landmark,
   Home,
   UtensilsCrossed,
   Check,
   Loader2,
+  Mail,
+  Plus,
+  X,
 } from "lucide-react";
 import type { TripWizardData } from "@shared/schema";
 
@@ -37,6 +41,7 @@ const vibeOptions = [
   { id: "adventure", label: "Adventure", icon: Mountain, description: "Hiking, activities, exploring" },
   { id: "foodie", label: "Foodie", icon: Utensils, description: "Restaurants, markets, cooking" },
   { id: "nightlife", label: "Nightlife", icon: Wine, description: "Bars, clubs, entertainment" },
+  { id: "culture", label: "Culture", icon: Landmark, description: "Museums, history, local arts" },
 ];
 
 const accommodationOptions = [
@@ -56,11 +61,15 @@ const STEPS = [
   { id: 2, title: "Trip Vibe", description: "What's the mood?" },
   { id: 3, title: "Accommodation", description: "Where to stay" },
   { id: 4, title: "Dining", description: "How to eat" },
+  { id: 5, title: "Invite", description: "Invite your group" },
 ];
 
 export default function CreateTripPage() {
   const [currentStep, setCurrentStep] = useState(1);
-  const [formData, setFormData] = useState<Partial<TripWizardData>>({
+  const [inviteEmails, setInviteEmails] = useState<string[]>([]);
+  const [inviteEmailInput, setInviteEmailInput] = useState("");
+  const [formData, setFormData] = useState<Partial<TripWizardData & { title: string; tripType: string; voteDeadline: string }>>({
+    title: "",
     destination: "",
     startDate: "",
     endDate: "",
@@ -69,31 +78,56 @@ export default function CreateTripPage() {
     vibes: [],
     accommodationPref: "",
     diningPref: "",
+    tripType: "",
+    voteDeadline: "",
   });
   const [, setLocation] = useLocation();
   const { user } = useAuth();
   const { toast } = useToast();
 
   const createTripMutation = useMutation({
-    mutationFn: async (data: TripWizardData) => {
+    mutationFn: async (data: TripWizardData & { inviteEmails?: string[]; title?: string; tripType?: string; voteDeadline?: string }) => {
+      if (!user?.id) {
+        throw new Error("You must be logged in to create a trip");
+      }
+
       const response = await apiRequest("POST", "/api/trips", {
-        ...data,
-        organizerId: user?.id,
+        title: data.title ?? undefined,
+        tripType: data.tripType ?? undefined,
+        destination: data.destination,
+        startDate: data.startDate,
+        endDate: data.endDate,
+        budgetPerPerson: data.budgetPerPerson,
+        groupSize: data.groupSize,
+        vibes: data.vibes,
+        accommodationPref: data.accommodationPref,
+        diningPref: data.diningPref,
+        voteDeadline: (data as { voteDeadline?: string }).voteDeadline || undefined,
       });
-      return response.json();
+      const trip = await response.json();
+      const emails = (data as { inviteEmails?: string[] }).inviteEmails || [];
+      for (const email of emails) {
+        if (email?.trim()) {
+          try {
+            await apiRequest("POST", `/api/trips/${trip.id}/invites`, { email: email.trim() });
+          } catch (_) {}
+        }
+      }
+      return trip;
     },
     onSuccess: (trip) => {
       queryClient.invalidateQueries({ queryKey: ["/api/trips"] });
       toast({
         title: "Trip created!",
-        description: "AI is generating your itinerary...",
+        description: "Invites sent. AI is generating your itinerary...",
       });
       setLocation(`/trip/${trip.id}`);
     },
-    onError: () => {
+    onError: (error: Error) => {
+      const message = error.message || "Something went wrong. Please try again.";
       toast({
         title: "Failed to create trip",
-        description: "Something went wrong. Please try again.",
+        description: message,
         variant: "destructive",
       });
     },
@@ -122,16 +156,18 @@ export default function CreateTripPage() {
         return formData.accommodationPref;
       case 4:
         return formData.diningPref;
+      case 5:
+        return true;
       default:
         return false;
     }
   };
 
   const handleNext = () => {
-    if (currentStep < 4) {
+    if (currentStep < 5) {
       setCurrentStep((prev) => prev + 1);
     } else {
-      createTripMutation.mutate(formData as TripWizardData);
+      createTripMutation.mutate({ ...formData, inviteEmails } as TripWizardData & { inviteEmails: string[] });
     }
   };
 
@@ -141,7 +177,7 @@ export default function CreateTripPage() {
     }
   };
 
-  const progressPercent = (currentStep / 4) * 100;
+  const progressPercent = (currentStep / 5) * 100;
 
   return (
     <div className="min-h-screen bg-background">
@@ -155,9 +191,7 @@ export default function CreateTripPage() {
           </Link>
 
           <div className="flex items-center gap-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-md bg-primary">
-              <Plane className="h-4 w-4 text-primary-foreground" />
-            </div>
+            <AppLogo className="h-8 w-8 object-contain" />
             <span className="font-semibold hidden sm:block">TripSync</span>
           </div>
 
@@ -168,20 +202,20 @@ export default function CreateTripPage() {
       <main className="container mx-auto px-4 py-8 max-w-2xl">
         <div className="mb-8">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-sm text-muted-foreground">Step {currentStep} of 4</span>
+            <span className="text-sm text-muted-foreground">Step {currentStep} of 5</span>
             <span className="text-sm font-medium">{STEPS[currentStep - 1].title}</span>
           </div>
           <Progress value={progressPercent} className="h-2" />
         </div>
 
-        <div className="flex justify-center gap-2 mb-8">
+        <div className="flex justify-center gap-1 mb-8">
           {STEPS.map((step, index) => (
             <div
               key={step.id}
-              className={`flex items-center gap-2 ${index < STEPS.length - 1 ? "flex-1" : ""}`}
+              className={`flex items-center ${index < STEPS.length - 1 ? "flex-1" : ""}`}
             >
               <div
-                className={`flex h-8 w-8 items-center justify-center rounded-full text-sm font-medium ${
+                className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-sm font-medium ${
                   currentStep > step.id
                     ? "bg-primary text-primary-foreground"
                     : currentStep === step.id
@@ -193,7 +227,7 @@ export default function CreateTripPage() {
               </div>
               {index < STEPS.length - 1 && (
                 <div
-                  className={`h-0.5 flex-1 ${
+                  className={`h-0.5 flex-1 mx-1 ${
                     currentStep > step.id ? "bg-primary" : "bg-muted"
                   }`}
                 />
@@ -211,9 +245,19 @@ export default function CreateTripPage() {
             {currentStep === 1 && (
               <>
                 <div className="space-y-2">
+                  <Label htmlFor="title" className="flex items-center gap-2">Trip title (optional)</Label>
+                  <Input
+                    id="title"
+                    placeholder="e.g., Miami Bachelorette 2026"
+                    value={formData.title ?? ""}
+                    onChange={(e) => setFormData((p) => ({ ...p, title: e.target.value }))}
+                    data-testid="input-title"
+                  />
+                </div>
+                <div className="space-y-2">
                   <Label htmlFor="destination" className="flex items-center gap-2">
                     <MapPin className="h-4 w-4" />
-                    Destination
+                    Location / Destination
                   </Label>
                   <Input
                     id="destination"
@@ -222,6 +266,23 @@ export default function CreateTripPage() {
                     onChange={(e) => updateField("destination", e.target.value)}
                     data-testid="input-destination"
                   />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="tripType">Trip type / template (optional)</Label>
+                  <select
+                    id="tripType"
+                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                    value={formData.tripType ?? ""}
+                    onChange={(e) => setFormData((p) => ({ ...p, tripType: e.target.value }))}
+                    data-testid="select-trip-type"
+                  >
+                    <option value="">None</option>
+                    <option value="beach">Beach / getaway</option>
+                    <option value="city">City break</option>
+                    <option value="food_tour">Food tour</option>
+                    <option value="adventure">Adventure</option>
+                    <option value="bachelorette">Bachelorette / bachelor</option>
+                  </select>
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
@@ -281,6 +342,17 @@ export default function CreateTripPage() {
                       data-testid="input-budget"
                     />
                   </div>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="voteDeadline">Decision deadline (optional)</Label>
+                  <Input
+                    id="voteDeadline"
+                    type="date"
+                    value={formData.voteDeadline ?? ""}
+                    onChange={(e) => setFormData((p) => ({ ...p, voteDeadline: e.target.value }))}
+                    data-testid="input-vote-deadline"
+                  />
+                  <p className="text-xs text-muted-foreground">Voting and itinerary changes lock after this date so the group can finalize.</p>
                 </div>
               </>
             )}
@@ -376,6 +448,61 @@ export default function CreateTripPage() {
               </div>
             )}
 
+            {currentStep === 5 && (
+              <div className="space-y-4">
+                <p className="text-sm text-muted-foreground">
+                  Add email addresses to invite. They'll get the trip share link. You can also copy the share link from the trip page after creation.
+                </p>
+                <div className="flex gap-2">
+                  <Input
+                    type="email"
+                    placeholder="friend@example.com"
+                    value={inviteEmailInput}
+                    onChange={(e) => setInviteEmailInput(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        e.preventDefault();
+                        if (inviteEmailInput.trim() && !inviteEmails.includes(inviteEmailInput.trim())) {
+                          setInviteEmails([...inviteEmails, inviteEmailInput.trim()]);
+                          setInviteEmailInput("");
+                        }
+                      }
+                    }}
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="icon"
+                    onClick={() => {
+                      if (inviteEmailInput.trim() && !inviteEmails.includes(inviteEmailInput.trim())) {
+                        setInviteEmails([...inviteEmails, inviteEmailInput.trim()]);
+                        setInviteEmailInput("");
+                      }
+                    }}
+                  >
+                    <Plus className="h-4 w-4" />
+                  </Button>
+                </div>
+                {inviteEmails.length > 0 && (
+                  <div className="flex flex-wrap gap-2">
+                    {inviteEmails.map((email) => (
+                      <Badge key={email} variant="secondary" className="gap-1 pr-1">
+                        <Mail className="h-3 w-3" />
+                        {email}
+                        <button
+                          type="button"
+                          className="ml-1 rounded-full hover:bg-muted p-0.5"
+                          onClick={() => setInviteEmails(inviteEmails.filter((e) => e !== email))}
+                        >
+                          <X className="h-3 w-3" />
+                        </button>
+                      </Badge>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
             <div className="flex justify-between pt-6">
               <Button
                 variant="outline"
@@ -396,10 +523,10 @@ export default function CreateTripPage() {
                     <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                     Creating...
                   </>
-                ) : currentStep === 4 ? (
+                ) : currentStep === 5 ? (
                   <>
                     <Sparkles className="h-4 w-4 mr-2" />
-                    Generate Itinerary
+                    Create Trip & Invite
                   </>
                 ) : (
                   <>

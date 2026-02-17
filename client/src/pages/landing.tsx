@@ -1,225 +1,254 @@
 import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { AppLogo } from "@/components/app-logo";
 import {
-  Plane,
   Users,
   Sparkles,
   Calendar,
   CreditCard,
   MessageSquare,
-  Check,
   ArrowRight,
   MapPin,
-  ThumbsUp,
+  ChevronDown,
 } from "lucide-react";
-import { SiX, SiInstagram, SiFacebook } from "react-icons/si";
 
 const features = [
   {
     icon: Sparkles,
     title: "AI-Powered Planning",
-    description: "Get a complete itinerary in minutes, not hours. Our AI considers your budget, vibe, and group preferences.",
+    description: "Complete itineraries in minutes. Budget, vibe, and group preferences in one place.",
   },
   {
     icon: Users,
     title: "Group Collaboration",
-    description: "Vote on activities, leave comments, and make decisions together. No more endless group chats.",
+    description: "Vote, comment, decide together. No more endless group chats.",
   },
   {
     icon: Calendar,
     title: "Smart Scheduling",
-    description: "Perfectly timed activities with realistic travel times. Never miss a reservation again.",
+    description: "Realistic timing and travel. Never miss a reservation.",
   },
   {
     icon: CreditCard,
     title: "Expense Tracking",
-    description: "Split bills fairly and see who owes what. Settle up with one click after your trip.",
+    description: "Split fairly, see who owes what. Settle up after the trip.",
   },
   {
     icon: MessageSquare,
-    title: "Real-time Updates",
-    description: "Everyone stays in sync. Changes update instantly for the whole group.",
+    title: "Real-time Sync",
+    description: "Changes update instantly for everyone.",
   },
   {
     icon: MapPin,
     title: "One-Click Booking",
-    description: "Deep links to flights, hotels, and restaurants. Book directly from your itinerary.",
+    description: "Deep links to flights, hotels, restaurants. Book from the plan.",
   },
 ];
 
 export default function LandingPage() {
   return (
     <div className="min-h-screen bg-background">
-      <header className="sticky top-0 z-50 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="container mx-auto flex h-16 items-center justify-between px-4 gap-4">
-          <Link href="/">
-            <div className="flex items-center gap-2 cursor-pointer">
-              <div className="flex h-9 w-9 items-center justify-center rounded-md bg-primary">
-                <Plane className="h-5 w-5 text-primary-foreground" />
-              </div>
-              <span className="text-xl font-bold">TripSync</span>
-            </div>
-          </Link>
+      {/* Hero: dark, beam, giant type, central CTA */}
+      <section className="relative min-h-screen flex flex-col overflow-hidden bg-neutral-950">
+        {/* Subtle speckle / noise texture */}
+        <div
+          className="absolute inset-0 opacity-[0.03]"
+          style={{
+            backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E")`,
+          }}
+          aria-hidden
+        />
+        {/* Warm accent beam from right */}
+        <div
+          className="absolute top-0 right-0 w-[80%] md:w-[60%] h-full pointer-events-none"
+          aria-hidden
+        >
+          <div className="absolute inset-0 bg-gradient-to-l from-amber-500/15 via-orange-400/5 to-transparent" />
+          <div className="absolute top-1/4 right-0 w-full h-1/2 bg-gradient-to-l from-amber-400/10 to-transparent blur-3xl" />
+        </div>
 
-          <nav className="hidden md:flex items-center gap-6">
-            <a href="#features" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+        <header className="relative z-10 flex h-16 items-center justify-between px-4 md:px-8 lg:px-12">
+          <Link href="/" className="flex items-center gap-2.5 cursor-pointer group">
+            <AppLogo className="h-9 w-9 object-contain" />
+            <span className="text-lg font-semibold text-white tracking-tight">TripSync</span>
+          </Link>
+          <nav className="hidden md:flex items-center gap-8">
+            <a
+              href="#features"
+              className="text-sm text-white/70 hover:text-white transition-colors"
+            >
               Features
             </a>
           </nav>
-
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3">
             <ThemeToggle />
             <Link href="/login">
-              <Button variant="ghost" data-testid="button-login">Log In</Button>
+              <Button
+                variant="ghost"
+                className="text-white/90 hover:text-white hover:bg-white/10 border border-transparent"
+                data-testid="button-login"
+              >
+                Log In
+              </Button>
             </Link>
             <Link href="/login">
-              <Button data-testid="button-get-started">Get Started</Button>
-            </Link>
-          </div>
-        </div>
-      </header>
-
-      <main>
-        <section className="container mx-auto px-4 py-20 md:py-32">
-          <div className="flex flex-col items-center text-center max-w-4xl mx-auto">
-            <h1 className="text-4xl md:text-6xl font-bold tracking-tight mb-6">
-              Plan group trips in{" "}
-              <span className="text-primary">10 minutes</span>
-              <br />
-              not 10 hours
-            </h1>
-            
-            <p className="text-lg md:text-xl text-muted-foreground mb-10 max-w-2xl">
-              TripSync combines AI itinerary generation, group collaboration, and expense tracking 
-              into one seamless platform. Stop juggling spreadsheets and group chats.
-            </p>
-
-            <div className="flex flex-col sm:flex-row gap-4 mb-16">
-              <Link href="/login">
-                <Button size="lg" className="gap-2 px-8" data-testid="button-start-planning">
-                  Start Planning
-                  <ArrowRight className="h-4 w-4" />
-                </Button>
-              </Link>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-3xl">
-              <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
-                <Check className="h-4 w-4 text-primary" />
-                No credit card required
-              </div>
-              <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
-                <Check className="h-4 w-4 text-primary" />
-                Free forever plan
-              </div>
-              <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
-                <Check className="h-4 w-4 text-primary" />
-                Cancel anytime
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <section id="features" className="container mx-auto px-4 py-20 md:py-32">
-          <div className="text-center mb-16">
-            <Badge variant="outline" className="mb-4">Features</Badge>
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">
-              Everything you need for stress-free group travel
-            </h2>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              From AI-generated itineraries to seamless expense splitting, 
-              TripSync handles the logistics so you can focus on making memories.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {features.map((feature, index) => (
-              <Card key={index} className="hover-elevate">
-                <CardContent className="p-6">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10 mb-4">
-                    <feature.icon className="h-6 w-6 text-primary" />
-                  </div>
-                  <h3 className="text-lg font-semibold mb-2">{feature.title}</h3>
-                  <p className="text-muted-foreground">{feature.description}</p>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </section>
-
-        <section className="bg-muted/30 py-20 md:py-32">
-          <div className="container mx-auto px-4">
-            <div className="text-center mb-16">
-              <Badge variant="outline" className="mb-4">How It Works</Badge>
-              <h2 className="text-3xl md:text-4xl font-bold mb-4">
-                From idea to itinerary in 4 simple steps
-              </h2>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-8 max-w-5xl mx-auto">
-              {[
-                { step: "1", title: "Enter Details", desc: "Tell us your destination, dates, and budget" },
-                { step: "2", title: "Pick Your Vibe", desc: "Adventure, relaxation, foodie, nightlife - you choose" },
-                { step: "3", title: "AI Generates", desc: "Get a personalized itinerary in seconds" },
-                { step: "4", title: "Collaborate", desc: "Vote, comment, and book together" },
-              ].map((item, index) => (
-                <div key={index} className="text-center">
-                  <div className="flex h-14 w-14 items-center justify-center rounded-full bg-primary text-primary-foreground text-xl font-bold mx-auto mb-4">
-                    {item.step}
-                  </div>
-                  <h3 className="font-semibold mb-2">{item.title}</h3>
-                  <p className="text-sm text-muted-foreground">{item.desc}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        <section className="bg-primary text-primary-foreground py-20">
-          <div className="container mx-auto px-4 text-center">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">
-              Ready to plan your next adventure?
-            </h2>
-            <p className="text-lg opacity-90 mb-8 max-w-xl mx-auto">
-              Join thousands of groups who've made trip planning actually fun.
-            </p>
-            <Link href="/login">
-              <Button size="lg" variant="secondary" className="gap-2" data-testid="button-cta-bottom">
-                Start Planning for Free
-                <ArrowRight className="h-4 w-4" />
+              <Button
+                className="bg-white text-neutral-950 hover:bg-white/90 border border-white/20 font-medium"
+                data-testid="button-get-started"
+              >
+                Get Started
               </Button>
             </Link>
           </div>
-        </section>
-      </main>
+        </header>
 
-      <footer className="border-t py-12">
-        <div className="container mx-auto px-4">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-            <div className="flex items-center gap-2">
-              <div className="flex h-8 w-8 items-center justify-center rounded-md bg-primary">
-                <Plane className="h-4 w-4 text-primary-foreground" />
+        <div className="relative z-10 flex flex-1 flex-col items-center justify-center px-4 pt-8 pb-24 text-center">
+          {/* Giant decorative wordmark (layered behind) */}
+          <div
+            className="absolute inset-0 flex items-center justify-center pointer-events-none select-none"
+            aria-hidden
+          >
+            <span
+              className="text-[clamp(8rem,25vw,18rem)] font-bold tracking-tighter text-white/[0.04]"
+              style={{ fontFamily: "var(--font-sans)" }}
+            >
+              TripSync
+            </span>
+          </div>
+
+          <h1 className="relative text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-white mb-6 max-w-3xl mx-auto leading-[1.1]">
+            Plan group trips in{" "}
+            <span className="text-amber-400/90">10 minutes</span>, not 10 hours
+          </h1>
+          <p className="relative text-lg text-white/60 mb-10 max-w-xl leading-relaxed">
+            AI itineraries, voting, chat, and expenses in one place. Create a trip, invite your group, get a plan everyone loves.
+          </p>
+
+          {/* Central CTA: pill-style primary action */}
+          <div className="relative flex flex-col sm:flex-row items-center gap-4 mb-12">
+            <Link href="/login">
+              <Button
+                size="lg"
+                className="h-14 px-10 rounded-full bg-amber-500 hover:bg-amber-400 text-neutral-950 font-semibold text-base gap-2 border-0 shadow-lg shadow-amber-500/20"
+                data-testid="button-start-planning"
+              >
+                Start Planning
+                <ArrowRight className="h-5 w-5" />
+              </Button>
+            </Link>
+          </div>
+
+          <p className="relative text-sm text-white/50 max-w-md">
+            Free to use · No credit card · Invite by email and go
+          </p>
+
+          <a
+            href="#features"
+            className="absolute bottom-8 left-1/2 -translate-x-1/2 text-white/40 hover:text-white/60 transition-colors"
+            aria-label="Scroll to features"
+          >
+            <ChevronDown className="h-8 w-8" />
+          </a>
+        </div>
+      </section>
+
+      {/* Features: refined, spacious */}
+      <section id="features" className="relative bg-background py-24 md:py-32">
+        <div className="container mx-auto px-4 md:px-8">
+          <div className="text-center mb-16">
+            <p className="text-sm font-medium text-muted-foreground tracking-wide uppercase mb-3">
+              Features
+            </p>
+            <h2 className="font-heading text-3xl md:text-4xl font-bold text-foreground mb-4 max-w-2xl mx-auto">
+              Everything for stress-free group travel
+            </h2>
+            <p className="text-muted-foreground max-w-xl mx-auto leading-relaxed">
+              From AI itineraries to expense splitting, we handle the logistics so you can focus on the trip.
+            </p>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-5xl mx-auto">
+            {features.map((feature, index) => (
+              <div
+                key={index}
+                className="group rounded-2xl border border-border/80 bg-card p-6 text-left transition-all hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5"
+              >
+                <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary/10 text-primary mb-4 group-hover:bg-primary/15 transition-colors">
+                  <feature.icon className="h-5 w-5" />
+                </div>
+                <h3 className="font-heading text-lg font-semibold text-foreground mb-2">
+                  {feature.title}
+                </h3>
+                <p className="text-muted-foreground text-sm leading-relaxed">
+                  {feature.description}
+                </p>
               </div>
-              <span className="font-semibold">TripSync</span>
-            </div>
+            ))}
+          </div>
+        </div>
+      </section>
 
-            <div className="flex items-center gap-4">
-              <a href="#" className="text-muted-foreground hover:text-foreground transition-colors">
-                <SiX className="h-5 w-5" />
-              </a>
-              <a href="#" className="text-muted-foreground hover:text-foreground transition-colors">
-                <SiInstagram className="h-5 w-5" />
-              </a>
-              <a href="#" className="text-muted-foreground hover:text-foreground transition-colors">
-                <SiFacebook className="h-5 w-5" />
-              </a>
-            </div>
+      {/* How it works: minimal steps */}
+      <section className="border-t bg-muted/30 py-24 md:py-28">
+        <div className="container mx-auto px-4 md:px-8">
+          <div className="text-center mb-14">
+            <p className="text-sm font-medium text-muted-foreground tracking-wide uppercase mb-3">
+              How it works
+            </p>
+            <h2 className="font-heading text-3xl md:text-4xl font-bold text-foreground">
+              Idea to itinerary in 4 steps
+            </h2>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-8 max-w-4xl mx-auto">
+            {[
+              { step: "1", title: "Enter details", desc: "Destination, dates, budget, vibe" },
+              { step: "2", title: "Invite & preferences", desc: "Email invite; 3 quick questions" },
+              { step: "3", title: "AI generates", desc: "A plan that fits the whole group" },
+              { step: "4", title: "Vote, chat & book", desc: "Deep links, expenses, done" },
+            ].map((item) => (
+              <div key={item.step} className="text-center">
+                <div className="inline-flex h-12 w-12 items-center justify-center rounded-full border-2 border-primary/30 bg-background text-foreground font-semibold mb-4">
+                  {item.step}
+                </div>
+                <h3 className="font-heading font-semibold text-foreground mb-1.5">{item.title}</h3>
+                <p className="text-sm text-muted-foreground leading-relaxed">{item.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
 
+      {/* Final CTA */}
+      <section className="border-t py-24 md:py-28">
+        <div className="container mx-auto px-4 text-center">
+          <h2 className="font-heading text-3xl md:text-4xl font-bold text-foreground mb-4">
+            Ready to plan your next adventure?
+          </h2>
+          <p className="text-muted-foreground mb-8 max-w-md mx-auto leading-relaxed">
+            Create a trip, invite your group, and get a plan everyone loves.
+          </p>
+          <Link href="/login">
+            <Button
+              size="lg"
+              className="gap-2 rounded-full font-medium px-8"
+              data-testid="button-cta-bottom"
+            >
+              Start Planning for Free
+              <ArrowRight className="h-4 w-4" />
+            </Button>
+          </Link>
+        </div>
+      </section>
+
+      <footer className="border-t py-10">
+        <div className="container mx-auto px-4">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+            <div className="flex items-center gap-2">
+              <AppLogo className="h-8 w-8 object-contain" />
+              <span className="font-semibold text-foreground">TripSync</span>
+            </div>
             <p className="text-sm text-muted-foreground">
-              &copy; 2026 TripSync. All rights reserved.
+              &copy; {new Date().getFullYear()} TripSync. All rights reserved.
             </p>
           </div>
         </div>

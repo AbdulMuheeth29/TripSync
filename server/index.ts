@@ -1,10 +1,31 @@
+import "dotenv/config";
 import express, { type Request, Response, NextFunction } from "express";
+import path from "path";
+import fs from "fs";
+import { migrate } from "drizzle-orm/node-postgres/migrator";
+import { validateEnv, env } from "./env";
+import { getDb } from "./db";
 import { registerRoutes } from "./routes";
 import { serveStatic } from "./static";
 import { createServer } from "http";
 
 const app = express();
 const httpServer = createServer(app);
+
+const isProduction = process.env.NODE_ENV === "production";
+if (isProduction) {
+  app.set("trust proxy", 1);
+}
+
+app.use((_req, res, next) => {
+  res.setHeader("X-Content-Type-Options", "nosniff");
+  res.setHeader("X-Frame-Options", "DENY");
+  res.setHeader("X-XSS-Protection", "1; mode=block");
+  if (isProduction) {
+    res.setHeader("Strict-Transport-Security", "max-age=31536000; includeSubDomains");
+  }
+  next();
+});
 
 declare module "http" {
   interface IncomingMessage {
@@ -59,8 +80,45 @@ app.use((req, res, next) => {
   next();
 });
 
+validateEnv();
+
 (async () => {
+  // Run pending migrations when using PostgreSQL (e.g. in Docker)
+  if (process.env.DATABASE_URL) {
+    const migrationsDir = path.join(process.cwd(), "migrations");
+    if (fs.existsSync(migrationsDir)) {
+      try {
+        const db = getDb();
+        await migrate(db, { migrationsFolder: migrationsDir });
+        log("migrations applied");
+      } catch (err) {
+        console.error("Migration failed:", err);
+        process.exit(1);
+      }
+    }
+  }
+
+  if (isProduction) {
+    try {
+      const { default: rateLimit } = await import("express-rate-limit");
+      app.use(
+        rateLimit({
+          windowMs: 15 * 60 * 1000,
+          max: 200,
+          message: { error: "Too many requests" },
+          standardHeaders: true,
+          legacyHeaders: false,
+        }),
+      );
+    } catch {
+      // express-rate-limit not installed; skip rate limiting
+    }
+  }
   await registerRoutes(httpServer, app);
+  const { registerUploadRoutes } = await import("./upload-routes");
+  registerUploadRoutes(app);
+  const { registerAdminRoutes } = await import("./admin/admin-routes");
+  registerAdminRoutes(app);
 
   app.use((err: any, _req: Request, res: Response, next: NextFunction) => {
     const status = err.status || err.statusCode || 500;
@@ -85,19 +143,23 @@ app.use((req, res, next) => {
     await setupVite(httpServer, app);
   }
 
-  // ALWAYS serve the app on the port specified in the environment variable PORT
-  // Other ports are firewalled. Default to 5000 if not specified.
-  // this serves both the API and the client.
-  // It is the only port that is not firewalled.
-  const port = parseInt(process.env.PORT || "5000", 10);
-  httpServer.listen(
-    {
-      port,
-      host: "0.0.0.0",
-      reusePort: true,
-    },
-    () => {
-      log(`serving on port ${port}`);
-    },
-  );
+  const host = env.host;
+  const preferredPort = env.port;
+
+  function tryListen(port: number) {
+    httpServer.listen(port, host, () => {
+      log(`serving on http://${host === "0.0.0.0" ? "localhost" : host}:${port}`);
+    });
+  }
+
+  httpServer.on("error", (err: NodeJS.ErrnoException) => {
+    if (err.code === "EADDRINUSE" && preferredPort === 3000) {
+      log(`port ${preferredPort} in use, trying ${preferredPort + 1}`);
+      tryListen(preferredPort + 1);
+    } else {
+      throw err;
+    }
+  });
+
+  tryListen(preferredPort);
 })();

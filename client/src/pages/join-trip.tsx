@@ -8,13 +8,14 @@ import { Label } from "@/components/ui/label";
 import { useAuth } from "@/lib/auth-context";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
-import { Plane, Users, MapPin, Calendar, Loader2 } from "lucide-react";
+import { AppLogo } from "@/components/app-logo";
+import { Users, MapPin, Calendar, Loader2 } from "lucide-react";
 
 export default function JoinTripPage() {
   const params = useParams();
   const shareCode = params.code;
   const [, setLocation] = useLocation();
-  const { user, login, isLoading: authLoading } = useAuth();
+  const { user, register, isLoading: authLoading } = useAuth();
   const { toast } = useToast();
 
   const [email, setEmail] = useState("");
@@ -69,18 +70,21 @@ export default function JoinTripPage() {
       joinMutation.mutate(user.id);
     } else if (email && name) {
       try {
-        await login(email, name);
-        const savedUser = localStorage.getItem("tripsync_user");
-        if (savedUser) {
-          const userData = JSON.parse(savedUser);
-          joinMutation.mutate(userData.id);
+        const autoPassword = crypto.randomUUID().slice(0, 16) + "A1!";
+        await register(email, name, autoPassword, true);
+        const token = localStorage.getItem("tripsync_token") ?? sessionStorage.getItem("tripsync_token");
+        if (token) {
+          const meRes = await fetch("/api/auth/me", { headers: { Authorization: `Bearer ${token}` }, credentials: "include" });
+          if (meRes.ok) {
+            const userData = await meRes.json();
+            joinMutation.mutate(userData.id);
+            return;
+          }
         }
+        toast({ title: "Account created", description: "Please refresh and try joining again.", variant: "destructive" });
       } catch (error) {
-        toast({
-          title: "Error",
-          description: "Failed to create account",
-          variant: "destructive",
-        });
+        const msg = error instanceof Error ? error.message : "Failed to create account";
+        toast({ title: "Error", description: msg, variant: "destructive" });
       }
     }
   };
@@ -114,9 +118,7 @@ export default function JoinTripPage() {
   return (
     <div className="min-h-screen bg-background flex flex-col items-center justify-center p-4">
       <div className="flex items-center gap-2 mb-8">
-        <div className="flex h-10 w-10 items-center justify-center rounded-md bg-primary">
-          <Plane className="h-5 w-5 text-primary-foreground" />
-        </div>
+        <AppLogo className="h-10 w-10 object-contain" />
         <span className="text-2xl font-bold">TripSync</span>
       </div>
 
