@@ -35,7 +35,7 @@ export default function ForgotPasswordPage() {
         toast({ title: data.error || "Failed", variant: "destructive" });
       }
     } catch {
-      toast({ title: "Password reset not configured", description: "Please contact support or register a new account.", variant: "destructive" });
+      toast({ title: "Password reset not configured", description: "Please contact us or register a new account.", variant: "destructive" });
     } finally {
       setIsLoading(false);
     }
@@ -49,15 +49,15 @@ export default function ForgotPasswordPage() {
           Back
         </Button>
       </Link>
-      <div className="flex items-center gap-2 mb-8">
+      <Link href="/" className="flex items-center gap-2 mb-8 no-underline text-foreground hover:opacity-90 transition-opacity">
         <AppLogo className="h-10 w-10 object-contain" />
         <span className="text-2xl font-bold">TripSync</span>
-      </div>
+      </Link>
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
-          <CardTitle className="text-2xl">Forgot password</CardTitle>
+          <CardTitle className="text-2xl">Reset Your Password</CardTitle>
           <CardDescription>
-            Enter your email and we&apos;ll send you a link to reset your password
+            Enter your email address and we&apos;ll send you instructions to reset your password
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -86,7 +86,7 @@ export default function ForgotPasswordPage() {
                 {isLoading ? "Sending..." : "Send reset link"}
               </Button>
               <p className="text-xs text-muted-foreground text-center">
-                Password reset requires email service to be configured. If you don&apos;t receive an email, contact support.
+                Password reset requires email service to be configured. If you don&apos;t receive an email, <Link href="/contact"><a className="text-primary hover:underline">contact us</a></Link>.
               </p>
             </form>
           )}

@@ -10,7 +10,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { useAuth } from "@/lib/auth-context";
 import { useToast } from "@/hooks/use-toast";
 import { AppLogo } from "@/components/app-logo";
-import { ArrowLeft, Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff } from "lucide-react";
 import { Link } from "wouter";
 
 function passwordStrength(pw: string): { score: number; label: string } {
@@ -36,6 +36,7 @@ export default function LoginPage() {
     return localStorage.getItem("tripsync_remember") === "true";
   });
   const [isLoading, setIsLoading] = useState(false);
+  const [termsAccepted, setTermsAccepted] = useState(false);
   const pwStrength = useMemo(() => passwordStrength(password), [password]);
   const [, setLocation] = useLocation();
   const { login, register } = useAuth();
@@ -105,6 +106,15 @@ export default function LoginPage() {
       return;
     }
 
+    if (!termsAccepted) {
+      toast({
+        title: "Please accept the Terms of Service",
+        description: "You must agree to the Terms of Service and Privacy Policy to create an account.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setIsLoading(true);
 
     try {
@@ -115,7 +125,8 @@ export default function LoginPage() {
       });
       const params = new URLSearchParams(typeof window !== "undefined" ? window.location.search : "");
       const redirect = params.get("redirect");
-      setLocation(redirect && redirect.startsWith("/") ? redirect : "/dashboard");
+      // After signup, default to AI demo onboarding on the dashboard
+      setLocation(redirect && redirect.startsWith("/") ? redirect : "/dashboard?onboarding=ai-demo");
     } catch (error) {
       toast({
         title: "Registration failed",
@@ -129,23 +140,16 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen bg-background flex flex-col items-center justify-center p-4">
-      <Link href="/">
-        <Button variant="ghost" className="absolute top-4 left-4 gap-2" data-testid="button-back-home">
-          <ArrowLeft className="h-4 w-4" />
-          Back
-        </Button>
-      </Link>
-
-      <div className="flex items-center gap-2 mb-8">
+      <Link href="/" className="flex items-center gap-2 mb-8 no-underline text-foreground hover:opacity-90 transition-opacity" data-testid="link-logo-home">
         <AppLogo className="h-10 w-10 object-contain" />
         <span className="text-2xl font-bold">TripSync</span>
-      </div>
+      </Link>
 
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
-          <CardTitle className="text-2xl">Welcome</CardTitle>
+          <CardTitle className="text-2xl">Welcome to TripSync</CardTitle>
           <CardDescription>
-            Sign in or create an account to get started
+            Sign in to your account or create a new one to start planning
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -213,6 +217,35 @@ export default function LoginPage() {
                 </div>
                 <Button type="submit" className="w-full" disabled={isLoading} data-testid="button-submit-login">
                   {isLoading ? "Signing in..." : "Sign In"}
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="w-full mt-2"
+                  disabled={isLoading}
+                  onClick={async () => {
+                    setEmail("demo@tripsync.com");
+                    setPassword("password123");
+                    setIsLoading(true);
+                    try {
+                      await login("demo@tripsync.com", "password123", rememberMe);
+                      toast({ title: "Welcome back!", description: "Let's plan your next adventure" });
+                      const params = new URLSearchParams(typeof window !== "undefined" ? window.location.search : "");
+                      const redirect = params.get("redirect");
+                      setLocation(redirect && redirect.startsWith("/") ? redirect : "/dashboard");
+                    } catch (err) {
+                      toast({
+                        title: "Login failed",
+                        description: err instanceof Error ? err.message : "Invalid credentials",
+                        variant: "destructive",
+                      });
+                    } finally {
+                      setIsLoading(false);
+                    }
+                  }}
+                  data-testid="button-demo-login"
+                >
+                  Try Demo Account
                 </Button>
               </form>
             </TabsContent>
@@ -293,16 +326,35 @@ export default function LoginPage() {
                     onChange={(e) => setConfirmPassword(e.target.value)}
                   />
                 </div>
-                <Button type="submit" className="w-full" disabled={isLoading} data-testid="button-submit-register">
+                <div className="flex items-start gap-2 mt-2">
+                  <Checkbox
+                    id="accept-terms"
+                    checked={termsAccepted}
+                    onCheckedChange={(v) => setTermsAccepted(Boolean(v))}
+                    required
+                  />
+                  <label
+                    htmlFor="accept-terms"
+                    className="text-xs text-muted-foreground leading-normal cursor-pointer"
+                  >
+                    I agree to the{" "}
+                    <Link href="/terms" className="underline text-primary">
+                      Terms of Service
+                    </Link>{" "}
+                    and{" "}
+                    <Link href="/privacy" className="underline text-primary">
+                      Privacy Policy
+                    </Link>
+                    .
+                  </label>
+                </div>
+                <Button type="submit" className="w-full mt-2" disabled={isLoading} data-testid="button-submit-register">
                   {isLoading ? "Creating account..." : "Create Account"}
                 </Button>
               </form>
             </TabsContent>
           </Tabs>
 
-          <p className="text-xs text-muted-foreground text-center mt-6">
-            By continuing, you agree to TripSync's Terms of Service and Privacy Policy.
-          </p>
         </CardContent>
       </Card>
     </div>

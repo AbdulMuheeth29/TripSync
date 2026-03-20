@@ -35,6 +35,8 @@ import {
   type InsertTripDocument,
   type EmergencyContact,
   type InsertEmergencyContact,
+  type MoodBoardItem,
+  type InsertMoodBoardItem,
   type UserLearnedPreferences,
   type InsertUserLearnedPreferences,
   type TripSatisfaction,
@@ -50,6 +52,7 @@ export interface IStorage {
   getUserById(id: string): Promise<User | undefined>;
   getUserByEmail(email: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
+  updateUser(id: string, updates: Partial<User>): Promise<User | undefined>;
 
   // Trips
   getTrip(id: string): Promise<Trip | undefined>;
@@ -146,6 +149,11 @@ export interface IStorage {
   updateEmergencyContact(id: string, updates: Partial<EmergencyContact>): Promise<EmergencyContact | undefined>;
   deleteEmergencyContact(id: string): Promise<void>;
 
+  // Mood board
+  getMoodBoardByTrip(tripId: string): Promise<(MoodBoardItem & { addedBy?: User })[]>;
+  createMoodBoardItem(item: InsertMoodBoardItem): Promise<MoodBoardItem>;
+  deleteMoodBoardItem(id: string): Promise<void>;
+
   // User learned preferences (preference learning)
   getUserLearnedPreferences(userId: string): Promise<UserLearnedPreferences | undefined>;
   createOrUpdateUserLearnedPreferences(pref: InsertUserLearnedPreferences): Promise<UserLearnedPreferences>;
@@ -187,6 +195,7 @@ export class MemStorage implements IStorage {
   private groupAvailability: Map<string, GroupAvailability> = new Map();
   private tripDocuments: Map<string, TripDocument> = new Map();
   private emergencyContacts: Map<string, EmergencyContact> = new Map();
+  private moodBoardItems: Map<string, MoodBoardItem> = new Map();
   private userLearnedPreferences: Map<string, UserLearnedPreferences> = new Map();
   private tripSatisfaction: Map<string, TripSatisfaction> = new Map();
   private locationSharing: Map<string, LocationSharing> = new Map();
@@ -582,10 +591,20 @@ export class MemStorage implements IStorage {
   async createUser(user: InsertUser): Promise<User> {
     const newUser: User = {
       ...user,
+      subscriptionTier: (user as Partial<User>).subscriptionTier ?? "free",
+      subscriptionExpiresAt: (user as Partial<User>).subscriptionExpiresAt ?? null,
       createdAt: new Date(),
-    };
+    } as User;
     this.users.set(user.id, newUser);
     return newUser;
+  }
+
+  async updateUser(id: string, updates: Partial<User>): Promise<User | undefined> {
+    const existing = this.users.get(id);
+    if (!existing) return undefined;
+    const updated = { ...existing, ...updates } as User;
+    this.users.set(id, updated);
+    return updated;
   }
 
   // Trips
@@ -1078,6 +1097,26 @@ export class MemStorage implements IStorage {
 
   async deleteEmergencyContact(id: string): Promise<void> {
     this.emergencyContacts.delete(id);
+  }
+
+  async getMoodBoardByTrip(tripId: string): Promise<(MoodBoardItem & { addedBy?: User })[]> {
+    const list = Array.from(this.moodBoardItems.values()).filter((m) => m.tripId === tripId);
+    for (const m of list) {
+      const u = this.users.get(m.addedByUserId);
+      if (u) (m as MoodBoardItem & { addedBy?: User }).addedBy = u;
+    }
+    return list as (MoodBoardItem & { addedBy?: User })[];
+  }
+
+  async createMoodBoardItem(item: InsertMoodBoardItem): Promise<MoodBoardItem> {
+    const id = item.id ?? randomUUID();
+    const newItem: MoodBoardItem = { ...item, id, createdAt: new Date() } as MoodBoardItem;
+    this.moodBoardItems.set(id, newItem);
+    return newItem;
+  }
+
+  async deleteMoodBoardItem(id: string): Promise<void> {
+    this.moodBoardItems.delete(id);
   }
 
   async getUserLearnedPreferences(userId: string): Promise<UserLearnedPreferences | undefined> {

@@ -3,8 +3,16 @@ import { getAuthHeaders } from "./auth-context";
 
 async function throwIfResNotOk(res: Response) {
   if (!res.ok) {
-    const text = (await res.text()) || res.statusText;
-    throw new Error(`${res.status}: ${text}`);
+    let body: { error?: string; upgradeUrl?: string } = {};
+    try {
+      const text = await res.text();
+      if (text) body = JSON.parse(text) as { error?: string; upgradeUrl?: string };
+    } catch {
+      // ignore
+    }
+    const err = new Error(body.error || res.statusText || `${res.status}`) as Error & { upgradeUrl?: string };
+    if (body.upgradeUrl) err.upgradeUrl = body.upgradeUrl;
+    throw err;
   }
 }
 

@@ -12,6 +12,7 @@ import { useAuth } from "@/lib/auth-context";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { AppLogo } from "@/components/app-logo";
+import { AppHero } from "@/components/app-hero";
 import {
   ArrowLeft,
   ArrowRight,
@@ -35,6 +36,7 @@ import {
   X,
 } from "lucide-react";
 import type { TripWizardData } from "@shared/schema";
+import confetti from "canvas-confetti";
 
 const vibeOptions = [
   { id: "relaxing", label: "Relaxing", icon: Palmtree, description: "Beach, spa, slow-paced" },
@@ -117,18 +119,27 @@ export default function CreateTripPage() {
     },
     onSuccess: (trip) => {
       queryClient.invalidateQueries({ queryKey: ["/api/trips"] });
+      try {
+        confetti({ particleCount: 80, spread: 60, origin: { y: 0.7 } });
+      } catch (_) {}
       toast({
         title: "Trip created!",
         description: "Invites sent. AI is generating your itinerary...",
       });
       setLocation(`/trip/${trip.id}`);
     },
-    onError: (error: Error) => {
+    onError: (error: Error & { upgradeUrl?: string }) => {
       const message = error.message || "Something went wrong. Please try again.";
+      const upgradeUrl = error.upgradeUrl;
       toast({
         title: "Failed to create trip",
-        description: message,
+        description: upgradeUrl ? `${message} Upgrade to Pro for unlimited trips.` : message,
         variant: "destructive",
+        action: upgradeUrl ? (
+          <a href={upgradeUrl} className="inline-flex items-center rounded-md bg-background px-3 py-1.5 text-sm font-medium ring-1 ring-inset ring-border hover:bg-muted">
+            Upgrade
+          </a>
+        ) : undefined,
       });
     },
   });
@@ -149,7 +160,20 @@ export default function CreateTripPage() {
   const canProceed = () => {
     switch (currentStep) {
       case 1:
-        return formData.destination && formData.startDate && formData.endDate && formData.groupSize && formData.budgetPerPerson;
+        if (!formData.destination || !formData.startDate || !formData.endDate || !formData.groupSize || !formData.budgetPerPerson) {
+          return false;
+        }
+        try {
+          const start = new Date(formData.startDate);
+          const end = new Date(formData.endDate);
+          const today = new Date();
+          today.setHours(0, 0, 0, 0);
+          if (start < today) return false;
+          if (end < start) return false;
+        } catch {
+          return false;
+        }
+        return true;
       case 2:
         return formData.vibes && formData.vibes.length > 0;
       case 3:
@@ -181,7 +205,7 @@ export default function CreateTripPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="sticky top-0 z-50 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <header className="sticky top-0 z-50 glass-header">
         <div className="container mx-auto flex h-16 items-center justify-between px-4 gap-4">
           <Link href="/dashboard">
             <Button variant="ghost" className="gap-2" data-testid="button-back-dashboard">
@@ -190,14 +214,16 @@ export default function CreateTripPage() {
             </Button>
           </Link>
 
-          <div className="flex items-center gap-2">
+          <Link href="/" className="flex items-center gap-2 no-underline text-foreground hover:opacity-90 transition-opacity">
             <AppLogo className="h-8 w-8 object-contain" />
             <span className="font-semibold hidden sm:block">TripSync</span>
-          </div>
+          </Link>
 
           <ThemeToggle />
         </div>
       </header>
+
+      <AppHero />
 
       <main className="container mx-auto px-4 py-8 max-w-2xl">
         <div className="mb-8">
@@ -462,8 +488,9 @@ export default function CreateTripPage() {
                     onKeyDown={(e) => {
                       if (e.key === "Enter") {
                         e.preventDefault();
-                        if (inviteEmailInput.trim() && !inviteEmails.includes(inviteEmailInput.trim())) {
-                          setInviteEmails([...inviteEmails, inviteEmailInput.trim()]);
+                        const trimmed = inviteEmailInput.trim();
+                        if (trimmed && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed) && !inviteEmails.includes(trimmed)) {
+                          setInviteEmails([...inviteEmails, trimmed]);
                           setInviteEmailInput("");
                         }
                       }
@@ -474,8 +501,9 @@ export default function CreateTripPage() {
                     variant="outline"
                     size="icon"
                     onClick={() => {
-                      if (inviteEmailInput.trim() && !inviteEmails.includes(inviteEmailInput.trim())) {
-                        setInviteEmails([...inviteEmails, inviteEmailInput.trim()]);
+                      const trimmed = inviteEmailInput.trim();
+                      if (trimmed && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed) && !inviteEmails.includes(trimmed)) {
+                        setInviteEmails([...inviteEmails, trimmed]);
                         setInviteEmailInput("");
                       }
                     }}

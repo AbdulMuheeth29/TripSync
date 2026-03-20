@@ -37,6 +37,8 @@ import type {
   InsertTripDocument,
   EmergencyContact,
   InsertEmergencyContact,
+  MoodBoardItem,
+  InsertMoodBoardItem,
   UserLearnedPreferences,
   InsertUserLearnedPreferences,
   TripSatisfaction,
@@ -63,6 +65,7 @@ import {
   groupAvailability,
   tripDocuments,
   emergencyContacts,
+  moodBoardItems,
   userLearnedPreferences,
   tripSatisfaction,
   locationSharing,
@@ -89,6 +92,11 @@ export function createPgStorage(db: Db): IStorage {
     async createUser(user: InsertUser) {
       const [row] = await db.insert(users).values(user as typeof users.$inferInsert).returning();
       return row as User;
+    },
+
+    async updateUser(id: string, updates: Partial<User>) {
+      const [row] = await db.update(users).set(updates).where(eq(users.id, id)).returning();
+      return row as User | undefined;
     },
 
     async getTrip(id: string) {
@@ -508,6 +516,26 @@ export function createPgStorage(db: Db): IStorage {
 
     async deleteEmergencyContact(id: string) {
       await db.delete(emergencyContacts).where(eq(emergencyContacts.id, id));
+    },
+
+    async getMoodBoardByTrip(tripId: string) {
+      const list = await db.select().from(moodBoardItems).where(eq(moodBoardItems.tripId, tripId));
+      if (list.length === 0) return [];
+      const userIds = [...new Set(list.map((m) => m.addedByUserId))];
+      const userRows = await db.select().from(users).where(inArray(users.id, userIds));
+      const userMap = new Map(userRows.map((u) => [u.id, u]));
+      return list.map((m) => ({ ...m, addedBy: userMap.get(m.addedByUserId) })) as (MoodBoardItem & { addedBy?: User })[];
+    },
+
+    async createMoodBoardItem(item: InsertMoodBoardItem) {
+      const id = item.id ?? crypto.randomUUID();
+      const [row] = await db.insert(moodBoardItems).values({ ...item, id } as typeof moodBoardItems.$inferInsert).returning();
+      if (!row) throw new Error("Failed to create mood board item");
+      return row as MoodBoardItem;
+    },
+
+    async deleteMoodBoardItem(id: string) {
+      await db.delete(moodBoardItems).where(eq(moodBoardItems.id, id));
     },
 
     async getUserLearnedPreferences(userId: string) {

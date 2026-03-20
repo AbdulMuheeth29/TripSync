@@ -2,8 +2,12 @@ import "dotenv/config";
 import express, { type Request, Response, NextFunction } from "express";
 import path from "path";
 import fs from "fs";
+import helmet from "helmet";
+import compression from "compression";
+import cors from "cors";
 import { migrate } from "drizzle-orm/node-postgres/migrator";
 import { validateEnv, env } from "./env";
+import { setVapidKeys } from "./push-service";
 import { getDb } from "./db";
 import { registerRoutes } from "./routes";
 import { serveStatic } from "./static";
@@ -15,6 +19,15 @@ const httpServer = createServer(app);
 const isProduction = process.env.NODE_ENV === "production";
 if (isProduction) {
   app.set("trust proxy", 1);
+}
+
+// Security headers (Helmet) and compression (deployment guide)
+app.use(helmet({ contentSecurityPolicy: false }));
+app.use(compression());
+
+// CORS when serving API separately (set CORS_ORIGIN e.g. https://yourdomain.com)
+if (env.corsOrigin) {
+  app.use(cors({ origin: env.corsOrigin }));
 }
 
 app.use((_req, res, next) => {
@@ -33,8 +46,10 @@ declare module "http" {
   }
 }
 
+// Body parsing: JSON (10mb limit per deployment guide), URL-encoded
 app.use(
   express.json({
+    limit: "10mb",
     verify: (req, _res, buf) => {
       req.rawBody = buf;
     },
@@ -83,6 +98,16 @@ app.use((req, res, next) => {
 validateEnv();
 
 (async () => {
+  // Configure VAPID keys for web push if provided via environment
+  if (env.vapidPublicKey && env.vapidPrivateKey) {
+    try {
+      setVapidKeys(env.vapidPublicKey, env.vapidPrivateKey);
+      log("VAPID keys configured from environment", "push");
+    } catch (err) {
+      console.warn("[push] Failed to configure VAPID keys from environment:", err);
+    }
+  }
+
   // Run pending migrations when using PostgreSQL (e.g. in Docker)
   if (process.env.DATABASE_URL) {
     const migrationsDir = path.join(process.cwd(), "migrations");

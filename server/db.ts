@@ -2,6 +2,11 @@ import { drizzle } from "drizzle-orm/node-postgres";
 import pg from "pg";
 import * as schema from "@shared/schema";
 
+/**
+ * PostgreSQL connection. Required in production.
+ * Connection string format: postgresql://username:password@host:port/database?sslmode=require
+ * Pool settings: max 20 connections, idle timeout 30s, connection timeout 10s.
+ */
 const connectionString = process.env.DATABASE_URL;
 
 if (!connectionString && process.env.NODE_ENV === "production") {

@@ -19,6 +19,7 @@ import {
 } from "@/components/ui/collapsible";
 import { useAuth } from "@/lib/auth-context";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { AppHero } from "@/components/app-hero";
 import {
   ArrowLeft,
   Users,
@@ -244,7 +245,7 @@ export default function MetricsDashboard() {
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="sticky top-0 z-50 border-b bg-background/95 backdrop-blur">
+      <header className="sticky top-0 z-50 glass-header">
         <div className="container mx-auto flex h-16 items-center justify-between px-4">
           <div className="flex items-center gap-4">
             <Link href="/dashboard">
@@ -260,6 +261,8 @@ export default function MetricsDashboard() {
           </div>
         </div>
       </header>
+
+      <AppHero />
 
       <main className="container mx-auto px-4 py-8 max-w-4xl">
         <div className="mb-8">

@@ -1,7 +1,7 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { storage } from "./storage";
 import { randomUUID } from "crypto";
-import type { TripWizardData, AIItinerary } from "@shared/schema";
+import type { TripWizardData, AIItinerary, Trip, ItineraryItem, Expense, Vote, TripMember } from "@shared/schema";
 
 const anthropic = new Anthropic({
   apiKey: process.env.AI_INTEGRATIONS_ANTHROPIC_API_KEY,
@@ -319,25 +319,127 @@ Give 2-3 short, practical tips to optimize spending (e.g. cheaper dining alterna
   }
 }
 
+export type AtlasRichContext = {
+  trip: Pick<Trip, "id" | "destination" | "startDate" | "endDate" | "budgetPerPerson" | "groupSize" | "status" | "isLocked">;
+  progress: {
+    itineraryItems: number;
+    daysWithActivities: number;
+    daysWithoutActivities: number;
+    totalExpenses: number;
+    totalBudget: number;
+    overBudget: boolean;
+    overAmount: number;
+    confirmedMembers: number;
+    pendingMembers: number;
+    activeVotes: number;
+    stuckVotes: number;
+    completionPercentage: number;
+    daysUntilTrip: number | null;
+  };
+  behavior: {
+    currentPage?: string;
+    timeOnPage?: number;
+    lastAction?: string;
+    inactivityTime?: number;
+  };
+  group?: {
+    vibes?: string[];
+  };
+  detectedIssues?: string[];
+};
+
 /** Conversational planning: user sends a quick change request, AI suggests an itinerary edit. */
 export async function conversationalPlanningSuggestion(params: {
   tripId: string;
-  destination: string;
   userMessage: string;
-  itemsSummary?: string;
+  context: AtlasRichContext;
+  fullTrip: Trip;
+  items: ItineraryItem[];
+  expenses: Expense[];
+  votes: Vote[];
+  members: (TripMember & { user: { name: string } })[];
 }): Promise<{ suggestion: string; action?: string }> {
-  const { destination, userMessage, itemsSummary } = params;
+  const { userMessage, context, fullTrip, items, expenses, votes, members } = params;
   if (!process.env.AI_INTEGRATIONS_ANTHROPIC_API_KEY) {
-    return { suggestion: "Quick changes are coming soon. For now, add or edit items from the Itinerary tab.", action: "none" };
+    return {
+      suggestion:
+        "Quick changes are coming soon. For now, add or edit items from the Itinerary tab, adjust your budget in the Budget section, or invite more friends from the Members tab.",
+      action: "none",
+    };
   }
   try {
-    const prompt = `You are a travel assistant for a trip to ${destination}. The user said: "${userMessage}". ${itemsSummary ? `Current itinerary summary: ${itemsSummary}` : ""}
-Reply in 1-2 short sentences: either confirm a simple action (e.g. "I'll add a lunch at X for Day 2") or ask for one clarifying detail. End with a single line "ACTION: add_item|edit_item|none" to indicate what the app could do.`;
+    const { trip, progress, behavior, detectedIssues } = context;
+
+    const issuesList =
+      detectedIssues && detectedIssues.length > 0
+        ? detectedIssues.map((i) => `- ${i}`).join("\n")
+        : "- None detected from metrics above. Focus on what the user is asking.";
+
+    const systemPrompt = `You are Atlas, TripSync's intelligent group travel assistant.
+
+PERSONALITY:
+- Friendly, proactive, and helpful
+- Concise (1-3 sentences unless explaining complex features)
+- Action-oriented: always suggest clear next steps
+- Reference specific trip details to show you understand context
+
+CURRENT TRIP CONTEXT:
+- Destination: ${trip.destination}
+- Dates: ${trip.startDate} to ${trip.endDate}
+- Group size: ${trip.groupSize} people
+- Budget per person: $${trip.budgetPerPerson} (total: $${progress.totalBudget})
+- Current spend: $${progress.totalExpenses} (${progress.overBudget ? `OVER budget by $${progress.overAmount}` : "under budget"})
+
+TRIP PROGRESS:
+- Itinerary items: ${progress.itineraryItems} across ${progress.daysWithActivities + progress.daysWithoutActivities} days (${progress.daysWithoutActivities} days empty)
+- Expenses: ${expenses.length} tracked
+- Votes: ${progress.activeVotes} active, ${progress.stuckVotes} stuck (ties)
+- Completion: ${progress.completionPercentage}%
+
+GROUP & MEMBERS:
+- Total members: ${members.length}
+- Confirmed: ${progress.confirmedMembers}, Pending: ${progress.pendingMembers}
+
+USER BEHAVIOR:
+- Current page: ${behavior.currentPage ?? "unknown"}
+- Time on page: ${behavior.timeOnPage ?? 0} seconds
+- Last action: ${behavior.lastAction ?? "unknown"}
+${behavior.inactivityTime && behavior.inactivityTime > 30 ? `- User inactive for ${behavior.inactivityTime}s (may be stuck)` : ""}
+
+DETECTED ISSUES:
+${issuesList}
+
+YOUR ROLE:
+- Proactively help based on this context (don't just restate it)
+- Offer to DO things, not just explain them (e.g. suggest adding, removing, or moving activities; adjusting budget; resolving stuck votes)
+- Keep responses under 100 words
+- If user seems stuck or the trip is incomplete, offer 1–3 concrete, high‑leverage next steps.
+`;
+
+    const recentItemsSummary = items
+      .slice(0, 10)
+      .map((i) => `- Day ${i.dayNumber} ${i.time} ${i.type}: ${i.name} @ ${i.location} ($${i.pricePerPerson}/person)`)
+      .join("\n");
+
+    const userPrompt = `USER MESSAGE:
+"${userMessage}"
+
+SNAPSHOT OF ITINERARY (first ${Math.min(items.length, 10)} items):
+${recentItemsSummary || "- No items yet; itinerary is empty."}
+
+INSTRUCTIONS:
+- Respond in a warm, confident tone.
+- Focus on one primary suggestion plus (optionally) 1–2 follow‑ups.
+- If an obvious quick fix exists (e.g. fill empty days, reduce budget overrun, resolve stuck vote), propose it directly.
+- At the very end of your message, add a line of the form:
+  ACTION: add_item | edit_item | optimize_budget | resolve_vote | none
+Choose the single best action type for the app to take given the situation.`;
 
     const message = await anthropic.messages.create({
       model: "claude-sonnet-4-5",
       max_tokens: 256,
-      messages: [{ role: "user", content: prompt }],
+      system: systemPrompt,
+      messages: [{ role: "user", content: userPrompt }],
     });
     const content = message.content[0];
     const text = content.type === "text" ? content.text.trim() : "";
@@ -348,5 +450,113 @@ Reply in 1-2 short sentences: either confirm a simple action (e.g. "I'll add a l
   } catch (e) {
     console.error("Conversational planning AI error:", e);
     return { suggestion: "You can add or edit items from the Itinerary tab.", action: "none" };
+  }
+}
+
+/** Generate trip recap from itinerary + photos. */
+export async function generateTripRecap(params: {
+  destination: string;
+  startDate: string;
+  endDate: string;
+  itinerarySummary?: string;
+  photoCaptions?: string[];
+}): Promise<{ recap: string }> {
+  const { destination, startDate, endDate, itinerarySummary, photoCaptions } = params;
+  if (!process.env.AI_INTEGRATIONS_ANTHROPIC_API_KEY) {
+    return { recap: `A wonderful trip to ${destination} from ${startDate} to ${endDate}.${itinerarySummary ? ` ${itinerarySummary}` : ""}${photoCaptions?.length ? ` Highlights: ${photoCaptions.slice(0, 5).join(", ")}.` : ""}` };
+  }
+  try {
+    const prompt = `Write a short, warm trip recap (2-4 paragraphs) for a group trip to ${destination} (${startDate} to ${endDate}). ${itinerarySummary ? `Itinerary summary: ${itinerarySummary}.` : ""} ${photoCaptions?.length ? `Photo moments: ${photoCaptions.join("; ")}.` : ""} Sound personal and celebratory. No JSON, just prose.`;
+
+    const message = await anthropic.messages.create({
+      model: "claude-sonnet-4-5",
+      max_tokens: 1024,
+      messages: [{ role: "user", content: prompt }],
+    });
+    const content = message.content[0];
+    const text = content.type === "text" ? content.text.trim() : "";
+    return { recap: text || `An unforgettable trip to ${destination}.` };
+  } catch (e) {
+    console.error("Trip recap AI error:", e);
+    return { recap: `A memorable trip to ${destination}. Hope you had a great time!` };
+  }
+}
+
+/** Generate smart packing list from trip details. */
+export async function generatePackingList(params: {
+  destination: string;
+  startDate: string;
+  endDate: string;
+  tripType?: string;
+  groupSize: number;
+}): Promise<{ items: string[] }> {
+  const { destination, startDate, endDate, tripType, groupSize } = params;
+  if (!process.env.AI_INTEGRATIONS_ANTHROPIC_API_KEY) {
+    const base = ["Passport/ID", "Phone & charger", "Toiletries", "Clothes", "Sunglasses", "Medications"];
+    return { items: base };
+  }
+  try {
+    const prompt = `Generate a practical packing list for a ${groupSize}-person trip to ${destination} from ${startDate} to ${endDate}.${tripType ? ` Trip type: ${tripType}.` : ""}
+Return ONLY a JSON array of strings, e.g. ["Passport", "Sunscreen", "Swimwear"]. 15-25 items. No other text.`;
+
+    const message = await anthropic.messages.create({
+      model: "claude-sonnet-4-5",
+      max_tokens: 512,
+      messages: [{ role: "user", content: prompt }],
+    });
+    const content = message.content[0];
+    let text = content.type === "text" ? content.text.trim() : "";
+    const jsonMatch = text.match(/\[[\s\S]*\]/);
+    if (jsonMatch) text = jsonMatch[0];
+    const items = JSON.parse(text) as string[];
+    return { items: Array.isArray(items) ? items : [] };
+  } catch (e) {
+    console.error("Packing list AI error:", e);
+    return { items: ["Passport/ID", "Phone & charger", "Toiletries", "Clothes", "Sunglasses"] };
+  }
+}
+
+/** Parse confirmation email text and suggest itinerary items. */
+export async function parseEmailForItinerary(params: { emailText: string; destination?: string }): Promise<{ suggestions: { name: string; description: string; location: string; type: string; dayNumber: number; time: string; pricePerPerson?: number }[] }> {
+  const { emailText, destination } = params;
+  if (!process.env.AI_INTEGRATIONS_ANTHROPIC_API_KEY) {
+    return { suggestions: [] };
+  }
+  try {
+    const prompt = `Extract travel booking details from this email. For each flight, hotel, activity, or reservation mentioned, output one line in this exact format (one per line):
+NAME|DESCRIPTION|LOCATION|TYPE|DAY|TIME|PRICE
+Where TYPE is one of: flight, hotel, dining, activity. DAY is 1-31. TIME is HH:MM. PRICE is number or 0.
+Destination context: ${destination || "unknown"}.
+Email:
+---
+${emailText.slice(0, 6000)}
+---
+Reply with only the lines, no other text. If nothing found, reply with a single line: NONE`;
+
+    const message = await anthropic.messages.create({
+      model: "claude-sonnet-4-5",
+      max_tokens: 1024,
+      messages: [{ role: "user", content: prompt }],
+    });
+    const content = message.content[0];
+    const text = content.type === "text" ? content.text.trim() : "";
+    if (!text || text.startsWith("NONE")) return { suggestions: [] };
+    const lines = text.split("\n").filter((l) => l.includes("|"));
+    const suggestions = lines.slice(0, 20).map((line) => {
+      const parts = line.split("|");
+      return {
+        name: parts[0]?.trim() || "Item",
+        description: parts[1]?.trim() || "",
+        location: parts[2]?.trim() || destination || "",
+        type: ["flight", "hotel", "dining", "activity"].includes(parts[3]?.trim() || "") ? parts[3].trim()! : "activity",
+        dayNumber: Math.min(31, Math.max(1, parseInt(parts[4] || "1", 10) || 1)),
+        time: /^\d{1,2}:\d{2}$/.test(parts[5]?.trim() || "") ? parts[5].trim()! : "12:00",
+        pricePerPerson: parseInt(parts[6] || "0", 10) || 0,
+      };
+    });
+    return { suggestions };
+  } catch (e) {
+    console.error("Parse email error:", e);
+    return { suggestions: [] };
   }
 }

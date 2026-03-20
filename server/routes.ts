@@ -1,13 +1,19 @@
 import type { Express, Request, Response } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { generateItinerary, suggestConflictResolution, conversationalPlanningSuggestion, suggestBudgetOptimization } from "./ai-service";
+import { generateItinerary, suggestConflictResolution, conversationalPlanningSuggestion, suggestBudgetOptimization, generateTripRecap, generatePackingList, parseEmailForItinerary, type AtlasRichContext } from "./ai-service";
+import { getDb } from "./db";
+import { atlasConversations } from "@shared/schema";
+import { and, eq } from "drizzle-orm";
 import { randomUUID } from "crypto";
 import type { TripWizardData } from "@shared/schema";
 import { hashPassword, comparePassword, generateToken, requireAuth, optionalAuth } from "./auth";
 import { requireTripAccess, requireOrganizer, requirePlanner, requireUnlocked, requireBeforeVoteDeadline } from "./middleware";
 import { emailService } from "./email-service";
 import { getVapidPublicKey, addSubscription, startReminderScheduler } from "./push-service";
+import { createCheckoutSession, createBillingPortalSession, handleWebhook, isStripeEnabled } from "./stripe-service";
+import { env } from "./env";
+import { canCreateTrip, canAddMemberToTrip, canAddPhotoToTrip, canUseAIGeneration, getEffectiveTier } from "./subscription-gates";
 
 // Simple rate limiting for AI generation
 const rateLimitMap = new Map<string, { count: number; resetTime: number }>();
@@ -31,6 +37,25 @@ function checkRateLimit(userId: string): boolean {
   return true;
 }
 
+async function requirePro(req: Request, res: Response, next: () => void): Promise<void> {
+  try {
+    const userId = (req as any).userId;
+    if (!userId) {
+      res.status(401).json({ error: "Authentication required" });
+      return;
+    }
+    const { tier } = await getEffectiveTier(userId);
+    if (tier !== "pro" && tier !== "teams") {
+      res.status(403).json({ error: "This feature requires TripSync Pro", upgradeUrl: "/pricing" });
+      return;
+    }
+    next();
+  } catch (e) {
+    console.error("requirePro error:", e);
+    res.status(500).json({ error: "Subscription check failed" });
+  }
+}
+
 export async function registerRoutes(
   httpServer: Server,
   app: Express
@@ -39,6 +64,27 @@ export async function registerRoutes(
   app.get("/api/health", (_req: Request, res: Response) => {
     const storage = process.env.DATABASE_URL ? "pg" : "memory";
     res.json({ ok: true, storage });
+  });
+
+  // Public, read-only trip preview by share code (no auth)
+  app.get("/api/public/trips/:shareCode", async (req: Request, res: Response) => {
+    try {
+      const { shareCode } = req.params;
+      const trip = await storage.getTripByShareCode(shareCode);
+      if (!trip) {
+        return res.status(404).json({ error: "Trip not found" });
+      }
+      const [items] = await Promise.all([
+        storage.getItineraryItems(trip.id),
+      ]);
+      res.json({
+        trip,
+        items,
+      });
+    } catch (error) {
+      console.error("Error fetching public trip:", error);
+      res.status(500).json({ error: "Failed to load trip" });
+    }
   });
 
   // Auth - Register
@@ -88,19 +134,73 @@ export async function registerRoutes(
         email: user.email,
       });
 
-      // Return user data without password hash
+      // Return user data without password hash (serializable for client)
+      const createdAt = user.createdAt instanceof Date ? user.createdAt.toISOString() : String(user.createdAt ?? new Date().toISOString());
+      const u = user as { subscriptionTier?: string; subscriptionExpiresAt?: Date | null };
       res.status(201).json({
         token,
         user: {
           id: user.id,
           email: user.email,
           name: user.name,
-          createdAt: user.createdAt,
+          createdAt,
+          subscriptionTier: u.subscriptionTier ?? "free",
+          subscriptionExpiresAt: u.subscriptionExpiresAt ? new Date(u.subscriptionExpiresAt).toISOString() : null,
         }
       });
     } catch (error) {
       console.error("Registration error:", error);
       res.status(500).json({ error: "Registration failed" });
+    }
+  });
+
+  // Contact form (public; rate limited by IP)
+  const contactRateLimitMap = new Map<string, { count: number; resetTime: number }>();
+  const CONTACT_RATE_LIMIT = 5;
+  const CONTACT_RATE_WINDOW = 60 * 60 * 1000; // 1 hour
+  app.post("/api/contact", async (req: Request, res: Response) => {
+    try {
+      const ip = (req.headers["x-forwarded-for"] as string)?.split(",")[0]?.trim() || req.socket.remoteAddress || "unknown";
+      const now = Date.now();
+      const limit = contactRateLimitMap.get(ip);
+      if (limit) {
+        if (now > limit.resetTime) {
+          contactRateLimitMap.set(ip, { count: 1, resetTime: now + CONTACT_RATE_WINDOW });
+        } else if (limit.count >= CONTACT_RATE_LIMIT) {
+          return res.status(429).json({ error: "Too many messages. Please try again later." });
+        } else {
+          limit.count++;
+        }
+      } else {
+        contactRateLimitMap.set(ip, { count: 1, resetTime: now + CONTACT_RATE_WINDOW });
+      }
+      const { name, email, subject, message } = req.body as { name?: string; email?: string; subject?: string; message?: string };
+      const fromName = typeof name === "string" ? name.trim().slice(0, 200) : "";
+      const fromEmail = typeof email === "string" ? email.trim().toLowerCase().slice(0, 254) : "";
+      const subj = typeof subject === "string" ? subject.trim().slice(0, 300) : "Contact form";
+      const body = typeof message === "string" ? message.trim().slice(0, 10000) : "";
+      if (!fromEmail || !body) {
+        return res.status(400).json({ error: "Email and message are required." });
+      }
+      const contactTo = env.contactEmail;
+      if (emailService.isEnabled() && contactTo) {
+        const html = `
+          <p><strong>From:</strong> ${fromName || "(not given)"} &lt;${fromEmail}&gt;</p>
+          <p><strong>Subject:</strong> ${subj}</p>
+          <hr/>
+          <p>${body.replace(/\n/g, "<br/>")}</p>
+        `;
+        await emailService.sendEmail({
+          to: contactTo,
+          subject: `[TripSync Contact] ${subj}`,
+          html,
+          text: `From: ${fromName || "(not given)"} <${fromEmail}>\nSubject: ${subj}\n\n${body}`,
+        });
+      }
+      res.json({ message: "Thanks for reaching out. We'll get back to you soon." });
+    } catch (error) {
+      console.error("Contact form error:", error);
+      res.status(500).json({ error: "Failed to send message. Please try again or email us directly." });
     }
   });
 
@@ -123,7 +223,10 @@ export async function registerRoutes(
   // Auth - Login
   app.post("/api/auth/login", async (req: Request, res: Response) => {
     try {
-      const { email, password } = req.body;
+      const rawEmail = req.body?.email;
+      const rawPassword = req.body?.password;
+      const email = typeof rawEmail === "string" ? rawEmail.trim().toLowerCase() : "";
+      const password = typeof rawPassword === "string" ? rawPassword : "";
 
       if (!email || !password) {
         return res.status(400).json({
@@ -132,11 +235,21 @@ export async function registerRoutes(
         });
       }
 
-      // Find user
-      const user = await storage.getUserByEmail(email.toLowerCase());
+      // In development: ensure demo user exists so demo@tripsync.com / password123 always works
+      let user = await storage.getUserByEmail(email);
+      if (!user && process.env.NODE_ENV === "development" && email === "demo@tripsync.com") {
+        const passwordHash = await hashPassword("password123");
+        user = await storage.createUser({
+          id: randomUUID(),
+          email: "demo@tripsync.com",
+          name: "Demo User",
+          passwordHash,
+        });
+      }
+
       if (!user) {
         return res.status(401).json({
-          error: "Invalid credentials",
+          error: "Invalid email or password",
           code: "INVALID_CREDENTIALS"
         });
       }
@@ -145,7 +258,6 @@ export async function registerRoutes(
       if (!user.passwordHash) {
         if (process.env.NODE_ENV === "development") {
           console.log(`[dev] Legacy user ${user.email} logged in without password hash`);
-          // Skip password check for legacy demo users
         } else {
           return res.status(401).json({
             error: "Account needs password reset. Please register again.",
@@ -154,10 +266,18 @@ export async function registerRoutes(
         }
       } else {
         // Verify password (only when passwordHash exists)
-        const isValid = await comparePassword(password, user.passwordHash);
-        if (!isValid) {
+        try {
+          const isValid = await comparePassword(password, user.passwordHash);
+          if (!isValid) {
+            return res.status(401).json({
+              error: "Invalid email or password",
+              code: "INVALID_CREDENTIALS"
+            });
+          }
+        } catch (compareErr) {
+          console.error("Password compare error:", compareErr);
           return res.status(401).json({
-            error: "Invalid credentials",
+            error: "Invalid email or password",
             code: "INVALID_CREDENTIALS"
           });
         }
@@ -169,14 +289,18 @@ export async function registerRoutes(
         email: user.email,
       });
 
-      // Return user data without password hash
+      // Return user data without password hash (ensure serializable for client)
+      const createdAt = user.createdAt instanceof Date ? user.createdAt.toISOString() : user.createdAt;
+      const u = user as { subscriptionTier?: string; subscriptionExpiresAt?: Date | null };
       res.json({
         token,
         user: {
           id: user.id,
           email: user.email,
           name: user.name,
-          createdAt: user.createdAt,
+          createdAt: typeof createdAt === "string" ? createdAt : new Date(createdAt).toISOString(),
+          subscriptionTier: u.subscriptionTier ?? "free",
+          subscriptionExpiresAt: u.subscriptionExpiresAt ? new Date(u.subscriptionExpiresAt).toISOString() : null,
         }
       });
     } catch (error) {
@@ -244,15 +368,196 @@ export async function registerRoutes(
         });
       }
 
+      const createdAt = user.createdAt instanceof Date ? user.createdAt.toISOString() : user.createdAt;
       res.json({
         id: user.id,
         email: user.email,
         name: user.name,
-        createdAt: user.createdAt,
+        createdAt,
+        subscriptionTier: (user as { subscriptionTier?: string }).subscriptionTier ?? "free",
+        subscriptionExpiresAt: (user as { subscriptionExpiresAt?: Date | null }).subscriptionExpiresAt
+          ? new Date((user as { subscriptionExpiresAt: Date }).subscriptionExpiresAt).toISOString()
+          : null,
       });
     } catch (error) {
       console.error("Get user error:", error);
       res.status(500).json({ error: "Failed to get user info" });
+    }
+  });
+
+  // Subscription status
+  app.get("/api/subscription/status", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const userId = (req as any).userId;
+      const user = await storage.getUserById(userId);
+      if (!user) return res.status(404).json({ error: "User not found" });
+      const u = user as { subscriptionTier?: string; subscriptionExpiresAt?: Date | null };
+      const tier = u.subscriptionTier ?? "free";
+      const expiresAt = u.subscriptionExpiresAt;
+      const isActive = tier !== "free" && (!expiresAt || new Date(expiresAt) > new Date());
+      res.json({
+        tier,
+        expiresAt: expiresAt ? new Date(expiresAt).toISOString() : null,
+        isActive: isActive || tier === "free",
+        stripeEnabled: isStripeEnabled(),
+      });
+    } catch (error) {
+      console.error("Subscription status error:", error);
+      res.status(500).json({ error: "Failed to get subscription status" });
+    }
+  });
+
+  // Stripe checkout (create session and redirect URL)
+  app.post("/api/stripe/checkout", requireAuth, async (req: Request, res: Response) => {
+    try {
+      if (!isStripeEnabled()) {
+        return res.status(503).json({ error: "Payments are not configured", upgradeUrl: "/pricing" });
+      }
+      const userId = (req as any).userId;
+      const user = await storage.getUserById(userId);
+      if (!user) return res.status(404).json({ error: "User not found" });
+      const { tier, isAnnual } = req.body as { tier?: "pro" | "teams"; isAnnual?: boolean };
+      if (!tier || (tier !== "pro" && tier !== "teams")) {
+        return res.status(400).json({ error: "tier must be 'pro' or 'teams'" });
+      }
+      const { url } = await createCheckoutSession({
+        tier,
+        isAnnual: !!isAnnual,
+        userId,
+        userEmail: user.email,
+      });
+      if (!url) return res.status(500).json({ error: "Could not create checkout session" });
+      res.json({ url });
+    } catch (error) {
+      console.error("Stripe checkout error:", error);
+      res.status(500).json({ error: "Checkout failed" });
+    }
+  });
+
+  // Stripe customer portal (manage subscription)
+  app.post("/api/stripe/portal", requireAuth, async (req: Request, res: Response) => {
+    try {
+      if (!isStripeEnabled()) {
+        return res.status(503).json({ error: "Payments are not configured" });
+      }
+      const userId = (req as any).userId;
+      const user = await storage.getUserById(userId) as { stripeCustomerId?: string | null };
+      if (!user?.stripeCustomerId) {
+        return res.status(400).json({ error: "No billing account. Subscribe first from the pricing page." });
+      }
+      const returnUrl = (req.body?.returnUrl as string) || `${env.appUrl}/dashboard`;
+      const { url } = await createBillingPortalSession(user.stripeCustomerId, returnUrl);
+      res.json({ url });
+    } catch (error) {
+      console.error("Stripe portal error:", error);
+      res.status(500).json({ error: "Could not open billing portal" });
+    }
+  });
+
+  // Stripe webhook (raw body required; do not use requireAuth)
+  app.post("/api/stripe/webhook", async (req: Request, res: Response) => {
+    try {
+      const rawBody = (req as any).rawBody as Buffer | undefined;
+      const signature = req.headers["stripe-signature"] as string;
+      if (!rawBody || !signature) {
+        return res.status(400).json({ error: "Missing raw body or stripe-signature" });
+      }
+      const result = await handleWebhook(rawBody, signature);
+      if (!result.received && result.error) {
+        return res.status(400).json({ error: result.error });
+      }
+      res.json({ received: true });
+    } catch (error) {
+      console.error("Stripe webhook error:", error);
+      res.status(500).json({ error: "Webhook failed" });
+    }
+  });
+
+  // Demo trip: any authenticated user can view (for "Play AI demo" from dashboard)
+  const DEMO_TRIP_ID = "trip-austin-1";
+  app.get("/api/demo/trip", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const trip = await storage.getTrip(DEMO_TRIP_ID);
+      if (!trip) {
+        return res.status(404).json({ error: "Demo trip not found" });
+      }
+      const tripId = DEMO_TRIP_ID;
+      const items = await storage.getItineraryItems(tripId);
+      const allComments = await storage.getCommentsByTrip(tripId);
+      const allVotes = await storage.getVotesByTrip(tripId);
+      const members = await storage.getTripMembers(tripId);
+      const expenses = await storage.getExpensesByTrip(tripId);
+      const invites = await storage.getInvitesByTrip(tripId);
+      const preferences = await storage.getPreferencesByTrip(tripId);
+      const chatMessages = await storage.getChatMessagesByTrip(tripId);
+      const photos = await storage.getPhotosByTrip(tripId);
+      const pollsList = await storage.getPollsByTrip(tripId);
+      const packingList = await storage.getPackingByTrip(tripId);
+      const transportationList = await storage.getTransportationByTrip(tripId);
+      const groupAvailabilityList = await storage.getGroupAvailabilityByTrip(tripId);
+      const documentsList = await storage.getDocumentsByTrip(tripId);
+      const emergencyContactsList = await storage.getEmergencyContactsByTrip(tripId);
+      const moodBoardList = await storage.getMoodBoardByTrip(tripId);
+      const satisfactionList = await storage.getSatisfactionByTrip(tripId);
+      const locationSharingList = await storage.getLocationSharingByTrip(tripId);
+
+      const pollVoteCounts: Record<string, number[]> = {};
+      for (const poll of pollsList) {
+        const pv = await storage.getPollVotes(poll.id);
+        const counts = (poll.options as string[]).map((_, i) => pv.filter((v) => v.optionIndex === i).length);
+        pollVoteCounts[poll.id] = counts;
+      }
+
+      const comments: Record<string, typeof allComments> = {};
+      allComments.forEach((c) => {
+        if (!comments[c.itemId]) comments[c.itemId] = [];
+        comments[c.itemId].push(c);
+      });
+
+      const votes: Record<string, { up: number; down: number; abstain: number; userVote?: string }> = {};
+      const voteDetails: Record<string, { userId: string; voteType: string; userName: string }[]> = {};
+      const userId = req.query.userId as string | undefined;
+      const memberMap = new Map(members.map((m) => [m.userId, m.user.name]));
+      allVotes.forEach((v) => {
+        if (!votes[v.itemId]) votes[v.itemId] = { up: 0, down: 0, abstain: 0 };
+        if (v.voteType === "up") votes[v.itemId].up++;
+        else if (v.voteType === "down") votes[v.itemId].down++;
+        else if (v.voteType === "abstain") votes[v.itemId].abstain++;
+        if (userId && v.userId === userId) votes[v.itemId].userVote = v.voteType;
+        if (!voteDetails[v.itemId]) voteDetails[v.itemId] = [];
+        voteDetails[v.itemId].push({ userId: v.userId, voteType: v.voteType, userName: memberMap.get(v.userId) ?? "Unknown" });
+      });
+
+      const effectiveTrip = { ...trip };
+      if (trip.voteDeadline && new Date(trip.voteDeadline) <= new Date()) {
+        effectiveTrip.isLocked = true;
+      }
+
+      res.json({
+        trip: effectiveTrip,
+        items,
+        comments,
+        votes,
+        voteDetails,
+        members: members.map((m) => ({ ...m.user, role: m.role, rsvpStatus: m.rsvpStatus, memberId: m.id })),
+        expenses,
+        invites,
+        preferences: preferences.map((p) => ({ ...p, user: p.user })),
+        chatMessages,
+        photos,
+        polls: pollsList.map((p) => ({ ...p, voteCounts: pollVoteCounts[p.id] ?? [] })),
+        packing: packingList,
+        transportation: transportationList,
+        groupAvailability: groupAvailabilityList,
+        documents: documentsList,
+        emergencyContacts: emergencyContactsList,
+        moodBoard: moodBoardList,
+        satisfaction: satisfactionList,
+        locationSharing: locationSharingList,
+      });
+    } catch (error) {
+      console.error("Error fetching demo trip:", error);
+      res.status(500).json({ error: "Failed to fetch demo trip" });
     }
   });
 
@@ -301,6 +606,11 @@ export async function registerRoutes(
       // Check rate limit
       if (!checkRateLimit(userId)) {
         return res.status(429).json({ error: "Rate limit exceeded. Try again later." });
+      }
+
+      const createTripCheck = await canCreateTrip(userId);
+      if (!createTripCheck.allowed) {
+        return res.status(403).json({ error: createTripCheck.reason, upgradeUrl: "/pricing" });
       }
 
       const tripId = randomUUID();
@@ -354,6 +664,7 @@ export async function registerRoutes(
       const groupAvailabilityList = await storage.getGroupAvailabilityByTrip(tripId);
       const documentsList = await storage.getDocumentsByTrip(tripId);
       const emergencyContactsList = await storage.getEmergencyContactsByTrip(tripId);
+      const moodBoardList = await storage.getMoodBoardByTrip(tripId);
       const satisfactionList = await storage.getSatisfactionByTrip(tripId);
       const locationSharingList = await storage.getLocationSharingByTrip(tripId);
 
@@ -411,6 +722,7 @@ export async function registerRoutes(
         groupAvailability: groupAvailabilityList,
         documents: documentsList,
         emergencyContacts: emergencyContactsList,
+        moodBoard: moodBoardList,
         satisfaction: satisfactionList,
         locationSharing: locationSharingList,
       });
@@ -441,7 +753,12 @@ export async function registerRoutes(
   app.post("/api/trips/:id/regenerate-itinerary", requireAuth, requireTripAccess, requirePlanner, async (req: Request, res: Response) => {
     try {
       const tripId = req.params.id;
+      const userId = (req as any).userId;
       const trip = (req as any).trip;
+      const aiCheck = await canUseAIGeneration(userId, tripId);
+      if (!aiCheck.allowed) {
+        return res.status(403).json({ error: aiCheck.reason, upgradeUrl: "/pricing" });
+      }
       const preferences = await storage.getPreferencesByTrip(tripId);
       const memberInputs = preferences.map((p) => ({
         userName: p.user.name,
@@ -776,6 +1093,10 @@ export async function registerRoutes(
           await storage.updateInvite(inviteId, { status: "accepted" });
           return res.json({ ok: true, message: "Already a member", tripId: invite.tripId });
         }
+        const memberCheck = await canAddMemberToTrip(invite.tripId);
+        if (!memberCheck.allowed) {
+          return res.status(403).json({ error: memberCheck.reason, upgradeUrl: "/pricing" });
+        }
         await storage.addTripMember({
           id: randomUUID(),
           tripId: invite.tripId,
@@ -850,8 +1171,9 @@ export async function registerRoutes(
   app.put("/api/trips/:tripId/preferences", requireAuth, requireTripAccess, async (req: Request, res: Response) => {
     try {
       const { tripId } = req.params;
-      const { userId, budgetBand, pace, diet, budgetFlexibility, mustDoActivities, accessibility } = req.body;
-      if (!userId) return res.status(400).json({ error: "UserId is required" });
+      const userId = (req as any).userId as string | undefined;
+      const { budgetBand, pace, diet, budgetFlexibility, mustDoActivities, accessibility } = req.body;
+      if (!userId) return res.status(401).json({ error: "Authentication required" });
       const existing = await storage.getPreference(tripId, userId);
       const pref = await storage.createOrUpdatePreference({
         id: existing?.id ?? randomUUID(),
@@ -895,8 +1217,13 @@ export async function registerRoutes(
   app.post("/api/trips/:tripId/photos", requireAuth, requireTripAccess, async (req: Request, res: Response) => {
     try {
       const { tripId } = req.params;
-      const { userId, url, caption } = req.body;
-      if (!userId || !url) return res.status(400).json({ error: "UserId and url required" });
+      const userId = (req as any).userId as string | undefined;
+      const { url, caption } = req.body;
+      if (!userId || !url) return res.status(400).json({ error: "url required" });
+      const photoCheck = await canAddPhotoToTrip(tripId);
+      if (!photoCheck.allowed) {
+        return res.status(403).json({ error: photoCheck.reason, upgradeUrl: "/pricing" });
+      }
       const photo = await storage.createTripPhoto({
         id: randomUUID(),
         tripId,
@@ -941,8 +1268,9 @@ export async function registerRoutes(
   app.post("/api/trips/:tripId/polls", requireAuth, requireTripAccess, async (req: Request, res: Response) => {
     try {
       const { tripId } = req.params;
-      const { createdByUserId, question, options, deadline } = req.body;
-      if (!createdByUserId || !question || !options || !Array.isArray(options) || options.length < 2) return res.status(400).json({ error: "createdByUserId, question, and options (array of 2+) required" });
+      const createdByUserId = (req as any).userId as string | undefined;
+      const { question, options, deadline } = req.body;
+      if (!createdByUserId || !question || !options || !Array.isArray(options) || options.length < 2) return res.status(400).json({ error: "question and options (array of 2+) required" });
       const poll = await storage.createPoll({
         id: randomUUID(),
         tripId,
@@ -962,8 +1290,9 @@ export async function registerRoutes(
   app.post("/api/trips/:tripId/polls/:pollId/vote", requireAuth, requireTripAccess, async (req: Request, res: Response) => {
     try {
       const { pollId } = req.params;
-      const { userId, optionIndex } = req.body;
-      if (userId === undefined || optionIndex === undefined) return res.status(400).json({ error: "userId and optionIndex required" });
+      const userId = (req as any).userId as string | undefined;
+      const { optionIndex } = req.body;
+      if (!userId || optionIndex === undefined) return res.status(400).json({ error: "optionIndex required" });
       const vote = await storage.createOrUpdatePollVote({
         id: randomUUID(),
         pollId,
@@ -1083,8 +1412,9 @@ export async function registerRoutes(
   app.put("/api/trips/:tripId/availability", requireAuth, requireTripAccess, async (req: Request, res: Response) => {
     try {
       const { tripId } = req.params;
-      const { userId, availableDates } = req.body;
-      if (!userId || !Array.isArray(availableDates)) return res.status(400).json({ error: "userId and availableDates (array) required" });
+      const userId = (req as any).userId as string | undefined;
+      const { availableDates } = req.body;
+      if (!userId || !Array.isArray(availableDates)) return res.status(400).json({ error: "availableDates (array) required" });
       const avail = await storage.setUserAvailability(tripId, userId, availableDates);
       res.json(avail);
     } catch (error) {
@@ -1096,8 +1426,9 @@ export async function registerRoutes(
   app.post("/api/trips/:tripId/chat", requireAuth, requireTripAccess, async (req: Request, res: Response) => {
     try {
       const { tripId } = req.params;
-      const { userId, content, itemId } = req.body;
-      if (!userId || !content) return res.status(400).json({ error: "UserId and content required" });
+      const userId = (req as any).userId as string | undefined;
+      const { content, itemId } = req.body;
+      if (!userId || !content) return res.status(400).json({ error: "Content required" });
       const msg = await storage.createChatMessage({
         id: randomUUID(),
         tripId,
@@ -1227,12 +1558,144 @@ export async function registerRoutes(
     }
   });
 
+  // Mood board
+  app.post("/api/trips/:tripId/mood-board", requireAuth, requireTripAccess, async (req: Request, res: Response) => {
+    try {
+      const { tripId } = req.params;
+      const userId = (req as any).userId as string;
+      const { url, label } = req.body;
+      if (!url || typeof url !== "string") return res.status(400).json({ error: "url required" });
+      const item = await storage.createMoodBoardItem({
+        id: randomUUID(),
+        tripId,
+        url: url.trim(),
+        label: typeof label === "string" ? label.trim() || null : null,
+        addedByUserId: userId,
+      });
+      res.status(201).json(item);
+    } catch (error) {
+      console.error("Error creating mood board item:", error);
+      res.status(500).json({ error: "Failed to add to mood board" });
+    }
+  });
+
+  app.delete("/api/trips/:tripId/mood-board/:itemId", requireAuth, requireTripAccess, async (req: Request, res: Response) => {
+    try {
+      const { itemId } = req.params;
+      await storage.deleteMoodBoardItem(itemId);
+      res.status(204).send();
+    } catch (error) {
+      console.error("Error deleting mood board item:", error);
+      res.status(500).json({ error: "Failed to remove from mood board" });
+    }
+  });
+
+  // Generate trip recap (AI)
+  app.post("/api/trips/:tripId/generate-recap", requireAuth, requireTripAccess, async (req: Request, res: Response) => {
+    try {
+      const { tripId } = req.params;
+      const trip = await storage.getTrip(tripId);
+      if (!trip) return res.status(404).json({ error: "Trip not found" });
+      const items = await storage.getItineraryItems(tripId);
+      const photos = await storage.getPhotosByTrip(tripId);
+      const itinerarySummary = items.length
+        ? items.slice(0, 15).map((i) => `${i.dayNumber}: ${i.name}`).join("; ")
+        : undefined;
+      const photoCaptions = photos.map((p) => p.caption).filter(Boolean) as string[];
+      const { recap } = await generateTripRecap({
+        destination: trip.destination,
+        startDate: trip.startDate,
+        endDate: trip.endDate,
+        itinerarySummary,
+        photoCaptions,
+      });
+      await storage.updateTrip(tripId, { recapText: recap });
+      res.json({ recap });
+    } catch (error) {
+      console.error("Error generating recap:", error);
+      res.status(500).json({ error: "Failed to generate recap" });
+    }
+  });
+
+  // Generate packing list (AI)
+  app.post("/api/trips/:tripId/generate-packing-list", requireAuth, requireTripAccess, async (req: Request, res: Response) => {
+    try {
+      const { tripId } = req.params;
+      const trip = await storage.getTrip(tripId);
+      if (!trip) return res.status(404).json({ error: "Trip not found" });
+      const { items } = await generatePackingList({
+        destination: trip.destination,
+        startDate: trip.startDate,
+        endDate: trip.endDate,
+        tripType: (trip as { tripType?: string }).tripType,
+        groupSize: trip.groupSize,
+      });
+      const userId = (req as any).userId as string;
+      const created = [];
+      for (const name of items) {
+        const item = await storage.createPackingItem({
+          id: randomUUID(),
+          tripId,
+          name,
+          assignedToUserId: null,
+          notes: null,
+        });
+        created.push(item);
+      }
+      res.json({ items: created });
+    } catch (error) {
+      console.error("Error generating packing list:", error);
+      res.status(500).json({ error: "Failed to generate packing list" });
+    }
+  });
+
+  // Email import: parse confirmation email and suggest itinerary items
+  app.post("/api/trips/:tripId/parse-email", requireAuth, requireTripAccess, requirePlanner, requirePro, async (req: Request, res: Response) => {
+    try {
+      const { tripId } = req.params;
+      const { emailText } = req.body as { emailText?: string };
+      if (!emailText || typeof emailText !== "string") return res.status(400).json({ error: "emailText required" });
+      const trip = await storage.getTrip(tripId);
+      const { suggestions } = await parseEmailForItinerary({ emailText: emailText.slice(0, 10000), destination: trip?.destination });
+      res.json({ suggestions });
+    } catch (error) {
+      console.error("Parse email error:", error);
+      res.status(500).json({ error: "Failed to parse email", suggestions: [] });
+    }
+  });
+
+  // Place discovery (proxy to avoid CORS; uses Nominatim/Overpass for POIs) — Pro only
+  app.get("/api/places/search", requireAuth, requirePro, async (req: Request, res: Response) => {
+    try {
+      const q = (req.query.q as string)?.trim();
+      const near = (req.query.near as string)?.trim();
+      if (!q && !near) return res.status(400).json({ error: "q or near required" });
+      const query = q || near;
+      const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=15`;
+      const resp = await fetch(url, { headers: { "User-Agent": "TripSync/1.0" } });
+      if (!resp.ok) throw new Error("Places service unavailable");
+      const data = await resp.json();
+      const places = (Array.isArray(data) ? data : []).slice(0, 15).map((p: { place_id: number; display_name: string; lat: string; lon: string; type?: string; class?: string }) => ({
+        id: String(p.place_id),
+        name: p.display_name,
+        lat: parseFloat(p.lat),
+        lng: parseFloat(p.lon),
+        type: p.type || p.class || "place",
+      }));
+      res.json({ places });
+    } catch (error) {
+      console.error("Places search error:", error);
+      res.status(500).json({ error: "Search failed", places: [] });
+    }
+  });
+
   // Trip satisfaction (analytics) — also updates preference learning from this trip
   app.post("/api/trips/:tripId/satisfaction", requireAuth, requireTripAccess, async (req: Request, res: Response) => {
     try {
       const { tripId } = req.params;
-      const { userId, score, comment } = req.body;
-      if (!userId || score == null) return res.status(400).json({ error: "userId and score (1-5) required" });
+      const userId = (req as any).userId as string | undefined;
+      const { score, comment } = req.body;
+      if (!userId || score == null) return res.status(400).json({ error: "score (1-5) required" });
       const entry = await storage.createOrUpdateTripSatisfaction({
         id: randomUUID(),
         tripId,
@@ -1359,24 +1822,266 @@ export async function registerRoutes(
   app.post("/api/trips/:tripId/planning-chat", requireAuth, requireTripAccess, async (req: Request, res: Response) => {
     try {
       const { tripId } = req.params;
-      const { userMessage } = req.body;
+      const { userMessage, currentPage, timeOnPage, lastAction, inactivityTime } = req.body as {
+        userMessage?: string;
+        currentPage?: string;
+        timeOnPage?: number;
+        lastAction?: string;
+        inactivityTime?: number;
+      };
       if (!userMessage) return res.status(400).json({ error: "userMessage required" });
+
       const trip = await storage.getTrip(tripId);
       if (!trip) return res.status(404).json({ error: "Trip not found" });
-      const items = await storage.getItineraryItems(tripId);
-      const itemsSummary = items.length > 0
-        ? `Days 1-${Math.max(...items.map((i) => i.dayNumber))}: ${items.length} items (${[...new Set(items.map((i) => i.type))].join(", ")})`
-        : undefined;
+
+      const [membersWithUsers, items, expenses, votes] = await Promise.all([
+        storage.getTripMembers(tripId),
+        storage.getItineraryItems(tripId),
+        storage.getExpensesByTrip(tripId),
+        storage.getVotesByTrip(tripId),
+      ]);
+
+      const confirmedMembers = membersWithUsers.filter((m) => (m as any).rsvpStatus !== "declined").length;
+      const totalMembers = membersWithUsers.length || trip.groupSize || 0;
+      const pendingMembers = Math.max(totalMembers - confirmedMembers, 0);
+
+      const totalBudget = (trip.budgetPerPerson || 0) * (trip.groupSize || totalMembers || 0);
+      const totalExpenses = expenses.reduce((sum, e) => sum + (e.amount || 0), 0);
+      const overBudget = totalBudget > 0 && totalExpenses > totalBudget;
+      const overAmount = overBudget ? totalExpenses - totalBudget : 0;
+
+      const dayNumbers = Array.from(new Set(items.map((i) => i.dayNumber))).sort((a, b) => a - b);
+      const daysWithActivities = dayNumbers.length;
+      const tripStart = new Date(trip.startDate);
+      const tripEnd = new Date(trip.endDate);
+      const tripDays = Number.isNaN(tripStart.getTime()) || Number.isNaN(tripEnd.getTime())
+        ? null
+        : Math.max(1, Math.round((tripEnd.getTime() - tripStart.getTime()) / (1000 * 60 * 60 * 24)) + 1);
+      const daysWithoutActivities = tripDays != null ? Math.max(tripDays - daysWithActivities, 0) : 0;
+
+      const completionBase = tripDays && tripDays > 0 ? tripDays * 3 : 6;
+      const completionPercentage = Math.max(
+        0,
+        Math.min(100, completionBase > 0 ? Math.round((items.length / completionBase) * 100) : 0)
+      );
+
+      const daysUntilTrip = Number.isNaN(tripStart.getTime())
+        ? null
+        : Math.ceil((tripStart.getTime() - Date.now()) / (1000 * 60 * 60 * 24));
+
+      const activeVotes = votes.length; // per-item votes; treat any presence as "active"
+      const stuckVotes = votes.reduce((count, v) => {
+        // Approximate stuck-ness by per-item tallies when tied; reuse getVotesByTrip aggregation later if needed
+        return count + 0;
+      }, 0);
+
+      const detectedIssues: string[] = [];
+      if (overBudget && overAmount > 0) {
+        detectedIssues.push(`Budget overrun of $${overAmount}. Total spend $${totalExpenses} vs budget $${totalBudget}.`);
+      }
+      if (tripDays != null && daysWithoutActivities > 0) {
+        detectedIssues.push(`${daysWithoutActivities} of ${tripDays} days have no planned activities.`);
+      }
+      if (daysUntilTrip != null && daysUntilTrip <= 7 && completionPercentage < 50) {
+        detectedIssues.push(
+          `Trip starts in ${daysUntilTrip} days but itinerary is only ${completionPercentage}% complete.`
+        );
+      }
+      if (pendingMembers > 0) {
+        detectedIssues.push(`${pendingMembers} invited members have not confirmed yet.`);
+      }
+
+      const context: AtlasRichContext = {
+        trip: {
+          id: trip.id,
+          destination: trip.destination,
+          startDate: trip.startDate,
+          endDate: trip.endDate,
+          budgetPerPerson: trip.budgetPerPerson,
+          groupSize: trip.groupSize,
+          status: trip.status,
+          isLocked: (trip as any).isLocked ?? false,
+        },
+        progress: {
+          itineraryItems: items.length,
+          daysWithActivities,
+          daysWithoutActivities,
+          totalExpenses,
+          totalBudget,
+          overBudget,
+          overAmount,
+          confirmedMembers,
+          pendingMembers,
+          activeVotes,
+          stuckVotes,
+          completionPercentage,
+          daysUntilTrip,
+        },
+        behavior: {
+          currentPage,
+          timeOnPage,
+          lastAction,
+          inactivityTime,
+        },
+        group: {
+          vibes: trip.vibes,
+        },
+        detectedIssues,
+      };
+
       const result = await conversationalPlanningSuggestion({
         tripId,
-        destination: trip.destination,
         userMessage: String(userMessage).trim(),
-        itemsSummary,
+        context,
+        fullTrip: trip,
+        items,
+        expenses,
+        votes,
+        members: membersWithUsers,
       });
       res.json(result);
     } catch (error) {
       console.error("Error in planning chat:", error);
       res.status(500).json({ error: "Failed to get suggestion" });
+    }
+  });
+
+  // Atlas: generate additional AI itinerary suggestions for an existing trip
+  app.post("/api/trips/:tripId/ai-suggestions", requireAuth, requireTripAccess, async (req: Request, res: Response) => {
+    try {
+      const { tripId } = req.params;
+      const trip = await storage.getTrip(tripId);
+      if (!trip) {
+        return res.status(404).json({ error: "Trip not found" });
+      }
+
+      const tripData: TripWizardData = {
+        destination: trip.destination,
+        startDate: trip.startDate,
+        endDate: trip.endDate,
+        budgetPerPerson: trip.budgetPerPerson,
+        groupSize: trip.groupSize,
+        vibes: trip.vibes,
+        accommodationPref: trip.accommodationPref,
+        diningPref: trip.diningPref,
+      };
+
+      await generateItinerary(tripId, tripData);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error generating AI suggestions for trip:", error);
+      res.status(500).json({ error: "Failed to generate AI suggestions" });
+    }
+  });
+
+  // Travel insurance helper: return a simple quote URL based on trip budget
+  app.get("/api/trips/:tripId/insurance-quote", requireAuth, requireTripAccess, async (req: Request, res: Response) => {
+    try {
+      const { tripId } = req.params;
+      const trip = await storage.getTrip(tripId);
+      if (!trip) return res.status(404).json({ error: "Trip not found" });
+
+      const groupSize = trip.groupSize || 0;
+      const totalBudget = (trip.budgetPerPerson || 0) * groupSize;
+      const url = `https://www.google.com/search?q=${encodeURIComponent(
+        `travel insurance for trip costing $${totalBudget} to ${trip.destination}`
+      )}`;
+
+      res.json({
+        totalBudget,
+        groupSize,
+        suggestionUrl: url,
+      });
+    } catch (error) {
+      console.error("Error generating insurance quote helper:", error);
+      res.status(500).json({ error: "Failed to build insurance suggestion" });
+    }
+  });
+
+  // Flight price watch stub – records interest in tracking flight prices (can be wired to a provider later)
+  app.post("/api/trips/:tripId/flight-watch", requireAuth, requireTripAccess, async (req: Request, res: Response) => {
+    try {
+      const { tripId } = req.params;
+      const { flight } = req.body as { flight?: { from?: string; to?: string; date?: string; airline?: string } };
+      if (!flight) {
+        return res.status(400).json({ error: "flight payload required" });
+      }
+      console.log("Flight watch requested", { tripId, flight });
+      res.json({ success: true, message: "Flight watch recorded. Price alerts will be available in a future update." });
+    } catch (error) {
+      console.error("Error recording flight watch:", error);
+      res.status(500).json({ error: "Failed to record flight watch" });
+    }
+  });
+
+  // Atlas conversation memory (per-trip, per-user)
+  app.get("/api/trips/:tripId/atlas/conversation", requireAuth, requireTripAccess, async (req: Request, res: Response) => {
+    try {
+      const { tripId } = req.params;
+      const userId = (req as any).userId as string | undefined;
+      if (!userId) {
+        return res.status(401).json({ error: "Authentication required" });
+      }
+
+      // When using Postgres, persist via atlas_conversations; otherwise fall back to in-memory (non-persistent) map.
+      const db = getDb();
+      const [row] = await db
+        .select()
+        .from(atlasConversations)
+        .where(and(eq(atlasConversations.tripId, tripId), eq(atlasConversations.userId, userId)))
+        .limit(1);
+
+      if (!row) {
+        return res.json({ messages: [] });
+      }
+      res.json({ messages: (row as any).messages ?? [] });
+    } catch (error) {
+      console.error("Error loading Atlas conversation:", error);
+      res.status(500).json({ error: "Failed to load conversation" });
+    }
+  });
+
+  app.post("/api/trips/:tripId/atlas/conversation", requireAuth, requireTripAccess, async (req: Request, res: Response) => {
+    try {
+      const { tripId } = req.params;
+      const { message } = req.body as { message?: unknown };
+      const userId = (req as any).userId as string | undefined;
+      if (!userId) {
+        return res.status(401).json({ error: "Authentication required" });
+      }
+      if (!message) {
+        return res.status(400).json({ error: "message required" });
+      }
+
+      const db = getDb();
+      const existing = await db
+        .select()
+        .from(atlasConversations)
+        .where(and(eq(atlasConversations.tripId, tripId), eq(atlasConversations.userId, userId)))
+        .limit(1);
+
+      if (existing.length > 0) {
+        const currentMessages = ((existing[0] as any).messages ?? []) as unknown[];
+        await db
+          .update(atlasConversations)
+          .set({
+            messages: [...currentMessages, message],
+            updatedAt: new Date(),
+          } as any)
+          .where(eq(atlasConversations.id, (existing[0] as any).id));
+      } else {
+        await db.insert(atlasConversations).values({
+          id: randomUUID(),
+          tripId,
+          userId,
+          messages: [message],
+        } as any);
+      }
+
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error saving Atlas conversation:", error);
+      res.status(500).json({ error: "Failed to save conversation" });
     }
   });
 

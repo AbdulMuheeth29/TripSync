@@ -117,15 +117,15 @@ export default function JoinTripPage() {
 
   return (
     <div className="min-h-screen bg-background flex flex-col items-center justify-center p-4">
-      <div className="flex items-center gap-2 mb-8">
+      <Link href="/" className="flex items-center gap-2 mb-8 no-underline text-foreground hover:opacity-90 transition-opacity">
         <AppLogo className="h-10 w-10 object-contain" />
         <span className="text-2xl font-bold">TripSync</span>
-      </div>
+      </Link>
 
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
-          <CardTitle className="text-2xl">You're Invited!</CardTitle>
-          <CardDescription>Join the group trip to {tripInfo.destination}</CardDescription>
+          <CardTitle className="text-2xl">Join This Trip</CardTitle>
+          <CardDescription>You've been invited to join a group trip to {tripInfo.destination}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="bg-muted rounded-lg p-4 space-y-2">

@@ -12,12 +12,16 @@ import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Checkbox } from "@/components/ui/checkbox";
-import { FileUpload } from "@/components/file-upload";
+import { FileUpload, BatchPhotoUpload } from "@/components/file-upload";
 import { AppLogo } from "@/components/app-logo";
+import { TripDestinationHero } from "@/components/trip-destination-hero";
+import { TripMap } from "@/components/trip-map";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { useAuth, getAuthHeaders } from "@/lib/auth-context";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
+import { useExchangeRates } from "@/lib/useExchangeRates";
+import { saveOfflineTrip, loadOfflineTrip, isTripOfflineEnabled, setTripOfflineEnabled } from "@/lib/offline-trips";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid } from "recharts";
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors } from "@dnd-kit/core";
@@ -62,8 +66,13 @@ import {
   GripVertical,
   AlertTriangle,
   Trash2,
+  Search,
+  Pin,
+  Mail,
 } from "lucide-react";
 import type { Trip, ItineraryItem, Comment, Vote, Expense, User } from "@shared/schema";
+
+const DEMO_TRIP_ID = "trip-austin-1";
 
 const typeIcons: Record<string, typeof Plane> = {
   flight: Plane,
@@ -211,41 +220,48 @@ function DayWeatherCard({ destination, date }: { destination: string; date: stri
   });
 
   const hourly = weatherQuery.data?.hourly;
-  const dayLabel = new Date(date).toLocaleDateString("en-US", { weekday: "long", month: "short", day: "numeric" });
-  const cardClassName = "mb-6 overflow-hidden border-0 bg-gradient-to-br from-slate-800/90 via-sky-900/80 to-slate-900/90 dark:from-slate-900/95 dark:via-sky-950/90 dark:to-slate-950 text-white shadow-xl";
+  const dayLabel = new Date(date + "T12:00:00").toLocaleDateString("en-US", { weekday: "long", month: "short", day: "numeric" });
+  const emptyCardClassName = "mb-6 overflow-hidden border border-border bg-card text-card-foreground shadow-sm";
+  const filledCardClassName = "mb-6 overflow-hidden border-0 bg-gradient-to-br from-slate-800/90 via-sky-900/80 to-slate-900/90 dark:from-slate-900/95 dark:via-sky-950/90 dark:to-slate-950 text-white shadow-xl";
+
+  if (geocodeQuery.isLoading || (lat != null && weatherQuery.isLoading)) {
+    return (
+      <Card className={emptyCardClassName}>
+        <CardContent className="p-6 min-h-[120px] flex items-center justify-center">
+          <div className="flex items-center gap-2 text-muted-foreground">
+            <Loader2 className="h-5 w-5 animate-spin" />
+            <span>Loading weather for {dayLabel}…</span>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (geocodeQuery.isError || weatherQuery.isError) {
+    return (
+      <Card className={emptyCardClassName}>
+        <CardContent className="p-6 min-h-[120px] flex items-center justify-center">
+          <div className="flex flex-col items-center gap-2 text-center text-muted-foreground">
+            <Cloud className="h-8 w-8" />
+            <span className="text-sm font-medium">Weather unavailable</span>
+            <span className="text-xs">No forecast for {dayLabel}. Try again later.</span>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   if (!hourly?.time?.length) {
-    if (geocodeQuery.isLoading || weatherQuery.isLoading)
-      return (
-        <Card className={cardClassName}>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-center gap-2 text-white/80">
-              <Loader2 className="h-5 w-5 animate-spin" />
-              <span>Loading weather…</span>
-            </div>
-          </CardContent>
-        </Card>
-      );
-    if (geocodeQuery.isError || weatherQuery.isError)
-      return (
-        <Card className={cardClassName}>
-          <CardContent className="p-6">
-            <div className="flex items-center gap-2 text-white/80">
-              <Cloud className="h-5 w-5" />
-              <span className="text-sm">Weather unavailable for this date</span>
-            </div>
-          </CardContent>
-        </Card>
-      );
     return (
-      <Card className={cardClassName}>
-        <CardContent className="p-6">
-          <div className="flex items-center gap-2 text-white/80">
-            <Cloud className="h-5 w-5" />
-            <span className="font-semibold tracking-wide">Hourly forecast</span>
-            <span className="text-white/70 text-sm">— {dayLabel}</span>
+      <Card className={emptyCardClassName}>
+        <CardContent className="p-6 min-h-[120px] flex flex-col justify-center">
+          <div className="flex items-center gap-2 font-medium">
+            <Cloud className="h-5 w-5 text-muted-foreground" />
+            <span>Hourly forecast — {dayLabel}</span>
           </div>
-          <p className="text-white/60 text-sm mt-2">Forecast available within 16 days of travel. Check back closer to your trip.</p>
+          <p className="text-sm text-muted-foreground mt-2">
+            Forecast is available within 16 days of travel. Check back closer to your trip date.
+          </p>
         </CardContent>
       </Card>
     );
@@ -260,7 +276,7 @@ function DayWeatherCard({ destination, date }: { destination: string; date: stri
   }));
 
   return (
-    <Card className={cardClassName}>
+    <Card className={filledCardClassName}>
       <CardContent className="p-0">
         <div className="px-6 pt-6 pb-2">
           <div className="flex items-center gap-2 text-white/90">
@@ -290,6 +306,19 @@ function DayWeatherCard({ destination, date }: { destination: string; date: stri
               </div>
             );
           })}
+        </div>
+        <div className="px-6 pb-4 text-xs text-white/80 space-y-1">
+          {slots.some((s) => (s.pop ?? 0) >= 60) ? (
+            <p>
+              This day has a high chance of rain. Consider moving outdoor‑heavy activities to another day and swapping in
+              more indoor options like museums, cafes, or shows.
+            </p>
+          ) : (
+            <p>
+              Weather looks fairly stable. It could be a good day to schedule longer outdoor blocks like hikes, beach
+              time, or walking tours.
+            </p>
+          )}
         </div>
       </CardContent>
     </Card>
@@ -504,6 +533,7 @@ interface TripDetailData {
   groupAvailability?: { id: string; tripId: string; userId: string; availableDates: string[]; user: User }[];
   documents?: { id: string; tripId: string; type: string; name: string; url: string; notes?: string | null; uploadedBy?: User }[];
   emergencyContacts?: { id: string; tripId: string; type: string; name: string; phone?: string | null; url?: string | null; notes?: string | null }[];
+  moodBoard?: { id: string; tripId: string; url: string; label: string | null; addedByUserId: string; addedBy?: User }[];
   satisfaction?: { id: string; tripId: string; userId: string; score: number; comment?: string | null; user: User }[];
   locationSharing?: { id: string; tripId: string; userId: string; lat: string; lng: string; user: User }[];
 }
@@ -1097,13 +1127,30 @@ function ItineraryItemCard({
   );
 }
 
-function ExpenseItem({ expense, members, tripId, onUpdate }: { expense: Expense; members: User[]; tripId: string; onUpdate: () => void }) {
+function ExpenseItem({
+  expense,
+  members,
+  tripId,
+  onUpdate,
+  convert,
+  displayCurrency,
+}: {
+  expense: Expense;
+  members: User[];
+  tripId: string;
+  onUpdate: () => void;
+  convert?: (amount: number, from: string, to: string) => number | null;
+  displayCurrency?: string;
+}) {
   const [editOpen, setEditOpen] = useState(false);
   const [editAmount, setEditAmount] = useState(String(expense.amount));
   const [editDesc, setEditDesc] = useState(expense.description);
   const payer = members.find((m) => m.id === expense.paidByUserId);
   const splitCount = expense.splitAmong.length;
   const perPerson = expense.amount / splitCount;
+  const expenseCurrency = (expense as { currency?: string }).currency ?? "USD";
+  const convertedAmount = convert && displayCurrency && expenseCurrency !== displayCurrency ? convert(expense.amount, expenseCurrency, displayCurrency) : null;
+  const convertedPerPerson = convert && displayCurrency && expenseCurrency !== displayCurrency && splitCount ? (convert(expense.amount, expenseCurrency, displayCurrency) ?? 0) / splitCount : null;
   const { toast } = useToast();
   const settleMutation = useMutation({
     mutationFn: () => apiRequest("PATCH", `/api/trips/${tripId}/expenses/${expense.id}`, { isSettled: !expense.isSettled }),
@@ -1125,11 +1172,15 @@ function ExpenseItem({ expense, members, tripId, onUpdate }: { expense: Expense;
           <div>
             <div className="font-medium">{expense.description}</div>
             <div className="text-sm text-muted-foreground">
-              {payer?.name || "Unknown"} paid ${expense.amount.toFixed(2)}
+              {payer?.name || "Unknown"} paid {expenseCurrency} {expense.amount.toFixed(2)}
+              {convertedAmount != null && displayCurrency && (
+                <span className="text-muted-foreground"> (≈ {displayCurrency} {convertedAmount.toFixed(2)})</span>
+              )}
               {expense.location && ` at ${expense.location}`}
             </div>
             <div className="text-xs text-muted-foreground mt-1">
-              Split among {splitCount} people (${perPerson.toFixed(2)}/person)
+              Split among {splitCount} people ({expenseCurrency} {perPerson.toFixed(2)}/person
+              {convertedPerPerson != null && displayCurrency && ` ≈ ${displayCurrency} ${convertedPerPerson.toFixed(2)}`})
             </div>
             {(expense as Expense & { receiptImageUrl?: string | null }).receiptImageUrl && (
               <a href={(expense as Expense & { receiptImageUrl?: string }).receiptImageUrl} target="_blank" rel="noopener noreferrer" className="inline-block mt-2">
@@ -1183,6 +1234,9 @@ export default function TripDetailPage() {
     itemId: "",
     receiptImageUrl: "",
   });
+  const [expenseSplitMemberIds, setExpenseSplitMemberIds] = useState<string[]>([]);
+  const [expenseDisplayCurrency, setExpenseDisplayCurrency] = useState("USD");
+  const { convert: convertCurrency, isLoading: ratesLoading } = useExchangeRates();
   const [chatInput, setChatInput] = useState("");
   const [mentionQuery, setMentionQuery] = useState<string | null>(null);
   const [mentionAnchor, setMentionAnchor] = useState<{ start: number; end: number } | null>(null);
@@ -1190,7 +1244,7 @@ export default function TripDetailPage() {
   const [prefForm, setPrefForm] = useState({ budgetBand: "", pace: "", diet: "", budgetFlexibility: "", mustDoActivities: "", accessibility: "" });
   const [photoForm, setPhotoForm] = useState({ url: "", caption: "" });
   const [photoDialogOpen, setPhotoDialogOpen] = useState(false);
-  const [pollForm, setPollForm] = useState({ question: "", optionA: "", optionB: "" });
+  const [pollForm, setPollForm] = useState<{ question: string; options: string[] }>({ question: "", options: ["", ""] });
   const [packingForm, setPackingForm] = useState({ name: "", assignedToUserId: "" });
   const [transportForm, setTransportForm] = useState({ dayNumber: 1, type: "drive", description: "", driverUserId: "" });
   const [availabilityDates, setAvailabilityDates] = useState<string[]>([]);
@@ -1215,33 +1269,73 @@ export default function TripDetailPage() {
   const [addItemOpen, setAddItemOpen] = useState(false);
   const [addItemForm, setAddItemForm] = useState({ dayNumber: 1, type: "activity", time: "09:00", name: "", description: "", location: "", pricePerPerson: "0", bookingUrl: "" });
   const [inviteEmail, setInviteEmail] = useState("");
+  const [moodBoardForm, setMoodBoardForm] = useState({ url: "", label: "" });
+  const [placeSearchQuery, setPlaceSearchQuery] = useState("");
+  const [placeSearchResults, setPlaceSearchResults] = useState<{ id: string; name: string; lat: number; lng: number; type: string }[]>([]);
+  const [placeSearchLoading, setPlaceSearchLoading] = useState(false);
+  const [recapLoading, setRecapLoading] = useState(false);
+  const [emailImportText, setEmailImportText] = useState("");
+  const [emailSuggestions, setEmailSuggestions] = useState<{ name: string; description: string; location: string; type: string; dayNumber: number; time: string; pricePerPerson?: number }[]>([]);
+  const [emailImportLoading, setEmailImportLoading] = useState(false);
+  const [offlineEnabled, setOfflineEnabled] = useState(false);
 
-  const { user: currentUser } = useAuth();
+  const { user: currentUser, isPro } = useAuth();
+  // Any user can view the demo trip via the demo endpoint (no membership required)
+  const useDemoEndpoint = tripId === DEMO_TRIP_ID;
+
   const { data, isLoading, error } = useQuery<TripDetailData>({
-    queryKey: ["/api/trips", tripId, currentUser?.id],
+    queryKey: useDemoEndpoint ? ["/api/demo/trip", currentUser?.id] : ["/api/trips", tripId, currentUser?.id],
     queryFn: async () => {
-      const url = `/api/trips/${tripId}`;
+      const url = useDemoEndpoint ? "/api/demo/trip" : `/api/trips/${tripId}`;
       const headers = getAuthHeaders();
-      const res = await fetch(url, { 
-        headers,
-        credentials: "include" 
-      });
-      if (!res.ok) {
-        const text = await res.text();
-        let errorMessage = text || `HTTP ${res.status}`;
-        try {
-          const errorJson = JSON.parse(text);
-          errorMessage = errorJson.error || errorMessage;
-        } catch {
-          // Use text as-is if not JSON
+      try {
+        const res = await fetch(url, {
+          headers,
+          credentials: "include",
+        });
+        if (!res.ok) {
+          const text = await res.text();
+          let errorMessage = text || `HTTP ${res.status}`;
+          try {
+            const errorJson = JSON.parse(text);
+            errorMessage = errorJson.error || errorMessage;
+          } catch {
+            // Use text as-is if not JSON
+          }
+          throw new Error(errorMessage);
         }
-        throw new Error(errorMessage);
+        const json = (await res.json()) as TripDetailData;
+        if (tripId) {
+          void saveOfflineTrip(tripId, json);
+        }
+        return json;
+      } catch (err) {
+        if (tripId) {
+          const offline = await loadOfflineTrip<TripDetailData>(tripId);
+          if (offline) return offline;
+        }
+        throw err;
       }
-      return res.json();
     },
     enabled: !!tripId && !!currentUser?.id,
     retry: false,
   });
+
+  useEffect(() => {
+    if (!tripId) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const enabled = await isTripOfflineEnabled(tripId);
+        if (!cancelled) setOfflineEnabled(enabled);
+      } catch {
+        // ignore
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [tripId]);
 
   const updateTripMutation = useMutation({
     mutationFn: async (updates: { voteDeadline?: string | null }) => {
@@ -1289,6 +1383,16 @@ export default function TripDetailPage() {
 
   const addExpenseMutation = useMutation({
     mutationFn: async () => {
+      const allMemberIds = data?.members.map((m) => m.id) || [];
+      const splitAmong =
+        expenseSplitMemberIds.length > 0
+          ? expenseSplitMemberIds
+          : allMemberIds.length > 0
+          ? allMemberIds
+          : user?.id
+          ? [user.id]
+          : [];
+
       return apiRequest("POST", `/api/trips/${tripId}/expenses`, {
         paidByUserId: user?.id,
         amount: Math.round(parseFloat(expenseForm.amount) || 0),
@@ -1297,13 +1401,14 @@ export default function TripDetailPage() {
         location: expenseForm.location,
         itemId: expenseForm.itemId || undefined,
         receiptImageUrl: expenseForm.receiptImageUrl || undefined,
-        splitAmong: data?.members.map((m) => m.id) || [user?.id],
+        splitAmong,
       });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/trips", tripId] });
       setNewExpenseOpen(false);
       setExpenseForm({ amount: "", currency: "USD", description: "", location: "", itemId: "", receiptImageUrl: "" });
+      setExpenseSplitMemberIds([]);
       toast({
         title: "Expense added",
         description: "The expense has been recorded",
@@ -1316,6 +1421,13 @@ export default function TripDetailPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/trips", tripId] });
       toast({ title: "Regenerating itinerary", description: "AI is creating a new plan from everyone's preferences." });
+    },
+    onError: (error: Error & { upgradeUrl?: string }) => {
+      if (error.upgradeUrl) {
+        toast({ title: "Pro feature", description: error.message, variant: "destructive", action: <Link href="/pricing?checkout=pro"><a className="text-sm font-medium underline">Upgrade</a></Link> });
+      } else {
+        toast({ title: "Failed to regenerate", description: error.message, variant: "destructive" });
+      }
     },
   });
 
@@ -1398,7 +1510,6 @@ export default function TripDetailPage() {
   const chatMutation = useMutation({
     mutationFn: async (content: string) => {
       return apiRequest("POST", `/api/trips/${tripId}/chat`, {
-        userId: user?.id,
         content,
       });
     },
@@ -1411,9 +1522,8 @@ export default function TripDetailPage() {
   const createPollMutation = useMutation({
     mutationFn: async () => {
       return apiRequest("POST", `/api/trips/${tripId}/polls`, {
-        createdByUserId: user?.id,
         question: pollForm.question,
-        options: [pollForm.optionA, pollForm.optionB].filter(Boolean),
+        options: pollForm.options.map((o) => o.trim()).filter(Boolean),
       });
     },
     onSuccess: () => {
@@ -1425,7 +1535,7 @@ export default function TripDetailPage() {
 
   const votePollMutation = useMutation({
     mutationFn: async ({ pollId, optionIndex }: { pollId: string; optionIndex: number }) => {
-      return apiRequest("POST", `/api/trips/${tripId}/polls/${pollId}/vote`, { userId: user?.id, optionIndex });
+      return apiRequest("POST", `/api/trips/${tripId}/polls/${pollId}/vote`, { optionIndex });
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["/api/trips", tripId] }),
   });
@@ -1498,7 +1608,7 @@ export default function TripDetailPage() {
 
   const satisfactionMutation = useMutation({
     mutationFn: async (score: number) => {
-      return apiRequest("POST", `/api/trips/${tripId}/satisfaction`, { userId: user?.id, score });
+      return apiRequest("POST", `/api/trips/${tripId}/satisfaction`, { score });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/trips", tripId] });
@@ -1576,7 +1686,7 @@ export default function TripDetailPage() {
 
   const setAvailabilityMutation = useMutation({
     mutationFn: async () => {
-      return apiRequest("PUT", `/api/trips/${tripId}/availability`, { userId: user?.id, availableDates: availabilityDates });
+      return apiRequest("PUT", `/api/trips/${tripId}/availability`, { availableDates: availabilityDates });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/trips", tripId] });
@@ -1594,7 +1704,6 @@ export default function TripDetailPage() {
   const addPhotoMutation = useMutation({
     mutationFn: async () => {
       return apiRequest("POST", `/api/trips/${tripId}/photos`, {
-        userId: user?.id,
         url: photoForm.url,
         caption: photoForm.caption || null,
       });
@@ -1605,12 +1714,61 @@ export default function TripDetailPage() {
       setPhotoForm({ url: "", caption: "" });
       toast({ title: "Photo added", description: "Added to shared album." });
     },
+    onError: (error: Error & { upgradeUrl?: string }) => {
+      if (error.upgradeUrl) {
+        toast({ title: "Photo limit reached", description: error.message, variant: "destructive", action: <Link href="/pricing?checkout=pro"><a className="text-sm font-medium underline">Upgrade</a></Link> });
+      } else {
+        toast({ title: "Failed to add photo", description: error.message, variant: "destructive" });
+      }
+    },
+  });
+
+  const addMoodBoardMutation = useMutation({
+    mutationFn: async () => {
+      return apiRequest("POST", `/api/trips/${tripId}/mood-board`, { url: moodBoardForm.url, label: moodBoardForm.label || null });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/trips", tripId] });
+      setMoodBoardForm({ url: "", label: "" });
+      toast({ title: "Added to mood board", description: "Pin saved." });
+    },
+  });
+
+  const deleteMoodBoardMutation = useMutation({
+    mutationFn: async (itemId: string) => apiRequest("DELETE", `/api/trips/${tripId}/mood-board/${itemId}`),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/trips", tripId] });
+      toast({ title: "Removed", description: "Pin removed from mood board." });
+    },
+  });
+
+  const generateRecapMutation = useMutation({
+    mutationFn: async () => {
+      const res = await fetch(`/api/trips/${tripId}/generate-recap`, { method: "POST", headers: getAuthHeaders(), credentials: "include" });
+      if (!res.ok) throw new Error("Failed to generate");
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/trips", tripId] });
+      toast({ title: "Recap generated", description: "Your trip recap is ready." });
+    },
+  });
+
+  const generatePackingMutation = useMutation({
+    mutationFn: async () => {
+      const res = await fetch(`/api/trips/${tripId}/generate-packing-list`, { method: "POST", headers: getAuthHeaders(), credentials: "include" });
+      if (!res.ok) throw new Error("Failed to generate");
+      return res.json();
+    },
+    onSuccess: (result: { items?: unknown[] }) => {
+      queryClient.invalidateQueries({ queryKey: ["/api/trips", tripId] });
+      toast({ title: "Packing list generated", description: `${result?.items?.length ?? 0} items added.` });
+    },
   });
 
   const preferencesMutation = useMutation({
     mutationFn: async () => {
       return apiRequest("PUT", `/api/trips/${tripId}/preferences`, {
-        userId: user?.id,
         budgetBand: prefForm.budgetBand || null,
         pace: prefForm.pace || null,
         diet: prefForm.diet || null,
@@ -1642,8 +1800,29 @@ export default function TripDetailPage() {
     navigator.clipboard.writeText(shareUrl);
     toast({
       title: "Link copied!",
-      description: "Share this link with your group members",
+      description: "Share this private join link with your group members.",
     });
+  };
+
+  const sharePublicTrip = () => {
+    const publicUrl = `${window.location.origin}/t/${data?.trip.shareCode}`;
+    if (navigator.share) {
+      navigator
+        .share({
+          title: `${data?.trip.destination} trip – planned in TripSync`,
+          text: "Check out this itinerary I planned with TripSync.",
+          url: publicUrl,
+        })
+        .catch(() => {
+          // ignore
+        });
+    } else {
+      navigator.clipboard.writeText(publicUrl);
+      toast({
+        title: "Public link copied",
+        description: "Share this link on social or with friends.",
+      });
+    }
   };
 
   const handlePlanningChat = async () => {
@@ -1666,6 +1845,97 @@ export default function TripDetailPage() {
     }
   };
 
+  const doPlaceSearch = async () => {
+    const query = placeSearchQuery.trim() || trip.destination;
+    if (!query) return;
+    setPlaceSearchLoading(true);
+    setPlaceSearchResults([]);
+    try {
+      const res = await fetch(`/api/places/search?q=${encodeURIComponent(query)}&near=${encodeURIComponent(trip.destination)}`, { headers: getAuthHeaders(), credentials: "include" });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        if (res.status === 403 && (data as { upgradeUrl?: string }).upgradeUrl) {
+          toast({ title: "Pro feature", description: "Place discovery is included in TripSync Pro.", variant: "destructive", action: <Link href="/pricing?checkout=pro"><a className="text-sm font-medium underline">Upgrade</a></Link> });
+        } else {
+          toast({ title: "Search failed", description: (data as { error?: string }).error || "Could not search places.", variant: "destructive" });
+        }
+        setPlaceSearchResults([]);
+      } else {
+        setPlaceSearchResults(data.places ?? []);
+      }
+    } catch {
+      toast({ title: "Search failed", description: "Could not search places.", variant: "destructive" });
+    } finally {
+      setPlaceSearchLoading(false);
+    }
+  };
+
+  const addPlaceToItinerary = async (place: { id: string; name: string; lat: number; lng: number; type: string }) => {
+    try {
+      await apiRequest("POST", `/api/trips/${tripId}/items`, {
+        dayNumber: 1,
+        type: "activity",
+        time: "12:00",
+        name: place.name,
+        description: "Discovered place – add details as needed",
+        location: place.name,
+        pricePerPerson: 0,
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/trips", tripId] });
+      toast({ title: "Added to itinerary", description: `${place.name} added as Day 1 activity.` });
+    } catch {
+      toast({ title: "Failed to add", description: "You may need planner access.", variant: "destructive" });
+    }
+  };
+
+  const doEmailImport = async () => {
+    if (!emailImportText.trim()) return;
+    setEmailImportLoading(true);
+    setEmailSuggestions([]);
+    try {
+      const res = await fetch(`/api/trips/${tripId}/parse-email`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", ...getAuthHeaders() },
+        credentials: "include",
+        body: JSON.stringify({ emailText: emailImportText.trim() }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        if (res.status === 403 && (data as { upgradeUrl?: string }).upgradeUrl) {
+          toast({ title: "Pro feature", description: "Email import is included in TripSync Pro.", variant: "destructive", action: <Link href="/pricing?checkout=pro"><a className="text-sm font-medium underline">Upgrade</a></Link> });
+        } else {
+          toast({ title: "Import failed", description: (data as { error?: string }).error || "Import failed.", variant: "destructive" });
+        }
+      } else {
+        setEmailSuggestions(data.suggestions ?? []);
+        if ((data.suggestions ?? []).length === 0) toast({ title: "No items found", description: "Try pasting a confirmation email with flight/hotel details.", variant: "destructive" });
+      }
+    } catch {
+      toast({ title: "Import failed", variant: "destructive" });
+    } finally {
+      setEmailImportLoading(false);
+    }
+  };
+
+  const addEmailSuggestionToItinerary = async (s: { name: string; description: string; location: string; type: string; dayNumber: number; time: string; pricePerPerson?: number }) => {
+    try {
+      await apiRequest("POST", `/api/trips/${tripId}/items`, {
+        dayNumber: s.dayNumber,
+        type: s.type,
+        time: s.time,
+        name: s.name,
+        description: s.description,
+        location: s.location,
+        pricePerPerson: s.pricePerPerson ?? 0,
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/trips", tripId] });
+      setEmailSuggestions((prev) => prev.filter((x) => x !== s));
+      toast({ title: "Added", description: `${s.name} added to itinerary.` });
+    } catch {
+      toast({ title: "Failed to add", variant: "destructive" });
+    }
+  };
+
   // Sync satisfaction score with existing user rating (must be before any early returns)
   useEffect(() => {
     if (!data?.satisfaction || !currentUser?.id) return;
@@ -1684,7 +1954,7 @@ export default function TripDetailPage() {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-background">
-        <header className="sticky top-0 z-50 border-b bg-background/95 backdrop-blur">
+        <header className="sticky top-0 z-50 glass-header">
           <div className="container mx-auto flex h-16 items-center px-4">
             <Skeleton className="h-8 w-32" />
           </div>
@@ -1722,7 +1992,7 @@ export default function TripDetailPage() {
   }
 
   if (!data) return <div className="min-h-screen bg-background" />;
-  const { trip, items, comments, votes, voteDetails = {}, members, expenses, invites = [], chatMessages = [], preferences = [], photos = [], documents = [], emergencyContacts = [], satisfaction = [], locationSharing = [], polls: pollsList = [], packing: packingList = [], transportation: transportationList = [], groupAvailability: groupAvailabilityList = [] } = data;
+  const { trip, items, comments, votes, voteDetails = {}, members, expenses, invites = [], chatMessages = [], preferences = [], photos = [], documents = [], emergencyContacts = [], moodBoard: moodBoardList = [], satisfaction = [], locationSharing = [], polls: pollsList = [], packing: packingList = [], transportation: transportationList = [], groupAvailability: groupAvailabilityList = [] } = data;
 
   // Unread chat count: compare last message id to stored lastRead
   const chatUnreadCount = (() => {
@@ -1833,7 +2103,7 @@ export default function TripDetailPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="sticky top-0 z-50 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <header className="sticky top-0 z-50 glass-header">
         <div className="container mx-auto flex h-16 items-center justify-between px-4 gap-4">
           <Link href="/dashboard">
             <Button variant="ghost" className="gap-2" data-testid="button-back">
@@ -1842,10 +2112,10 @@ export default function TripDetailPage() {
             </Button>
           </Link>
 
-          <div className="flex items-center gap-2">
+          <Link href="/" className="flex items-center gap-2 no-underline text-foreground hover:opacity-90 transition-opacity">
             <AppLogo className="h-8 w-8 object-contain" />
             <span className="font-semibold hidden sm:block">TripSync</span>
-          </div>
+          </Link>
 
           <div className="flex items-center gap-2">
             <ThemeToggle />
@@ -1910,6 +2180,8 @@ export default function TripDetailPage() {
           </div>
         </div>
       </header>
+
+      <TripDestinationHero destination={trip.destination ?? ""} />
 
       <main className="container mx-auto px-4 py-8">
         <div className="mb-8">
@@ -2043,6 +2315,9 @@ export default function TripDetailPage() {
         <Tabs defaultValue="itinerary" onValueChange={(v) => { if (v === "chat" && data) { const latest = data.chatMessages?.[data.chatMessages.length - 1]; if (latest) localStorage.setItem(`chat-last-read-${tripId}`, latest.id); setChatTabActive(true); } else setChatTabActive(false); }}>
           <TabsList className="mb-6 flex-wrap">
             <TabsTrigger value="itinerary" data-testid="tab-itinerary">Itinerary</TabsTrigger>
+            <TabsTrigger value="map" data-testid="tab-map">Map</TabsTrigger>
+            <TabsTrigger value="discover" data-testid="tab-discover">Discover</TabsTrigger>
+            <TabsTrigger value="mood" data-testid="tab-mood">Mood Board</TabsTrigger>
             {todayDayNum != null && (
               <TabsTrigger value="today" data-testid="tab-today">Today</TabsTrigger>
             )}
@@ -2063,7 +2338,175 @@ export default function TripDetailPage() {
             <TabsTrigger value="members" data-testid="tab-members">Members</TabsTrigger>
           </TabsList>
 
+          <TabsContent value="map" className="space-y-4">
+            {isPro ? (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    <MapPin className="h-5 w-5 text-primary" />
+                    Trip map
+                  </CardTitle>
+                  <CardDescription>
+                    Destination and itinerary locations. Pins for items with a location may take a moment to load.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <TripMap
+                    destination={trip.destination}
+                    items={items.map((i) => ({ name: i.name, location: i.location, dayNumber: i.dayNumber, time: i.time }))}
+                  />
+                </CardContent>
+              </Card>
+            ) : (
+              <Card className="border-primary/30 bg-primary/5">
+                <CardHeader>
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    <MapPin className="h-5 w-5 text-primary" />
+                    Trip map
+                  </CardTitle>
+                  <CardDescription>
+                    Interactive map view is a Pro feature. Upgrade to see destinations and itinerary on the map.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <Button asChild>
+                    <Link href="/pricing?checkout=pro"><a className="inline-flex items-center gap-2"><Sparkles className="h-4 w-4" />Upgrade to Pro</a></Link>
+                  </Button>
+                </CardContent>
+              </Card>
+            )}
+          </TabsContent>
+
+          <TabsContent value="discover" className="space-y-4">
+            {isPro ? (
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg flex items-center gap-2">
+                  <Search className="h-5 w-5 text-primary" />
+                  Place discovery
+                </CardTitle>
+                <CardDescription>
+                  Search for restaurants, attractions, and places near your destination. Add them to your itinerary.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex gap-2 flex-wrap">
+                  <Input
+                    placeholder={`Search in ${trip.destination} (e.g. restaurants, museums)`}
+                    value={placeSearchQuery}
+                    onChange={(e) => setPlaceSearchQuery(e.target.value)}
+                    onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), doPlaceSearch())}
+                    className="max-w-md"
+                  />
+                  <Button onClick={doPlaceSearch} disabled={placeSearchLoading}>
+                    {placeSearchLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Search className="h-4 w-4" />}
+                    Search
+                  </Button>
+                </div>
+                {placeSearchResults.length > 0 && (
+                  <ul className="space-y-2 border rounded-lg p-3 divide-y">
+                    {placeSearchResults.map((place) => (
+                      <li key={place.id} className="flex items-center justify-between gap-2 pt-2 first:pt-0">
+                        <div>
+                          <p className="font-medium">{place.name}</p>
+                          <p className="text-xs text-muted-foreground">{place.type}</p>
+                        </div>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => addPlaceToItinerary(place)}
+                        >
+                          <Plus className="h-4 w-4 mr-1" />
+                          Add to itinerary
+                        </Button>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </CardContent>
+            </Card>
+            ) : (
+              <Card className="border-primary/30 bg-primary/5">
+                <CardHeader>
+                  <CardTitle className="text-lg flex items-center gap-2"><Search className="h-5 w-5 text-primary" /> Place discovery</CardTitle>
+                  <CardDescription>Place discovery is a Pro feature. Upgrade to search and add places to your itinerary.</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <Button asChild><Link href="/pricing?checkout=pro"><a className="inline-flex items-center gap-2"><Sparkles className="h-4 w-4" />Upgrade to Pro</a></Link></Button>
+                </CardContent>
+              </Card>
+            )}
+          </TabsContent>
+
+          <TabsContent value="mood" className="space-y-4">
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg flex items-center gap-2">
+                  <Pin className="h-5 w-5 text-primary" />
+                  Group mood board
+                </CardTitle>
+                <CardDescription>
+                  Pin inspiration images and ideas. Pinterest-style visual planning for the group.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex gap-2 flex-wrap">
+                  <Input placeholder="Image URL" value={moodBoardForm.url} onChange={(e) => setMoodBoardForm((p) => ({ ...p, url: e.target.value }))} className="max-w-xs" />
+                  <Input placeholder="Label (optional)" value={moodBoardForm.label} onChange={(e) => setMoodBoardForm((p) => ({ ...p, label: e.target.value }))} className="max-w-xs" />
+                  <Button onClick={() => addMoodBoardMutation.mutate()} disabled={!moodBoardForm.url || addMoodBoardMutation.isPending}>
+                    {addMoodBoardMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
+                    Add pin
+                  </Button>
+                </div>
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                  {moodBoardList.map((pin: { id: string; url: string; label: string | null; addedBy?: User }) => (
+                    <div key={pin.id} className="rounded-lg overflow-hidden border bg-muted/30 relative group">
+                      <a href={pin.url} target="_blank" rel="noopener noreferrer" className="block aspect-square">
+                        <img src={pin.url} alt={pin.label ?? "Mood pin"} className="w-full h-full object-cover" onError={(e) => { (e.target as HTMLImageElement).src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'%3E%3Crect fill='%23ddd' width='100' height='100'/%3E%3Ctext x='50' y='50' fill='%23999' text-anchor='middle' dy='.3em' font-size='10'%3EPin%3C/text%3E%3C/svg%3E"; }} />
+                      </a>
+                      {(pin.label || pin.addedBy?.name) && (
+                        <div className="absolute bottom-0 left-0 right-0 p-2 bg-black/60 text-white text-xs truncate">
+                          {pin.label || `by ${pin.addedBy?.name}`}
+                        </div>
+                      )}
+                      <Button variant="destructive" size="icon" className="absolute top-2 right-2 h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity" onClick={() => deleteMoodBoardMutation.mutate(pin.id)}>
+                        <Trash2 className="h-3 w-3" />
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+                {moodBoardList.length === 0 && <p className="text-sm text-muted-foreground text-center py-8">No pins yet. Add an image URL to start the mood board.</p>}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
           <TabsContent value="itinerary" className="space-y-8">
+            {(isOrganizer || isPlanner) && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-base flex items-center gap-2"><Mail className="h-4 w-4 text-primary" /> Import from email</CardTitle>
+                  <CardDescription>Paste a confirmation email (flight, hotel, etc.) and we&apos;ll suggest itinerary items.</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-2">
+                  <Textarea placeholder="Paste your booking confirmation email here..." value={emailImportText} onChange={(e) => setEmailImportText(e.target.value)} className="min-h-[80px]" />
+                  <Button size="sm" onClick={doEmailImport} disabled={!emailImportText.trim() || emailImportLoading}>
+                    {emailImportLoading ? <Loader2 className="h-4 w-4 animate-spin mr-1" /> : <Mail className="h-4 w-4 mr-1" />}
+                    Suggest items
+                  </Button>
+                  {emailSuggestions.length > 0 && (
+                    <ul className="mt-3 space-y-2 border rounded-lg p-2 divide-y">
+                      {emailSuggestions.map((s, i) => (
+                        <li key={i} className="flex items-center justify-between gap-2 pt-2 first:pt-0">
+                          <span className="text-sm font-medium truncate">{s.name}</span>
+                          <span className="text-xs text-muted-foreground capitalize">{s.type}</span>
+                          <Button size="sm" variant="outline" onClick={() => addEmailSuggestionToItinerary(s)}><Plus className="h-3 w-3 mr-1" /> Add</Button>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </CardContent>
+              </Card>
+            )}
             <div className="flex flex-wrap justify-between items-center gap-2 mb-4">
               <div className="flex items-center gap-2">
                 {(isOrganizer || isPlanner) && !trip.isLocked && (
@@ -2190,6 +2633,30 @@ export default function TripDetailPage() {
                   Add to Calendar
                 </Button>
               )}
+              <Button
+                variant={offlineEnabled ? "secondary" : "outline"}
+                size="sm"
+                onClick={async () => {
+                  if (!tripId) return;
+                  const next = !offlineEnabled;
+                  setOfflineEnabled(next);
+                  await setTripOfflineEnabled(tripId, next);
+                  if (next && data) {
+                    await saveOfflineTrip(tripId, data);
+                    toast({
+                      title: "Trip available offline",
+                      description: "We’ll use saved data if you go offline on this device.",
+                    });
+                  } else if (!next) {
+                    toast({
+                      title: "Offline disabled",
+                      description: "This trip will now rely on live updates only.",
+                    });
+                  }
+                }}
+              >
+                {offlineEnabled ? "Offline ready" : "Make available offline"}
+              </Button>
               {hasPreferences && isOrganizer && items.length > 0 && (
                 <Button variant="outline" size="sm" onClick={() => regenerateMutation.mutate()} disabled={regenerateMutation.isPending}>
                   {regenerateMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
@@ -2528,9 +2995,9 @@ export default function TripDetailPage() {
               <CardHeader>
                 <CardTitle className="text-lg flex items-center gap-2">
                   <Sparkles className="h-5 w-5 text-primary" />
-                  Conversational planning
+                  AI Trip Concierge
                 </CardTitle>
-                <CardDescription>Ask for quick changes in plain language (e.g. &quot;Add a lunch at the pier on Day 2&quot;).</CardDescription>
+                <CardDescription>Chat to plan or modify your trip in plain language (e.g. &quot;Add a lunch at the pier on Day 2&quot;).</CardDescription>
               </CardHeader>
               <CardContent className="space-y-2">
                 <div className="flex gap-2">
@@ -2558,9 +3025,33 @@ export default function TripDetailPage() {
             <div className="flex items-center justify-between flex-wrap gap-2">
               <div>
                 <h2 className="text-xl font-semibold">Expense Tracking</h2>
-                <p className="text-sm text-muted-foreground">
-                  Total: ${totalSpent.toFixed(2)} / ${budgetTotal} budget
-                </p>
+                <div className="flex items-center gap-3 flex-wrap">
+                  <p className="text-sm text-muted-foreground">
+                    Total: ${totalSpent.toFixed(2)} / ${budgetTotal} budget
+                  </p>
+                  <div className="flex items-center gap-2">
+                    <label className="text-xs text-muted-foreground">Display in:</label>
+                    <select
+                      className="rounded border border-input bg-background px-2 py-1 text-sm"
+                      value={expenseDisplayCurrency}
+                      onChange={(e) => setExpenseDisplayCurrency(e.target.value)}
+                    >
+                      {["USD", "EUR", "GBP", "CAD", "AUD", "JPY", "CHF", "MXN", "THB", "INR"].map((c) => (
+                        <option key={c} value={c}>{c}</option>
+                      ))}
+                    </select>
+                    {expenseDisplayCurrency !== "USD" && !ratesLoading && (() => {
+                      const totalConverted = expenses.reduce((sum, e) => {
+                        const cur = (e as { currency?: string }).currency ?? "USD";
+                        const conv = convertCurrency(e.amount, cur, expenseDisplayCurrency);
+                        return sum + (conv ?? e.amount);
+                      }, 0);
+                      return (
+                        <span className="text-xs text-muted-foreground">≈ {expenseDisplayCurrency} {totalConverted.toFixed(2)}</span>
+                      );
+                    })()}
+                  </div>
+                </div>
               </div>
               <div className="flex gap-2">
                 <Button
@@ -2657,6 +3148,38 @@ export default function TripDetailPage() {
                       />
                     </div>
                     <div className="space-y-2">
+                      <label className="text-sm font-medium">Split between</label>
+                      <div className="flex flex-wrap gap-2">
+                        {members.map((m) => {
+                          const isSelected =
+                            expenseSplitMemberIds.length === 0 || expenseSplitMemberIds.includes(m.id);
+                          return (
+                            <button
+                              key={m.id}
+                              type="button"
+                              onClick={() =>
+                                setExpenseSplitMemberIds((prev) =>
+                                  prev.includes(m.id)
+                                    ? prev.filter((id) => id !== m.id)
+                                    : [...prev, m.id]
+                                )
+                              }
+                              className={`flex items-center gap-1 rounded-full border px-3 py-1 text-xs ${
+                                isSelected
+                                  ? "bg-primary text-primary-foreground border-primary"
+                                  : "bg-background text-foreground border-muted"
+                              }`}
+                            >
+                              <span className="inline-flex h-3 w-3 items-center justify-center rounded-full border border-current">
+                                {isSelected && <span className="h-2 w-2 rounded-full bg-current" />}
+                              </span>
+                              <span>{m.name}</span>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                    <div className="space-y-2">
                       <label className="text-sm font-medium">Link to itinerary item (optional)</label>
                       <select
                         className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
@@ -2688,7 +3211,11 @@ export default function TripDetailPage() {
                     <Button
                       className="w-full"
                       onClick={() => addExpenseMutation.mutate()}
-                      disabled={!expenseForm.amount || !expenseForm.description || addExpenseMutation.isPending}
+                      disabled={
+                        !expenseForm.amount ||
+                        !expenseForm.description ||
+                        addExpenseMutation.isPending
+                      }
                       data-testid="button-submit-expense"
                     >
                       {addExpenseMutation.isPending ? "Adding..." : "Add Expense"}
@@ -2775,7 +3302,15 @@ export default function TripDetailPage() {
 
             <div className="space-y-4">
               {expenses.map((expense) => (
-                <ExpenseItem key={expense.id} expense={expense} members={members} tripId={tripId} onUpdate={() => {}} />
+                <ExpenseItem
+                  key={expense.id}
+                  expense={expense}
+                  members={members}
+                  tripId={tripId}
+                  onUpdate={() => {}}
+                  convert={convertCurrency}
+                  displayCurrency={expenseDisplayCurrency}
+                />
               ))}
 
               {expenses.length === 0 && (
@@ -2796,15 +3331,43 @@ export default function TripDetailPage() {
             <Card>
               <CardHeader>
                 <CardTitle className="text-lg flex items-center gap-2">
+                  <Sparkles className="h-5 w-5 text-primary" />
+                  Automatic trip recap
+                </CardTitle>
+                <CardDescription>AI-generated summary from your itinerary and photos.</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {(trip as { recapText?: string | null }).recapText ? (
+                  <div className="prose prose-sm dark:prose-invert max-w-none">
+                    <p className="whitespace-pre-wrap text-muted-foreground">{(trip as { recapText?: string }).recapText}</p>
+                  </div>
+                ) : (
+                  <p className="text-sm text-muted-foreground">No recap yet. Generate one from your itinerary and photos.</p>
+                )}
+                <Button onClick={() => generateRecapMutation.mutate()} disabled={generateRecapMutation.isPending}>
+                  {generateRecapMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Sparkles className="h-4 w-4 mr-2" />}
+                  Generate recap
+                </Button>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg flex items-center gap-2">
                   <Image className="h-5 w-5 text-primary" />
                   Trip recap & shared photos
                 </CardTitle>
                 <CardDescription>Group photo album and memories from the trip.</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
+                {!isPro && photos.length >= 5 && (
+                  <div className="rounded-lg border border-primary/30 bg-primary/5 p-3 flex flex-wrap items-center justify-between gap-2">
+                    <p className="text-sm">Free plan limited to 5 photos per trip. Upgrade to Pro for unlimited photos.</p>
+                    <Button size="sm" variant="outline" asChild><Link href="/pricing?checkout=pro"><a className="inline-flex items-center gap-1"><Sparkles className="h-3 w-3" />Upgrade</a></Link></Button>
+                  </div>
+                )}
                 <Dialog open={photoDialogOpen} onOpenChange={setPhotoDialogOpen}>
                   <DialogTrigger asChild>
-                    <Button>
+                    <Button disabled={!isPro && photos.length >= 5}>
                       <Plus className="h-4 w-4 mr-2" />
                       Add photo
                     </Button>
@@ -2829,6 +3392,39 @@ export default function TripDetailPage() {
                           placeholder="Or paste URL: https://..."
                           value={photoForm.url}
                           onChange={(e) => setPhotoForm({ ...photoForm, url: e.target.value })}
+                        />
+                      </div>
+                      <div className="space-y-2 pt-2 border-t">
+                        <label className="text-sm font-medium">Upload multiple photos</label>
+                        <p className="text-xs text-muted-foreground">
+                          Great for dropping in a whole album at once. Each uploaded file becomes a photo in this trip.
+                        </p>
+                        <BatchPhotoUpload
+                          onUploadComplete={async (urls) => {
+                            if (!urls.length) return;
+                            try {
+                              await Promise.all(
+                                urls.map((url) =>
+                                  apiRequest("POST", `/api/trips/${tripId}/photos`, {
+                                    url,
+                                    caption: null,
+                                  }),
+                                ),
+                              );
+                              queryClient.invalidateQueries({ queryKey: ["/api/trips", tripId] });
+                              toast({
+                                title: "Photos added",
+                                description: `${urls.length} photo${urls.length === 1 ? "" : "s"} added to the album.`,
+                              });
+                            } catch (e) {
+                              const err = e as Error & { upgradeUrl?: string };
+                              if (err.upgradeUrl) {
+                                toast({ title: "Photo limit reached", description: err.message, variant: "destructive", action: <Link href="/pricing?checkout=pro"><a className="text-sm font-medium underline">Upgrade</a></Link> });
+                              } else {
+                                toast({ title: "Error", description: err?.message || "Some photos could not be saved.", variant: "destructive" });
+                              }
+                            }
+                          }}
                         />
                       </div>
                       <div className="space-y-2">
@@ -2948,14 +3544,76 @@ export default function TripDetailPage() {
             <Card>
               <CardHeader>
                 <CardTitle className="text-lg">Quick Polls</CardTitle>
-                <CardDescription>Fast voting on binary decisions (e.g. Beach or hiking?).</CardDescription>
+                <CardDescription>Fast voting on group decisions (e.g. Beach, hiking, or museum?).</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="flex flex-wrap gap-2">
-                  <Input placeholder="Question" value={pollForm.question} onChange={(e) => setPollForm((p) => ({ ...p, question: e.target.value }))} className="max-w-xs" />
-                  <Input placeholder="Option A" value={pollForm.optionA} onChange={(e) => setPollForm((p) => ({ ...p, optionA: e.target.value }))} className="max-w-xs" />
-                  <Input placeholder="Option B" value={pollForm.optionB} onChange={(e) => setPollForm((p) => ({ ...p, optionB: e.target.value }))} className="max-w-xs" />
-                  <Button onClick={() => createPollMutation.mutate()} disabled={!pollForm.question || !pollForm.optionA || !pollForm.optionB || createPollMutation.isPending}>Create poll</Button>
+                <div className="space-y-2">
+                  <div className="flex flex-wrap gap-2">
+                    <Input
+                      placeholder="Question"
+                      value={pollForm.question}
+                      onChange={(e) => setPollForm((p) => ({ ...p, question: e.target.value }))}
+                      className="max-w-xs"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    {pollForm.options.map((opt, index) => (
+                      <div key={index} className="flex items-center gap-2 max-w-xs">
+                        <Input
+                          placeholder={`Option ${String.fromCharCode(65 + index)}`}
+                          value={opt}
+                          onChange={(e) =>
+                            setPollForm((p) => {
+                              const next = [...p.options];
+                              next[index] = e.target.value;
+                              return { ...p, options: next };
+                            })
+                          }
+                        />
+                        {pollForm.options.length > 2 && index >= 2 && (
+                          <Button
+                            type="button"
+                            size="icon"
+                            variant="ghost"
+                            className="h-8 w-8"
+                            onClick={() =>
+                              setPollForm((p) => ({
+                                ...p,
+                                options: p.options.filter((_, i) => i !== index),
+                              }))
+                            }
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        )}
+                      </div>
+                    ))}
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() =>
+                        setPollForm((p) => ({
+                          ...p,
+                          options: p.options.length >= 6 ? p.options : [...p.options, ""],
+                        }))
+                      }
+                      disabled={pollForm.options.length >= 6}
+                    >
+                      <Plus className="h-4 w-4 mr-1" />
+                      Add option
+                    </Button>
+                  </div>
+                  <Button
+                    onClick={() => createPollMutation.mutate()}
+                    disabled={
+                      !pollForm.question ||
+                      pollForm.options.map((o) => o.trim()).filter(Boolean).length < 2 ||
+                      createPollMutation.isPending
+                    }
+                  >
+                    {createPollMutation.isPending ? "Creating..." : "Create poll"}
+                  </Button>
                 </div>
                 {pollsList?.map((poll) => (
                   <div key={poll.id} className="border rounded p-3 space-y-2">
@@ -2999,7 +3657,16 @@ export default function TripDetailPage() {
               </CardContent>
             </Card>
             <Card>
-              <CardHeader><CardTitle className="text-lg">Packing List</CardTitle><CardDescription>Shared packing list; assign items to members.</CardDescription></CardHeader>
+              <CardHeader>
+                <CardTitle className="text-lg">Packing List</CardTitle>
+                <CardDescription>Shared packing list; assign items to members. Use AI to generate from your trip details.</CardDescription>
+                <div className="pt-2">
+                  <Button variant="outline" size="sm" onClick={() => generatePackingMutation.mutate()} disabled={generatePackingMutation.isPending}>
+                    {generatePackingMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin mr-1" /> : <Sparkles className="h-4 w-4 mr-1" />}
+                    Generate with AI
+                  </Button>
+                </div>
+              </CardHeader>
               <CardContent className="space-y-2">
                 <div className="flex gap-2">
                   <Input placeholder="Item name" value={packingForm.name} onChange={(e) => setPackingForm((p) => ({ ...p, name: e.target.value }))} />
@@ -3170,12 +3837,25 @@ export default function TripDetailPage() {
                       <span>{m.name}</span>
                       <Badge variant="outline">{(m as { rsvpStatus?: string }).rsvpStatus ?? "pending"}</Badge>
                       {isOrganizer && (
-                        <select className="rounded border text-xs" value={(m as { rsvpStatus?: string }).rsvpStatus} onChange={(e) => {
-                          const memberId = (m as { memberId?: string }).memberId;
-                          if (memberId) rsvpMutation.mutate({ memberId, rsvpStatus: e.target.value });
-                          else toast({ title: "Error", description: "Could not update RSVP.", variant: "destructive" });
-                        }}>
-                          <option value="pending">Pending</option><option value="accepted">Accepted</option><option value="declined">Declined</option>
+                        <select
+                          className="rounded border text-xs"
+                          value={(m as { rsvpStatus?: string }).rsvpStatus}
+                          onChange={(e) => {
+                            const memberId = (m as { memberId?: string }).memberId ?? m.id;
+                            if (memberId) {
+                              rsvpMutation.mutate({ memberId, rsvpStatus: e.target.value });
+                            } else {
+                              toast({
+                                title: "Error",
+                                description: "Could not update RSVP.",
+                                variant: "destructive",
+                              });
+                            }
+                          }}
+                        >
+                          <option value="pending">Pending</option>
+                          <option value="accepted">Accepted</option>
+                          <option value="declined">Declined</option>
                         </select>
                       )}
                     </li>
@@ -3186,6 +3866,84 @@ export default function TripDetailPage() {
           </TabsContent>
 
           <TabsContent value="safety" className="space-y-6">
+            <Card className="border-primary/20 bg-primary/5">
+              <CardHeader>
+                <CardTitle className="text-lg flex items-center gap-2"><Phone className="h-5 w-5 text-primary" /> Emergency SOS Hub</CardTitle>
+                <CardDescription>Quick access to embassy, medical, and police. Save contacts below for your destination.</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                {emergencyContacts.length > 0 ? (
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    {emergencyContacts.filter((c) => c.type === "embassy" || c.type === "medical" || c.type === "police").map((c) => (
+                      <a key={c.id} href={c.phone ? `tel:${c.phone}` : c.url || "#"} target={c.url ? "_blank" : undefined} rel={c.url ? "noopener noreferrer" : undefined} className="flex items-center gap-2 p-3 rounded-lg border bg-card hover:bg-muted/50 transition-colors">
+                        <Phone className="h-4 w-4 text-primary" />
+                        <div>
+                          <p className="font-medium text-sm">{c.name}</p>
+                          <p className="text-xs text-muted-foreground capitalize">{c.type}</p>
+                        </div>
+                      </a>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-sm text-muted-foreground">Add embassy, medical, and police contacts below for quick access during your trip.</p>
+                )}
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg flex items-center gap-2"><FileText className="h-5 w-5 text-primary" /> Visa & entry requirements</CardTitle>
+                <CardDescription>Check visa requirements for your destination and nationality. Compare travel insurance.</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <p className="text-sm text-muted-foreground">Destination: <strong>{trip.destination}</strong>. For official requirements, check your government travel site or use a visa checker (e.g. Sherpa°, iVisa).</p>
+                <div className="flex flex-wrap gap-2">
+                  <a href={`https://www.google.com/search?q=visa+requirements+${encodeURIComponent(trip.destination)}`} target="_blank" rel="noopener noreferrer" className="text-sm text-primary hover:underline">Search visa requirements</a>
+                </div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg flex items-center gap-2">Travel insurance comparison</CardTitle>
+                <CardDescription>Compare quotes from providers before your trip.</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-2">
+                <p className="text-sm text-muted-foreground">
+                  Based on your current budget, TripSync can help you research travel insurance options tailored to this trip.
+                </p>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={async () => {
+                    try {
+                      const res = await fetch(`/api/trips/${tripId}/insurance-quote`, { credentials: "include" });
+                      if (!res.ok) throw new Error();
+                      const info = await res.json() as { suggestionUrl?: string; totalBudget?: number };
+                      if (info.suggestionUrl) {
+                        window.open(info.suggestionUrl, "_blank", "noopener,noreferrer");
+                      } else {
+                        window.open(
+                          `https://www.google.com/search?q=${encodeURIComponent(
+                            `travel insurance for trip costing $${info.totalBudget ?? trip.budgetPerPerson * trip.groupSize} to ${trip.destination}`
+                          )}`,
+                          "_blank",
+                          "noopener,noreferrer"
+                        );
+                      }
+                    } catch {
+                      window.open(
+                        `https://www.google.com/search?q=${encodeURIComponent(
+                          `travel insurance for trip to ${trip.destination}`
+                        )}`,
+                        "_blank",
+                        "noopener,noreferrer"
+                      );
+                    }
+                  }}
+                >
+                  Get insurance suggestions
+                </Button>
+              </CardContent>
+            </Card>
             <Card>
               <CardHeader>
                 <CardTitle className="text-lg flex items-center gap-2"><FileText className="h-5 w-5 text-primary" /> Document storage</CardTitle>
@@ -3341,6 +4099,80 @@ export default function TripDetailPage() {
           <TabsContent value="analytics" className="space-y-6">
             <Card>
               <CardHeader>
+                <CardTitle className="text-lg flex items-center gap-2"><Cloud className="h-5 w-5 text-primary" /> Carbon footprint estimate</CardTitle>
+                <CardDescription>Rough CO₂ estimate from your itinerary (flights vs other activities).</CardDescription>
+              </CardHeader>
+              <CardContent>
+                {(() => {
+                  const flightCount = items.filter((i) => i.type === "flight").length;
+                  const otherCount = items.length - flightCount;
+                  const flightKg = flightCount * 200;
+                  const otherKg = otherCount * 5;
+                  const totalKg = flightKg + otherKg;
+                  return (
+                    <div className="space-y-2">
+                      <p className="text-2xl font-semibold">{totalKg.toLocaleString()} kg CO₂e</p>
+                      <p className="text-sm text-muted-foreground">{flightCount} flight(s) ≈ {flightKg} kg · other activities ≈ {otherKg} kg. Offset or reduce flights to lower impact.</p>
+                    </div>
+                  );
+                })()}
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg flex items-center gap-2"><Plane className="h-5 w-5 text-primary" /> Flight price watch</CardTitle>
+                <CardDescription>Flag your flights so you remember to check prices later.</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-2">
+                {items.filter((i) => i.type === "flight").length === 0 ? (
+                  <p className="text-sm text-muted-foreground">Add at least one flight to your itinerary to enable flight watch.</p>
+                ) : (
+                  <>
+                    <p className="text-sm text-muted-foreground">
+                      Select a flight in your itinerary and click “Watch price” to record it. TripSync will support automatic alerts in a future update.
+                    </p>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={async () => {
+                        const firstFlight = items.find((i) => i.type === "flight");
+                        if (!firstFlight) return;
+                        try {
+                          const res = await fetch(`/api/trips/${tripId}/flight-watch`, {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            credentials: "include",
+                            body: JSON.stringify({
+                              flight: {
+                                from: trip.destination,
+                                to: firstFlight.location,
+                                date: trip.startDate,
+                                airline: firstFlight.name,
+                              },
+                            }),
+                          });
+                          if (!res.ok) throw new Error();
+                          toast({
+                            title: "Flight watch noted",
+                            description: "We’ve recorded this flight. Price alerts will be available in a future release.",
+                          });
+                        } catch {
+                          toast({
+                            title: "Could not record flight watch",
+                            description: "Please try again later.",
+                            variant: "destructive",
+                          });
+                        }
+                      }}
+                    >
+                      Watch price for first flight
+                    </Button>
+                  </>
+                )}
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader>
                 <CardTitle className="text-lg flex items-center gap-2"><BarChart3 className="h-5 w-5 text-primary" /> Trip analytics</CardTitle>
                 <CardDescription>Cost per person, activity breakdown, satisfaction.</CardDescription>
               </CardHeader>
@@ -3468,11 +4300,20 @@ export default function TripDetailPage() {
               <p className="text-sm text-muted-foreground">Copy the link to share via any app, or use the email form below to send invites directly.</p>
             </div>
 
+            {!isPro && members.length >= 6 && (
+              <Card className="border-primary/30 bg-primary/5">
+                <CardContent className="py-4 flex flex-wrap items-center justify-between gap-2">
+                  <p className="text-sm">Free plan limited to 6 members per trip. Upgrade to Pro for unlimited members.</p>
+                  <Button size="sm" asChild><Link href="/pricing?checkout=pro"><a className="inline-flex items-center gap-1"><Sparkles className="h-3 w-3" />Upgrade</a></Link></Button>
+                </CardContent>
+              </Card>
+            )}
+
             {isOrganizer && (
               <Card>
                 <CardHeader>
-                  <CardTitle className="text-base">Invite by email</CardTitle>
-                  <CardDescription>Send an email invite to someone to join this trip.</CardDescription>
+                  <CardTitle className="text-base">Invite & share</CardTitle>
+                  <CardDescription>Invite people directly, or share a public read‑only version of this trip.</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="flex gap-2">
@@ -3483,8 +4324,16 @@ export default function TripDetailPage() {
                       onChange={(e) => setInviteEmail(e.target.value)}
                       className="flex-1"
                     />
-                    <Button onClick={() => inviteEmail && createInviteMutation.mutate(inviteEmail)} disabled={!inviteEmail || createInviteMutation.isPending}>
+                    <Button onClick={() => inviteEmail && createInviteMutation.mutate(inviteEmail)} disabled={!inviteEmail || createInviteMutation.isPending || (!isPro && members.length >= 6)}>
                       {createInviteMutation.isPending ? "Sending..." : "Send invite"}
+                    </Button>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    <Button variant="outline" size="sm" onClick={copyShareLink}>
+                      Copy join link
+                    </Button>
+                    <Button variant="outline" size="sm" onClick={sharePublicTrip}>
+                      Share public trip
                     </Button>
                   </div>
                 </CardContent>

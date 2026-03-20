@@ -9,6 +9,23 @@ export const users = pgTable("users", {
   email: text("email").notNull().unique(),
   name: text("name").notNull(),
   passwordHash: text("password_hash").notNull(),
+  subscriptionTier: varchar("subscription_tier", { length: 20 }).default("free").notNull(),
+  subscriptionExpiresAt: timestamp("subscription_expires_at"),
+  stripeCustomerId: varchar("stripe_customer_id", { length: 255 }),
+  createdAt: timestamp("created_at").default(sql`CURRENT_TIMESTAMP`).notNull(),
+});
+
+// Subscriptions table (Stripe-backed)
+export const subscriptions = pgTable("subscriptions", {
+  id: varchar("id", { length: 36 }).primaryKey(),
+  userId: varchar("user_id", { length: 36 }).notNull(),
+  stripeCustomerId: varchar("stripe_customer_id", { length: 255 }),
+  stripeSubscriptionId: varchar("stripe_subscription_id", { length: 255 }),
+  tier: varchar("tier", { length: 20 }).notNull(),
+  status: varchar("status", { length: 20 }).notNull(),
+  currentPeriodStart: timestamp("current_period_start"),
+  currentPeriodEnd: timestamp("current_period_end"),
+  cancelAtPeriodEnd: boolean("cancel_at_period_end").default(false),
   createdAt: timestamp("created_at").default(sql`CURRENT_TIMESTAMP`).notNull(),
 });
 
@@ -31,6 +48,8 @@ export const trips = pgTable("trips", {
   shareCode: varchar("share_code", { length: 12 }),
   voteDeadline: text("vote_deadline"), // ISO date when voting locks
   timezone: text("timezone"), // IANA e.g. America/New_York for display
+  coverImageUrl: text("cover_image_url"), // Hero/cover from Unsplash
+  recapText: text("recap_text"), // AI-generated trip recap
   createdAt: timestamp("created_at").default(sql`CURRENT_TIMESTAMP`).notNull(),
 });
 
@@ -98,6 +117,17 @@ export const chatMessages = pgTable("chat_messages", {
   content: text("content").notNull(),
   itemId: varchar("item_id", { length: 36 }), // Optional: link to itinerary item
   createdAt: timestamp("created_at").default(sql`CURRENT_TIMESTAMP`).notNull(),
+});
+
+// Atlas conversations (per-trip, per-user AI assistant history)
+export const atlasConversations = pgTable("atlas_conversations", {
+  id: varchar("id", { length: 36 }).primaryKey(),
+  tripId: varchar("trip_id", { length: 36 }).notNull(),
+  userId: varchar("user_id", { length: 36 }).notNull(),
+  // Stored as JSON array of AtlasMessage-like objects; structure enforced at application layer
+  messages: json("messages").notNull(),
+  createdAt: timestamp("created_at").default(sql`CURRENT_TIMESTAMP`).notNull(),
+  updatedAt: timestamp("updated_at").default(sql`CURRENT_TIMESTAMP`).notNull(),
 });
 
 // Comments on itinerary items
@@ -243,6 +273,16 @@ export const tripSatisfaction = pgTable("trip_satisfaction", {
   createdAt: timestamp("created_at").default(sql`CURRENT_TIMESTAMP`).notNull(),
 });
 
+// Group mood board (Pinterest-style pins)
+export const moodBoardItems = pgTable("mood_board_items", {
+  id: varchar("id", { length: 36 }).primaryKey(),
+  tripId: varchar("trip_id", { length: 36 }).notNull(),
+  url: text("url").notNull(),
+  label: text("label"),
+  addedByUserId: varchar("added_by_user_id", { length: 36 }).notNull(),
+  createdAt: timestamp("created_at").default(sql`CURRENT_TIMESTAMP`).notNull(),
+});
+
 // Real-time location sharing (optional, during trip)
 export const locationSharing = pgTable("location_sharing", {
   id: varchar("id", { length: 36 }).primaryKey(),
@@ -302,6 +342,8 @@ export const insertTransportationEntrySchema = createInsertSchema(transportation
 export const insertGroupAvailabilitySchema = createInsertSchema(groupAvailability).omit({ createdAt: true });
 export const insertTripDocumentSchema = createInsertSchema(tripDocuments).omit({ createdAt: true });
 export const insertEmergencyContactSchema = createInsertSchema(emergencyContacts).omit({ createdAt: true });
+export const insertMoodBoardItemSchema = createInsertSchema(moodBoardItems).omit({ createdAt: true });
+export const insertSubscriptionSchema = createInsertSchema(subscriptions).omit({ createdAt: true });
 export const insertUserLearnedPreferencesSchema = createInsertSchema(userLearnedPreferences).omit({ updatedAt: true });
 export const insertTripSatisfactionSchema = createInsertSchema(tripSatisfaction).omit({ createdAt: true });
 export const insertLocationSharingSchema = createInsertSchema(locationSharing).omit({ updatedAt: true });
@@ -309,6 +351,8 @@ export const insertLocationSharingSchema = createInsertSchema(locationSharing).o
 // Types
 export type User = typeof users.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;
+export type Subscription = typeof subscriptions.$inferSelect;
+export type InsertSubscription = z.infer<typeof insertSubscriptionSchema>;
 export type Trip = typeof trips.$inferSelect;
 export type InsertTrip = z.infer<typeof insertTripSchema>;
 export type TripMember = typeof tripMembers.$inferSelect;
@@ -343,12 +387,16 @@ export type TripDocument = typeof tripDocuments.$inferSelect;
 export type InsertTripDocument = z.infer<typeof insertTripDocumentSchema>;
 export type EmergencyContact = typeof emergencyContacts.$inferSelect;
 export type InsertEmergencyContact = z.infer<typeof insertEmergencyContactSchema>;
+export type MoodBoardItem = typeof moodBoardItems.$inferSelect;
+export type InsertMoodBoardItem = z.infer<typeof insertMoodBoardItemSchema>;
 export type UserLearnedPreferences = typeof userLearnedPreferences.$inferSelect;
 export type InsertUserLearnedPreferences = z.infer<typeof insertUserLearnedPreferencesSchema>;
 export type TripSatisfaction = typeof tripSatisfaction.$inferSelect;
 export type InsertTripSatisfaction = z.infer<typeof insertTripSatisfactionSchema>;
 export type LocationSharing = typeof locationSharing.$inferSelect;
 export type InsertLocationSharing = z.infer<typeof insertLocationSharingSchema>;
+export type AtlasConversation = typeof atlasConversations.$inferSelect;
+export type InsertAtlasConversation = typeof atlasConversations.$inferInsert;
 
 // Wizard form schema
 export const tripWizardSchema = z.object({

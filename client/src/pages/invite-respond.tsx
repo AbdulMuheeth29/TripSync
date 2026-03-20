@@ -52,6 +52,8 @@ export default function InviteRespondPage() {
         if (res.status === 401 && action === "accept") {
           toast({ title: "Log in required", description: "Redirecting to login...", variant: "default" });
           setLocation(`/login?invite=${inviteId}&redirect=/invite/${inviteId}`);
+        } else if (res.status === 403 && json.upgradeUrl) {
+          toast({ title: json.error || "Member limit reached", description: "Upgrade to Pro for unlimited members per trip.", variant: "destructive", action: <a href={json.upgradeUrl} className="text-sm font-medium underline">Upgrade</a> });
         } else {
           toast({ title: json.error || "Failed", variant: "destructive" });
         }
@@ -102,16 +104,16 @@ export default function InviteRespondPage() {
 
   return (
     <div className="min-h-screen bg-background flex flex-col items-center justify-center p-4">
-      <div className="flex items-center gap-2 mb-8">
+      <Link href="/" className="flex items-center gap-2 mb-8 no-underline text-foreground hover:opacity-90 transition-opacity">
         <AppLogo className="h-10 w-10 object-contain" />
         <span className="text-2xl font-bold">TripSync</span>
-      </div>
+      </Link>
 
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
-          <CardTitle className="text-2xl">Trip invitation</CardTitle>
+          <CardTitle className="text-2xl">You're Invited</CardTitle>
           <CardDescription>
-            You&apos;re invited to join a trip — {trip.destination}
+            Join a group trip to {trip.destination}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
