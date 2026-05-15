@@ -184,4 +184,29 @@ export const env = {
   get sentryDsn(): string | undefined {
     return process.env.SENTRY_DSN;
   },
+  /** Feature flags for emergency disable */
+  isFeatureEnabled(key: string): boolean {
+    const value = process.env[key];
+    if (value === undefined) return true; // Default enabled
+    return value.toLowerCase() === "true" || value === "1";
+  },
+  get isAiEnabled(): boolean {
+    return this.isFeatureEnabled("FEATURE_AI_ENABLED");
+  },
+  get isFileUploadsEnabled(): boolean {
+    return this.isFeatureEnabled("FEATURE_FILE_UPLOADS_ENABLED");
+  },
+  get isStripeEnabled(): boolean {
+    return this.isFeatureEnabled("FEATURE_STRIPE_ENABLED");
+  },
+  get isChatEnabled(): boolean {
+    return this.isFeatureEnabled("FEATURE_CHAT_ENABLED");
+  },
+  get isPushEnabled(): boolean {
+    return this.isFeatureEnabled("FEATURE_PUSH_ENABLED");
+  },
+  /** Check if email is admin */
+  isAdmin(email: string): boolean {
+    return this.adminEmails.includes(email.toLowerCase());
+  },
 };

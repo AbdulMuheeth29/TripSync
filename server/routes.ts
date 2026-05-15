@@ -22,6 +22,7 @@ import {
   aiGenerationRateLimiter,
 } from "./rate-limiter";
 import { getParam } from "./route-utils";
+import { featureFlags } from "./feature-flags";
 
 // Rate limiting is now handled by Redis-backed middleware in rate-limiter.ts
 
@@ -43,6 +44,27 @@ async function requirePro(req: Request, res: Response, next: () => void): Promis
     res.status(500).json({ error: "Subscription check failed" });
   }
 }
+
+// Feature flag middleware for emergency disable
+function requireFeature(featureName: string, featureLabel: string) {
+  return (req: Request, res: Response, next: () => void): void => {
+    if (!featureFlags.isEnabled(featureName)) {
+      res.status(503).json({
+        error: `${featureLabel} temporarily disabled for maintenance`,
+        code: "FEATURE_DISABLED",
+        feature: featureName
+      });
+      return;
+    }
+    next();
+  };
+}
+
+const requireAI = requireFeature("ai", "AI features");
+const requireFileUploads = requireFeature("fileUploads", "File uploads");
+const requireStripe = requireFeature("stripe", "Billing");
+const requireChat = requireFeature("chat", "Chat");
+const requirePush = requireFeature("push", "Push notifications");
 
 export async function registerRoutes(
   httpServer: Server,
@@ -132,6 +154,26 @@ export async function registerRoutes(
       services,
       timestamp: new Date().toISOString(),
     });
+  });
+
+  // Admin endpoint to check feature flags status
+  app.get("/api/admin/feature-flags", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const userId = (req as any).userId;
+      const user = await storage.getUser(userId);
+
+      if (!user || !env.isAdmin(user.email)) {
+        return res.status(403).json({ error: "Admin access required" });
+      }
+
+      res.json({
+        flags: featureFlags.getAll(),
+        timestamp: new Date().toISOString()
+      });
+    } catch (error) {
+      console.error("Error fetching feature flags:", error);
+      res.status(500).json({ error: "Failed to fetch feature flags" });
+    }
   });
 
   // Public, read-only trip preview by share code (no auth)
@@ -653,7 +695,7 @@ export async function registerRoutes(
   });
 
   // Stripe checkout (create session and redirect URL)
-  app.post("/api/stripe/checkout", requireAuth, async (req: Request, res: Response) => {
+  app.post("/api/stripe/checkout", requireAuth, requireStripe, async (req: Request, res: Response) => {
     try {
       if (!isStripeEnabled()) {
         return res.status(503).json({ error: "Payments are not configured", upgradeUrl: "/pricing" });
@@ -680,7 +722,7 @@ export async function registerRoutes(
   });
 
   // Stripe customer portal (manage subscription)
-  app.post("/api/stripe/portal", requireAuth, async (req: Request, res: Response) => {
+  app.post("/api/stripe/portal", requireAuth, requireStripe, async (req: Request, res: Response) => {
     try {
       if (!isStripeEnabled()) {
         return res.status(503).json({ error: "Payments are not configured" });
@@ -839,7 +881,7 @@ export async function registerRoutes(
     }
   });
 
-  app.post("/api/trips", requireAuth, aiGenerationRateLimiter, async (req: Request, res: Response) => {
+  app.post("/api/trips", requireAuth, requireAI, aiGenerationRateLimiter, async (req: Request, res: Response) => {
     try {
       const userId = (req as any).userId;
       const tripData = req.body as TripWizardData & { title?: string; tripType?: string; voteDeadline?: string };
@@ -990,7 +1032,7 @@ export async function registerRoutes(
   });
 
   // Regenerate itinerary with member preferences
-  app.post("/api/trips/:id/regenerate-itinerary", requireAuth, requireTripAccess, requirePlanner, aiGenerationRateLimiter, async (req: Request, res: Response) => {
+  app.post("/api/trips/:id/regenerate-itinerary", requireAuth, requireAI, requireTripAccess, requirePlanner, aiGenerationRateLimiter, async (req: Request, res: Response) => {
     try {
       const tripId = getParam(req.params.id);
       const userId = (req as any).userId;
@@ -1251,7 +1293,7 @@ export async function registerRoutes(
   });
 
   // AI budget optimization
-  app.post("/api/trips/:tripId/budget-optimize", requireAuth, requireTripAccess, aiGenerationRateLimiter, async (req: Request, res: Response) => {
+  app.post("/api/trips/:tripId/budget-optimize", requireAuth, requireAI, requireTripAccess, aiGenerationRateLimiter, async (req: Request, res: Response) => {
     try {
       const tripId = getParam(req.params.tripId);
       const trip = (req as any).trip;
@@ -1452,7 +1494,7 @@ export async function registerRoutes(
     }
   });
 
-  app.post("/api/trips/:tripId/photos", requireAuth, requireTripAccess, async (req: Request, res: Response) => {
+  app.post("/api/trips/:tripId/photos", requireAuth, requireFileUploads, requireTripAccess, async (req: Request, res: Response) => {
     try {
       const tripId = getParam(req.params.tripId);
       const userId = (req as any).userId as string | undefined;
@@ -1693,7 +1735,7 @@ export async function registerRoutes(
     }
   });
 
-  app.post("/api/trips/:tripId/documents", requireAuth, requireTripAccess, async (req: Request, res: Response) => {
+  app.post("/api/trips/:tripId/documents", requireAuth, requireFileUploads, requireTripAccess, async (req: Request, res: Response) => {
     try {
       const tripId = getParam(req.params.tripId);
       const { uploadedByUserId, type, name, url, notes } = req.body;
@@ -1829,7 +1871,7 @@ export async function registerRoutes(
   });
 
   // Generate trip recap (AI)
-  app.post("/api/trips/:tripId/generate-recap", requireAuth, requireTripAccess, aiGenerationRateLimiter, async (req: Request, res: Response) => {
+  app.post("/api/trips/:tripId/generate-recap", requireAuth, requireAI, requireTripAccess, aiGenerationRateLimiter, async (req: Request, res: Response) => {
     try {
       const tripId = getParam(req.params.tripId);
       const trip = await storage.getTrip(tripId);
@@ -1856,7 +1898,7 @@ export async function registerRoutes(
   });
 
   // Generate packing list (AI)
-  app.post("/api/trips/:tripId/generate-packing-list", requireAuth, requireTripAccess, aiGenerationRateLimiter, async (req: Request, res: Response) => {
+  app.post("/api/trips/:tripId/generate-packing-list", requireAuth, requireAI, requireTripAccess, aiGenerationRateLimiter, async (req: Request, res: Response) => {
     try {
       const tripId = getParam(req.params.tripId);
       const trip = await storage.getTrip(tripId);
@@ -1888,7 +1930,7 @@ export async function registerRoutes(
   });
 
   // Email import: parse confirmation email and suggest itinerary items
-  app.post("/api/trips/:tripId/parse-email", requireAuth, requireTripAccess, requirePlanner, requirePro, aiGenerationRateLimiter, async (req: Request, res: Response) => {
+  app.post("/api/trips/:tripId/parse-email", requireAuth, requireAI, requireTripAccess, requirePlanner, requirePro, aiGenerationRateLimiter, async (req: Request, res: Response) => {
     try {
       const tripId = getParam(req.params.tripId);
       const { emailText } = req.body as { emailText?: string };
@@ -1976,7 +2018,7 @@ export async function registerRoutes(
   });
 
   // Push subscription (store for reminders)
-  app.post("/api/trips/:tripId/push/subscribe", requireAuth, requireTripAccess, async (req: Request, res: Response) => {
+  app.post("/api/trips/:tripId/push/subscribe", requireAuth, requirePush, requireTripAccess, async (req: Request, res: Response) => {
     try {
       const tripId = getParam(req.params.tripId);
       const userId = (req as any).userId;
@@ -2043,7 +2085,7 @@ export async function registerRoutes(
   });
 
   // Smart conflict resolution (AI suggests compromise for a poll)
-  app.post("/api/trips/:tripId/suggest-resolution", requireAuth, requireTripAccess, aiGenerationRateLimiter, async (req: Request, res: Response) => {
+  app.post("/api/trips/:tripId/suggest-resolution", requireAuth, requireAI, requireTripAccess, aiGenerationRateLimiter, async (req: Request, res: Response) => {
     try {
       const tripId = getParam(req.params.tripId);
       const { question, options, voteCounts } = req.body;
@@ -2057,7 +2099,7 @@ export async function registerRoutes(
   });
 
   // Conversational planning (chat interface for quick changes)
-  app.post("/api/trips/:tripId/planning-chat", requireAuth, requireTripAccess, aiGenerationRateLimiter, async (req: Request, res: Response) => {
+  app.post("/api/trips/:tripId/planning-chat", requireAuth, requireAI, requireTripAccess, aiGenerationRateLimiter, async (req: Request, res: Response) => {
     try {
       const tripId = getParam(req.params.tripId);
       const { userMessage, currentPage, timeOnPage, lastAction, inactivityTime } = req.body as {
@@ -2185,7 +2227,7 @@ export async function registerRoutes(
   });
 
   // Atlas: generate additional AI itinerary suggestions for an existing trip
-  app.post("/api/trips/:tripId/ai-suggestions", requireAuth, requireTripAccess, aiGenerationRateLimiter, async (req: Request, res: Response) => {
+  app.post("/api/trips/:tripId/ai-suggestions", requireAuth, requireAI, requireTripAccess, aiGenerationRateLimiter, async (req: Request, res: Response) => {
     try {
       const tripId = getParam(req.params.tripId);
       const trip = await storage.getTrip(tripId);
@@ -2279,7 +2321,7 @@ export async function registerRoutes(
     }
   });
 
-  app.post("/api/trips/:tripId/atlas/conversation", requireAuth, requireTripAccess, aiGenerationRateLimiter, async (req: Request, res: Response) => {
+  app.post("/api/trips/:tripId/atlas/conversation", requireAuth, requireAI, requireTripAccess, aiGenerationRateLimiter, async (req: Request, res: Response) => {
     try {
       const tripId = getParam(req.params.tripId);
       const { message } = req.body as { message?: unknown };

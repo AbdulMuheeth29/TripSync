@@ -36,6 +36,7 @@
     "docker:prod:down": "docker-compose -f docker-compose.prod.yml down",
     "docker:prod:logs": "docker-compose -f docker-compose.prod.yml logs -f",
     "setup:production": "./scripts/setup-production-env.sh",
+    "setup:monitoring": "./scripts/setup-uptime-monitoring.sh",
     "baseline": "./scripts/establish-baseline.sh development",
     "baseline:staging": "./scripts/establish-baseline.sh staging http://localhost:3001",
     "baseline:prod": "./scripts/establish-baseline.sh production https://tripsync.app",
