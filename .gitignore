@@ -10,5 +10,6 @@ vite.config.ts.*
 
 # Documentation (keep local only)
 *.md
+!README.md
 coverage/
 backups/
