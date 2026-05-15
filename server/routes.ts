@@ -14,28 +14,16 @@ import { getVapidPublicKey, addSubscription, startReminderScheduler } from "./pu
 import { createCheckoutSession, createBillingPortalSession, handleWebhook, isStripeEnabled } from "./stripe-service";
 import { env } from "./env";
 import { canCreateTrip, canAddMemberToTrip, canAddPhotoToTrip, canUseAIGeneration, getEffectiveTier } from "./subscription-gates";
+import {
+  loginRateLimiter,
+  registerRateLimiter,
+  passwordResetRequestRateLimiter,
+  passwordResetSubmitRateLimiter,
+  aiGenerationRateLimiter,
+} from "./rate-limiter";
+import { getParam } from "./route-utils";
 
-// Simple rate limiting for AI generation
-const rateLimitMap = new Map<string, { count: number; resetTime: number }>();
-const RATE_LIMIT = 10;
-const RATE_LIMIT_WINDOW = 60 * 60 * 1000; // 1 hour
-
-function checkRateLimit(userId: string): boolean {
-  const now = Date.now();
-  const userLimit = rateLimitMap.get(userId);
-  
-  if (!userLimit || now > userLimit.resetTime) {
-    rateLimitMap.set(userId, { count: 1, resetTime: now + RATE_LIMIT_WINDOW });
-    return true;
-  }
-  
-  if (userLimit.count >= RATE_LIMIT) {
-    return false;
-  }
-  
-  userLimit.count++;
-  return true;
-}
+// Rate limiting is now handled by Redis-backed middleware in rate-limiter.ts
 
 async function requirePro(req: Request, res: Response, next: () => void): Promise<void> {
   try {
@@ -61,15 +49,95 @@ export async function registerRoutes(
   app: Express
 ): Promise<Server> {
   // Health check (for load balancers and monitoring)
-  app.get("/api/health", (_req: Request, res: Response) => {
+  app.get("/api/health", async (req: Request, res: Response) => {
+    const detailed = req.query.detailed === 'true';
     const storage = process.env.DATABASE_URL ? "pg" : "memory";
-    res.json({ ok: true, storage });
+
+    // Basic health response (fast)
+    if (!detailed) {
+      return res.json({ ok: true, storage });
+    }
+
+    // Detailed health check with service status
+    const services: Record<string, { status: 'ok' | 'unavailable' | 'error'; message?: string }> = {
+      database: { status: 'ok' },
+      redis: { status: 'unavailable' },
+      storage: { status: 'unavailable' },
+      email: { status: 'unavailable' },
+      sentry: { status: 'unavailable' },
+      stripe: { status: 'unavailable' },
+      ai: { status: 'unavailable' },
+    };
+
+    try {
+      // Test database
+      if (process.env.DATABASE_URL) {
+        const { getDb } = await import('./db');
+        const db = getDb();
+        await db.execute('SELECT 1');
+        services.database = { status: 'ok' };
+      }
+    } catch (error) {
+      services.database = { status: 'error', message: 'Connection failed' };
+    }
+
+    // Check Redis
+    if (process.env.REDIS_URL) {
+      try {
+        const { cache } = await import('./cache');
+        if (cache.isEnabled()) {
+          await cache.get('health_check');
+          services.redis = { status: 'ok' };
+        }
+      } catch (error) {
+        services.redis = { status: 'error', message: 'Connection failed' };
+      }
+    }
+
+    // Check cloud storage
+    const hasStorage = (process.env.AWS_ACCESS_KEY_ID && process.env.AWS_S3_BUCKET) ||
+                      (process.env.R2_ACCOUNT_ID && process.env.R2_BUCKET_NAME);
+    if (hasStorage) {
+      const { cloudStorage } = await import('./cloud-storage');
+      services.storage = cloudStorage.isAvailable() ? { status: 'ok' } : { status: 'error' };
+    }
+
+    // Check email
+    if (process.env.SMTP_HOST && process.env.SMTP_USER) {
+      const { emailService } = await import('./email-service');
+      services.email = emailService.isEnabled() ? { status: 'ok' } : { status: 'error' };
+    }
+
+    // Check Sentry
+    if (process.env.SENTRY_DSN) {
+      services.sentry = { status: 'ok' };
+    }
+
+    // Check Stripe
+    if (process.env.STRIPE_SECRET_KEY) {
+      const { isStripeEnabled } = await import('./stripe-service');
+      services.stripe = isStripeEnabled() ? { status: 'ok' } : { status: 'error' };
+    }
+
+    // Check AI
+    if (process.env.AI_INTEGRATIONS_ANTHROPIC_API_KEY) {
+      services.ai = { status: 'ok' };
+    }
+
+    const allCriticalOk = services.database.status === 'ok';
+
+    res.json({
+      ok: allCriticalOk,
+      storage,
+      services,
+      timestamp: new Date().toISOString(),
+    });
   });
 
   // Public, read-only trip preview by share code (no auth)
   app.get("/api/public/trips/:shareCode", async (req: Request, res: Response) => {
     try {
-      const { shareCode } = req.params;
+      const shareCode = getParam(req.params.shareCode);
       const trip = await storage.getTripByShareCode(shareCode);
       if (!trip) {
         return res.status(404).json({ error: "Trip not found" });
@@ -88,7 +156,7 @@ export async function registerRoutes(
   });
 
   // Auth - Register
-  app.post("/api/auth/register", async (req: Request, res: Response) => {
+  app.post("/api/auth/register", registerRateLimiter, async (req: Request, res: Response) => {
     try {
       const { email, name, password } = req.body;
 
@@ -204,24 +272,131 @@ export async function registerRoutes(
     }
   });
 
-  // Auth - Forgot password (placeholder; requires email service)
-  app.post("/api/auth/forgot-password", async (req: Request, res: Response) => {
+  // Auth - Forgot password
+  app.post("/api/auth/forgot-password", passwordResetRequestRateLimiter, async (req: Request, res: Response) => {
     try {
       const { email } = req.body;
-      if (!email) return res.status(400).json({ error: "Email required" });
-      // Placeholder: in production, send reset email via emailService
-      if (!emailService.isEnabled()) {
-        return res.status(503).json({ error: "Password reset not configured. Email service is disabled.", message: "Please contact support or register a new account." });
+
+      if (!email) {
+        return res.status(400).json({
+          error: "Email required",
+          code: "VALIDATION_ERROR"
+        });
       }
-      // TODO: generate reset token, send email
-      res.json({ message: "If an account exists for this email, you will receive password reset instructions." });
-    } catch {
-      res.status(500).json({ error: "Failed to process request" });
+
+      // Check if email service is configured
+      if (!emailService.isEnabled()) {
+        return res.status(503).json({
+          error: "Password reset not configured. Email service is disabled.",
+          message: "Please contact support or register a new account.",
+          code: "SERVICE_UNAVAILABLE"
+        });
+      }
+
+      // Import password reset service
+      const { requestPasswordReset } = await import("./password-reset-service");
+
+      // Request password reset (always returns success to prevent email enumeration)
+      await requestPasswordReset(email);
+
+      // Generic success message (don't reveal if email exists)
+      res.json({
+        message: "If an account exists for this email, you will receive password reset instructions."
+      });
+    } catch (error) {
+      console.error("Forgot password error:", error);
+      res.status(500).json({
+        error: "Failed to process request",
+        code: "SERVER_ERROR"
+      });
+    }
+  });
+
+  // Auth - Reset password
+  app.post("/api/auth/reset-password", passwordResetSubmitRateLimiter, async (req: Request, res: Response) => {
+    try {
+      const { token, password } = req.body;
+
+      // Validation
+      if (!token || !password) {
+        return res.status(400).json({
+          error: "Token and password are required",
+          code: "VALIDATION_ERROR"
+        });
+      }
+
+      if (password.length < 8) {
+        return res.status(400).json({
+          error: "Password must be at least 8 characters",
+          code: "WEAK_PASSWORD"
+        });
+      }
+
+      // Import password reset service
+      const { resetPassword } = await import("./password-reset-service");
+
+      // Attempt to reset password
+      const success = await resetPassword(token, password);
+
+      if (!success) {
+        return res.status(400).json({
+          error: "Invalid or expired reset token",
+          code: "INVALID_TOKEN"
+        });
+      }
+
+      res.json({
+        message: "Password reset successful. You can now log in with your new password."
+      });
+    } catch (error) {
+      console.error("Reset password error:", error);
+      res.status(500).json({
+        error: "Failed to reset password",
+        code: "SERVER_ERROR"
+      });
+    }
+  });
+
+  // Auth - Validate reset token
+  app.get("/api/auth/validate-reset-token/:token", async (req: Request, res: Response) => {
+    try {
+      const token = getParam(req.params.token);
+
+      if (!token) {
+        return res.status(400).json({
+          error: "Token required",
+          code: "VALIDATION_ERROR"
+        });
+      }
+
+      // Import password reset service
+      const { validateResetToken } = await import("./password-reset-service");
+
+      // Validate token
+      const userId = await validateResetToken(token);
+
+      if (!userId) {
+        return res.status(400).json({
+          valid: false,
+          error: "Invalid or expired token",
+          code: "INVALID_TOKEN"
+        });
+      }
+
+      res.json({
+        valid: true
+      });
+    } catch (error) {
+      console.error("Validate reset token error:", error);
+      res.status(500).json({
+        error: "Failed to validate token",
+        code: "SERVER_ERROR"
+      });
     }
   });
 
   // Auth - Login
-  app.post("/api/auth/login", async (req: Request, res: Response) => {
+  app.post("/api/auth/login", loginRateLimiter, async (req: Request, res: Response) => {
     try {
       const rawEmail = req.body?.email;
       const rawPassword = req.body?.password;
@@ -306,6 +481,76 @@ export async function registerRoutes(
     } catch (error) {
       console.error("Login error:", error);
       res.status(500).json({ error: "Login failed" });
+    }
+  });
+
+  // Auth - Logout
+  app.post("/api/auth/logout", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const userId = (req as any).userId;
+      const authHeader = req.headers.authorization;
+
+      if (!authHeader) {
+        return res.status(400).json({
+          error: "No token provided",
+          code: "VALIDATION_ERROR"
+        });
+      }
+
+      const token = authHeader.substring(7); // Remove "Bearer "
+
+      // Import token blacklist service
+      const { tokenBlacklist } = await import("./token-blacklist");
+      const { verifyToken } = await import("./auth");
+
+      // Get token expiration
+      const payload = verifyToken(token);
+      if (!payload) {
+        return res.status(400).json({
+          error: "Invalid token",
+          code: "INVALID_TOKEN"
+        });
+      }
+
+      // Calculate expiration date (JWT exp is in seconds)
+      const expiresAt = new Date((payload as any).exp * 1000);
+
+      // Add token to blacklist
+      await tokenBlacklist.blacklistToken(token, userId, expiresAt, 'logout');
+
+      res.json({
+        message: "Logged out successfully"
+      });
+    } catch (error) {
+      console.error("Logout error:", error);
+      res.status(500).json({
+        error: "Logout failed",
+        code: "SERVER_ERROR"
+      });
+    }
+  });
+
+  // Auth - Revoke all sessions (security measure)
+  app.post("/api/auth/revoke-all-sessions", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const userId = (req as any).userId;
+
+      // Import token blacklist service
+      const { tokenBlacklist } = await import("./token-blacklist");
+
+      // Revoke all tokens for this user
+      const count = await tokenBlacklist.revokeAllUserTokens(userId, 'security');
+
+      res.json({
+        message: `Revoked ${count} active session(s)`,
+        count
+      });
+    } catch (error) {
+      console.error("Revoke sessions error:", error);
+      res.status(500).json({
+        error: "Failed to revoke sessions",
+        code: "SERVER_ERROR"
+      });
     }
   });
 
@@ -594,18 +839,13 @@ export async function registerRoutes(
     }
   });
 
-  app.post("/api/trips", requireAuth, async (req: Request, res: Response) => {
+  app.post("/api/trips", requireAuth, aiGenerationRateLimiter, async (req: Request, res: Response) => {
     try {
       const userId = (req as any).userId;
       const tripData = req.body as TripWizardData & { title?: string; tripType?: string; voteDeadline?: string };
 
       if (!tripData.destination) {
         return res.status(400).json({ error: "Missing required fields" });
-      }
-
-      // Check rate limit
-      if (!checkRateLimit(userId)) {
-        return res.status(429).json({ error: "Rate limit exceeded. Try again later." });
       }
 
       const createTripCheck = await canCreateTrip(userId);
@@ -627,8 +867,8 @@ export async function registerRoutes(
         accommodationPref: tripData.accommodationPref,
         diningPref: tripData.diningPref,
         tripType: tripData.tripType ?? null,
-        status: "planning",
         voteDeadline: tripData.voteDeadline ?? null,
+        timezone: null,
       });
 
       // Generate itinerary in background
@@ -646,7 +886,7 @@ export async function registerRoutes(
 
   app.get("/api/trips/:id", requireAuth, requireTripAccess, async (req: Request, res: Response) => {
     try {
-      const tripId = req.params.id;
+      const tripId = getParam(req.params.id);
       const trip = (req as any).trip; // Already fetched by requireTripAccess middleware
 
       const items = await storage.getItineraryItems(tripId);
@@ -734,7 +974,7 @@ export async function registerRoutes(
 
   app.patch("/api/trips/:id", requireAuth, requireTripAccess, requirePlanner, async (req: Request, res: Response) => {
     try {
-      const tripId = req.params.id;
+      const tripId = getParam(req.params.id);
       const updates = req.body;
 
       const trip = await storage.updateTrip(tripId, updates);
@@ -750,9 +990,9 @@ export async function registerRoutes(
   });
 
   // Regenerate itinerary with member preferences
-  app.post("/api/trips/:id/regenerate-itinerary", requireAuth, requireTripAccess, requirePlanner, async (req: Request, res: Response) => {
+  app.post("/api/trips/:id/regenerate-itinerary", requireAuth, requireTripAccess, requirePlanner, aiGenerationRateLimiter, async (req: Request, res: Response) => {
     try {
-      const tripId = req.params.id;
+      const tripId = getParam(req.params.id);
       const userId = (req as any).userId;
       const trip = (req as any).trip;
       const aiCheck = await canUseAIGeneration(userId, tripId);
@@ -788,7 +1028,7 @@ export async function registerRoutes(
   // Join trip
   app.get("/api/trips/join/:code/info", async (req: Request, res: Response) => {
     try {
-      const shareCode = req.params.code;
+      const shareCode = getParam(req.params.code);
       const trip = await storage.getTripByShareCode(shareCode);
       
       if (!trip) {
@@ -808,7 +1048,7 @@ export async function registerRoutes(
 
   app.post("/api/trips/join/:code", requireAuth, async (req: Request, res: Response) => {
     try {
-      const shareCode = req.params.code;
+      const shareCode = getParam(req.params.code);
       const { userId } = req.body;
       
       const trip = await storage.getTripByShareCode(shareCode);
@@ -838,7 +1078,7 @@ export async function registerRoutes(
   // Reorder itinerary items (planner only)
   app.post("/api/trips/:tripId/itinerary/reorder", requireAuth, requireTripAccess, requirePlanner, async (req: Request, res: Response) => {
     try {
-      const { tripId } = req.params;
+      const tripId = getParam(req.params.tripId);
       const { itemIds } = req.body as { itemIds: string[] };
       if (!Array.isArray(itemIds) || itemIds.length === 0) {
         return res.status(400).json({ error: "itemIds array required" });
@@ -861,7 +1101,7 @@ export async function registerRoutes(
   // Create itinerary item (planner only)
   app.post("/api/trips/:tripId/items", requireAuth, requireTripAccess, requirePlanner, async (req: Request, res: Response) => {
     try {
-      const { tripId } = req.params;
+      const tripId = getParam(req.params.tripId);
       const body = req.body as { dayNumber: number; type: string; time: string; name: string; description: string; location: string; pricePerPerson: number; bookingUrl?: string; bookingUrlHint?: string };
       if (!body.dayNumber || !body.type || !body.time || !body.name || !body.description || !body.location || body.pricePerPerson == null) {
         return res.status(400).json({ error: "dayNumber, type, time, name, description, location, pricePerPerson required" });
@@ -889,7 +1129,7 @@ export async function registerRoutes(
   // Itinerary items
   app.patch("/api/trips/:tripId/items/:itemId", requireAuth, requireTripAccess, async (req: Request, res: Response) => {
     try {
-      const { itemId } = req.params;
+      const itemId = getParam(req.params.itemId);
       const updates = req.body;
       
       const item = await storage.updateItineraryItem(itemId, updates);
@@ -907,7 +1147,7 @@ export async function registerRoutes(
   // Votes
   app.post("/api/trips/:tripId/items/:itemId/vote", requireAuth, requireTripAccess, async (req: Request, res: Response) => {
     try {
-      const { itemId } = req.params;
+      const itemId = getParam(req.params.itemId);
       const { userId, voteType } = req.body;
       
       if (!userId || !voteType) {
@@ -931,7 +1171,7 @@ export async function registerRoutes(
   // Comments
   app.post("/api/trips/:tripId/items/:itemId/comments", requireAuth, requireTripAccess, async (req: Request, res: Response) => {
     try {
-      const { itemId } = req.params;
+      const itemId = getParam(req.params.itemId);
       const { userId, content } = req.body;
       
       if (!userId || !content) {
@@ -955,7 +1195,7 @@ export async function registerRoutes(
   // Expenses
   app.post("/api/trips/:tripId/expenses", requireAuth, requireTripAccess, async (req: Request, res: Response) => {
     try {
-      const { tripId } = req.params;
+      const tripId = getParam(req.params.tripId);
       const { paidByUserId, amount, currency, description, location, itemId, receiptImageUrl, splitAmong } = req.body;
       
       if (!paidByUserId || !amount || !description) {
@@ -967,7 +1207,6 @@ export async function registerRoutes(
         tripId,
         paidByUserId,
         amount,
-        currency: currency ?? "USD",
         description,
         location: location || null,
         itemId: itemId ?? null,
@@ -984,7 +1223,7 @@ export async function registerRoutes(
 
   app.patch("/api/trips/:tripId/expenses/:expenseId", requireAuth, requireTripAccess, async (req: Request, res: Response) => {
     try {
-      const { expenseId } = req.params;
+      const expenseId = getParam(req.params.expenseId);
       const updates = req.body;
       
       const expense = await storage.updateExpense(expenseId, updates);
@@ -1001,7 +1240,7 @@ export async function registerRoutes(
 
   app.delete("/api/trips/:tripId/expenses/:expenseId", requireAuth, requireTripAccess, async (req: Request, res: Response) => {
     try {
-      const { expenseId } = req.params;
+      const expenseId = getParam(req.params.expenseId);
       const ok = await storage.deleteExpense(expenseId);
       if (!ok) return res.status(404).json({ error: "Expense not found" });
       res.status(204).send();
@@ -1012,9 +1251,9 @@ export async function registerRoutes(
   });
 
   // AI budget optimization
-  app.post("/api/trips/:tripId/budget-optimize", requireAuth, requireTripAccess, async (req: Request, res: Response) => {
+  app.post("/api/trips/:tripId/budget-optimize", requireAuth, requireTripAccess, aiGenerationRateLimiter, async (req: Request, res: Response) => {
     try {
-      const { tripId } = req.params;
+      const tripId = getParam(req.params.tripId);
       const trip = (req as any).trip;
       const expenses = await storage.getExpensesByTrip(tripId);
       const items = await storage.getItineraryItems(tripId);
@@ -1039,7 +1278,7 @@ export async function registerRoutes(
   // Invites
   app.get("/api/trips/:tripId/invites", requireAuth, requireTripAccess, async (req: Request, res: Response) => {
     try {
-      const invites = await storage.getInvitesByTrip(req.params.tripId);
+      const invites = await storage.getInvitesByTrip(getParam(req.params.tripId));
       res.json(invites);
     } catch (error) {
       console.error("Error fetching invites:", error);
@@ -1050,7 +1289,7 @@ export async function registerRoutes(
   // Public invite response (token = invite ID)
   app.get("/api/invites/:inviteId", async (req: Request, res: Response) => {
     try {
-      const { inviteId } = req.params;
+      const inviteId = getParam(req.params.inviteId);
       const invite = await storage.getInviteById(inviteId);
       if (!invite || invite.status !== "pending") {
         return res.status(404).json({ error: "Invite not found or already responded" });
@@ -1066,7 +1305,7 @@ export async function registerRoutes(
 
   app.post("/api/invites/:inviteId/respond", optionalAuth, async (req: Request, res: Response) => {
     try {
-      const { inviteId } = req.params;
+      const inviteId = getParam(req.params.inviteId);
       const { action } = req.body as { action: "accept" | "decline" };
       if (!action || !["accept", "decline"].includes(action)) {
         return res.status(400).json({ error: "action must be 'accept' or 'decline'" });
@@ -1102,7 +1341,6 @@ export async function registerRoutes(
           tripId: invite.tripId,
           userId,
           role: "member",
-          rsvpStatus: "accepted",
         });
         await storage.updateInvite(inviteId, { status: "accepted" });
         return res.json({ ok: true, message: "Invite accepted", tripId: invite.tripId });
@@ -1115,7 +1353,7 @@ export async function registerRoutes(
 
   app.post("/api/trips/:tripId/invites", requireAuth, requireTripAccess, async (req: Request, res: Response) => {
     try {
-      const { tripId } = req.params;
+      const tripId = getParam(req.params.tripId);
       const { email } = req.body;
       const userId = (req as any).userId;
       const trip = (req as any).trip;
@@ -1160,7 +1398,7 @@ export async function registerRoutes(
   // Member preferences
   app.get("/api/trips/:tripId/preferences", requireAuth, requireTripAccess, async (req: Request, res: Response) => {
     try {
-      const preferences = await storage.getPreferencesByTrip(req.params.tripId);
+      const preferences = await storage.getPreferencesByTrip(getParam(req.params.tripId));
       res.json(preferences);
     } catch (error) {
       console.error("Error fetching preferences:", error);
@@ -1170,7 +1408,7 @@ export async function registerRoutes(
 
   app.put("/api/trips/:tripId/preferences", requireAuth, requireTripAccess, async (req: Request, res: Response) => {
     try {
-      const { tripId } = req.params;
+      const tripId = getParam(req.params.tripId);
       const userId = (req as any).userId as string | undefined;
       const { budgetBand, pace, diet, budgetFlexibility, mustDoActivities, accessibility } = req.body;
       if (!userId) return res.status(401).json({ error: "Authentication required" });
@@ -1196,7 +1434,7 @@ export async function registerRoutes(
   // Chat
   app.get("/api/trips/:tripId/chat", requireAuth, requireTripAccess, async (req: Request, res: Response) => {
     try {
-      const messages = await storage.getChatMessagesByTrip(req.params.tripId);
+      const messages = await storage.getChatMessagesByTrip(getParam(req.params.tripId));
       res.json(messages);
     } catch (error) {
       console.error("Error fetching chat:", error);
@@ -1206,7 +1444,7 @@ export async function registerRoutes(
 
   app.get("/api/trips/:tripId/photos", requireAuth, requireTripAccess, async (req: Request, res: Response) => {
     try {
-      const photos = await storage.getPhotosByTrip(req.params.tripId);
+      const photos = await storage.getPhotosByTrip(getParam(req.params.tripId));
       res.json(photos);
     } catch (error) {
       console.error("Error fetching photos:", error);
@@ -1216,7 +1454,7 @@ export async function registerRoutes(
 
   app.post("/api/trips/:tripId/photos", requireAuth, requireTripAccess, async (req: Request, res: Response) => {
     try {
-      const { tripId } = req.params;
+      const tripId = getParam(req.params.tripId);
       const userId = (req as any).userId as string | undefined;
       const { url, caption } = req.body;
       if (!userId || !url) return res.status(400).json({ error: "url required" });
@@ -1240,7 +1478,7 @@ export async function registerRoutes(
 
   app.delete("/api/trips/:tripId/photos/:photoId", requireAuth, requireTripAccess, async (req: Request, res: Response) => {
     try {
-      const { photoId } = req.params;
+      const photoId = getParam(req.params.photoId);
       await storage.deleteTripPhoto(photoId);
       res.status(204).send();
     } catch (error) {
@@ -1252,7 +1490,7 @@ export async function registerRoutes(
   // Trip member RSVP
   app.patch("/api/trips/:tripId/members/:memberId", requireAuth, requireTripAccess, async (req: Request, res: Response) => {
     try {
-      const { memberId } = req.params;
+      const memberId = getParam(req.params.memberId);
       const { rsvpStatus } = req.body;
       if (!rsvpStatus || !["pending", "accepted", "declined"].includes(rsvpStatus)) return res.status(400).json({ error: "Invalid rsvpStatus" });
       const updated = await storage.updateTripMember(memberId, { rsvpStatus });
@@ -1267,7 +1505,7 @@ export async function registerRoutes(
   // Quick polls
   app.post("/api/trips/:tripId/polls", requireAuth, requireTripAccess, async (req: Request, res: Response) => {
     try {
-      const { tripId } = req.params;
+      const tripId = getParam(req.params.tripId);
       const createdByUserId = (req as any).userId as string | undefined;
       const { question, options, deadline } = req.body;
       if (!createdByUserId || !question || !options || !Array.isArray(options) || options.length < 2) return res.status(400).json({ error: "question and options (array of 2+) required" });
@@ -1289,7 +1527,7 @@ export async function registerRoutes(
 
   app.post("/api/trips/:tripId/polls/:pollId/vote", requireAuth, requireTripAccess, async (req: Request, res: Response) => {
     try {
-      const { pollId } = req.params;
+      const pollId = getParam(req.params.pollId);
       const userId = (req as any).userId as string | undefined;
       const { optionIndex } = req.body;
       if (!userId || optionIndex === undefined) return res.status(400).json({ error: "optionIndex required" });
@@ -1308,7 +1546,7 @@ export async function registerRoutes(
 
   app.delete("/api/trips/:tripId/polls/:pollId", requireAuth, requireTripAccess, async (req: Request, res: Response) => {
     try {
-      const { pollId } = req.params;
+      const pollId = getParam(req.params.pollId);
       await storage.deletePoll(pollId);
       res.status(204).send();
     } catch (error) {
@@ -1320,7 +1558,7 @@ export async function registerRoutes(
   // Packing list
   app.post("/api/trips/:tripId/packing", requireAuth, requireTripAccess, async (req: Request, res: Response) => {
     try {
-      const { tripId } = req.params;
+      const tripId = getParam(req.params.tripId);
       const { name, assignedToUserId, notes } = req.body;
       if (!name) return res.status(400).json({ error: "name required" });
       const item = await storage.createPackingItem({
@@ -1339,7 +1577,7 @@ export async function registerRoutes(
 
   app.patch("/api/trips/:tripId/packing/:itemId", requireAuth, requireTripAccess, async (req: Request, res: Response) => {
     try {
-      const { itemId } = req.params;
+      const itemId = getParam(req.params.itemId);
       const updates = req.body;
       const item = await storage.updatePackingItem(itemId, updates);
       if (!item) return res.status(404).json({ error: "Packing item not found" });
@@ -1352,7 +1590,7 @@ export async function registerRoutes(
 
   app.delete("/api/trips/:tripId/packing/:itemId", requireAuth, requireTripAccess, async (req: Request, res: Response) => {
     try {
-      const { itemId } = req.params;
+      const itemId = getParam(req.params.itemId);
       await storage.deletePackingItem(itemId);
       res.status(204).send();
     } catch (error) {
@@ -1364,7 +1602,7 @@ export async function registerRoutes(
   // Transportation
   app.post("/api/trips/:tripId/transportation", requireAuth, requireTripAccess, async (req: Request, res: Response) => {
     try {
-      const { tripId } = req.params;
+      const tripId = getParam(req.params.tripId);
       const { dayNumber, type, description, driverUserId, passengerUserIds, notes } = req.body;
       if (!dayNumber || !type || !description) return res.status(400).json({ error: "dayNumber, type, description required" });
       const entry = await storage.createTransportationEntry({
@@ -1386,7 +1624,7 @@ export async function registerRoutes(
 
   app.patch("/api/trips/:tripId/transportation/:entryId", requireAuth, requireTripAccess, async (req: Request, res: Response) => {
     try {
-      const { entryId } = req.params;
+      const entryId = getParam(req.params.entryId);
       const updates = req.body;
       const entry = await storage.updateTransportationEntry(entryId, updates);
       if (!entry) return res.status(404).json({ error: "Transportation entry not found" });
@@ -1399,7 +1637,7 @@ export async function registerRoutes(
 
   app.delete("/api/trips/:tripId/transportation/:entryId", requireAuth, requireTripAccess, async (req: Request, res: Response) => {
     try {
-      const { entryId } = req.params;
+      const entryId = getParam(req.params.entryId);
       await storage.deleteTransportationEntry(entryId);
       res.status(204).send();
     } catch (error) {
@@ -1411,7 +1649,7 @@ export async function registerRoutes(
   // Group availability
   app.put("/api/trips/:tripId/availability", requireAuth, requireTripAccess, async (req: Request, res: Response) => {
     try {
-      const { tripId } = req.params;
+      const tripId = getParam(req.params.tripId);
       const userId = (req as any).userId as string | undefined;
       const { availableDates } = req.body;
       if (!userId || !Array.isArray(availableDates)) return res.status(400).json({ error: "availableDates (array) required" });
@@ -1425,7 +1663,7 @@ export async function registerRoutes(
 
   app.post("/api/trips/:tripId/chat", requireAuth, requireTripAccess, async (req: Request, res: Response) => {
     try {
-      const { tripId } = req.params;
+      const tripId = getParam(req.params.tripId);
       const userId = (req as any).userId as string | undefined;
       const { content, itemId } = req.body;
       if (!userId || !content) return res.status(400).json({ error: "Content required" });
@@ -1446,7 +1684,7 @@ export async function registerRoutes(
   // Trip documents (boarding passes, confirmations, vaccination)
   app.get("/api/trips/:tripId/documents", requireAuth, requireTripAccess, async (req: Request, res: Response) => {
     try {
-      const { tripId } = req.params;
+      const tripId = getParam(req.params.tripId);
       const list = await storage.getDocumentsByTrip(tripId);
       res.json(list);
     } catch (error) {
@@ -1457,7 +1695,7 @@ export async function registerRoutes(
 
   app.post("/api/trips/:tripId/documents", requireAuth, requireTripAccess, async (req: Request, res: Response) => {
     try {
-      const { tripId } = req.params;
+      const tripId = getParam(req.params.tripId);
       const { uploadedByUserId, type, name, url, notes } = req.body;
       if (!uploadedByUserId || !type || !name || !url) return res.status(400).json({ error: "uploadedByUserId, type, name, url required" });
       const doc = await storage.createTripDocument({
@@ -1479,7 +1717,7 @@ export async function registerRoutes(
 
   app.patch("/api/trips/:tripId/documents/:docId", requireAuth, requireTripAccess, async (req: Request, res: Response) => {
     try {
-      const { docId } = req.params;
+      const docId = getParam(req.params.docId);
       const updates = req.body;
       const doc = await storage.updateTripDocument(docId, updates);
       if (!doc) return res.status(404).json({ error: "Document not found" });
@@ -1492,7 +1730,7 @@ export async function registerRoutes(
 
   app.delete("/api/trips/:tripId/documents/:docId", requireAuth, requireTripAccess, async (req: Request, res: Response) => {
     try {
-      const { docId } = req.params;
+      const docId = getParam(req.params.docId);
       await storage.deleteTripDocument(docId);
       res.status(204).send();
     } catch (error) {
@@ -1504,7 +1742,7 @@ export async function registerRoutes(
   // Emergency contacts
   app.get("/api/trips/:tripId/emergency-contacts", requireAuth, requireTripAccess, async (req: Request, res: Response) => {
     try {
-      const { tripId } = req.params;
+      const tripId = getParam(req.params.tripId);
       const list = await storage.getEmergencyContactsByTrip(tripId);
       res.json(list);
     } catch (error) {
@@ -1515,7 +1753,7 @@ export async function registerRoutes(
 
   app.post("/api/trips/:tripId/emergency-contacts", requireAuth, requireTripAccess, async (req: Request, res: Response) => {
     try {
-      const { tripId } = req.params;
+      const tripId = getParam(req.params.tripId);
       const { type, name, phone, url, notes } = req.body;
       if (!type || !name) return res.status(400).json({ error: "type and name required" });
       const contact = await storage.createEmergencyContact({
@@ -1536,7 +1774,7 @@ export async function registerRoutes(
 
   app.patch("/api/trips/:tripId/emergency-contacts/:contactId", requireAuth, requireTripAccess, async (req: Request, res: Response) => {
     try {
-      const { contactId } = req.params;
+      const contactId = getParam(req.params.contactId);
       const updates = req.body;
       const updated = await storage.updateEmergencyContact(contactId, updates);
       if (!updated) return res.status(404).json({ error: "Contact not found" });
@@ -1549,7 +1787,7 @@ export async function registerRoutes(
 
   app.delete("/api/trips/:tripId/emergency-contacts/:contactId", requireAuth, requireTripAccess, async (req: Request, res: Response) => {
     try {
-      const { contactId } = req.params;
+      const contactId = getParam(req.params.contactId);
       await storage.deleteEmergencyContact(contactId);
       res.status(204).send();
     } catch (error) {
@@ -1561,7 +1799,7 @@ export async function registerRoutes(
   // Mood board
   app.post("/api/trips/:tripId/mood-board", requireAuth, requireTripAccess, async (req: Request, res: Response) => {
     try {
-      const { tripId } = req.params;
+      const tripId = getParam(req.params.tripId);
       const userId = (req as any).userId as string;
       const { url, label } = req.body;
       if (!url || typeof url !== "string") return res.status(400).json({ error: "url required" });
@@ -1581,7 +1819,7 @@ export async function registerRoutes(
 
   app.delete("/api/trips/:tripId/mood-board/:itemId", requireAuth, requireTripAccess, async (req: Request, res: Response) => {
     try {
-      const { itemId } = req.params;
+      const itemId = getParam(req.params.itemId);
       await storage.deleteMoodBoardItem(itemId);
       res.status(204).send();
     } catch (error) {
@@ -1591,9 +1829,9 @@ export async function registerRoutes(
   });
 
   // Generate trip recap (AI)
-  app.post("/api/trips/:tripId/generate-recap", requireAuth, requireTripAccess, async (req: Request, res: Response) => {
+  app.post("/api/trips/:tripId/generate-recap", requireAuth, requireTripAccess, aiGenerationRateLimiter, async (req: Request, res: Response) => {
     try {
-      const { tripId } = req.params;
+      const tripId = getParam(req.params.tripId);
       const trip = await storage.getTrip(tripId);
       if (!trip) return res.status(404).json({ error: "Trip not found" });
       const items = await storage.getItineraryItems(tripId);
@@ -1618,9 +1856,9 @@ export async function registerRoutes(
   });
 
   // Generate packing list (AI)
-  app.post("/api/trips/:tripId/generate-packing-list", requireAuth, requireTripAccess, async (req: Request, res: Response) => {
+  app.post("/api/trips/:tripId/generate-packing-list", requireAuth, requireTripAccess, aiGenerationRateLimiter, async (req: Request, res: Response) => {
     try {
-      const { tripId } = req.params;
+      const tripId = getParam(req.params.tripId);
       const trip = await storage.getTrip(tripId);
       if (!trip) return res.status(404).json({ error: "Trip not found" });
       const { items } = await generatePackingList({
@@ -1650,9 +1888,9 @@ export async function registerRoutes(
   });
 
   // Email import: parse confirmation email and suggest itinerary items
-  app.post("/api/trips/:tripId/parse-email", requireAuth, requireTripAccess, requirePlanner, requirePro, async (req: Request, res: Response) => {
+  app.post("/api/trips/:tripId/parse-email", requireAuth, requireTripAccess, requirePlanner, requirePro, aiGenerationRateLimiter, async (req: Request, res: Response) => {
     try {
-      const { tripId } = req.params;
+      const tripId = getParam(req.params.tripId);
       const { emailText } = req.body as { emailText?: string };
       if (!emailText || typeof emailText !== "string") return res.status(400).json({ error: "emailText required" });
       const trip = await storage.getTrip(tripId);
@@ -1692,7 +1930,7 @@ export async function registerRoutes(
   // Trip satisfaction (analytics) — also updates preference learning from this trip
   app.post("/api/trips/:tripId/satisfaction", requireAuth, requireTripAccess, async (req: Request, res: Response) => {
     try {
-      const { tripId } = req.params;
+      const tripId = getParam(req.params.tripId);
       const userId = (req as any).userId as string | undefined;
       const { score, comment } = req.body;
       if (!userId || score == null) return res.status(400).json({ error: "score (1-5) required" });
@@ -1710,11 +1948,11 @@ export async function registerRoutes(
         const existing = await storage.getUserLearnedPreferences(userId);
         const vibes = (trip.vibes || []) as string[];
         const tripType = (trip as { tripType?: string }).tripType;
-        const vibesPreferred = [...new Set([...(existing?.vibesPreferred ?? []), ...vibes])];
+        const vibesPreferred = Array.from(new Set([...(existing?.vibesPreferred ?? []), ...vibes]));
         const tripTypesPreferred = tripType
-          ? [...new Set([...(existing?.tripTypesPreferred ?? []), tripType])]
+          ? Array.from(new Set([...(existing?.tripTypesPreferred ?? []), tripType]))
           : (existing?.tripTypesPreferred ?? []);
-        const learnedFromTripIds = [...new Set([...(existing?.learnedFromTripIds ?? []), tripId])].slice(-50);
+        const learnedFromTripIds = Array.from(new Set([...(existing?.learnedFromTripIds ?? []), tripId])).slice(-50);
         await storage.createOrUpdateUserLearnedPreferences({
           id: existing?.id ?? randomUUID(),
           userId,
@@ -1740,7 +1978,7 @@ export async function registerRoutes(
   // Push subscription (store for reminders)
   app.post("/api/trips/:tripId/push/subscribe", requireAuth, requireTripAccess, async (req: Request, res: Response) => {
     try {
-      const { tripId } = req.params;
+      const tripId = getParam(req.params.tripId);
       const userId = (req as any).userId;
       const subscription = req.body;
       if (!subscription?.endpoint || !subscription?.keys?.p256dh || !subscription?.keys?.auth) {
@@ -1758,7 +1996,7 @@ export async function registerRoutes(
   // Location sharing (optional, during trip)
   app.put("/api/trips/:tripId/location", requireAuth, requireTripAccess, async (req: Request, res: Response) => {
     try {
-      const { tripId } = req.params;
+      const tripId = getParam(req.params.tripId);
       const { userId, lat, lng } = req.body;
       if (!userId || lat == null || lng == null) return res.status(400).json({ error: "userId, lat, lng required" });
       const loc = await storage.setUserLocation(tripId, userId, String(lat), String(lng));
@@ -1772,7 +2010,7 @@ export async function registerRoutes(
   // Trip analytics (cost per person, activity breakdown, satisfaction)
   app.get("/api/trips/:tripId/analytics", requireAuth, requireTripAccess, async (req: Request, res: Response) => {
     try {
-      const { tripId } = req.params;
+      const tripId = getParam(req.params.tripId);
       const trip = await storage.getTrip(tripId);
       if (!trip) return res.status(404).json({ error: "Trip not found" });
       const [items, expenses, satisfaction] = await Promise.all([
@@ -1805,9 +2043,9 @@ export async function registerRoutes(
   });
 
   // Smart conflict resolution (AI suggests compromise for a poll)
-  app.post("/api/trips/:tripId/suggest-resolution", requireAuth, requireTripAccess, async (req: Request, res: Response) => {
+  app.post("/api/trips/:tripId/suggest-resolution", requireAuth, requireTripAccess, aiGenerationRateLimiter, async (req: Request, res: Response) => {
     try {
-      const { tripId } = req.params;
+      const tripId = getParam(req.params.tripId);
       const { question, options, voteCounts } = req.body;
       if (!question || !Array.isArray(options) || !Array.isArray(voteCounts)) return res.status(400).json({ error: "question, options, voteCounts required" });
       const result = await suggestConflictResolution({ question, options, voteCounts });
@@ -1819,9 +2057,9 @@ export async function registerRoutes(
   });
 
   // Conversational planning (chat interface for quick changes)
-  app.post("/api/trips/:tripId/planning-chat", requireAuth, requireTripAccess, async (req: Request, res: Response) => {
+  app.post("/api/trips/:tripId/planning-chat", requireAuth, requireTripAccess, aiGenerationRateLimiter, async (req: Request, res: Response) => {
     try {
-      const { tripId } = req.params;
+      const tripId = getParam(req.params.tripId);
       const { userMessage, currentPage, timeOnPage, lastAction, inactivityTime } = req.body as {
         userMessage?: string;
         currentPage?: string;
@@ -1947,9 +2185,9 @@ export async function registerRoutes(
   });
 
   // Atlas: generate additional AI itinerary suggestions for an existing trip
-  app.post("/api/trips/:tripId/ai-suggestions", requireAuth, requireTripAccess, async (req: Request, res: Response) => {
+  app.post("/api/trips/:tripId/ai-suggestions", requireAuth, requireTripAccess, aiGenerationRateLimiter, async (req: Request, res: Response) => {
     try {
-      const { tripId } = req.params;
+      const tripId = getParam(req.params.tripId);
       const trip = await storage.getTrip(tripId);
       if (!trip) {
         return res.status(404).json({ error: "Trip not found" });
@@ -1977,7 +2215,7 @@ export async function registerRoutes(
   // Travel insurance helper: return a simple quote URL based on trip budget
   app.get("/api/trips/:tripId/insurance-quote", requireAuth, requireTripAccess, async (req: Request, res: Response) => {
     try {
-      const { tripId } = req.params;
+      const tripId = getParam(req.params.tripId);
       const trip = await storage.getTrip(tripId);
       if (!trip) return res.status(404).json({ error: "Trip not found" });
 
@@ -2001,7 +2239,7 @@ export async function registerRoutes(
   // Flight price watch stub – records interest in tracking flight prices (can be wired to a provider later)
   app.post("/api/trips/:tripId/flight-watch", requireAuth, requireTripAccess, async (req: Request, res: Response) => {
     try {
-      const { tripId } = req.params;
+      const tripId = getParam(req.params.tripId);
       const { flight } = req.body as { flight?: { from?: string; to?: string; date?: string; airline?: string } };
       if (!flight) {
         return res.status(400).json({ error: "flight payload required" });
@@ -2017,7 +2255,7 @@ export async function registerRoutes(
   // Atlas conversation memory (per-trip, per-user)
   app.get("/api/trips/:tripId/atlas/conversation", requireAuth, requireTripAccess, async (req: Request, res: Response) => {
     try {
-      const { tripId } = req.params;
+      const tripId = getParam(req.params.tripId);
       const userId = (req as any).userId as string | undefined;
       if (!userId) {
         return res.status(401).json({ error: "Authentication required" });
@@ -2041,9 +2279,9 @@ export async function registerRoutes(
     }
   });
 
-  app.post("/api/trips/:tripId/atlas/conversation", requireAuth, requireTripAccess, async (req: Request, res: Response) => {
+  app.post("/api/trips/:tripId/atlas/conversation", requireAuth, requireTripAccess, aiGenerationRateLimiter, async (req: Request, res: Response) => {
     try {
-      const { tripId } = req.params;
+      const tripId = getParam(req.params.tripId);
       const { message } = req.body as { message?: unknown };
       const userId = (req as any).userId as string | undefined;
       if (!userId) {
@@ -2085,10 +2323,69 @@ export async function registerRoutes(
     }
   });
 
+  // Atlas proactive notifications
+  app.get("/api/trips/:tripId/atlas/notifications", requireAuth, requireTripAccess, async (req: Request, res: Response) => {
+    try {
+      const tripId = getParam(req.params.tripId);
+      const userId = (req as any).userId;
+
+      const { atlasProactive } = await import('./atlas-proactive-service');
+      const notifications = await atlasProactive.getNotifications(tripId, userId);
+
+      res.json({ notifications });
+    } catch (error) {
+      console.error("Error fetching Atlas notifications:", error);
+      res.status(500).json({ error: "Failed to fetch notifications" });
+    }
+  });
+
+  app.post("/api/atlas/notifications/:notificationId/read", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const notificationId = getParam(req.params.notificationId);
+
+      const { atlasProactive } = await import('./atlas-proactive-service');
+      await atlasProactive.markAsRead(notificationId);
+
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error marking notification as read:", error);
+      res.status(500).json({ error: "Failed to mark notification as read" });
+    }
+  });
+
+  app.post("/api/atlas/notifications/:notificationId/dismiss", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const notificationId = getParam(req.params.notificationId);
+
+      const { atlasProactive } = await import('./atlas-proactive-service');
+      await atlasProactive.dismissNotification(notificationId);
+
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error dismissing notification:", error);
+      res.status(500).json({ error: "Failed to dismiss notification" });
+    }
+  });
+
+  app.post("/api/atlas/notifications/:notificationId/snooze", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const notificationId = getParam(req.params.notificationId);
+      const { duration } = req.body; // duration in milliseconds
+
+      const { atlasProactive } = await import('./atlas-proactive-service');
+      await atlasProactive.snoozeNotification(notificationId, duration || 24 * 60 * 60 * 1000); // Default 24 hours
+
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error snoozing notification:", error);
+      res.status(500).json({ error: "Failed to snooze notification" });
+    }
+  });
+
   // Group travel insights & trend predictions (from user's past trips)
   app.get("/api/users/:userId/insights", requireAuth, async (req: Request, res: Response) => {
     try {
-      const { userId } = req.params;
+      const userId = getParam(req.params.userId);
       const trips = await storage.getTripsByUserId(userId);
       const learned = await storage.getUserLearnedPreferences(userId);
       const vibesCount: Record<string, number> = {};
@@ -2128,7 +2425,7 @@ export async function registerRoutes(
   // Delete a trip (organizer only)
   app.delete("/api/trips/:id", requireAuth, requireTripAccess, requireOrganizer, async (req: Request, res: Response) => {
     try {
-      const tripId = req.params.id;
+      const tripId = getParam(req.params.id);
 
       // Delete all related data (cascade)
       await storage.deleteItineraryItemsByTripId(tripId);
@@ -2148,7 +2445,7 @@ export async function registerRoutes(
   // Delete an itinerary item (planner only)
   app.delete("/api/trips/:tripId/items/:itemId", requireAuth, requireTripAccess, requirePlanner, async (req: Request, res: Response) => {
     try {
-      const { itemId } = req.params;
+      const itemId = getParam(req.params.itemId);
 
       // Note: This would also delete related comments and votes in production
       await storage.deleteItineraryItem(itemId);
@@ -2163,7 +2460,7 @@ export async function registerRoutes(
   // Remove a trip member (organizer only, cannot remove self)
   app.delete("/api/trips/:tripId/members/:memberId", requireAuth, requireTripAccess, requireOrganizer, async (req: Request, res: Response) => {
     try {
-      const { memberId } = req.params;
+      const memberId = getParam(req.params.memberId);
       const userId = (req as any).userId;
       const trip = (req as any).trip;
 
@@ -2190,7 +2487,7 @@ export async function registerRoutes(
   // Delete a comment (comment author or planner only)
   app.delete("/api/trips/:tripId/items/:itemId/comments/:commentId", requireAuth, requireTripAccess, async (req: Request, res: Response) => {
     try {
-      const { commentId } = req.params;
+      const commentId = getParam(req.params.commentId);
       const userId = (req as any).userId;
       const isPlanner = (req as any).isPlanner;
 
@@ -2216,7 +2513,7 @@ export async function registerRoutes(
   // Cancel a trip (organizer only)
   app.post("/api/trips/:id/cancel", requireAuth, requireTripAccess, requireOrganizer, async (req: Request, res: Response) => {
     try {
-      const tripId = req.params.id;
+      const tripId = getParam(req.params.id);
 
       const trip = await storage.updateTrip(tripId, { status: "cancelled" });
       if (!trip) {
@@ -2233,7 +2530,7 @@ export async function registerRoutes(
   // Update member role (organizer only)
   app.patch("/api/trips/:tripId/members/:memberId/role", requireAuth, requireTripAccess, requireOrganizer, async (req: Request, res: Response) => {
     try {
-      const { memberId } = req.params;
+      const memberId = getParam(req.params.memberId);
       const { role } = req.body;
       const trip = (req as any).trip;
 

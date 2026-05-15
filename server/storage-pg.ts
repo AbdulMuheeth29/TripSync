@@ -1,5 +1,6 @@
 import { eq, and, inArray, asc, desc, sql } from "drizzle-orm";
 import type { IStorage } from "./storage";
+import { cache, CacheKeys, CacheTTL } from "./cache";
 import type {
   User,
   InsertUser,
@@ -75,18 +76,39 @@ import type { Db } from "./db";
 export function createPgStorage(db: Db): IStorage {
   return {
     async getUser(id: string) {
-      const rows = await db.select().from(users).where(eq(users.id, id)).limit(1);
-      return rows[0] as User | undefined;
+      const result = await cache.getOrSet(
+        CacheKeys.user(id),
+        async () => {
+          const rows = await db.select().from(users).where(eq(users.id, id)).limit(1);
+          return rows[0] as User | undefined;
+        },
+        CacheTTL.MEDIUM
+      );
+      return result ?? undefined;
     },
 
     async getUserById(id: string) {
-      const rows = await db.select().from(users).where(eq(users.id, id)).limit(1);
-      return rows[0] as User | undefined;
+      const result = await cache.getOrSet(
+        CacheKeys.user(id),
+        async () => {
+          const rows = await db.select().from(users).where(eq(users.id, id)).limit(1);
+          return rows[0] as User | undefined;
+        },
+        CacheTTL.MEDIUM
+      );
+      return result ?? undefined;
     },
 
     async getUserByEmail(email: string) {
-      const rows = await db.select().from(users).where(eq(users.email, email)).limit(1);
-      return rows[0] as User | undefined;
+      const result = await cache.getOrSet(
+        `user:email:${email}`,
+        async () => {
+          const rows = await db.select().from(users).where(eq(users.email, email)).limit(1);
+          return rows[0] as User | undefined;
+        },
+        CacheTTL.MEDIUM
+      );
+      return result ?? undefined;
     },
 
     async createUser(user: InsertUser) {
@@ -96,12 +118,26 @@ export function createPgStorage(db: Db): IStorage {
 
     async updateUser(id: string, updates: Partial<User>) {
       const [row] = await db.update(users).set(updates).where(eq(users.id, id)).returning();
+
+      // Invalidate user cache
+      await cache.del(CacheKeys.user(id));
+      if (row && row.email) {
+        await cache.del(`user:email:${row.email}`);
+      }
+
       return row as User | undefined;
     },
 
     async getTrip(id: string) {
-      const rows = await db.select().from(trips).where(eq(trips.id, id)).limit(1);
-      return rows[0] as Trip | undefined;
+      const result = await cache.getOrSet(
+        CacheKeys.trip(id),
+        async () => {
+          const rows = await db.select().from(trips).where(eq(trips.id, id)).limit(1);
+          return rows[0] as Trip | undefined;
+        },
+        CacheTTL.SHORT // 2 minutes for trip data
+      );
+      return result ?? undefined;
     },
 
     async getTripByShareCode(code: string) {
@@ -137,30 +173,64 @@ export function createPgStorage(db: Db): IStorage {
 
     async updateTrip(id: string, updates: Partial<Trip>) {
       const [row] = await db.update(trips).set(updates).where(eq(trips.id, id)).returning();
+
+      // Invalidate trip cache
+      await cache.del(CacheKeys.trip(id));
+      await cache.del(CacheKeys.tripMembers(id));
+
       return row as Trip | undefined;
     },
 
     async getTripMembers(tripId: string) {
-      const members = await db.select().from(tripMembers).where(eq(tripMembers.tripId, tripId));
-      const userIds = members.map((m) => m.userId);
-      if (userIds.length === 0) return [];
-      const userRows = await db.select().from(users).where(inArray(users.id, userIds));
-      const userMap = new Map(userRows.map((u) => [u.id, u]));
-      return members.map((m) => ({
-        ...m,
-        user: userMap.get(m.userId)!,
-      })) as (TripMember & { user: User })[];
+      const result = await cache.getOrSet(
+        CacheKeys.tripMembers(tripId),
+        async () => {
+          const members = await db.select().from(tripMembers).where(eq(tripMembers.tripId, tripId));
+          const userIds = members.map((m) => m.userId);
+          if (userIds.length === 0) return [];
+          const userRows = await db.select().from(users).where(inArray(users.id, userIds));
+          const userMap = new Map(userRows.map((u) => [u.id, u]));
+          return members.map((m) => ({
+            ...m,
+            user: userMap.get(m.userId)!,
+          })) as (TripMember & { user: User })[];
+        },
+        CacheTTL.SHORT // 2 minutes for trip members
+      );
+      return result ?? [];
     },
 
     async addTripMember(member: InsertTripMember) {
       const [row] = await db.insert(tripMembers).values({ ...member, rsvpStatus: "accepted" } as typeof tripMembers.$inferInsert).returning();
       if (!row) throw new Error("Failed to add member");
+
+      // Invalidate trip members cache
+      await cache.del(CacheKeys.tripMembers(member.tripId));
+
       return row as TripMember;
     },
 
     async updateTripMember(id: string, updates: Partial<TripMember>) {
       const [row] = await db.update(tripMembers).set(updates).where(eq(tripMembers.id, id)).returning();
+
+      // Invalidate trip members cache
+      if (row) {
+        await cache.del(CacheKeys.tripMembers(row.tripId));
+      }
+
       return row as TripMember | undefined;
+    },
+
+    async getTripMemberById(id: string) {
+      const rows = await db.select().from(tripMembers).where(eq(tripMembers.id, id)).limit(1);
+      return rows[0] as TripMember | undefined;
+    },
+
+    async deleteTripMember(id: string) {
+      const result = await db.delete(tripMembers).where(eq(tripMembers.id, id)).returning();
+      if (result[0]) {
+        await cache.del(CacheKeys.tripMembers(result[0].tripId));
+      }
     },
 
     async isTripMember(tripId: string, userId: string) {
@@ -179,7 +249,7 @@ export function createPgStorage(db: Db): IStorage {
     async createItineraryItem(item: InsertItineraryItem) {
       const [row] = await db
         .insert(itineraryItems)
-        .values({ ...item, bookingStatus: item.bookingStatus ?? "not_started" } as typeof itineraryItems.$inferInsert)
+        .values({ ...item, bookingStatus: "not_started" } as typeof itineraryItems.$inferInsert)
         .returning();
       if (!row) throw new Error("Failed to create itinerary item");
       return row as ItineraryItem;
@@ -188,6 +258,10 @@ export function createPgStorage(db: Db): IStorage {
     async updateItineraryItem(id: string, updates: Partial<ItineraryItem>) {
       const [row] = await db.update(itineraryItems).set(updates).where(eq(itineraryItems.id, id)).returning();
       return row as ItineraryItem | undefined;
+    },
+
+    async deleteItineraryItem(id: string) {
+      await db.delete(itineraryItems).where(eq(itineraryItems.id, id));
     },
 
     async deleteItineraryItemsByTripId(tripId: string) {
@@ -209,6 +283,15 @@ export function createPgStorage(db: Db): IStorage {
       const [row] = await db.insert(comments).values(comment as typeof comments.$inferInsert).returning();
       if (!row) throw new Error("Failed to create comment");
       return row as Comment;
+    },
+
+    async getCommentById(id: string) {
+      const rows = await db.select().from(comments).where(eq(comments.id, id)).limit(1);
+      return rows[0] as Comment | undefined;
+    },
+
+    async deleteComment(id: string) {
+      await db.delete(comments).where(eq(comments.id, id));
     },
 
     async getVotesByItem(itemId: string) {
@@ -336,7 +419,7 @@ export function createPgStorage(db: Db): IStorage {
         .where(eq(chatMessages.tripId, tripId))
         .orderBy(asc(chatMessages.createdAt));
       if (messages.length === 0) return [];
-      const userIds = [...new Set(messages.map((m) => m.userId))];
+      const userIds = Array.from(new Set(messages.map((m) => m.userId)));
       const userRows = await db.select().from(users).where(inArray(users.id, userIds));
       const userMap = new Map(userRows.map((u) => [u.id, u]));
       return messages.map((m) => ({ ...m, user: userMap.get(m.userId)! })) as (ChatMessage & { user: User })[];
@@ -351,7 +434,7 @@ export function createPgStorage(db: Db): IStorage {
     async getPhotosByTrip(tripId: string) {
       const photos = await db.select().from(tripPhotos).where(eq(tripPhotos.tripId, tripId)).orderBy(desc(tripPhotos.createdAt));
       if (photos.length === 0) return [];
-      const userIds = [...new Set(photos.map((p) => p.userId))];
+      const userIds = Array.from(new Set(photos.map((p) => p.userId)));
       const userRows = await db.select().from(users).where(inArray(users.id, userIds));
       const userMap = new Map(userRows.map((u) => [u.id, u]));
       return photos.map((p) => ({ ...p, user: userMap.get(p.userId)! })) as (TripPhoto & { user: User })[];
@@ -370,7 +453,7 @@ export function createPgStorage(db: Db): IStorage {
     async getPollsByTrip(tripId: string) {
       const list = await db.select().from(polls).where(eq(polls.tripId, tripId));
       if (list.length === 0) return [];
-      const userIds = [...new Set(list.map((p) => p.createdByUserId))];
+      const userIds = Array.from(new Set(list.map((p) => p.createdByUserId)));
       const userRows = await db.select().from(users).where(inArray(users.id, userIds));
       const userMap = new Map(userRows.map((u) => [u.id, u]));
       return list.map((p) => ({ ...p, createdBy: userMap.get(p.createdByUserId)! })) as (Poll & { createdBy: User })[];
@@ -405,7 +488,7 @@ export function createPgStorage(db: Db): IStorage {
     async getPackingByTrip(tripId: string) {
       const list = await db.select().from(packingItems).where(eq(packingItems.tripId, tripId));
       if (list.length === 0) return [];
-      const userIds = [...new Set(list.map((p) => p.assignedToUserId).filter(Boolean))] as string[];
+      const userIds = Array.from(new Set(list.map((p) => p.assignedToUserId).filter(Boolean))) as string[];
       if (userIds.length === 0) return list as (PackingItem & { assignedTo?: User })[];
       const userRows = await db.select().from(users).where(inArray(users.id, userIds));
       const userMap = new Map(userRows.map((u) => [u.id, u]));
@@ -430,7 +513,7 @@ export function createPgStorage(db: Db): IStorage {
     async getTransportationByTrip(tripId: string) {
       const list = await db.select().from(transportationEntries).where(eq(transportationEntries.tripId, tripId));
       if (list.length === 0) return [];
-      const userIds = [...new Set(list.map((t) => t.driverUserId).filter(Boolean))] as string[];
+      const userIds = Array.from(new Set(list.map((t) => t.driverUserId).filter(Boolean))) as string[];
       if (userIds.length === 0) return list as (TransportationEntry & { driver?: User })[];
       const userRows = await db.select().from(users).where(inArray(users.id, userIds));
       const userMap = new Map(userRows.map((u) => [u.id, u]));
@@ -476,7 +559,7 @@ export function createPgStorage(db: Db): IStorage {
     async getDocumentsByTrip(tripId: string) {
       const list = await db.select().from(tripDocuments).where(eq(tripDocuments.tripId, tripId));
       if (list.length === 0) return [];
-      const userIds = [...new Set(list.map((d) => d.uploadedByUserId))];
+      const userIds = Array.from(new Set(list.map((d) => d.uploadedByUserId)));
       const userRows = await db.select().from(users).where(inArray(users.id, userIds));
       const userMap = new Map(userRows.map((u) => [u.id, u]));
       return list.map((d) => ({ ...d, uploadedBy: userMap.get(d.uploadedByUserId) })) as (TripDocument & { uploadedBy?: User })[];
@@ -521,7 +604,7 @@ export function createPgStorage(db: Db): IStorage {
     async getMoodBoardByTrip(tripId: string) {
       const list = await db.select().from(moodBoardItems).where(eq(moodBoardItems.tripId, tripId));
       if (list.length === 0) return [];
-      const userIds = [...new Set(list.map((m) => m.addedByUserId))];
+      const userIds = Array.from(new Set(list.map((m) => m.addedByUserId)));
       const userRows = await db.select().from(users).where(inArray(users.id, userIds));
       const userMap = new Map(userRows.map((u) => [u.id, u]));
       return list.map((m) => ({ ...m, addedBy: userMap.get(m.addedByUserId) })) as (MoodBoardItem & { addedBy?: User })[];

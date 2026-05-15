@@ -31,6 +31,35 @@ export function validateEnv(): void {
   if (isProduction && (!process.env.VAPID_PUBLIC_KEY || !process.env.VAPID_PRIVATE_KEY)) {
     console.warn("[env] VAPID_PUBLIC_KEY / VAPID_PRIVATE_KEY not set; web push reminders will use ephemeral keys and may break across restarts.");
   }
+
+  if (isProduction && !process.env.SENTRY_DSN) {
+    console.warn("[env] SENTRY_DSN not set; error tracking disabled. Recommended for production monitoring.");
+  }
+
+  const hasSmtp = process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS;
+  if (isProduction && !hasSmtp) {
+    console.warn("[env] SMTP not configured; email features (password reset, invites) will be disabled. Set SMTP_* variables to enable.");
+  }
+
+  if (isProduction && !process.env.REDIS_URL) {
+    console.warn("[env] REDIS_URL not set; using in-memory cache. Redis recommended for production for better performance and session management.");
+  }
+
+  const hasAwsS3 = process.env.AWS_ACCESS_KEY_ID && process.env.AWS_SECRET_ACCESS_KEY && process.env.AWS_S3_BUCKET;
+  const hasR2 = process.env.R2_ACCOUNT_ID && process.env.R2_ACCESS_KEY_ID && process.env.R2_SECRET_ACCESS_KEY && process.env.R2_BUCKET_NAME;
+
+  if (isProduction && !hasAwsS3 && !hasR2) {
+    console.warn("[env] Cloud storage (S3 or R2) not configured; file uploads will be disabled. Set AWS_* or R2_* variables to enable.");
+  }
+
+  const hasStripe = process.env.STRIPE_SECRET_KEY &&
+                    process.env.STRIPE_WEBHOOK_SECRET &&
+                    process.env.STRIPE_PRICE_PRO_MONTHLY &&
+                    process.env.STRIPE_PRICE_PRO_ANNUAL;
+
+  if (isProduction && !hasStripe) {
+    console.warn("[env] Stripe not fully configured; billing features will be disabled. Set STRIPE_* variables to enable.");
+  }
 }
 
 export const env = {
@@ -98,7 +127,7 @@ export const env = {
   get corsOrigin(): string | undefined {
     return process.env.CORS_ORIGIN;
   },
-  /** SMTP (future: email notifications) */
+  /** SMTP (email notifications for invites, password resets) */
   get smtpHost(): string | undefined {
     return process.env.SMTP_HOST;
   },
@@ -110,6 +139,9 @@ export const env = {
   },
   get smtpPass(): string | undefined {
     return process.env.SMTP_PASS;
+  },
+  get smtpFrom(): string {
+    return process.env.SMTP_FROM ?? "noreply@tripsync.app";
   },
   /** Where to receive contact form submissions (e.g. support@tripsync.app). If set with SMTP, contact form sends email here. */
   get contactEmail(): string | undefined {
@@ -124,5 +156,32 @@ export const env = {
   },
   get awsS3Bucket(): string | undefined {
     return process.env.AWS_S3_BUCKET;
+  },
+  get awsRegion(): string {
+    return process.env.AWS_REGION ?? "us-east-1";
+  },
+  /** Cloudflare R2 (S3-compatible alternative) */
+  get r2AccountId(): string | undefined {
+    return process.env.R2_ACCOUNT_ID;
+  },
+  get r2AccessKeyId(): string | undefined {
+    return process.env.R2_ACCESS_KEY_ID;
+  },
+  get r2SecretAccessKey(): string | undefined {
+    return process.env.R2_SECRET_ACCESS_KEY;
+  },
+  get r2BucketName(): string | undefined {
+    return process.env.R2_BUCKET_NAME;
+  },
+  get r2PublicUrl(): string | undefined {
+    return process.env.R2_PUBLIC_URL;
+  },
+  /** Redis (caching and session management) */
+  get redisUrl(): string | undefined {
+    return process.env.REDIS_URL;
+  },
+  /** Sentry (error tracking and performance monitoring) */
+  get sentryDsn(): string | undefined {
+    return process.env.SENTRY_DSN;
   },
 };

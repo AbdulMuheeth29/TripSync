@@ -26,7 +26,7 @@ class EmailService {
     this.fromEmail = process.env.SMTP_FROM || "noreply@tripsync.app";
 
     if (smtpHost && smtpUser && smtpPass) {
-      this.transporter = nodemailer.createTransporter({
+      this.transporter = nodemailer.createTransport({
         host: smtpHost,
         port: smtpPort,
         secure: smtpPort === 465, // Use TLS if port is 465
@@ -359,6 +359,84 @@ Have an amazing trip!
     await this.sendEmail({
       to: toEmail,
       subject: `✈️ Your ${tripDestination} trip starts tomorrow!`,
+      html,
+      text,
+    });
+  }
+
+  /**
+   * Send password reset email
+   */
+  async sendPasswordResetEmail(toEmail: string, userName: string, resetUrl: string): Promise<void> {
+    const html = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <style>
+          body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #333; }
+          .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+          .header { background: #dc2626; color: white; padding: 30px; text-align: center; border-radius: 8px 8px 0 0; }
+          .content { background: #f9fafb; padding: 30px; border-radius: 0 0 8px 8px; }
+          .button { display: inline-block; padding: 12px 24px; background: #dc2626; color: white; text-decoration: none; border-radius: 6px; margin: 20px 0; }
+          .warning { background: #fee2e2; padding: 15px; border-left: 4px solid #dc2626; margin: 20px 0; }
+          .footer { text-align: center; padding: 20px; color: #6b7280; font-size: 14px; }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="header">
+            <h1>🔒 Password Reset Request</h1>
+          </div>
+          <div class="content">
+            <p>Hi ${userName},</p>
+            <p>We received a request to reset the password for your TripSync account.</p>
+
+            <p>Click the button below to reset your password:</p>
+            <a href="${resetUrl}" class="button">Reset Password</a>
+
+            <p style="color: #6b7280; font-size: 14px;">Or copy this link: ${resetUrl}</p>
+
+            <div class="warning">
+              <p><strong>⚠️ Important:</strong></p>
+              <ul style="margin: 10px 0;">
+                <li>This link expires in 1 hour</li>
+                <li>If you didn't request this, please ignore this email</li>
+                <li>Your password will not change until you click the link above</li>
+              </ul>
+            </div>
+
+            <p>For security reasons, we can't help you reset your password via email or phone. You must use the reset link above.</p>
+          </div>
+          <div class="footer">
+            <p>Sent by TripSync | <a href="${process.env.APP_URL || 'http://localhost:3000'}">Visit Website</a></p>
+            <p>If you have concerns about this email, contact us immediately.</p>
+          </div>
+        </div>
+      </body>
+      </html>
+    `;
+
+    const text = `
+Password Reset Request
+
+Hi ${userName},
+
+We received a request to reset the password for your TripSync account.
+
+Click this link to reset your password:
+${resetUrl}
+
+⚠️ Important:
+- This link expires in 1 hour
+- If you didn't request this, please ignore this email
+- Your password will not change until you click the link above
+
+For security reasons, we can't help you reset your password via email or phone. You must use the reset link above.
+    `;
+
+    await this.sendEmail({
+      to: toEmail,
+      subject: '🔒 Reset your TripSync password',
       html,
       text,
     });

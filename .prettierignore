@@ -1,0 +1,13 @@
+node_modules
+dist
+build
+coverage
+.next
+.nuxt
+.output
+.vite
+*.min.js
+*.min.css
+package-lock.json
+pnpm-lock.yaml
+yarn.lock

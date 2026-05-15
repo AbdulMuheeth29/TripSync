@@ -1,0 +1,41 @@
+# TripSync Robots.txt
+# Allow all bots to crawl public pages
+
+User-agent: *
+Allow: /
+Disallow: /dashboard
+Disallow: /trip/
+Disallow: /admin/
+Disallow: /api/
+
+# Sitemap location
+Sitemap: https://tripsync.app/sitemap.xml
+
+# Crawl delay (optional - adjust based on server capacity)
+# Crawl-delay: 1
+
+# Common bot-specific rules
+User-agent: Googlebot
+Allow: /
+
+User-agent: Bingbot
+Allow: /
+
+User-agent: Slurp
+Allow: /
+
+# Block AI scrapers (optional - uncomment if you want to block)
+# User-agent: GPTBot
+# Disallow: /
+
+# User-agent: ChatGPT-User
+# Disallow: /
+
+# User-agent: CCBot
+# Disallow: /
+
+# User-agent: anthropic-ai
+# Disallow: /
+
+# User-agent: Claude-Web
+# Disallow: /

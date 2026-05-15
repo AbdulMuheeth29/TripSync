@@ -7,6 +7,7 @@ import type { Express, Request, Response } from "express";
 import multer from "multer";
 import { cloudStorage } from "./cloud-storage";
 import { requireAuth } from "./auth";
+import { getParam } from "./route-utils";
 
 // File size limits
 const MAX_IMAGE_SIZE = 25 * 1024 * 1024; // 25MB
@@ -284,7 +285,7 @@ export function registerUploadRoutes(app: Express) {
           });
         }
 
-        const { key } = req.params;
+        const key = getParam(req.params.key);
         if (!key) {
           return res.status(400).json({
             error: "File key required",
@@ -324,7 +325,7 @@ export function registerUploadRoutes(app: Express) {
           });
         }
 
-        const { key } = req.params;
+        const key = getParam(req.params.key);
         const expiresIn = parseInt(req.query.expiresIn as string) || 3600;
 
         if (!key) {

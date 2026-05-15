@@ -658,7 +658,7 @@ function ItineraryItemCard({
   groupDietSummary?: string;
   hasAccessibilityPrefs?: boolean;
   onDeleteItem?: (itemId: string) => void;
-  onDeleteComment?: (commentId: string) => void;
+  onDeleteComment?: (itemId: string, commentId: string) => void;
 }) {
   const [showComments, setShowComments] = useState(false);
   const [showVoteBreakdown, setShowVoteBreakdown] = useState(false);
@@ -1528,7 +1528,7 @@ export default function TripDetailPage() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/trips", tripId] });
-      setPollForm({ question: "", optionA: "", optionB: "" });
+      setPollForm({ question: "", options: ["", ""] });
       toast({ title: "Poll created", description: "Group can vote now." });
     },
   });
@@ -2077,7 +2077,7 @@ export default function TripDetailPage() {
   const bookedCount = items.filter((i) => i.bookingStatus === "booked").length;
   const progressPercent = items.length > 0 ? (bookedCount / items.length) * 100 : 0;
 
-  const groupDiets = [...new Set(preferences.map((p) => p.diet).filter(Boolean))] as string[];
+  const groupDiets = Array.from(new Set(preferences.map((p) => p.diet).filter(Boolean))) as string[];
   const groupDietSummary = groupDiets.length ? groupDiets.join(", ") : undefined;
   const hasAccessibilityPrefs = preferences.some((p) => (p as { accessibility?: string }).accessibility);
 
@@ -2256,7 +2256,7 @@ export default function TripDetailPage() {
                   <p className="font-medium">Automatic booking reminder</p>
                   <p className="text-sm text-muted-foreground">You have {unbookedCount} unbooked item{unbookedCount !== 1 ? "s" : ""}, trip is in {daysUntilTrip} days.</p>
                 </div>
-                <Button variant="outline" size="sm" onClick={() => document.querySelector('[data-testid="tab-itinerary"]')?.click()}>View itinerary</Button>
+                <Button variant="outline" size="sm" onClick={() => (document.querySelector('[data-testid="tab-itinerary"]') as HTMLElement)?.click()}>View itinerary</Button>
               </CardContent>
             </Card>
           )}
@@ -2733,7 +2733,7 @@ export default function TripDetailPage() {
                         .map((item) => (
                           <ItineraryItemCard
                             key={item.id}
-                            item={item}
+                            item={{ ...item, locked: item.locked ?? undefined } as ItineraryItem & { locked?: boolean; bookedByUserId?: string | null }}
                             comments={comments[item.id] || []}
                             votes={votes[item.id] || { up: 0, down: 0, abstain: 0 }}
                             voteDetails={voteDetails[item.id]}
@@ -2783,7 +2783,7 @@ export default function TripDetailPage() {
                     todayItems.map((item) => (
                       <ItineraryItemCard
                         key={item.id}
-                        item={item}
+                        item={{ ...item, locked: item.locked ?? undefined } as ItineraryItem & { locked?: boolean; bookedByUserId?: string | null }}
                         comments={comments[item.id] || []}
                         votes={votes[item.id] || { up: 0, down: 0, abstain: 0 }}
                         voteDetails={voteDetails[item.id]}
@@ -2816,7 +2816,7 @@ export default function TripDetailPage() {
                     </div>
                   ))}
                   {todayItems.length === 0 && <p className="text-sm text-muted-foreground">No events today.</p>}
-                  <PushRemindersButton tripId={tripId} toast={toast} />
+                  <PushRemindersButton tripId={tripId!} toast={toast} />
                 </CardContent>
               </Card>
             </TabsContent>
@@ -2831,7 +2831,7 @@ export default function TripDetailPage() {
               <CardContent className="space-y-3 max-h-[500px] overflow-y-auto">
                 {(() => {
                   const itemNameMap = Object.fromEntries(items.map((i) => [i.id, i.name]));
-                  const allComments = Object.entries(comments).flatMap(([itemId, arr]) => (arr ?? []).map((c: { id: string; userId: string; content: string; createdAt: string }) => ({ ...c, itemId, itemName: itemNameMap[itemId] ?? "an item" })));
+                  const allComments = Object.entries(comments).flatMap(([itemId, arr]) => (arr ?? []).map((c) => ({ ...c, itemId, itemName: itemNameMap[itemId] ?? "an item" })));
                   const entries: { type: string; id: string; at: string; text: string }[] = [
                     ...expenses.map((e) => {
                       const payer = members.find((m) => m.id === e.paidByUserId);
@@ -2844,10 +2844,10 @@ export default function TripDetailPage() {
                     }),
                     ...items.map((i) => ({ type: "itinerary", id: i.id, at: i.createdAt, text: `Itinerary item added: ${i.name} (Day ${i.dayNumber})` })),
                     ...photos.map((p) => ({ type: "photo", id: p.id, at: p.createdAt, text: `${p.user?.name ?? "Someone"} added a photo${p.caption ? `: ${p.caption}` : ""}` })),
-                    ...(pollsList ?? []).map((p) => ({ type: "poll", id: p.id, at: p.createdAt, text: `${p.createdBy?.name ?? "Someone"} created poll: ${p.question}` })),
+                    ...(pollsList ?? []).map((p) => ({ type: "poll", id: p.id, at: (p as any).createdAt || new Date().toISOString(), text: `${p.createdBy?.name ?? "Someone"} created poll: ${p.question}` })),
                     ...(preferences ?? []).map((p) => {
                       const u = p.user ?? members.find((m) => m.id === p.userId);
-                      return { type: "preference", id: p.id, at: p.createdAt, text: `${u?.name ?? "Someone"} set trip preferences` };
+                      return { type: "preference", id: p.id, at: (p as any).createdAt || new Date().toISOString(), text: `${u?.name ?? "Someone"} set trip preferences` };
                     }),
                   ];
                   const sorted = entries.sort((a, b) => new Date(b.at).getTime() - new Date(a.at).getTime()).slice(0, 30);
@@ -3306,7 +3306,7 @@ export default function TripDetailPage() {
                   key={expense.id}
                   expense={expense}
                   members={members}
-                  tripId={tripId}
+                  tripId={tripId!}
                   onUpdate={() => {}}
                   convert={convertCurrency}
                   displayCurrency={expenseDisplayCurrency}
@@ -4093,7 +4093,7 @@ export default function TripDetailPage() {
                 {emergencyContacts.length === 0 && <p className="text-muted-foreground text-sm">No emergency contacts yet.</p>}
               </CardContent>
             </Card>
-            <LocationSharingCard tripId={tripId} locationSharing={locationSharing} currentUserId={user?.id ?? ""} />
+            <LocationSharingCard tripId={tripId!} locationSharing={locationSharing} currentUserId={user?.id ?? ""} />
           </TabsContent>
 
           <TabsContent value="analytics" className="space-y-6">

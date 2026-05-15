@@ -8,7 +8,7 @@ function getStripe(): Stripe {
   if (!stripe) {
     const key = env.stripeSecretKey;
     if (!key) throw new Error("STRIPE_SECRET_KEY is not set");
-    stripe = new Stripe(key, { apiVersion: "2024-11-20.acacia" });
+    stripe = new Stripe(key, { apiVersion: "2026-01-28.clover" });
   }
   return stripe;
 }
@@ -70,7 +70,7 @@ export async function handleWebhook(rawBody: Buffer, signature: string): Promise
       if (userId && session.subscription) {
         const subId = typeof session.subscription === "string" ? session.subscription : session.subscription.id;
         const subscription = await stripeApi.subscriptions.retrieve(subId);
-        const periodEnd = subscription.current_period_end;
+        const periodEnd = (subscription as any).current_period_end;
         const customerId = typeof session.customer === "string" ? session.customer : session.customer?.id;
         await storage.updateUser(userId, {
           subscriptionTier: tier,
@@ -84,7 +84,7 @@ export async function handleWebhook(rawBody: Buffer, signature: string): Promise
       const subscription = event.data.object as Stripe.Subscription;
       const userId = subscription.metadata?.userId;
       if (userId) {
-        const periodEnd = subscription.current_period_end;
+        const periodEnd = (subscription as any).current_period_end;
         const tier = (subscription.metadata?.tier as string) || "pro";
         const active = subscription.status === "active" || subscription.status === "trialing";
         await storage.updateUser(userId, {

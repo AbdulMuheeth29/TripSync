@@ -12,9 +12,20 @@ import { getDb } from "./db";
 import { registerRoutes } from "./routes";
 import { serveStatic } from "./static";
 import { createServer } from "http";
+import {
+  initSentry,
+  sentryRequestHandler,
+  sentryTracingHandler,
+  sentryErrorHandler,
+  captureException,
+} from "./sentry";
+import { httpLogger, correlationIdMiddleware, appLogger } from "./logger";
 
 const app = express();
 const httpServer = createServer(app);
+
+// Initialize Sentry FIRST (before any other middleware)
+initSentry(app);
 
 const isProduction = process.env.NODE_ENV === "production";
 if (isProduction) {
@@ -24,6 +35,16 @@ if (isProduction) {
 // Security headers (Helmet) and compression (deployment guide)
 app.use(helmet({ contentSecurityPolicy: false }));
 app.use(compression());
+
+// Sentry request and tracing handlers (must be before routes)
+app.use(sentryRequestHandler());
+app.use(sentryTracingHandler());
+
+// Request correlation IDs (before HTTP logger)
+app.use(correlationIdMiddleware());
+
+// Structured HTTP request logging
+app.use(httpLogger());
 
 // CORS when serving API separately (set CORS_ORIGIN e.g. https://yourdomain.com)
 if (env.corsOrigin) {
@@ -58,42 +79,11 @@ app.use(
 
 app.use(express.urlencoded({ extended: false }));
 
+// Legacy log function for backward compatibility
+// New code should use appLogger.* methods instead
 export function log(message: string, source = "express") {
-  const formattedTime = new Date().toLocaleTimeString("en-US", {
-    hour: "numeric",
-    minute: "2-digit",
-    second: "2-digit",
-    hour12: true,
-  });
-
-  console.log(`${formattedTime} [${source}] ${message}`);
+  appLogger.debug(message, { source });
 }
-
-app.use((req, res, next) => {
-  const start = Date.now();
-  const path = req.path;
-  let capturedJsonResponse: Record<string, any> | undefined = undefined;
-
-  const originalResJson = res.json;
-  res.json = function (bodyJson, ...args) {
-    capturedJsonResponse = bodyJson;
-    return originalResJson.apply(res, [bodyJson, ...args]);
-  };
-
-  res.on("finish", () => {
-    const duration = Date.now() - start;
-    if (path.startsWith("/api")) {
-      let logLine = `${req.method} ${path} ${res.statusCode} in ${duration}ms`;
-      if (capturedJsonResponse) {
-        logLine += ` :: ${JSON.stringify(capturedJsonResponse)}`;
-      }
-
-      log(logLine);
-    }
-  });
-
-  next();
-});
 
 validateEnv();
 
@@ -102,9 +92,12 @@ validateEnv();
   if (env.vapidPublicKey && env.vapidPrivateKey) {
     try {
       setVapidKeys(env.vapidPublicKey, env.vapidPrivateKey);
-      log("VAPID keys configured from environment", "push");
+      appLogger.database("VAPID keys configured from environment", { service: "push" });
     } catch (err) {
-      console.warn("[push] Failed to configure VAPID keys from environment:", err);
+      appLogger.warn("Failed to configure VAPID keys from environment", {
+        service: "push",
+        error: err instanceof Error ? err.message : String(err),
+      });
     }
   }
 
@@ -115,9 +108,12 @@ validateEnv();
       try {
         const db = getDb();
         await migrate(db, { migrationsFolder: migrationsDir });
-        log("migrations applied");
+        appLogger.migration("migrations applied");
       } catch (err) {
-        console.error("Migration failed:", err);
+        appLogger.error(
+          err instanceof Error ? err : new Error(String(err)),
+          { context: "migration" }
+        );
         process.exit(1);
       }
     }
@@ -145,11 +141,38 @@ validateEnv();
   const { registerAdminRoutes } = await import("./admin/admin-routes");
   registerAdminRoutes(app);
 
+  // Sentry error handler (must be before other error handlers)
+  app.use(sentryErrorHandler());
+
+  // Custom error handler
   app.use((err: any, _req: Request, res: Response, next: NextFunction) => {
     const status = err.status || err.statusCode || 500;
     const message = err.message || "Internal Server Error";
 
-    console.error("Internal Server Error:", err);
+    // Log error with structured logging and capture in Sentry for 500 errors
+    if (status >= 500) {
+      appLogger.error(err, {
+        http: {
+          status_code: status,
+          method: _req.method,
+          url: _req.url,
+        },
+      });
+      captureException(err, {
+        http: {
+          status_code: status,
+          method: _req.method,
+          url: _req.url,
+        },
+      });
+    } else {
+      appLogger.warn(`HTTP ${status} error`, {
+        status,
+        method: _req.method,
+        url: _req.url,
+        message: err.message,
+      });
+    }
 
     if (res.headersSent) {
       return next(err);
@@ -173,13 +196,135 @@ validateEnv();
 
   function tryListen(port: number) {
     httpServer.listen(port, host, () => {
-      log(`serving on http://${host === "0.0.0.0" ? "localhost" : host}:${port}`);
+      const displayHost = host === "0.0.0.0" ? "localhost" : host;
+      appLogger.startup(displayHost, port);
+
+      // Start periodic cleanup jobs
+      cleanupInterval = startPeriodicCleanup();
     });
   }
 
+  // Periodic cleanup of expired tokens and old data
+  function startPeriodicCleanup(): NodeJS.Timeout {
+    // Run cleanup every hour
+    const interval = setInterval(async () => {
+      try {
+        const { cleanupExpiredTokens } = await import("./password-reset-service");
+        await cleanupExpiredTokens();
+
+        // Also cleanup old Atlas notifications
+        const { atlasProactive } = await import("./atlas-proactive-service");
+        await atlasProactive.clearOldNotifications();
+      } catch (error) {
+        appLogger.error(
+          error instanceof Error ? error : new Error(String(error)),
+          { context: "periodic_cleanup" }
+        );
+      }
+    }, 60 * 60 * 1000); // 1 hour
+
+    appLogger.debug("Periodic cleanup job started");
+
+    // Start Atlas proactive monitoring
+    (async () => {
+      try {
+        const { atlasProactive } = await import("./atlas-proactive-service");
+        atlasProactive.startMonitoring();
+      } catch (error) {
+        appLogger.error(
+          error instanceof Error ? error : new Error(String(error)),
+          { context: "atlas_proactive_startup" }
+        );
+      }
+    })();
+
+    return interval;
+  }
+
+  // Graceful shutdown handling
+  let isShuttingDown = false;
+  let cleanupInterval: NodeJS.Timeout | null = null;
+
+  function gracefulShutdown(signal: string) {
+    if (isShuttingDown) {
+      appLogger.warn('Shutdown already in progress');
+      return;
+    }
+
+    isShuttingDown = true;
+    appLogger.warn(`${signal} received, starting graceful shutdown`);
+
+    // Stop accepting new connections
+    httpServer.close(async (err) => {
+      if (err) {
+        appLogger.error(err instanceof Error ? err : new Error(String(err)), {
+          context: 'http_server_close',
+        });
+      } else {
+        appLogger.debug('HTTP server closed');
+      }
+
+      try {
+        // Stop periodic cleanup job
+        if (cleanupInterval) {
+          clearInterval(cleanupInterval);
+          appLogger.debug('Stopped periodic cleanup job');
+        }
+
+        // Stop Atlas proactive monitoring
+        const { atlasProactive } = await import('./atlas-proactive-service');
+        atlasProactive.stopMonitoring();
+        appLogger.debug('Stopped Atlas monitoring');
+
+        // Shutdown token blacklist service
+        const { tokenBlacklist } = await import('./token-blacklist');
+        await tokenBlacklist.shutdown();
+        appLogger.debug('Token blacklist shut down');
+
+        // Shutdown Redis cache
+        const { cache } = await import('./cache');
+        await cache.shutdown();
+        appLogger.debug('Redis cache shut down');
+
+        appLogger.warn('Graceful shutdown complete');
+        process.exit(0);
+      } catch (error) {
+        appLogger.error(error instanceof Error ? error : new Error(String(error)), {
+          context: 'graceful_shutdown',
+        });
+        process.exit(1);
+      }
+    });
+
+    // Force shutdown after 30 seconds if graceful shutdown hangs
+    setTimeout(() => {
+      appLogger.error(new Error('Graceful shutdown timeout, forcing exit'));
+      process.exit(1);
+    }, 30000);
+  }
+
+  // Register shutdown handlers
+  process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
+  process.on('SIGINT', () => gracefulShutdown('SIGINT'));
+
+  // Handle uncaught exceptions
+  process.on('uncaughtException', (error) => {
+    appLogger.error(error, { context: 'uncaught_exception' });
+    gracefulShutdown('UNCAUGHT_EXCEPTION');
+  });
+
+  // Handle unhandled promise rejections
+  process.on('unhandledRejection', (reason) => {
+    appLogger.error(
+      reason instanceof Error ? reason : new Error(String(reason)),
+      { context: 'unhandled_rejection' }
+    );
+    gracefulShutdown('UNHANDLED_REJECTION');
+  });
+
   httpServer.on("error", (err: NodeJS.ErrnoException) => {
     if (err.code === "EADDRINUSE" && preferredPort === 3000) {
-      log(`port ${preferredPort} in use, trying ${preferredPort + 1}`);
+      appLogger.warn(`Port ${preferredPort} in use, trying ${preferredPort + 1}`);
       tryListen(preferredPort + 1);
     } else {
       throw err;

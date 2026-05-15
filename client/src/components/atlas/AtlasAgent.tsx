@@ -631,8 +631,8 @@ function AtlasAgentInner({ pathname }: { pathname: string }) {
           </div>
 
           <div className="flex-1 flex flex-col">
-            <ScrollArea className="h-[260px]" viewportRef={scrollRef}>
-              <div className="px-3 py-3 space-y-2 text-sm">
+            <ScrollArea className="h-[260px]">
+              <div ref={scrollRef} className="px-3 py-3 space-y-2 text-sm">
                 {proactiveTriggers.length > 0 && (
                   <div className="mb-2 space-y-2">
                     {proactiveTriggers.map((t) => (

@@ -11,7 +11,8 @@ export async function requireTripAccess(
   next: NextFunction
 ) {
   const userId = (req as any).userId;
-  const tripId = req.params.tripId || req.params.id;
+  const tripIdParam = req.params.tripId || req.params.id;
+  const tripId = Array.isArray(tripIdParam) ? tripIdParam[0] : tripIdParam;
 
   if (!userId) {
     return res.status(401).json({

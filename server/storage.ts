@@ -210,6 +210,10 @@ export class MemStorage implements IStorage {
       id: "demo-user-1",
       email: "demo@tripsync.com",
       name: "Demo User",
+      passwordHash: "",
+      subscriptionTier: "free",
+      subscriptionExpiresAt: null,
+      stripeCustomerId: null,
       createdAt: new Date(),
     };
     this.users.set(demoUser.id, demoUser);
@@ -218,6 +222,7 @@ export class MemStorage implements IStorage {
     const miamiTrip: Trip = {
       id: "trip-miami-1",
       organizerId: demoUser.id,
+      title: null,
       destination: "Miami, FL",
       startDate: "2026-05-15",
       endDate: "2026-05-18",
@@ -226,9 +231,14 @@ export class MemStorage implements IStorage {
       vibes: ["nightlife", "relaxing"],
       accommodationPref: "hotel",
       diningPref: "mix",
+      tripType: null,
       status: "planning",
       isLocked: false,
+      voteDeadline: null,
+      timezone: null,
       shareCode: "MIAMI2026",
+      coverImageUrl: null,
+      recapText: null,
       createdAt: new Date(),
     };
     this.trips.set(miamiTrip.id, miamiTrip);
@@ -239,6 +249,7 @@ export class MemStorage implements IStorage {
       tripId: miamiTrip.id,
       userId: demoUser.id,
       role: "organizer",
+      rsvpStatus: "accepted",
       joinedAt: new Date(),
     };
     this.tripMembers.set(miamiMember.id, miamiMember);
@@ -382,7 +393,15 @@ export class MemStorage implements IStorage {
     miamiItems.forEach((item) => {
       const fullItem: ItineraryItem = {
         ...item,
+        bookingUrlHint: item.bookingUrlHint ?? null,
+        bookingUrl: item.bookingUrl ?? null,
+        bookedByUserId: item.bookedByUserId ?? null,
+        endTime: item.endTime ?? null,
+        confirmationNumber: item.confirmationNumber ?? null,
+        confirmationImageUrl: item.confirmationImageUrl ?? null,
         bookingStatus: "suggested",
+        locked: null,
+        sortOrder: null,
         createdAt: new Date(),
       };
       this.itineraryItems.set(item.id, fullItem);
@@ -392,6 +411,7 @@ export class MemStorage implements IStorage {
     const austinTrip: Trip = {
       id: "trip-austin-1",
       organizerId: demoUser.id,
+      title: null,
       destination: "Austin, TX",
       startDate: "2026-06-08",
       endDate: "2026-06-10",
@@ -400,9 +420,14 @@ export class MemStorage implements IStorage {
       vibes: ["foodie", "adventure"],
       accommodationPref: "airbnb",
       diningPref: "casual",
+      tripType: null,
       status: "planning",
       isLocked: false,
+      voteDeadline: null,
+      timezone: null,
       shareCode: "AUSTIN2026",
+      coverImageUrl: null,
+      recapText: null,
       createdAt: new Date(),
     };
     this.trips.set(austinTrip.id, austinTrip);
@@ -413,6 +438,7 @@ export class MemStorage implements IStorage {
       tripId: austinTrip.id,
       userId: demoUser.id,
       role: "organizer",
+      rsvpStatus: "accepted",
       joinedAt: new Date(),
     };
     this.tripMembers.set(austinMember.id, austinMember);
@@ -568,7 +594,15 @@ export class MemStorage implements IStorage {
     austinItems.forEach((item) => {
       const fullItem: ItineraryItem = {
         ...item,
+        bookingUrlHint: item.bookingUrlHint ?? null,
+        bookingUrl: item.bookingUrl ?? null,
+        bookedByUserId: item.bookedByUserId ?? null,
+        endTime: item.endTime ?? null,
+        confirmationNumber: item.confirmationNumber ?? null,
+        confirmationImageUrl: item.confirmationImageUrl ?? null,
         bookingStatus: "suggested",
+        locked: null,
+        sortOrder: null,
         createdAt: new Date(),
       };
       this.itineraryItems.set(item.id, fullItem);
@@ -632,7 +666,13 @@ export class MemStorage implements IStorage {
     const shareCode = Math.random().toString(36).substring(2, 10).toUpperCase();
     const newTrip: Trip = {
       ...trip,
-      status: trip.status || "planning",
+      title: trip.title ?? null,
+      tripType: trip.tripType ?? null,
+      voteDeadline: trip.voteDeadline ?? null,
+      timezone: trip.timezone ?? null,
+      coverImageUrl: null,
+      recapText: trip.recapText ?? null,
+      status: "planning",
       isLocked: false,
       shareCode,
       createdAt: new Date(),
@@ -677,6 +717,7 @@ export class MemStorage implements IStorage {
   async addTripMember(member: InsertTripMember): Promise<TripMember> {
     const newMember: TripMember = {
       ...member,
+      role: member.role ?? "member",
       rsvpStatus: "accepted",
       joinedAt: new Date(),
     };
@@ -716,7 +757,15 @@ export class MemStorage implements IStorage {
   async createItineraryItem(item: InsertItineraryItem): Promise<ItineraryItem> {
     const newItem: ItineraryItem = {
       ...item,
+      bookingUrlHint: item.bookingUrlHint ?? null,
+      bookingUrl: item.bookingUrl ?? null,
+      bookedByUserId: item.bookedByUserId ?? null,
+      endTime: item.endTime ?? null,
+      confirmationNumber: item.confirmationNumber ?? null,
+      confirmationImageUrl: item.confirmationImageUrl ?? null,
       bookingStatus: "not_started",
+      locked: null,
+      sortOrder: null,
       createdAt: new Date(),
     };
     this.itineraryItems.set(item.id, newItem);
@@ -735,16 +784,16 @@ export class MemStorage implements IStorage {
   async deleteItineraryItem(id: string): Promise<void> {
     this.itineraryItems.delete(id);
     // Also delete related comments and votes
-    for (const [commentId, comment] of this.comments.entries()) {
+    for (const [commentId, comment] of Array.from(this.comments.entries())) {
       if (comment.itemId === id) this.comments.delete(commentId);
     }
-    for (const [voteId, vote] of this.votes.entries()) {
+    for (const [voteId, vote] of Array.from(this.votes.entries())) {
       if (vote.itemId === id) this.votes.delete(voteId);
     }
   }
 
   async deleteItineraryItemsByTripId(tripId: string): Promise<void> {
-    for (const [id, item] of this.itineraryItems.entries()) {
+    for (const [id, item] of Array.from(this.itineraryItems.entries())) {
       if (item.tripId === tripId) {
         await this.deleteItineraryItem(id);
       }
@@ -777,6 +826,14 @@ export class MemStorage implements IStorage {
     };
     this.comments.set(comment.id, newComment);
     return newComment;
+  }
+
+  async getCommentById(id: string): Promise<Comment | undefined> {
+    return this.comments.get(id);
+  }
+
+  async deleteComment(id: string): Promise<void> {
+    this.comments.delete(id);
   }
 
   // Votes
@@ -828,6 +885,10 @@ export class MemStorage implements IStorage {
   async createExpense(expense: InsertExpense): Promise<Expense> {
     const newExpense: Expense = {
       ...expense,
+      location: expense.location ?? null,
+      itemId: expense.itemId ?? null,
+      receiptImageUrl: expense.receiptImageUrl ?? null,
+      currency: "USD",
       isSettled: false,
       createdAt: new Date(),
     };
@@ -868,6 +929,7 @@ export class MemStorage implements IStorage {
   async createInvite(invite: InsertTripInvite): Promise<TripInvite> {
     const newInvite: TripInvite = {
       ...invite,
+      status: invite.status ?? "pending",
       createdAt: new Date(),
     };
     this.tripInvites.set(invite.id, newInvite);
@@ -929,6 +991,7 @@ export class MemStorage implements IStorage {
   async createChatMessage(msg: InsertChatMessage): Promise<ChatMessage> {
     const newMsg: ChatMessage = {
       ...msg,
+      itemId: msg.itemId ?? null,
       createdAt: new Date(),
     };
     this.chatMessages.set(msg.id, newMsg);
@@ -944,7 +1007,11 @@ export class MemStorage implements IStorage {
   }
 
   async createTripPhoto(photo: InsertTripPhoto): Promise<TripPhoto> {
-    const newPhoto: TripPhoto = { ...photo, createdAt: new Date() };
+    const newPhoto: TripPhoto = {
+      ...photo,
+      caption: photo.caption ?? null,
+      createdAt: new Date(),
+    };
     this.tripPhotos.set(photo.id, newPhoto);
     return newPhoto;
   }
@@ -959,7 +1026,12 @@ export class MemStorage implements IStorage {
   }
 
   async createPoll(poll: InsertPoll): Promise<Poll> {
-    const newPoll: Poll = { ...poll, status: "open", createdAt: new Date() };
+    const newPoll: Poll = {
+      ...poll,
+      deadline: poll.deadline ?? null,
+      status: "open",
+      createdAt: new Date(),
+    };
     this.polls.set(poll.id, newPoll);
     return newPoll;
   }
@@ -994,7 +1066,13 @@ export class MemStorage implements IStorage {
   }
 
   async createPackingItem(item: InsertPackingItem): Promise<PackingItem> {
-    const newItem: PackingItem = { ...item, createdAt: new Date() };
+    const newItem: PackingItem = {
+      ...item,
+      assignedToUserId: item.assignedToUserId ?? null,
+      notes: item.notes ?? null,
+      packed: item.packed ?? null,
+      createdAt: new Date(),
+    };
     this.packingItems.set(item.id, newItem);
     return newItem;
   }
@@ -1017,7 +1095,13 @@ export class MemStorage implements IStorage {
   }
 
   async createTransportationEntry(entry: InsertTransportationEntry): Promise<TransportationEntry> {
-    const newEntry: TransportationEntry = { ...entry, createdAt: new Date() };
+    const newEntry: TransportationEntry = {
+      ...entry,
+      notes: entry.notes ?? null,
+      driverUserId: entry.driverUserId ?? null,
+      passengerUserIds: entry.passengerUserIds ?? null,
+      createdAt: new Date(),
+    };
     this.transportationEntries.set(entry.id, newEntry);
     return newEntry;
   }
@@ -1059,7 +1143,13 @@ export class MemStorage implements IStorage {
 
   async createTripDocument(doc: InsertTripDocument): Promise<TripDocument> {
     const id = doc.id ?? randomUUID();
-    const newDoc: TripDocument = { ...doc, id, createdAt: new Date() };
+    const newDoc: TripDocument = {
+      ...doc,
+      id,
+      notes: doc.notes ?? null,
+      expiryDate: doc.expiryDate ?? null,
+      createdAt: new Date(),
+    };
     this.tripDocuments.set(id, newDoc);
     return newDoc;
   }
@@ -1082,7 +1172,14 @@ export class MemStorage implements IStorage {
 
   async createEmergencyContact(contact: InsertEmergencyContact): Promise<EmergencyContact> {
     const id = contact.id ?? randomUUID();
-    const newContact: EmergencyContact = { ...contact, id, createdAt: new Date() };
+    const newContact: EmergencyContact = {
+      ...contact,
+      id,
+      url: contact.url ?? null,
+      notes: contact.notes ?? null,
+      phone: contact.phone ?? null,
+      createdAt: new Date(),
+    };
     this.emergencyContacts.set(id, newContact);
     return newContact;
   }
@@ -1130,6 +1227,10 @@ export class MemStorage implements IStorage {
       ...(existing ?? { id, userId: pref.userId, updatedAt: new Date() }),
       ...pref,
       id,
+      budgetBand: pref.budgetBand ?? null,
+      vibesPreferred: pref.vibesPreferred ?? null,
+      tripTypesPreferred: pref.tripTypesPreferred ?? null,
+      learnedFromTripIds: pref.learnedFromTripIds ?? null,
       updatedAt: new Date(),
     };
     this.userLearnedPreferences.set(id, updated);
@@ -1144,7 +1245,12 @@ export class MemStorage implements IStorage {
   async createOrUpdateTripSatisfaction(entry: InsertTripSatisfaction): Promise<TripSatisfaction> {
     const existing = Array.from(this.tripSatisfaction.values()).find((s) => s.tripId === entry.tripId && s.userId === entry.userId);
     const id = existing?.id ?? entry.id ?? randomUUID();
-    const newEntry: TripSatisfaction = { ...entry, id, createdAt: existing?.createdAt ?? new Date() };
+    const newEntry: TripSatisfaction = {
+      ...entry,
+      id,
+      comment: entry.comment ?? null,
+      createdAt: existing?.createdAt ?? new Date(),
+    };
     this.tripSatisfaction.set(id, newEntry);
     return newEntry;
   }

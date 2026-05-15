@@ -18,7 +18,7 @@ export function getVapidPublicKey(): string {
   if (!vapidKeys) {
     vapidKeys = webpush.generateVAPIDKeys();
   }
-  return vapidKeys.publicKey;
+  return vapidKeys!.publicKey;
 }
 
 export function setVapidKeys(publicKey: string, privateKey: string) {
@@ -29,7 +29,7 @@ export function setVapidKeys(publicKey: string, privateKey: string) {
 function ensureVapid() {
   if (!vapidKeys) {
     vapidKeys = webpush.generateVAPIDKeys();
-    webpush.setVapidDetails("mailto:support@tripsync.app", vapidKeys.publicKey, vapidKeys.privateKey);
+    webpush.setVapidDetails("mailto:support@tripsync.app", vapidKeys!.publicKey, vapidKeys!.privateKey);
   }
 }
 
@@ -47,7 +47,7 @@ export function removeSubscription(userId: string, tripId: string, endpoint: str
 export async function sendPushToUser(userId: string, tripId: string, payload: { title: string; body?: string }): Promise<void> {
   ensureVapid();
   const toSend: StoredSubscription[] = [];
-  for (const sub of subscriptions.values()) {
+  for (const sub of Array.from(subscriptions.values())) {
     if (sub.userId === userId && sub.tripId === tripId) toSend.push(sub);
   }
   for (const sub of toSend) {
@@ -63,7 +63,7 @@ export async function sendPushToUser(userId: string, tripId: string, payload: { 
 
 export async function runReminderCheck(): Promise<void> {
   try {
-    const tripIds = [...new Set(Array.from(subscriptions.values()).map((s) => s.tripId))];
+    const tripIds = Array.from(new Set(Array.from(subscriptions.values()).map((s) => s.tripId)));
     if (tripIds.length === 0) return;
     const now = new Date();
     const windowEnd = new Date(now.getTime() + 30 * 60 * 1000);

@@ -8,6 +8,29 @@ const anthropic = new Anthropic({
   baseURL: process.env.AI_INTEGRATIONS_ANTHROPIC_BASE_URL,
 });
 
+/**
+ * AI Model Configuration
+ *
+ * Cost optimization strategy:
+ * - Use Sonnet 4.5 for complex reasoning (full itinerary generation)
+ * - Use Haiku for simple tasks (suggestions, lists, extraction)
+ *
+ * Pricing (per 1M tokens):
+ * - Haiku: $0.25 input / $1.25 output (12x cheaper)
+ * - Sonnet 4.5: $3 input / $15 output
+ *
+ * Estimated savings: 40-60% of AI costs
+ */
+const AI_MODELS = {
+  // Complex reasoning - needs Sonnet's intelligence
+  ITINERARY_GENERATION: 'claude-sonnet-4-5' as const,
+
+  // Simple tasks - Haiku is faster and 12x cheaper
+  SUGGESTIONS: 'claude-3-5-haiku-20241022' as const,
+  EXTRACTION: 'claude-3-5-haiku-20241022' as const,
+  CONTENT_GENERATION: 'claude-3-5-haiku-20241022' as const,
+};
+
 type MemberPreferenceInput = { userName: string; diet?: string | null; budgetFlexibility?: string | null; mustDoActivities?: string | null };
 
 function buildPreferencesSection(preferences: MemberPreferenceInput[]): string {
@@ -68,7 +91,7 @@ IMPORTANT: Respond with valid JSON only, this structure:
 }`;
 
     const message = await anthropic.messages.create({
-      model: "claude-sonnet-4-5",
+      model: AI_MODELS.ITINERARY_GENERATION,
       max_tokens: 8192,
       messages: [
         {
@@ -271,7 +294,7 @@ export async function suggestConflictResolution(params: {
 Suggest a short, practical compromise (1-2 sentences). Example: "Since 4 want beach and 2 want museums, suggest morning beach + afternoon museum." Reply with only the suggestion text, no JSON.`;
 
     const message = await anthropic.messages.create({
-      model: "claude-sonnet-4-5",
+      model: AI_MODELS.SUGGESTIONS,
       max_tokens: 256,
       messages: [{ role: "user", content: prompt }],
     });
@@ -306,7 +329,7 @@ export async function suggestBudgetOptimization(params: {
 Give 2-3 short, practical tips to optimize spending (e.g. cheaper dining alternatives, advance bookings, group discounts). Reply with only the tips, no JSON.`;
 
     const message = await anthropic.messages.create({
-      model: "claude-sonnet-4-5",
+      model: AI_MODELS.SUGGESTIONS,
       max_tokens: 512,
       messages: [{ role: "user", content: prompt }],
     });
@@ -436,7 +459,7 @@ INSTRUCTIONS:
 Choose the single best action type for the app to take given the situation.`;
 
     const message = await anthropic.messages.create({
-      model: "claude-sonnet-4-5",
+      model: AI_MODELS.SUGGESTIONS,
       max_tokens: 256,
       system: systemPrompt,
       messages: [{ role: "user", content: userPrompt }],
@@ -469,7 +492,7 @@ export async function generateTripRecap(params: {
     const prompt = `Write a short, warm trip recap (2-4 paragraphs) for a group trip to ${destination} (${startDate} to ${endDate}). ${itinerarySummary ? `Itinerary summary: ${itinerarySummary}.` : ""} ${photoCaptions?.length ? `Photo moments: ${photoCaptions.join("; ")}.` : ""} Sound personal and celebratory. No JSON, just prose.`;
 
     const message = await anthropic.messages.create({
-      model: "claude-sonnet-4-5",
+      model: AI_MODELS.CONTENT_GENERATION,
       max_tokens: 1024,
       messages: [{ role: "user", content: prompt }],
     });
@@ -500,7 +523,7 @@ export async function generatePackingList(params: {
 Return ONLY a JSON array of strings, e.g. ["Passport", "Sunscreen", "Swimwear"]. 15-25 items. No other text.`;
 
     const message = await anthropic.messages.create({
-      model: "claude-sonnet-4-5",
+      model: AI_MODELS.CONTENT_GENERATION,
       max_tokens: 512,
       messages: [{ role: "user", content: prompt }],
     });
@@ -534,7 +557,7 @@ ${emailText.slice(0, 6000)}
 Reply with only the lines, no other text. If nothing found, reply with a single line: NONE`;
 
     const message = await anthropic.messages.create({
-      model: "claude-sonnet-4-5",
+      model: AI_MODELS.EXTRACTION,
       max_tokens: 1024,
       messages: [{ role: "user", content: prompt }],
     });

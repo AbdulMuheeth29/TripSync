@@ -240,7 +240,7 @@ function PricingCard({
               ) : (
                 <X className="h-5 w-5 text-muted-foreground shrink-0 mt-0.5" />
               )}
-              <span className={`text-sm ${feature.bold ? "font-semibold" : ""} ${!feature.included ? "text-muted-foreground" : ""}`}>
+              <span className={`text-sm ${'bold' in feature && feature.bold ? "font-semibold" : ""} ${!feature.included ? "text-muted-foreground" : ""}`}>
                 {feature.text}
               </span>
             </li>
