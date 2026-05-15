@@ -57,6 +57,9 @@ export function AppFooter() {
           <div>
             <h4 className="text-sm font-semibold mb-2">Support</h4>
             <nav className="flex flex-col gap-1 text-sm text-muted-foreground">
+              <Link href="/help" className="hover:text-foreground transition-colors">
+                Help Center
+              </Link>
               <Link href="/contact" className="hover:text-foreground transition-colors">
                 Contact
               </Link>

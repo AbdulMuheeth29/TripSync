@@ -22,6 +22,7 @@ import ContactPage from "@/pages/contact";
 import PrivacyPage from "@/pages/privacy";
 import TermsPage from "@/pages/terms";
 import BillingPage from "@/pages/billing";
+import HelpPage from "@/pages/help";
 import NotFound from "@/pages/not-found";
 import MetricsDashboard from "@/admin/MetricsDashboard";
 import { CommandPalette } from "@/components/command-palette";
@@ -74,6 +75,7 @@ function Router() {
         <Route path="/pricing" component={PricingPage} />
         <Route path="/forgot-password" component={ForgotPasswordPage} />
         <Route path="/contact" component={ContactPage} />
+        <Route path="/help" component={HelpPage} />
         <Route path="/privacy" component={PrivacyPage} />
         <Route path="/terms" component={TermsPage} />
         <Route path="/dashboard">

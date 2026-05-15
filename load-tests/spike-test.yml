@@ -1,0 +1,64 @@
+# TripSync Spike Test
+# Tests system behavior during sudden traffic spikes
+# Run with: artillery run load-tests/spike-test.yml
+
+config:
+  target: "http://localhost:3000"
+  phases:
+    - duration: 30
+      arrivalRate: 5
+      name: "Normal load baseline"
+    - duration: 60
+      arrivalRate: 200
+      name: "SPIKE! 200 users/sec"
+    - duration: 30
+      arrivalRate: 5
+      name: "Return to normal"
+
+  # Very relaxed thresholds - spike tests will have errors
+  ensure:
+    maxErrorRate: 10  # Allow up to 10% errors during spike
+    p95: 5000  # 95th percentile under 5s
+    p99: 10000  # 99th percentile under 10s
+
+scenarios:
+  - name: "High-Volume API Requests"
+    weight: 100
+    flow:
+      # Health check (should always work)
+      - get:
+          url: "/api/health"
+
+      - think: 0.5
+
+      # Try to register (may fail during spike)
+      - post:
+          url: "/api/auth/register"
+          json:
+            email: "spike-{{ $randomString() }}@example.com"
+            password: "SpikeTest123!"
+            username: "spike{{ $randomString() }}"
+          capture:
+            - json: "$.token"
+              as: "token"
+          ifTrue: "token"  # Only continue if registration succeeded
+
+      # If registered, try to create a trip
+      - post:
+          url: "/api/trips"
+          headers:
+            Authorization: "Bearer {{ token }}"
+          json:
+            destination: "Spike City"
+            startDate: "2026-08-01"
+            endDate: "2026-08-07"
+            description: "Spike test trip"
+            generateWithAI: false
+
+plugins:
+  expect: {}
+
+output:
+  html:
+    enabled: true
+    outputFile: "load-tests/reports/spike-test-{{ Date.now() }}.html"

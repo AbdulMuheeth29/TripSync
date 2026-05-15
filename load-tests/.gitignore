@@ -1,0 +1,7 @@
+# Load test reports
+reports/
+*.html
+*.json
+
+# Test artifacts
+*.log

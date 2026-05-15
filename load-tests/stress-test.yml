@@ -1,0 +1,131 @@
+# TripSync Stress Test
+# Tests system behavior under high load
+# Run with: artillery run load-tests/stress-test.yml
+
+config:
+  target: "http://localhost:3000"
+  phases:
+    - duration: 60
+      arrivalRate: 10
+      name: "Warm up"
+    - duration: 120
+      arrivalRate: 50
+      name: "Moderate stress - 50 users/sec"
+    - duration: 120
+      arrivalRate: 100
+      name: "High stress - 100 users/sec"
+    - duration: 60
+      arrivalRate: 150
+      name: "Peak stress - 150 users/sec"
+    - duration: 60
+      arrivalRate: 10
+      name: "Recovery"
+
+  # Relaxed thresholds for stress test
+  ensure:
+    maxErrorRate: 5  # Allow up to 5% errors under stress
+    p95: 2000  # 95th percentile under 2s
+    p99: 5000  # 99th percentile under 5s
+
+scenarios:
+  - name: "API Health Checks"
+    weight: 20
+    flow:
+      - get:
+          url: "/api/health"
+
+      - get:
+          url: "/api/health?detailed=true"
+
+  - name: "Authenticated User Journey"
+    weight: 80
+    flow:
+      # Register
+      - post:
+          url: "/api/auth/register"
+          json:
+            email: "stress-{{ $randomString() }}@example.com"
+            password: "Pass{{ $randomNumber(1000, 9999) }}!"
+            username: "user{{ $randomString() }}"
+          capture:
+            json: "$.token"
+            as: "token"
+          expect:
+            - statusCode: 201
+
+      - think: 1
+
+      # Create a trip
+      - post:
+          url: "/api/trips"
+          headers:
+            Authorization: "Bearer {{ token }}"
+          json:
+            destination: "Test City {{ $randomNumber(1, 100) }}"
+            startDate: "2026-07-{{ $randomNumber(1, 28) }}"
+            endDate: "2026-07-{{ $randomNumber(1, 28) }}"
+            description: "Stress test trip"
+            generateWithAI: false
+          capture:
+            json: "$.trip.id"
+            as: "tripId"
+          expect:
+            - statusCode: 201
+
+      - think: 1
+
+      # Get trip details
+      - get:
+          url: "/api/trips/{{ tripId }}"
+          headers:
+            Authorization: "Bearer {{ token }}"
+          expect:
+            - statusCode: 200
+
+      - think: 1
+
+      # Add itinerary item
+      - post:
+          url: "/api/trips/{{ tripId }}/items"
+          headers:
+            Authorization: "Bearer {{ token }}"
+          json:
+            title: "Activity {{ $randomNumber(1, 100) }}"
+            description: "Test activity"
+            date: "2026-07-15"
+            type: "activity"
+          expect:
+            - statusCode: 201
+
+      - think: 1
+
+      # Add expense
+      - post:
+          url: "/api/trips/{{ tripId }}/expenses"
+          headers:
+            Authorization: "Bearer {{ token }}"
+          json:
+            description: "Test expense"
+            amount: "{{ $randomNumber(10, 500) }}"
+            currency: "USD"
+            date: "2026-07-15"
+          expect:
+            - statusCode: 201
+
+      - think: 1
+
+      # Get all trips
+      - get:
+          url: "/api/trips"
+          headers:
+            Authorization: "Bearer {{ token }}"
+          expect:
+            - statusCode: 200
+
+plugins:
+  expect: {}
+
+output:
+  html:
+    enabled: true
+    outputFile: "load-tests/reports/stress-test-{{ Date.now() }}.html"

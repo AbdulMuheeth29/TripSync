@@ -1,0 +1,128 @@
+# TripSync Basic Load Test
+# Tests normal usage patterns with gradual ramp-up
+# Run with: artillery run load-tests/basic-load.yml
+
+config:
+  target: "http://localhost:3000"
+  phases:
+    - duration: 60
+      arrivalRate: 5
+      name: "Warm up - 5 users/sec"
+    - duration: 120
+      arrivalRate: 20
+      name: "Sustained load - 20 users/sec"
+    - duration: 60
+      arrivalRate: 5
+      name: "Cool down - 5 users/sec"
+
+  # Performance thresholds
+  ensure:
+    maxErrorRate: 1  # Max 1% error rate
+    p95: 500  # 95th percentile response time under 500ms
+    p99: 1000  # 99th percentile response time under 1s
+
+scenarios:
+  - name: "Health Check"
+    weight: 10
+    flow:
+      - get:
+          url: "/api/health"
+          expect:
+            - statusCode: 200
+            - contentType: json
+            - hasProperty: "ok"
+
+  - name: "Public Pages"
+    weight: 30
+    flow:
+      # Landing page
+      - get:
+          url: "/"
+          expect:
+            - statusCode: 200
+
+      # Pricing page
+      - get:
+          url: "/pricing"
+          expect:
+            - statusCode: 200
+
+      # Help page
+      - get:
+          url: "/help"
+          expect:
+            - statusCode: 200
+
+      - think: 2  # User reads page for 2 seconds
+
+  - name: "User Registration Flow"
+    weight: 20
+    flow:
+      - post:
+          url: "/api/auth/register"
+          json:
+            email: "loadtest-{{ $randomString() }}@example.com"
+            password: "TestPassword123!"
+            username: "user_{{ $randomString() }}"
+          capture:
+            json: "$.token"
+            as: "authToken"
+          expect:
+            - statusCode: 201
+
+      - think: 3
+
+      # Get user profile
+      - get:
+          url: "/api/auth/me"
+          headers:
+            Authorization: "Bearer {{ authToken }}"
+          expect:
+            - statusCode: 200
+
+  - name: "User Login Flow"
+    weight: 40
+    flow:
+      # First register
+      - post:
+          url: "/api/auth/register"
+          json:
+            email: "user-{{ $randomNumber(1, 10000) }}@example.com"
+            password: "TestPass123"
+            username: "testuser{{ $randomNumber(1, 10000) }}"
+          capture:
+            - json: "$.user.email"
+              as: "userEmail"
+
+      - think: 2
+
+      # Then login
+      - post:
+          url: "/api/auth/login"
+          json:
+            email: "{{ userEmail }}"
+            password: "TestPass123"
+          capture:
+            json: "$.token"
+            as: "authToken"
+          expect:
+            - statusCode: 200
+
+      - think: 2
+
+      # Get trips
+      - get:
+          url: "/api/trips"
+          headers:
+            Authorization: "Bearer {{ authToken }}"
+          expect:
+            - statusCode: 200
+
+plugins:
+  expect: {}
+
+# Output configuration
+output:
+  html:
+    enabled: true
+    outputFile: "load-tests/reports/basic-load-{{ Date.now() }}.html"

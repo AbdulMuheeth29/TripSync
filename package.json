@@ -39,6 +39,10 @@
     "baseline": "./scripts/establish-baseline.sh development",
     "baseline:staging": "./scripts/establish-baseline.sh staging http://localhost:3001",
     "baseline:prod": "./scripts/establish-baseline.sh production https://tripsync.app",
+    "load:basic": "artillery run load-tests/basic-load.yml",
+    "load:stress": "artillery run load-tests/stress-test.yml",
+    "load:spike": "artillery run load-tests/spike-test.yml",
+    "load:quick": "artillery quick --count 10 --num 50 http://localhost:3000/api/health",
     "deploy": "./deploy.sh"
   },
   "dependencies": {
