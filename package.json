@@ -27,10 +27,18 @@
     "docker:dev:build": "docker-compose up -d --build",
     "docker:dev:down": "docker-compose down",
     "docker:dev:logs": "docker-compose logs -f",
+    "docker:staging": "docker-compose -f docker-compose.staging.yml up -d",
+    "docker:staging:build": "docker-compose -f docker-compose.staging.yml up -d --build",
+    "docker:staging:down": "docker-compose -f docker-compose.staging.yml down",
+    "docker:staging:logs": "docker-compose -f docker-compose.staging.yml logs -f",
     "docker:prod": "docker-compose -f docker-compose.prod.yml up -d",
     "docker:prod:build": "docker-compose -f docker-compose.prod.yml up -d --build",
     "docker:prod:down": "docker-compose -f docker-compose.prod.yml down",
     "docker:prod:logs": "docker-compose -f docker-compose.prod.yml logs -f",
+    "setup:production": "./scripts/setup-production-env.sh",
+    "baseline": "./scripts/establish-baseline.sh development",
+    "baseline:staging": "./scripts/establish-baseline.sh staging http://localhost:3001",
+    "baseline:prod": "./scripts/establish-baseline.sh production https://tripsync.app",
     "deploy": "./deploy.sh"
   },
   "dependencies": {

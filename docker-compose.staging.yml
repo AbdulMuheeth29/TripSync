@@ -1,0 +1,79 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: tripsync-postgres-staging
+    environment:
+      POSTGRES_DB: tripsync_staging
+      POSTGRES_USER: tripsync_staging
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD_STAGING:-staging_password_change_me}
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_staging_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U tripsync_staging"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: tripsync-redis-staging
+    ports:
+      - "6380:6379"
+    volumes:
+      - redis_staging_data:/data
+    command: redis-server --appendonly yes
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: tripsync-app-staging
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      NODE_ENV: staging
+      PORT: 3000
+      DATABASE_URL: postgresql://tripsync_staging:${POSTGRES_PASSWORD_STAGING:-staging_password_change_me}@postgres:5432/tripsync_staging
+      REDIS_URL: redis://redis:6379
+      JWT_SECRET: ${JWT_SECRET}
+      VAPID_PUBLIC_KEY: ${VAPID_PUBLIC_KEY}
+      VAPID_PRIVATE_KEY: ${VAPID_PRIVATE_KEY}
+      SMTP_HOST: ${SMTP_HOST}
+      SMTP_PORT: ${SMTP_PORT}
+      SMTP_USER: ${SMTP_USER}
+      SMTP_PASS: ${SMTP_PASS}
+      SMTP_FROM: ${SMTP_FROM}
+      ADMIN_EMAILS: ${ADMIN_EMAILS}
+      # Optional services
+      AI_INTEGRATIONS_ANTHROPIC_API_KEY: ${AI_INTEGRATIONS_ANTHROPIC_API_KEY:-}
+      SENTRY_DSN: ${SENTRY_DSN:-}
+      STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY:-}
+    ports:
+      - "3001:3000"
+    volumes:
+      - ./logs:/app/logs
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+volumes:
+  postgres_staging_data:
+    driver: local
+  redis_staging_data:
+    driver: local
