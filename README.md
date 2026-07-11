@@ -1,4 +1,4 @@
-# TripSync
+# TripSync - (Actively Building) V1
 
 <div align="center">
 
