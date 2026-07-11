@@ -661,9 +661,9 @@ const DESTINATION_IMAGES: Record<string, string[]> = {
 
 /** Fallback for US destinations not in the map (generic US travel / road trip). */
 const DEFAULT_IMAGES = [
-  "https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?w=2400&q=95",
-  "https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=2400&q=95",
-  "https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?w=2400&q=95",
+  "https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?w=2400&q=95", // Scenic landscape
+  "https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?w=2400&q=95", // Lake Tahoe
+  "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=2400&q=95", // Yosemite
 ];
 
 const ROTATE_INTERVAL_MS = 5500;
@@ -680,22 +680,29 @@ export function getDestinationCoverImage(destination: string): string {
   return partial?.[1]?.[0] ?? DEFAULT_IMAGES[0];
 }
 
+
 export interface TripDestinationHeroProps {
   destination: string;
 }
 
 /**
- * US-only floating hero for the trip view page. When the user selects a destination
- * city or place for their trip, this shows a rotating hero with imagery for that
- * destination. Covers major US cities, states, and popular spots.
+ * Trip destination hero for the trip view page. When the user selects a destination
+ * for their trip, this shows a rotating hero with imagery for that destination.
+ *
+ * - Uses hardcoded Unsplash images for US destinations (instant loading)
+ * - Covers all major US cities, states, and popular destinations
+ * - Falls back to generic travel images for unrecognized destinations
  */
 export function TripDestinationHero({ destination }: TripDestinationHeroProps) {
   const images = useMemo(() => {
     const key = normalizeDestination(destination ?? "");
     if (!key) return DEFAULT_IMAGES;
+
+    // Try exact match
     const exact = DESTINATION_IMAGES[key];
     if (exact?.length) return exact;
-    // Partial match only when key is non-empty: "New York City" → new york, "San Francisco Bay" → san francisco
+
+    // Try partial match
     const partial = Object.entries(DESTINATION_IMAGES).find(
       ([k]) => key.length >= 2 && (key.includes(k) || k.includes(key))
     );

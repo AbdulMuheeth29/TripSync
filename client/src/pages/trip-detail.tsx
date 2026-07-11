@@ -17,6 +17,13 @@ import { AppLogo } from "@/components/app-logo";
 import { TripDestinationHero } from "@/components/trip-destination-hero";
 import { TripMap } from "@/components/trip-map";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { PackingListModal } from "@/components/trip/packing-list-modal";
+import { TransportationCoordinatorModal } from "@/components/trip/transportation-coordinator-modal";
+import { DocumentViewerModal } from "@/components/trip/document-viewer-modal";
+import { PollManagerModal } from "@/components/vote/poll-manager-modal";
+import { AvailabilityCalendarModal } from "@/components/trip/availability-calendar-modal";
+import { PhotoGalleryModal } from "@/components/trip/photo-gallery-modal";
+import { TripRecapEditorModal } from "@/components/trip/trip-recap-editor-modal";
 import { useAuth, getAuthHeaders } from "@/lib/auth-context";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
@@ -71,6 +78,7 @@ import {
   Mail,
 } from "lucide-react";
 import type { Trip, ItineraryItem, Comment, Vote, Expense, User } from "@shared/schema";
+import { SettlementSummary } from "@/components/settlement-summary";
 
 const DEMO_TRIP_ID = "trip-austin-1";
 
@@ -1236,6 +1244,7 @@ export default function TripDetailPage() {
   });
   const [expenseSplitMemberIds, setExpenseSplitMemberIds] = useState<string[]>([]);
   const [expenseDisplayCurrency, setExpenseDisplayCurrency] = useState("USD");
+  const [isProcessingReceipt, setIsProcessingReceipt] = useState(false);
   const { convert: convertCurrency, isLoading: ratesLoading } = useExchangeRates();
   const [chatInput, setChatInput] = useState("");
   const [mentionQuery, setMentionQuery] = useState<string | null>(null);
@@ -1268,6 +1277,17 @@ export default function TripDetailPage() {
   const [showAllDays, setShowAllDays] = useState(false);
   const [addItemOpen, setAddItemOpen] = useState(false);
   const [addItemForm, setAddItemForm] = useState({ dayNumber: 1, type: "activity", time: "09:00", name: "", description: "", location: "", pricePerPerson: "0", bookingUrl: "" });
+
+  // Modal states for UX enhancement modals
+  const [packingModalOpen, setPackingModalOpen] = useState(false);
+  const [transportationModalOpen, setTransportationModalOpen] = useState(false);
+  const [documentViewerOpen, setDocumentViewerOpen] = useState(false);
+  const [selectedDocumentId, setSelectedDocumentId] = useState<string | undefined>(undefined);
+  const [pollManagerOpen, setPollManagerOpen] = useState(false);
+  const [availabilityCalendarOpen, setAvailabilityCalendarOpen] = useState(false);
+  const [photoGalleryOpen, setPhotoGalleryOpen] = useState(false);
+  const [selectedPhotoId, setSelectedPhotoId] = useState<string | undefined>(undefined);
+  const [recapEditorOpen, setRecapEditorOpen] = useState(false);
   const [inviteEmail, setInviteEmail] = useState("");
   const [moodBoardForm, setMoodBoardForm] = useState({ url: "", label: "" });
   const [placeSearchQuery, setPlaceSearchQuery] = useState("");
@@ -1415,6 +1435,59 @@ export default function TripDetailPage() {
       });
     },
   });
+
+  // Receipt OCR mutation (Pro feature)
+  const processReceiptMutation = useMutation({
+    mutationFn: async (imageUrl: string) => {
+      return apiRequest("POST", "/api/receipts/ocr", { imageUrl });
+    },
+    onSuccess: (data: any) => {
+      setIsProcessingReceipt(false);
+      if (data.amount) {
+        setExpenseForm((prev) => ({
+          ...prev,
+          amount: (data.amount / 100).toFixed(2),
+          currency: data.currency || prev.currency,
+          description: data.description || prev.description,
+          location: data.location || prev.location,
+        }));
+        toast({
+          title: "Receipt scanned successfully",
+          description: `Extracted: $${(data.amount / 100).toFixed(2)} at ${data.description || "unknown merchant"}`,
+        });
+      } else {
+        toast({
+          title: "Receipt scan complete",
+          description: "Some fields could not be extracted. Please fill them in manually.",
+        });
+      }
+    },
+    onError: (error: any) => {
+      setIsProcessingReceipt(false);
+      const is403 = error?.message?.includes("403") || error?.message?.toLowerCase().includes("pro");
+      toast({
+        title: is403 ? "Pro feature" : "Failed to scan receipt",
+        description: is403
+          ? "Receipt OCR is a TripSync Pro feature. Upgrade to unlock automatic data extraction."
+          : "Could not extract data from receipt. Please try a clearer image or enter details manually.",
+        variant: is403 ? "default" : "destructive",
+      });
+    },
+  });
+
+  const handleReceiptUpload = async (urls: string[]) => {
+    const imageUrl = urls[0];
+    if (!imageUrl) return;
+
+    setExpenseForm((p) => ({ ...p, receiptImageUrl: imageUrl }));
+    setIsProcessingReceipt(true);
+
+    try {
+      await processReceiptMutation.mutateAsync(imageUrl);
+    } catch (error) {
+      // Error handled in onError
+    }
+  };
 
   const regenerateMutation = useMutation({
     mutationFn: async () => apiRequest("POST", `/api/trips/${tripId}/regenerate-itinerary`, {}),
@@ -1638,11 +1711,25 @@ export default function TripDetailPage() {
     },
   });
 
+  const updatePhotoMutation = useMutation({
+    mutationFn: async ({ photoId, caption }: { photoId: string; caption: string }) =>
+      apiRequest("PATCH", `/api/trips/${tripId}/photos/${photoId}`, { caption }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["/api/trips", tripId] }),
+  });
+
   const deletePollMutation = useMutation({
     mutationFn: async (pollId: string) => apiRequest("DELETE", `/api/trips/${tripId}/polls/${pollId}`),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/trips", tripId] });
       toast({ title: "Poll deleted" });
+    },
+  });
+
+  const closePollMutation = useMutation({
+    mutationFn: async (pollId: string) => apiRequest("PATCH", `/api/trips/${tripId}/polls/${pollId}`, { status: "closed" }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/trips", tripId] });
+      toast({ title: "Poll closed" });
     },
   });
 
@@ -1668,6 +1755,12 @@ export default function TripDetailPage() {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["/api/trips", tripId] }),
   });
 
+  const updatePackingMutation = useMutation({
+    mutationFn: async ({ itemId, updates }: { itemId: string; updates: { name?: string; assignedToUserId?: string; notes?: string; packed?: boolean } }) =>
+      apiRequest("PATCH", `/api/trips/${tripId}/packing/${itemId}`, updates),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["/api/trips", tripId] }),
+  });
+
   const addTransportMutation = useMutation({
     mutationFn: async () => {
       return apiRequest("POST", `/api/trips/${tripId}/transportation`, {
@@ -1682,6 +1775,12 @@ export default function TripDetailPage() {
       setTransportForm({ dayNumber: 1, type: "drive", description: "", driverUserId: "" });
       toast({ title: "Transportation added" });
     },
+  });
+
+  const updateTransportMutation = useMutation({
+    mutationFn: async ({ entryId, updates }: { entryId: string; updates: { description?: string; driverUserId?: string; passengerUserIds?: string[]; notes?: string } }) =>
+      apiRequest("PATCH", `/api/trips/${tripId}/transportation/${entryId}`, updates),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["/api/trips", tripId] }),
   });
 
   const setAvailabilityMutation = useMutation({
@@ -1751,6 +1850,15 @@ export default function TripDetailPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/trips", tripId] });
       toast({ title: "Recap generated", description: "Your trip recap is ready." });
+    },
+  });
+
+  const saveRecapMutation = useMutation({
+    mutationFn: async (recapText: string) =>
+      apiRequest("PATCH", `/api/trips/${tripId}`, { recapText }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/trips", tripId] });
+      toast({ title: "Recap saved" });
     },
   });
 
@@ -3193,15 +3301,42 @@ export default function TripDetailPage() {
                       </select>
                     </div>
                     <div className="space-y-2">
-                      <label className="text-sm font-medium">Receipt photo (optional)</label>
+                      <label className="text-sm font-medium">
+                        Receipt photo (optional)
+                        {isProcessingReceipt && (
+                          <span className="ml-2 text-xs text-muted-foreground">
+                            <Loader2 className="h-3 w-3 inline animate-spin mr-1" />
+                            Scanning receipt with AI...
+                          </span>
+                        )}
+                      </label>
                       <FileUpload
                         endpoint="/api/upload/receipt"
                         accept="image/*"
                         maxSizeMB={10}
-                        onUploadComplete={(urls) => setExpenseForm((p) => ({ ...p, receiptImageUrl: urls[0] || p.receiptImageUrl }))}
+                        onUploadComplete={handleReceiptUpload}
                         buttonText="Upload receipt"
                         showPreview={false}
                       />
+                      {expenseForm.receiptImageUrl && (
+                        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                          <Check className="h-3 w-3 text-green-600" />
+                          Receipt uploaded
+                          {!isProcessingReceipt && (
+                            <Button
+                              variant="link"
+                              size="sm"
+                              className="h-auto p-0 text-xs"
+                              onClick={() => {
+                                setIsProcessingReceipt(true);
+                                processReceiptMutation.mutate(expenseForm.receiptImageUrl);
+                              }}
+                            >
+                              Scan again
+                            </Button>
+                          )}
+                        </div>
+                      )}
                       <Input
                         placeholder="Or paste URL"
                         value={expenseForm.receiptImageUrl}
@@ -3268,37 +3403,7 @@ export default function TripDetailPage() {
               </CardContent>
             </Card>
 
-            {settlementSummary.length > 0 && (
-              <Card className="border-primary/20 bg-primary/5">
-                <CardHeader>
-                  <CardTitle className="text-lg flex items-center gap-2">
-                    <DollarSign className="h-5 w-5" />
-                    Optimized settlement
-                  </CardTitle>
-                  <CardDescription>Minimum transactions — who pays whom to settle up at trip end</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-2">
-                  {settlementSummary.map((s, i) => {
-                    const fromName = members.find((m) => m.id === s.from)?.name ?? "Someone";
-                    const toName = members.find((m) => m.id === s.to)?.name ?? "Someone";
-                    const amountStr = s.amount.toFixed(2);
-                    return (
-                      <div key={i} className="flex flex-col gap-1 py-2 border-b last:border-0">
-                        <div className="flex items-center justify-between text-sm">
-                          <span className="text-muted-foreground">{fromName} owes {toName}</span>
-                          <span className="font-medium">${amountStr}</span>
-                        </div>
-                        <div className="flex gap-2 flex-wrap">
-                          <a href={`https://venmo.com/?txn=pay&amount=${amountStr}&recipient=${encodeURIComponent(toName)}`} target="_blank" rel="noopener noreferrer" className="text-xs text-primary hover:underline">Pay with Venmo</a>
-                          <span className="text-xs text-muted-foreground">·</span>
-                          <span className="text-xs text-muted-foreground">Zelle: Pay ${amountStr} to {toName}</span>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </CardContent>
-              </Card>
-            )}
+            <SettlementSummary tripId={tripId!} />
 
             <div className="space-y-4">
               {expenses.map((expense) => (
@@ -3332,21 +3437,20 @@ export default function TripDetailPage() {
               <CardHeader>
                 <CardTitle className="text-lg flex items-center gap-2">
                   <Sparkles className="h-5 w-5 text-primary" />
-                  Automatic trip recap
+                  Trip Recap
                 </CardTitle>
-                <CardDescription>AI-generated summary from your itinerary and photos.</CardDescription>
+                <CardDescription>Create and edit a memorable summary of your trip with AI assistance.</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 {(trip as { recapText?: string | null }).recapText ? (
-                  <div className="prose prose-sm dark:prose-invert max-w-none">
+                  <div className="prose prose-sm dark:prose-invert max-w-none line-clamp-3">
                     <p className="whitespace-pre-wrap text-muted-foreground">{(trip as { recapText?: string }).recapText}</p>
                   </div>
                 ) : (
-                  <p className="text-sm text-muted-foreground">No recap yet. Generate one from your itinerary and photos.</p>
+                  <p className="text-sm text-muted-foreground">No recap yet. Create one with AI or write your own.</p>
                 )}
-                <Button onClick={() => generateRecapMutation.mutate()} disabled={generateRecapMutation.isPending}>
-                  {generateRecapMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Sparkles className="h-4 w-4 mr-2" />}
-                  Generate recap
+                <Button onClick={() => setRecapEditorOpen(true)} className="w-full">
+                  {(trip as { recapText?: string | null }).recapText ? 'Edit Trip Recap' : 'Create Trip Recap'}
                 </Button>
               </CardContent>
             </Card>
@@ -3443,27 +3547,10 @@ export default function TripDetailPage() {
                 </Dialog>
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
                   {photos.map((p) => (
-                    <div key={p.id} className="rounded-lg overflow-hidden border bg-muted/50 relative group">
-                      <a href={p.url} target="_blank" rel="noopener noreferrer" className="block aspect-square">
+                    <div key={p.id} className="rounded-lg overflow-hidden border bg-muted/50 relative group cursor-pointer" onClick={() => { setSelectedPhotoId(p.id); setPhotoGalleryOpen(true); }}>
+                      <div className="block aspect-square">
                         <img src={p.url} alt={p.caption ?? "Trip photo"} className="w-full h-full object-cover" onError={(e) => { (e.target as HTMLImageElement).src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'%3E%3Crect fill='%23ddd' width='100' height='100'/%3E%3Ctext x='50' y='50' fill='%23999' text-anchor='middle' dy='.3em' font-size='12'%3EPhoto%3C/text%3E%3C/svg%3E"; }} />
-                      </a>
-                      <AlertDialog>
-                        <AlertDialogTrigger asChild>
-                          <Button variant="destructive" size="icon" className="absolute top-2 right-2 h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity">
-                            <Trash2 className="h-3 w-3" />
-                          </Button>
-                        </AlertDialogTrigger>
-                        <AlertDialogContent>
-                          <AlertDialogHeader>
-                            <AlertDialogTitle>Remove photo?</AlertDialogTitle>
-                            <AlertDialogDescription>This photo will be removed from the album.</AlertDialogDescription>
-                          </AlertDialogHeader>
-                          <AlertDialogFooter>
-                            <AlertDialogCancel>Cancel</AlertDialogCancel>
-                            <AlertDialogAction className="bg-destructive text-destructive-foreground hover:bg-destructive/90" onClick={() => deletePhotoMutation.mutate(p.id)}>Remove</AlertDialogAction>
-                          </AlertDialogFooter>
-                        </AlertDialogContent>
-                      </AlertDialog>
+                      </div>
                       {(p.caption || p.user?.name) && (
                         <div className="p-2 text-xs text-muted-foreground truncate">
                           {p.caption && <span>{p.caption}</span>}
@@ -3543,289 +3630,87 @@ export default function TripDetailPage() {
           <TabsContent value="coordination" className="space-y-6">
             <Card>
               <CardHeader>
-                <CardTitle className="text-lg">Quick Polls</CardTitle>
-                <CardDescription>Fast voting on group decisions (e.g. Beach, hiking, or museum?).</CardDescription>
+                <CardTitle className="text-lg">Group Polls</CardTitle>
+                <CardDescription>Fast voting on group decisions with visual results.</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="space-y-2">
-                  <div className="flex flex-wrap gap-2">
-                    <Input
-                      placeholder="Question"
-                      value={pollForm.question}
-                      onChange={(e) => setPollForm((p) => ({ ...p, question: e.target.value }))}
-                      className="max-w-xs"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    {pollForm.options.map((opt, index) => (
-                      <div key={index} className="flex items-center gap-2 max-w-xs">
-                        <Input
-                          placeholder={`Option ${String.fromCharCode(65 + index)}`}
-                          value={opt}
-                          onChange={(e) =>
-                            setPollForm((p) => {
-                              const next = [...p.options];
-                              next[index] = e.target.value;
-                              return { ...p, options: next };
-                            })
-                          }
-                        />
-                        {pollForm.options.length > 2 && index >= 2 && (
-                          <Button
-                            type="button"
-                            size="icon"
-                            variant="ghost"
-                            className="h-8 w-8"
-                            onClick={() =>
-                              setPollForm((p) => ({
-                                ...p,
-                                options: p.options.filter((_, i) => i !== index),
-                              }))
-                            }
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        )}
-                      </div>
-                    ))}
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      onClick={() =>
-                        setPollForm((p) => ({
-                          ...p,
-                          options: p.options.length >= 6 ? p.options : [...p.options, ""],
-                        }))
-                      }
-                      disabled={pollForm.options.length >= 6}
-                    >
-                      <Plus className="h-4 w-4 mr-1" />
-                      Add option
-                    </Button>
-                  </div>
-                  <Button
-                    onClick={() => createPollMutation.mutate()}
-                    disabled={
-                      !pollForm.question ||
-                      pollForm.options.map((o) => o.trim()).filter(Boolean).length < 2 ||
-                      createPollMutation.isPending
-                    }
-                  >
-                    {createPollMutation.isPending ? "Creating..." : "Create poll"}
-                  </Button>
+                <div className="text-sm text-muted-foreground">
+                  {pollsList && pollsList.length > 0 ? (
+                    <>
+                      {pollsList.filter((p: any) => p.status === "open").length} active poll{pollsList.filter((p: any) => p.status === "open").length !== 1 ? 's' : ''}
+                      {pollsList.filter((p: any) => p.status === "closed").length > 0 && (
+                        <> • {pollsList.filter((p: any) => p.status === "closed").length} closed</>
+                      )}
+                    </>
+                  ) : (
+                    <span>No polls yet</span>
+                  )}
                 </div>
-                {pollsList?.map((poll) => (
-                  <div key={poll.id} className="border rounded p-3 space-y-2">
-                    <div className="flex items-center justify-between gap-2">
-                      <p className="font-medium">{poll.question}</p>
-                      <AlertDialog>
-                        <AlertDialogTrigger asChild>
-                          <Button variant="ghost" size="sm" className="text-destructive hover:text-destructive h-7 text-xs">Delete</Button>
-                        </AlertDialogTrigger>
-                        <AlertDialogContent>
-                          <AlertDialogHeader>
-                            <AlertDialogTitle>Delete poll?</AlertDialogTitle>
-                            <AlertDialogDescription>This will remove the poll and its votes.</AlertDialogDescription>
-                          </AlertDialogHeader>
-                          <AlertDialogFooter>
-                            <AlertDialogCancel>Cancel</AlertDialogCancel>
-                            <AlertDialogAction className="bg-destructive text-destructive-foreground hover:bg-destructive/90" onClick={() => deletePollMutation.mutate(poll.id)}>Delete</AlertDialogAction>
-                          </AlertDialogFooter>
-                        </AlertDialogContent>
-                      </AlertDialog>
-                    </div>
-                    <div className="flex gap-2 flex-wrap">
-                      {(poll.options as string[]).map((opt, i) => (
-                        <Button key={i} size="sm" variant="outline" onClick={() => votePollMutation.mutate({ pollId: poll.id, optionIndex: i })}>
-                          {opt} ({poll.voteCounts?.[i] ?? 0})
-                        </Button>
-                      ))}
-                    </div>
-                    <Button size="sm" variant="ghost" className="text-primary" onClick={async () => {
-                      try {
-                        const res = await fetch(`/api/trips/${tripId}/suggest-resolution`, { method: "POST", headers: getAuthHeaders(), credentials: "include", body: JSON.stringify({ question: poll.question, options: poll.options as string[], voteCounts: poll.voteCounts ?? [] }) });
-                        const j = await res.json();
-                        toast({ title: "AI suggestion", description: j.suggestion });
-                      } catch { toast({ title: "Error", description: "Could not get suggestion", variant: "destructive" }); }
-                    }}>
-                      <Sparkles className="h-4 w-4 mr-1" /> Suggest compromise
-                    </Button>
-                  </div>
-                ))}
-                {(!pollsList || pollsList.length === 0) && <p className="text-sm text-muted-foreground">No polls yet.</p>}
+                <Button onClick={() => setPollManagerOpen(true)} className="w-full">
+                  Open Poll Manager
+                </Button>
               </CardContent>
             </Card>
             <Card>
               <CardHeader>
                 <CardTitle className="text-lg">Packing List</CardTitle>
-                <CardDescription>Shared packing list; assign items to members. Use AI to generate from your trip details.</CardDescription>
-                <div className="pt-2">
-                  <Button variant="outline" size="sm" onClick={() => generatePackingMutation.mutate()} disabled={generatePackingMutation.isPending}>
-                    {generatePackingMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin mr-1" /> : <Sparkles className="h-4 w-4 mr-1" />}
-                    Generate with AI
-                  </Button>
-                </div>
+                <CardDescription>Shared packing list organized by category with AI-powered suggestions.</CardDescription>
               </CardHeader>
-              <CardContent className="space-y-2">
-                <div className="flex gap-2">
-                  <Input placeholder="Item name" value={packingForm.name} onChange={(e) => setPackingForm((p) => ({ ...p, name: e.target.value }))} />
-                  <select className="rounded border px-2" value={packingForm.assignedToUserId} onChange={(e) => setPackingForm((p) => ({ ...p, assignedToUserId: e.target.value }))}>
-                    <option value="">Unassigned</option>
-                    {members.map((m) => <option key={m.id} value={m.id}>{m.name}</option>)}
-                  </select>
-                  <Button onClick={() => addPackingMutation.mutate()} disabled={!packingForm.name}>Add</Button>
-                </div>
-                <ul className="text-sm space-y-1">
-                  {packingList?.map((p) => (
-                    <li key={p.id} className="flex items-center gap-2">
-                      <Checkbox
-                        checked={(p as { packed?: boolean }).packed ?? false}
-                        onCheckedChange={(checked) => togglePackingMutation.mutate({ itemId: p.id, packed: !!checked })}
-                        disabled={togglePackingMutation.isPending}
-                      />
-                      <span className={(p as { packed?: boolean }).packed ? "line-through text-muted-foreground" : ""}>{p.name}</span>
-                      {p.assignedTo ? <span className="text-muted-foreground">→ {p.assignedTo.name}</span> : ""}
-                      <AlertDialog>
-                        <AlertDialogTrigger asChild>
-                          <Button variant="ghost" size="sm" className="h-6 text-destructive hover:text-destructive text-xs ml-auto">Delete</Button>
-                        </AlertDialogTrigger>
-                        <AlertDialogContent>
-                          <AlertDialogHeader>
-                            <AlertDialogTitle>Remove packing item?</AlertDialogTitle>
-                            <AlertDialogDescription>Remove &quot;{p.name}&quot; from the list?</AlertDialogDescription>
-                          </AlertDialogHeader>
-                          <AlertDialogFooter>
-                            <AlertDialogCancel>Cancel</AlertDialogCancel>
-                            <AlertDialogAction className="bg-destructive text-destructive-foreground hover:bg-destructive/90" onClick={() => deletePackingMutation.mutate(p.id)}>Remove</AlertDialogAction>
-                          </AlertDialogFooter>
-                        </AlertDialogContent>
-                      </AlertDialog>
-                    </li>
-                  ))}
-                </ul>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader><CardTitle className="text-lg">Transportation</CardTitle><CardDescription>Who&apos;s driving, car assignments, ride shares.</CardDescription></CardHeader>
-              <CardContent className="space-y-2">
-                <div className="flex flex-wrap gap-2">
-                  <Input type="number" min={1} placeholder="Day" value={transportForm.dayNumber} onChange={(e) => setTransportForm((p) => ({ ...p, dayNumber: Number(e.target.value) || 1 }))} className="w-20" />
-                  <select className="rounded border px-2" value={transportForm.type} onChange={(e) => setTransportForm((p) => ({ ...p, type: e.target.value }))}><option value="drive">Drive</option><option value="rideshare">Rideshare</option><option value="pickup">Pickup</option></select>
-                  <Input placeholder="Description" value={transportForm.description} onChange={(e) => setTransportForm((p) => ({ ...p, description: e.target.value }))} />
-                  <select className="rounded border px-2" value={transportForm.driverUserId} onChange={(e) => setTransportForm((p) => ({ ...p, driverUserId: e.target.value }))}><option value="">No driver</option>{members.map((m) => <option key={m.id} value={m.id}>{m.name}</option>)}</select>
-                  <Button onClick={() => addTransportMutation.mutate()} disabled={!transportForm.description}>Add</Button>
-                </div>
-                <ul className="text-sm space-y-1">
-                  {transportationList?.map((t) => (
-                    <li key={t.id} className="flex items-center justify-between py-2 border-b last:border-0">
-                      <span>Day {t.dayNumber}: {t.description} {t.driver ? `(${t.driver.name})` : ""}</span>
-                      <div className="flex gap-1">
-                        <AlertDialog>
-                          <AlertDialogTrigger asChild>
-                            <Button variant="ghost" size="sm" className="text-destructive hover:text-destructive text-xs">Delete</Button>
-                          </AlertDialogTrigger>
-                          <AlertDialogContent>
-                            <AlertDialogHeader>
-                              <AlertDialogTitle>Remove transportation entry?</AlertDialogTitle>
-                              <AlertDialogDescription>Day {t.dayNumber}: {t.description}</AlertDialogDescription>
-                            </AlertDialogHeader>
-                            <AlertDialogFooter>
-                              <AlertDialogCancel>Cancel</AlertDialogCancel>
-                              <AlertDialogAction className="bg-destructive text-destructive-foreground hover:bg-destructive/90" onClick={() => deleteTransportMutation.mutate(t.id)}>Remove</AlertDialogAction>
-                            </AlertDialogFooter>
-                          </AlertDialogContent>
-                        </AlertDialog>
-                      </div>
-                    </li>
-                  ))}
-                </ul>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader><CardTitle className="text-lg">Group Availability</CardTitle><CardDescription>Find dates that work for everyone.</CardDescription></CardHeader>
               <CardContent className="space-y-4">
-                <p className="text-sm text-muted-foreground">Add your available dates, then save.</p>
-                <div className="flex flex-wrap gap-2 items-center">
-                  <Input
-                    type="date"
-                    className="max-w-xs"
-                    value={availabilityDateToAdd}
-                    onChange={(e) => setAvailabilityDateToAdd(e.target.value)}
-                  />
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => {
-                      if (availabilityDateToAdd) {
-                        setAvailabilityDates((prev) =>
-                          prev.includes(availabilityDateToAdd) ? prev : [...prev, availabilityDateToAdd].sort()
-                        );
-                        setAvailabilityDateToAdd("");
-                      }
-                    }}
-                  >
-                    Add date
-                  </Button>
-                  <Button size="sm" onClick={() => setAvailabilityMutation.mutate()} disabled={setAvailabilityMutation.isPending}>Save availability</Button>
-                </div>
-                {availabilityDates.length > 0 && (
-                  <div className="flex flex-wrap gap-2 mt-2">
-                    <span className="text-sm text-muted-foreground mr-1">Selected:</span>
-                    {availabilityDates.map((d) => (
-                      <Badge key={d} variant="secondary" className="flex items-center gap-1">
-                        {new Date(d).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
-                        <button
-                          type="button"
-                          className="ml-1 rounded-full hover:bg-muted-foreground/20 p-0.5"
-                          onClick={() => setAvailabilityDates((prev) => prev.filter((x) => x !== d))}
-                          aria-label={`Remove ${d}`}
-                        >
-                          <Trash2 className="h-3 w-3" />
-                        </button>
-                      </Badge>
-                    ))}
+                <div className="flex items-center justify-between">
+                  <div className="text-sm text-muted-foreground">
+                    {packingList && packingList.length > 0 ? (
+                      <>
+                        {packingList.filter((p: any) => p.packed).length} of {packingList.length} items packed
+                        <Progress
+                          value={(packingList.filter((p: any) => p.packed).length / packingList.length) * 100}
+                          className="mt-2"
+                        />
+                      </>
+                    ) : (
+                      <span>No items yet</span>
+                    )}
                   </div>
-                )}
-                {groupAvailabilityList.length > 0 && (() => {
-                  const dates: string[] = [];
-                  const start = new Date(trip.startDate);
-                  const end = new Date(trip.endDate);
-                  for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
-                    dates.push(d.toISOString().slice(0, 10));
-                  }
-                  const maxCount = groupAvailabilityList.length;
-                  const dateCounts = dates.map((d) => ({
-                    date: d,
-                    count: groupAvailabilityList.filter((a) => (a.availableDates ?? []).includes(d)).length,
-                  }));
-                  return (
-                    <div className="mt-4">
-                      <p className="text-sm font-medium mb-2">Availability heatmap — darker = more people available</p>
-                      <div className="flex flex-wrap gap-1">
-                        {dateCounts.map(({ date, count }) => {
-                          const intensity = maxCount > 0 ? count / maxCount : 0;
-                          return (
-                            <div
-                              key={date}
-                              className="h-8 min-w-[2rem] rounded flex items-center justify-center text-xs font-medium"
-                              style={{ backgroundColor: `hsl(var(--primary) / ${0.2 + intensity * 0.8})`, color: intensity > 0.5 ? "white" : "inherit" }}
-                              title={`${date}: ${count}/${maxCount} available`}
-                            >
-                              {count}
-                            </div>
-                          );
-                        })}
-                      </div>
-                      <div className="flex flex-wrap gap-4 mt-2 text-xs text-muted-foreground">
-                        {dateCounts.slice(0, 7).map(({ date }) => (
-                          <span key={date}>{new Date(date).toLocaleDateString("en-US", { month: "short", day: "numeric" })}</span>
-                        ))}
-                        {dateCounts.length > 7 && <span>…</span>}
-                      </div>
-                    </div>
-                  );
-                })()}
+                </div>
+                <Button onClick={() => setPackingModalOpen(true)} className="w-full">
+                  Open Packing List Manager
+                </Button>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg">Transportation</CardTitle>
+                <CardDescription>Coordinate rides, drivers, and transportation logistics day by day.</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="text-sm text-muted-foreground">
+                  {transportationList && transportationList.length > 0 ? (
+                    `${transportationList.length} transportation ${transportationList.length === 1 ? 'entry' : 'entries'} planned`
+                  ) : (
+                    <span>No transportation planned yet</span>
+                  )}
+                </div>
+                <Button onClick={() => setTransportationModalOpen(true)} className="w-full">
+                  Open Transportation Coordinator
+                </Button>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg">Group Availability</CardTitle>
+                <CardDescription>Find dates that work for everyone with an interactive calendar.</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="text-sm text-muted-foreground">
+                  {groupAvailabilityList && groupAvailabilityList.length > 0 ? (
+                    `${groupAvailabilityList.filter((a: any) => a.availableDates && a.availableDates.length > 0).length} of ${members.length} members submitted availability`
+                  ) : (
+                    <span>No availability data yet</span>
+                  )}
+                </div>
+                <Button onClick={() => setAvailabilityCalendarOpen(true)} className="w-full">
+                  Open Availability Calendar
+                </Button>
               </CardContent>
             </Card>
             <Card>
@@ -3987,44 +3872,14 @@ export default function TripDetailPage() {
                     <p className="text-xs text-muted-foreground mt-1">Some documents are expiring within 14 days. Review and update.</p>
                   </div>
                 )}
-                <ul className="space-y-2 text-sm">
-                  {documents.map((d) => {
-                    const expiry = (d as { expiryDate?: string | null }).expiryDate;
-                    const isExpiringSoon = expiry && new Date(expiry) <= new Date(Date.now() + 14 * 24 * 60 * 60 * 1000);
-                    const isExpired = expiry && new Date(expiry) < new Date();
-                    return (
-                      <li key={d.id} className="flex items-center justify-between border-b pb-2">
-                        <div>
-                          <span>{d.name} <Badge variant="outline">{d.type}</Badge></span>
-                          {expiry && (
-                            <span className={`text-xs ml-2 ${isExpired ? "text-destructive" : isExpiringSoon ? "text-amber-600 dark:text-amber-400" : "text-muted-foreground"}`}>
-                              Expires {new Date(expiry).toLocaleDateString()}{isExpired ? " (expired)" : isExpiringSoon ? " (soon)" : ""}
-                            </span>
-                          )}
-                        </div>
-                        <div className="flex gap-2">
-                          <a href={d.url} target="_blank" rel="noopener noreferrer" className="text-primary text-xs">Open</a>
-                          <AlertDialog>
-                          <AlertDialogTrigger asChild>
-                            <Button size="sm" variant="ghost" className="text-destructive text-xs">Remove</Button>
-                          </AlertDialogTrigger>
-                          <AlertDialogContent>
-                            <AlertDialogHeader>
-                              <AlertDialogTitle>Remove document?</AlertDialogTitle>
-                              <AlertDialogDescription>Remove &quot;{d.name}&quot; from the list?</AlertDialogDescription>
-                            </AlertDialogHeader>
-                            <AlertDialogFooter>
-                              <AlertDialogCancel>Cancel</AlertDialogCancel>
-                              <AlertDialogAction className="bg-destructive text-destructive-foreground hover:bg-destructive/90" onClick={() => deleteDocumentMutation.mutate(d.id)}>Remove</AlertDialogAction>
-                            </AlertDialogFooter>
-                          </AlertDialogContent>
-                        </AlertDialog>
-                        </div>
-                      </li>
-                    );
-                  })}
-                </ul>
-                {documents.length === 0 && <p className="text-muted-foreground text-sm">No documents yet.</p>}
+                <div className="text-sm text-muted-foreground mb-3">
+                  {documents.length > 0 ? `${documents.length} document${documents.length !== 1 ? 's' : ''} stored` : 'No documents yet'}
+                </div>
+                {documents.length > 0 && (
+                  <Button onClick={() => { setSelectedDocumentId(documents[0]?.id); setDocumentViewerOpen(true); }} className="w-full" variant="outline">
+                    View All Documents
+                  </Button>
+                )}
               </CardContent>
             </Card>
             <Card>
@@ -4510,6 +4365,183 @@ export default function TripDetailPage() {
           </TabsContent>
         </Tabs>
       </main>
+
+      {/* UX Enhancement Modals */}
+      <PackingListModal
+        isOpen={packingModalOpen}
+        onClose={() => setPackingModalOpen(false)}
+        tripId={tripId!}
+        items={packingList.map((p: any) => ({
+          id: p.id,
+          name: p.name,
+          assignedToUserId: p.assignedToUserId,
+          assignedTo: p.assignedTo,
+          notes: p.notes,
+          packed: p.packed ?? false,
+          category: p.category || "essentials"
+        }))}
+        members={members}
+        onAddItem={async (item) => {
+          await apiRequest("POST", `/api/trips/${tripId}/packing`, item);
+          queryClient.invalidateQueries({ queryKey: ["/api/trips", tripId] });
+        }}
+        onUpdateItem={async (itemId, updates) => {
+          await updatePackingMutation.mutateAsync({ itemId, updates });
+        }}
+        onDeleteItem={async (itemId) => {
+          await deletePackingMutation.mutateAsync(itemId);
+        }}
+        onGenerateList={async () => {
+          await generatePackingMutation.mutateAsync();
+        }}
+        isGenerating={generatePackingMutation.isPending}
+      />
+
+      <TransportationCoordinatorModal
+        isOpen={transportationModalOpen}
+        onClose={() => setTransportationModalOpen(false)}
+        tripId={tripId!}
+        entries={transportationList.map((t: any) => ({
+          id: t.id,
+          dayNumber: t.dayNumber,
+          type: t.type,
+          description: t.description,
+          driverUserId: t.driverUserId,
+          passengerUserIds: t.passengerUserIds || [],
+          driver: t.driver,
+          notes: t.notes
+        }))}
+        members={members}
+        tripDays={Math.ceil((new Date(trip.endDate).getTime() - new Date(trip.startDate).getTime()) / (1000 * 60 * 60 * 24)) + 1}
+        onAddEntry={async (entry) => {
+          await apiRequest("POST", `/api/trips/${tripId}/transportation`, entry);
+          queryClient.invalidateQueries({ queryKey: ["/api/trips", tripId] });
+        }}
+        onUpdateEntry={async (entryId, updates) => {
+          await updateTransportMutation.mutateAsync({ entryId, updates });
+        }}
+        onDeleteEntry={async (entryId) => {
+          await deleteTransportMutation.mutateAsync(entryId);
+        }}
+      />
+
+      <PollManagerModal
+        isOpen={pollManagerOpen}
+        onClose={() => setPollManagerOpen(false)}
+        polls={pollsList.map((p: any) => ({
+          id: p.id,
+          question: p.question,
+          options: p.options as string[],
+          deadline: p.deadline,
+          status: p.status,
+          voteCounts: p.voteCounts || [],
+          createdBy: p.createdBy,
+          createdAt: p.createdAt,
+          userVote: undefined // Will be calculated from votes if needed
+        }))}
+        members={members}
+        currentUserId={user?.id || ""}
+        onCreatePoll={async (poll) => {
+          await apiRequest("POST", `/api/trips/${tripId}/polls`, poll);
+          queryClient.invalidateQueries({ queryKey: ["/api/trips", tripId] });
+        }}
+        onVote={async (pollId, optionIndex) => {
+          await votePollMutation.mutateAsync({ pollId, optionIndex });
+        }}
+        onClosePoll={async (pollId) => {
+          await closePollMutation.mutateAsync(pollId);
+        }}
+        onDeletePoll={async (pollId) => {
+          await deletePollMutation.mutateAsync(pollId);
+        }}
+      />
+
+      <AvailabilityCalendarModal
+        isOpen={availabilityCalendarOpen}
+        onClose={() => setAvailabilityCalendarOpen(false)}
+        availability={groupAvailabilityList.map((a: any) => ({
+          id: a.id,
+          userId: a.userId,
+          availableDates: a.availableDates || [],
+          user: a.user
+        }))}
+        members={members}
+        currentUserId={user?.id || ""}
+        onSaveAvailability={async (dates) => {
+          setAvailabilityDates(dates);
+          await apiRequest("PUT", `/api/trips/${tripId}/availability`, { availableDates: dates });
+          queryClient.invalidateQueries({ queryKey: ["/api/trips", tripId] });
+        }}
+      />
+
+      <DocumentViewerModal
+        isOpen={documentViewerOpen}
+        onClose={() => setDocumentViewerOpen(false)}
+        documents={documents.map((d: any) => ({
+          id: d.id,
+          type: d.type,
+          name: d.name,
+          url: d.url,
+          notes: d.notes,
+          expiryDate: d.expiryDate,
+          uploadedBy: d.uploadedBy,
+          createdAt: d.createdAt
+        }))}
+        initialDocumentId={selectedDocumentId}
+        onUpdateDocument={async (docId, updates) => {
+          await updateDocumentMutation.mutateAsync({ docId, updates });
+        }}
+        onDeleteDocument={async (docId) => {
+          await deleteDocumentMutation.mutateAsync(docId);
+        }}
+      />
+
+      <PhotoGalleryModal
+        isOpen={photoGalleryOpen}
+        onClose={() => setPhotoGalleryOpen(false)}
+        photos={photos.map((p: any) => ({
+          id: p.id,
+          url: p.url,
+          caption: p.caption,
+          userId: p.userId,
+          user: p.user,
+          createdAt: p.createdAt
+        }))}
+        initialPhotoId={selectedPhotoId}
+        currentUserId={user?.id || ""}
+        onUpdateCaption={async (photoId, caption) => {
+          await updatePhotoMutation.mutateAsync({ photoId, caption });
+        }}
+        onDeletePhoto={async (photoId) => {
+          await deletePhotoMutation.mutateAsync(photoId);
+        }}
+      />
+
+      <TripRecapEditorModal
+        isOpen={recapEditorOpen}
+        onClose={() => setRecapEditorOpen(false)}
+        tripId={tripId!}
+        tripName={trip.name}
+        destination={trip.destination}
+        startDate={trip.startDate}
+        endDate={trip.endDate}
+        currentRecap={(trip as { recapText?: string | null }).recapText}
+        stats={{
+          totalExpenses: expenses.length,
+          totalActivities: items.length,
+          totalPhotos: photos.length,
+          daysElapsed: Math.ceil((new Date(trip.endDate).getTime() - new Date(trip.startDate).getTime()) / (1000 * 60 * 60 * 24)) + 1,
+          topCategory: expenses.length > 0 ? "dining" : "",
+          favoriteActivity: items.length > 0 ? items[0].name : ""
+        }}
+        onSave={async (recapText) => {
+          await saveRecapMutation.mutateAsync(recapText);
+        }}
+        onGenerateRecap={async () => {
+          const result = await generateRecapMutation.mutateAsync();
+          return result.recapText || "";
+        }}
+      />
     </div>
   );
 }

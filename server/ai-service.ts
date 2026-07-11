@@ -2,6 +2,10 @@ import Anthropic from "@anthropic-ai/sdk";
 import { storage } from "./storage";
 import { randomUUID } from "crypto";
 import type { TripWizardData, AIItinerary, Trip, ItineraryItem, Expense, Vote, TripMember } from "@shared/schema";
+import { retryWithBackoff, RetryMetrics } from "./ai-retry";
+import { aiCircuitBreakers, CircuitBreakerError } from "./ai-circuit-breaker";
+import { cachedAICall, getSmartTTL } from "./ai-cache";
+import { recordAIOperation, calculateCost, type AIOperationMetrics } from "./ai-metrics";
 
 const anthropic = new Anthropic({
   apiKey: process.env.AI_INTEGRATIONS_ANTHROPIC_API_KEY,
@@ -42,10 +46,34 @@ ${preferences.map((p) => `- ${p.userName}: Diet: ${p.diet || "Any"}; Budget flex
 }
 
 export async function generateItinerary(tripId: string, tripData: TripWizardData, memberPreferences?: MemberPreferenceInput[]) {
-  try {
-    const preferencesSection = buildPreferencesSection(memberPreferences || []);
+  const operationStart = Date.now();
+  const model = AI_MODELS.ITINERARY_GENERATION;
 
-    const prompt = `You are a professional travel planner. Create a detailed day-by-day itinerary for a group trip.
+  try {
+    // Build cache key from inputs
+    const cacheInputs = {
+      operation: 'itinerary',
+      destination: tripData.destination,
+      startDate: tripData.startDate,
+      endDate: tripData.endDate,
+      groupSize: tripData.groupSize,
+      budgetPerPerson: tripData.budgetPerPerson,
+      vibes: tripData.vibes.sort().join(','),
+      accommodationPref: tripData.accommodationPref,
+      diningPref: tripData.diningPref,
+      preferences: memberPreferences?.map(p => `${p.userName}:${p.diet}:${p.budgetFlexibility}`).sort().join(',') || ''
+    };
+
+    // Execute with retry + circuit breaker + caching
+    const result = await retryWithBackoff(
+      async () => {
+        return await aiCircuitBreakers.itineraryGeneration.execute(async () => {
+          return await cachedAICall(
+            cacheInputs,
+            async () => {
+              const preferencesSection = buildPreferencesSection(memberPreferences || []);
+
+              const prompt = `You are a professional travel planner. Create a detailed day-by-day itinerary for a group trip.
 
 Trip parameters:
 Destination: ${tripData.destination}
@@ -90,32 +118,57 @@ IMPORTANT: Respond with valid JSON only, this structure:
   ]
 }`;
 
-    const message = await anthropic.messages.create({
-      model: AI_MODELS.ITINERARY_GENERATION,
-      max_tokens: 8192,
-      messages: [
-        {
-          role: "user",
-          content: prompt,
-        },
-      ],
-    });
+              const message = await anthropic.messages.create({
+                model,
+                max_tokens: 8192,
+                messages: [
+                  {
+                    role: "user",
+                    content: prompt,
+                  },
+                ],
+              });
 
-    const content = message.content[0];
-    if (content.type !== "text") {
-      throw new Error("Unexpected response type");
-    }
+              const content = message.content[0];
+              if (content.type !== "text") {
+                throw new Error("Unexpected response type");
+              }
 
-    // Parse the JSON response
-    let responseText = content.text;
-    
-    // Extract JSON if wrapped in markdown code blocks
-    const jsonMatch = responseText.match(/```(?:json)?\s*([\s\S]*?)```/);
-    if (jsonMatch) {
-      responseText = jsonMatch[1].trim();
-    }
+              // Parse the JSON response
+              let responseText = content.text;
 
-    const itinerary: AIItinerary = JSON.parse(responseText);
+              // Extract JSON if wrapped in markdown code blocks
+              const jsonMatch = responseText.match(/```(?:json)?\s*([\s\S]*?)```/);
+              if (jsonMatch) {
+                responseText = jsonMatch[1].trim();
+              }
+
+              const itinerary: AIItinerary = JSON.parse(responseText);
+
+              // Calculate cost and return with metadata
+              return {
+                itinerary,
+                usage: message.usage,
+                model
+              };
+            },
+            {
+              ttl: getSmartTTL('itinerary', cacheInputs),
+              namespace: 'itinerary'
+            }
+          );
+        });
+      },
+      {
+        maxRetries: 3,
+        baseDelay: 1000
+      }
+    );
+
+    // Extract itinerary from result
+    const responseData = result.data;
+    const actualData = responseData.cached ? responseData.data : responseData;
+    const { itinerary, usage, model: usedModel } = actualData as { itinerary: AIItinerary; usage: any; model: string };
 
     // Save itinerary items to storage
     for (const day of itinerary.itinerary) {
@@ -132,148 +185,66 @@ IMPORTANT: Respond with valid JSON only, this structure:
           pricePerPerson: item.price_per_person,
           bookingUrlHint: item.booking_url_hint,
           bookingUrl: item.booking_url || null,
+          confirmationImageUrl: null, // Images are handled by frontend for US destinations
         });
       }
     }
 
-    console.log(`Generated itinerary for trip ${tripId} with ${itinerary.itinerary.length} days`);
-  } catch (error) {
-    console.error("Error generating itinerary:", error);
-    
-    // Create a fallback itinerary if AI fails
-    await createFallbackItinerary(tripId, tripData);
-  }
-}
 
-async function createFallbackItinerary(tripId: string, tripData: TripWizardData) {
-  const startDate = new Date(tripData.startDate);
-  
-  const fallbackItems = [
-    // Day 1
-    {
-      dayNumber: 1,
-      type: "flight" as const,
-      time: "08:00",
-      name: `Flight to ${tripData.destination}`,
-      description: "Direct flight to your destination",
-      location: `${tripData.destination} Airport`,
-      pricePerPerson: Math.round(tripData.budgetPerPerson * 0.15),
-      bookingUrlHint: "Google Flights",
-    },
-    {
-      dayNumber: 1,
-      type: "hotel" as const,
-      time: "14:00",
-      name: "Hotel Check-in",
-      description: "Check into your accommodation and freshen up",
-      location: `Downtown ${tripData.destination}`,
-      pricePerPerson: Math.round(tripData.budgetPerPerson * 0.2),
-      bookingUrlHint: "Booking.com",
-    },
-    {
-      dayNumber: 1,
-      type: "dining" as const,
-      time: "19:00",
-      name: "Welcome Dinner",
-      description: "Start your trip with a memorable group dinner",
-      location: `Popular restaurant in ${tripData.destination}`,
-      pricePerPerson: Math.round(tripData.budgetPerPerson * 0.05),
-      bookingUrlHint: "OpenTable",
-    },
-    // Day 2
-    {
-      dayNumber: 2,
-      type: "dining" as const,
-      time: "09:00",
-      name: "Breakfast",
-      description: "Start your day with a local breakfast spot",
-      location: `${tripData.destination}`,
-      pricePerPerson: 20,
-      bookingUrlHint: "Google Maps",
-    },
-    {
-      dayNumber: 2,
-      type: "activity" as const,
-      time: "10:00",
-      name: "Morning Activity",
-      description: "Explore local attractions and landmarks",
-      location: `${tripData.destination}`,
-      pricePerPerson: Math.round(tripData.budgetPerPerson * 0.08),
-      bookingUrlHint: "Viator",
-    },
-    {
-      dayNumber: 2,
-      type: "dining" as const,
-      time: "13:00",
-      name: "Lunch",
-      description: "Casual lunch at a local favorite",
-      location: `${tripData.destination}`,
-      pricePerPerson: 25,
-      bookingUrlHint: "Google Maps",
-    },
-    {
-      dayNumber: 2,
-      type: "activity" as const,
-      time: "15:00",
-      name: "Afternoon Adventure",
-      description: "Continue exploring with your group",
-      location: `${tripData.destination}`,
-      pricePerPerson: Math.round(tripData.budgetPerPerson * 0.1),
-      bookingUrlHint: "GetYourGuide",
-    },
-    {
-      dayNumber: 2,
-      type: "dining" as const,
-      time: "20:00",
-      name: "Dinner",
-      description: "Evening dining experience",
-      location: `${tripData.destination}`,
-      pricePerPerson: Math.round(tripData.budgetPerPerson * 0.06),
-      bookingUrlHint: "Resy",
-    },
-    // Day 3
-    {
-      dayNumber: 3,
-      type: "dining" as const,
-      time: "10:00",
-      name: "Brunch",
-      description: "Leisurely brunch before departure",
-      location: `${tripData.destination}`,
-      pricePerPerson: 30,
-      bookingUrlHint: "Yelp",
-    },
-    {
-      dayNumber: 3,
-      type: "activity" as const,
-      time: "12:00",
-      name: "Final Activity",
-      description: "Last chance to explore before heading home",
-      location: `${tripData.destination}`,
-      pricePerPerson: Math.round(tripData.budgetPerPerson * 0.05),
-      bookingUrlHint: "TripAdvisor",
-    },
-    {
-      dayNumber: 3,
-      type: "flight" as const,
-      time: "17:00",
-      name: "Return Flight",
-      description: "Flight back home",
-      location: `${tripData.destination} Airport`,
-      pricePerPerson: Math.round(tripData.budgetPerPerson * 0.15),
-      bookingUrlHint: "Google Flights",
-    },
-  ];
+    // Record successful metrics
+    const duration = Date.now() - operationStart;
+    const cost = usage ? calculateCost(usedModel, usage.input_tokens, usage.output_tokens) : 0;
 
-  for (const item of fallbackItems) {
-    await storage.createItineraryItem({
-      id: randomUUID(),
-      tripId,
-      ...item,
+    await recordAIOperation({
+      operation: 'itinerary-generation',
+      model: usedModel,
+      success: true,
+      duration,
+      inputTokens: usage?.input_tokens,
+      outputTokens: usage?.output_tokens,
+      costUsd: cost,
+      cached: result.data.cached,
+      attempts: result.attempts,
+      timestamp: Date.now()
     });
-  }
 
-  console.log(`Created fallback itinerary for trip ${tripId}`);
+    RetryMetrics.recordSuccess(result.attempts, result.totalDuration);
+
+    console.log(`✅ Generated itinerary for trip ${tripId} with ${itinerary.itinerary.length} days (${result.attempts} attempts, ${duration}ms, $${cost.toFixed(4)})`);
+  } catch (error: any) {
+    // Record failure metrics
+    const duration = Date.now() - operationStart;
+
+    await recordAIOperation({
+      operation: 'itinerary-generation',
+      model,
+      success: false,
+      duration,
+      errorType: error instanceof CircuitBreakerError ? 'circuit_breaker' : error?.type || 'unknown',
+      timestamp: Date.now()
+    });
+
+    RetryMetrics.recordFailure();
+
+    console.error(`❌ Failed to generate itinerary for trip ${tripId}:`, {
+      error: error?.message || String(error),
+      duration,
+      type: error?.constructor?.name
+    });
+
+    // Re-throw with user-friendly message
+    if (error instanceof CircuitBreakerError) {
+      throw new Error(
+        'AI service is temporarily unavailable due to high load. Please try again in a few moments.'
+      );
+    }
+
+    throw new Error(
+      'Failed to generate itinerary after multiple attempts. Please try again or contact support if the issue persists.'
+    );
+  }
 }
+
 
 /** Smart conflict resolution: suggest a compromise from poll question, options, and vote counts. */
 export async function suggestConflictResolution(params: {
@@ -283,27 +254,93 @@ export async function suggestConflictResolution(params: {
   memberNames?: string[];
 }): Promise<{ suggestion: string }> {
   const { question, options, voteCounts, memberNames } = params;
-  if (!process.env.AI_INTEGRATIONS_ANTHROPIC_API_KEY) {
-    const total = voteCounts.reduce((a, b) => a + b, 0);
-    const leader = voteCounts.indexOf(Math.max(...voteCounts));
-    return { suggestion: `Based on votes: ${options[leader]} leads (${voteCounts[leader]}/${total}). Consider splitting the day: morning for one option, afternoon for the other so everyone gets something they want.` };
-  }
+  const operationStart = Date.now();
+  const model = AI_MODELS.SUGGESTIONS;
+
   try {
-    const breakdown = options.map((opt, i) => `${opt}: ${voteCounts[i]} vote(s)`).join("; ");
-    const prompt = `The group is deciding: "${question}". Options: ${options.join(", ")}. Vote breakdown: ${breakdown}.
+    const cacheInputs = {
+      operation: 'conflict_resolution',
+      question,
+      options: options.sort().join(','),
+      voteCounts: voteCounts.join(',')
+    };
+
+    const result = await retryWithBackoff(
+      async () => {
+        return await aiCircuitBreakers.suggestions.execute(async () => {
+          return await cachedAICall(
+            cacheInputs,
+            async () => {
+              const breakdown = options.map((opt, i) => `${opt}: ${voteCounts[i]} vote(s)`).join("; ");
+              const prompt = `The group is deciding: "${question}". Options: ${options.join(", ")}. Vote breakdown: ${breakdown}.
 Suggest a short, practical compromise (1-2 sentences). Example: "Since 4 want beach and 2 want museums, suggest morning beach + afternoon museum." Reply with only the suggestion text, no JSON.`;
 
-    const message = await anthropic.messages.create({
-      model: AI_MODELS.SUGGESTIONS,
-      max_tokens: 256,
-      messages: [{ role: "user", content: prompt }],
+              const message = await anthropic.messages.create({
+                model,
+                max_tokens: 256,
+                messages: [{ role: "user", content: prompt }],
+              });
+
+              const content = message.content[0];
+              const text = content.type === "text" ? content.text.trim() : "";
+
+              return {
+                suggestion: text || "Consider splitting the day so both preferences get time.",
+                usage: message.usage,
+                model
+              };
+            },
+            {
+              ttl: getSmartTTL('conflict_resolution', cacheInputs),
+              namespace: 'conflict-resolution'
+            }
+          );
+        });
+      },
+      { maxRetries: 3, baseDelay: 500 }
+    );
+
+    const responseData = result.data;
+    const actualData = responseData.cached ? responseData.data : responseData;
+    const { suggestion, usage, model: usedModel } = actualData as { suggestion: string; usage: any; model: string };
+
+    // Record metrics
+    const duration = Date.now() - operationStart;
+    const cost = usage ? calculateCost(usedModel, usage.input_tokens, usage.output_tokens) : 0;
+
+    await recordAIOperation({
+      operation: 'conflict-resolution',
+      model: usedModel,
+      success: true,
+      duration,
+      inputTokens: usage?.input_tokens,
+      outputTokens: usage?.output_tokens,
+      costUsd: cost,
+      cached: result.data.cached,
+      attempts: result.attempts,
+      timestamp: Date.now()
     });
-    const content = message.content[0];
-    const text = content.type === "text" ? content.text.trim() : "";
-    return { suggestion: text || "Consider splitting the day so both preferences get time." };
-  } catch (e) {
-    console.error("Conflict resolution AI error:", e);
-    return { suggestion: "Consider splitting the day: do one option in the morning and the other in the afternoon so everyone gets something they want." };
+
+    return { suggestion };
+  } catch (error: any) {
+    const duration = Date.now() - operationStart;
+
+    await recordAIOperation({
+      operation: 'conflict-resolution',
+      model,
+      success: false,
+      duration,
+      errorType: error instanceof CircuitBreakerError ? 'circuit_breaker' : error?.type || 'unknown',
+      timestamp: Date.now()
+    });
+
+    console.error("Conflict resolution AI error:", error);
+
+    if (error instanceof CircuitBreakerError) {
+      throw new Error('AI assistant is temporarily unavailable. Please try again in a moment.');
+    }
+
+    throw new Error('Failed to generate conflict resolution suggestion. Please try again.');
   }
 }
 
@@ -318,27 +355,93 @@ export async function suggestBudgetOptimization(params: {
 }): Promise<{ suggestion: string }> {
   const { destination, budgetPerPerson, groupSize, totalSpent, expenseSummary, itineraryEstimated } = params;
   const budgetTotal = budgetPerPerson * groupSize;
-  if (!process.env.AI_INTEGRATIONS_ANTHROPIC_API_KEY) {
-    if (totalSpent > budgetTotal) {
-      return { suggestion: "You're over budget. Consider trimming optional activities or dining at more affordable spots." };
-    }
-    return { suggestion: "You're on track. Try splitting expensive meals or booking activities in advance for discounts." };
-  }
+  const operationStart = Date.now();
+  const model = AI_MODELS.SUGGESTIONS;
+
   try {
-    const prompt = `Travel budget advisor. Trip to ${destination}. Budget: $${budgetPerPerson}/person × ${groupSize} = $${budgetTotal}. Total spent so far: $${totalSpent}. ${expenseSummary ? `Expenses: ${expenseSummary}.` : ""} ${itineraryEstimated ? `Estimated itinerary cost: $${itineraryEstimated}.` : ""}
+    const cacheInputs = {
+      operation: 'budget_optimization',
+      destination,
+      budgetTotal,
+      totalSpent,
+      overBudget: totalSpent > budgetTotal
+    };
+
+    const result = await retryWithBackoff(
+      async () => {
+        return await aiCircuitBreakers.suggestions.execute(async () => {
+          return await cachedAICall(
+            cacheInputs,
+            async () => {
+              const prompt = `Travel budget advisor. Trip to ${destination}. Budget: $${budgetPerPerson}/person × ${groupSize} = $${budgetTotal}. Total spent so far: $${totalSpent}. ${expenseSummary ? `Expenses: ${expenseSummary}.` : ""} ${itineraryEstimated ? `Estimated itinerary cost: $${itineraryEstimated}.` : ""}
 Give 2-3 short, practical tips to optimize spending (e.g. cheaper dining alternatives, advance bookings, group discounts). Reply with only the tips, no JSON.`;
 
-    const message = await anthropic.messages.create({
-      model: AI_MODELS.SUGGESTIONS,
-      max_tokens: 512,
-      messages: [{ role: "user", content: prompt }],
+              const message = await anthropic.messages.create({
+                model,
+                max_tokens: 512,
+                messages: [{ role: "user", content: prompt }],
+              });
+
+              const content = message.content[0];
+              const text = content.type === "text" ? content.text.trim() : "";
+
+              return {
+                suggestion: text || "Consider advance bookings and group discounts to save.",
+                usage: message.usage,
+                model
+              };
+            },
+            {
+              ttl: getSmartTTL('suggestions', cacheInputs),
+              namespace: 'budget-optimization'
+            }
+          );
+        });
+      },
+      { maxRetries: 3, baseDelay: 500 }
+    );
+
+    const responseData = result.data;
+    const actualData = responseData.cached ? responseData.data : responseData;
+    const { suggestion, usage, model: usedModel } = actualData as { suggestion: string; usage: any; model: string };
+
+    // Record metrics
+    const duration = Date.now() - operationStart;
+    const cost = usage ? calculateCost(usedModel, usage.input_tokens, usage.output_tokens) : 0;
+
+    await recordAIOperation({
+      operation: 'budget-optimization',
+      model: usedModel,
+      success: true,
+      duration,
+      inputTokens: usage?.input_tokens,
+      outputTokens: usage?.output_tokens,
+      costUsd: cost,
+      cached: result.data.cached,
+      attempts: result.attempts,
+      timestamp: Date.now()
     });
-    const content = message.content[0];
-    const text = content.type === "text" ? content.text.trim() : "";
-    return { suggestion: text || "Consider advance bookings and group discounts to save." };
-  } catch (e) {
-    console.error("Budget optimization AI error:", e);
-    return { suggestion: "Consider advance bookings and splitting expensive meals to stay on budget." };
+
+    return { suggestion };
+  } catch (error: any) {
+    const duration = Date.now() - operationStart;
+
+    await recordAIOperation({
+      operation: 'budget-optimization',
+      model,
+      success: false,
+      duration,
+      errorType: error instanceof CircuitBreakerError ? 'circuit_breaker' : error?.type || 'unknown',
+      timestamp: Date.now()
+    });
+
+    console.error("Budget optimization AI error:", error);
+
+    if (error instanceof CircuitBreakerError) {
+      throw new Error('AI assistant is temporarily unavailable. Please try again in a moment.');
+    }
+
+    throw new Error('Failed to generate budget optimization tips. Please try again.');
   }
 }
 
@@ -383,14 +486,24 @@ export async function conversationalPlanningSuggestion(params: {
   members: (TripMember & { user: { name: string } })[];
 }): Promise<{ suggestion: string; action?: string }> {
   const { userMessage, context, fullTrip, items, expenses, votes, members } = params;
-  if (!process.env.AI_INTEGRATIONS_ANTHROPIC_API_KEY) {
-    return {
-      suggestion:
-        "Quick changes are coming soon. For now, add or edit items from the Itinerary tab, adjust your budget in the Budget section, or invite more friends from the Members tab.",
-      action: "none",
-    };
-  }
+  const operationStart = Date.now();
+  const model = AI_MODELS.SUGGESTIONS;
+
   try {
+    const cacheInputs = {
+      operation: 'conversational_planning',
+      userMessage,
+      tripId: params.tripId,
+      completionPercentage: context.progress.completionPercentage
+    };
+
+    const result = await retryWithBackoff(
+      async () => {
+        return await aiCircuitBreakers.suggestions.execute(async () => {
+          // Don't cache conversational responses - they're highly contextual
+          return await cachedAICall(
+            cacheInputs,
+            async () => {
     const { trip, progress, behavior, detectedIssues } = context;
 
     const issuesList =
@@ -458,21 +571,77 @@ INSTRUCTIONS:
   ACTION: add_item | edit_item | optimize_budget | resolve_vote | none
 Choose the single best action type for the app to take given the situation.`;
 
-    const message = await anthropic.messages.create({
-      model: AI_MODELS.SUGGESTIONS,
-      max_tokens: 256,
-      system: systemPrompt,
-      messages: [{ role: "user", content: userPrompt }],
+              const message = await anthropic.messages.create({
+                model,
+                max_tokens: 256,
+                system: systemPrompt,
+                messages: [{ role: "user", content: userPrompt }],
+              });
+
+              const content = message.content[0];
+              const text = content.type === "text" ? content.text.trim() : "";
+              const actionMatch = text.match(/ACTION:\s*(\w+)/i);
+              const action = actionMatch ? actionMatch[1].toLowerCase() : "none";
+              const suggestion = text.replace(/\n*ACTION:\s*\w+.*$/i, "").trim();
+
+              return {
+                suggestion: suggestion || "Noted. You can add or edit items in the Itinerary tab.",
+                action,
+                usage: message.usage,
+                model
+              };
+            },
+            {
+              ttl: 0, // Don't cache conversational responses
+              namespace: 'conversational-planning'
+            }
+          );
+        });
+      },
+      { maxRetries: 3, baseDelay: 500 }
+    );
+
+    const responseData = result.data;
+    const actualData = responseData.cached ? responseData.data : responseData;
+    const { suggestion, action, usage, model: usedModel } = actualData as { suggestion: string; action: string; usage: any; model: string };
+
+    // Record metrics
+    const duration = Date.now() - operationStart;
+    const cost = usage ? calculateCost(usedModel, usage.input_tokens, usage.output_tokens) : 0;
+
+    await recordAIOperation({
+      operation: 'conversational-planning',
+      model: usedModel,
+      success: true,
+      duration,
+      inputTokens: usage?.input_tokens,
+      outputTokens: usage?.output_tokens,
+      costUsd: cost,
+      cached: result.data.cached,
+      attempts: result.attempts,
+      timestamp: Date.now()
     });
-    const content = message.content[0];
-    const text = content.type === "text" ? content.text.trim() : "";
-    const actionMatch = text.match(/ACTION:\s*(\w+)/i);
-    const action = actionMatch ? actionMatch[1].toLowerCase() : "none";
-    const suggestion = text.replace(/\n*ACTION:\s*\w+.*$/i, "").trim();
-    return { suggestion: suggestion || "Noted. You can add or edit items in the Itinerary tab.", action };
-  } catch (e) {
-    console.error("Conversational planning AI error:", e);
-    return { suggestion: "You can add or edit items from the Itinerary tab.", action: "none" };
+
+    return { suggestion, action };
+  } catch (error: any) {
+    const duration = Date.now() - operationStart;
+
+    await recordAIOperation({
+      operation: 'conversational-planning',
+      model,
+      success: false,
+      duration,
+      errorType: error instanceof CircuitBreakerError ? 'circuit_breaker' : error?.type || 'unknown',
+      timestamp: Date.now()
+    });
+
+    console.error("Conversational planning AI error:", error);
+
+    if (error instanceof CircuitBreakerError) {
+      throw new Error('AI assistant is temporarily unavailable. Please try again in a moment.');
+    }
+
+    throw new Error('Failed to process your request. Please try again.');
   }
 }
 
@@ -485,23 +654,92 @@ export async function generateTripRecap(params: {
   photoCaptions?: string[];
 }): Promise<{ recap: string }> {
   const { destination, startDate, endDate, itinerarySummary, photoCaptions } = params;
-  if (!process.env.AI_INTEGRATIONS_ANTHROPIC_API_KEY) {
-    return { recap: `A wonderful trip to ${destination} from ${startDate} to ${endDate}.${itinerarySummary ? ` ${itinerarySummary}` : ""}${photoCaptions?.length ? ` Highlights: ${photoCaptions.slice(0, 5).join(", ")}.` : ""}` };
-  }
-  try {
-    const prompt = `Write a short, warm trip recap (2-4 paragraphs) for a group trip to ${destination} (${startDate} to ${endDate}). ${itinerarySummary ? `Itinerary summary: ${itinerarySummary}.` : ""} ${photoCaptions?.length ? `Photo moments: ${photoCaptions.join("; ")}.` : ""} Sound personal and celebratory. No JSON, just prose.`;
+  const operationStart = Date.now();
+  const model = AI_MODELS.CONTENT_GENERATION;
 
-    const message = await anthropic.messages.create({
-      model: AI_MODELS.CONTENT_GENERATION,
-      max_tokens: 1024,
-      messages: [{ role: "user", content: prompt }],
+  try {
+    const cacheInputs = {
+      operation: 'trip_recap',
+      destination,
+      startDate,
+      endDate,
+      hasSummary: !!itinerarySummary,
+      hasPhotos: !!photoCaptions?.length
+    };
+
+    const result = await retryWithBackoff(
+      async () => {
+        return await aiCircuitBreakers.suggestions.execute(async () => {
+          return await cachedAICall(
+            cacheInputs,
+            async () => {
+              const prompt = `Write a short, warm trip recap (2-4 paragraphs) for a group trip to ${destination} (${startDate} to ${endDate}). ${itinerarySummary ? `Itinerary summary: ${itinerarySummary}.` : ""} ${photoCaptions?.length ? `Photo moments: ${photoCaptions.join("; ")}.` : ""} Sound personal and celebratory. No JSON, just prose.`;
+
+              const message = await anthropic.messages.create({
+                model,
+                max_tokens: 1024,
+                messages: [{ role: "user", content: prompt }],
+              });
+
+              const content = message.content[0];
+              const text = content.type === "text" ? content.text.trim() : "";
+
+              return {
+                recap: text || `An unforgettable trip to ${destination}.`,
+                usage: message.usage,
+                model
+              };
+            },
+            {
+              ttl: getSmartTTL('trip_recap', cacheInputs),
+              namespace: 'trip-recap'
+            }
+          );
+        });
+      },
+      { maxRetries: 3, baseDelay: 500 }
+    );
+
+    const responseData = result.data;
+    const actualData = responseData.cached ? responseData.data : responseData;
+    const { recap, usage, model: usedModel } = actualData as { recap: string; usage: any; model: string };
+
+    const duration = Date.now() - operationStart;
+    const cost = usage ? calculateCost(usedModel, usage.input_tokens, usage.output_tokens) : 0;
+
+    await recordAIOperation({
+      operation: 'trip-recap',
+      model: usedModel,
+      success: true,
+      duration,
+      inputTokens: usage?.input_tokens,
+      outputTokens: usage?.output_tokens,
+      costUsd: cost,
+      cached: result.data.cached,
+      attempts: result.attempts,
+      timestamp: Date.now()
     });
-    const content = message.content[0];
-    const text = content.type === "text" ? content.text.trim() : "";
-    return { recap: text || `An unforgettable trip to ${destination}.` };
-  } catch (e) {
-    console.error("Trip recap AI error:", e);
-    return { recap: `A memorable trip to ${destination}. Hope you had a great time!` };
+
+    return { recap };
+  } catch (error: any) {
+    const duration = Date.now() - operationStart;
+
+    await recordAIOperation({
+      operation: 'trip-recap',
+      model,
+      success: false,
+      duration,
+      errorType: error instanceof CircuitBreakerError ? 'circuit_breaker' : error?.type || 'unknown',
+      timestamp: Date.now()
+    });
+
+    console.error("Trip recap AI error:", error);
+
+    if (error instanceof CircuitBreakerError) {
+      throw new Error('AI assistant is temporarily unavailable. Please try again in a moment.');
+    }
+
+    throw new Error('Failed to generate trip recap. Please try again.');
   }
 }
 
@@ -514,39 +752,109 @@ export async function generatePackingList(params: {
   groupSize: number;
 }): Promise<{ items: string[] }> {
   const { destination, startDate, endDate, tripType, groupSize } = params;
-  if (!process.env.AI_INTEGRATIONS_ANTHROPIC_API_KEY) {
-    const base = ["Passport/ID", "Phone & charger", "Toiletries", "Clothes", "Sunglasses", "Medications"];
-    return { items: base };
-  }
+  const operationStart = Date.now();
+  const model = AI_MODELS.CONTENT_GENERATION;
+
   try {
-    const prompt = `Generate a practical packing list for a ${groupSize}-person trip to ${destination} from ${startDate} to ${endDate}.${tripType ? ` Trip type: ${tripType}.` : ""}
+    const cacheInputs = {
+      operation: 'packing_list',
+      destination,
+      tripType: tripType || 'general',
+      duration: Math.ceil((new Date(endDate).getTime() - new Date(startDate).getTime()) / (1000 * 60 * 60 * 24))
+    };
+
+    const result = await retryWithBackoff(
+      async () => {
+        return await aiCircuitBreakers.extraction.execute(async () => {
+          return await cachedAICall(
+            cacheInputs,
+            async () => {
+              const prompt = `Generate a practical packing list for a ${groupSize}-person trip to ${destination} from ${startDate} to ${endDate}.${tripType ? ` Trip type: ${tripType}.` : ""}
 Return ONLY a JSON array of strings, e.g. ["Passport", "Sunscreen", "Swimwear"]. 15-25 items. No other text.`;
 
-    const message = await anthropic.messages.create({
-      model: AI_MODELS.CONTENT_GENERATION,
-      max_tokens: 512,
-      messages: [{ role: "user", content: prompt }],
+              const message = await anthropic.messages.create({
+                model,
+                max_tokens: 512,
+                messages: [{ role: "user", content: prompt }],
+              });
+
+              const content = message.content[0];
+              let text = content.type === "text" ? content.text.trim() : "";
+              const jsonMatch = text.match(/\[[\s\S]*\]/);
+              if (jsonMatch) text = jsonMatch[0];
+              const items = JSON.parse(text) as string[];
+
+              return {
+                items: Array.isArray(items) ? items : [],
+                usage: message.usage,
+                model
+              };
+            },
+            {
+              ttl: getSmartTTL('packing_list', cacheInputs),
+              namespace: 'packing-list'
+            }
+          );
+        });
+      },
+      { maxRetries: 3, baseDelay: 500 }
+    );
+
+    const responseData = result.data;
+    const actualData = responseData.cached ? responseData.data : responseData;
+    const { items, usage, model: usedModel } = actualData as { items: string[]; usage: any; model: string };
+
+    const duration = Date.now() - operationStart;
+    const cost = usage ? calculateCost(usedModel, usage.input_tokens, usage.output_tokens) : 0;
+
+    await recordAIOperation({
+      operation: 'packing-list',
+      model: usedModel,
+      success: true,
+      duration,
+      inputTokens: usage?.input_tokens,
+      outputTokens: usage?.output_tokens,
+      costUsd: cost,
+      cached: result.data.cached,
+      attempts: result.attempts,
+      timestamp: Date.now()
     });
-    const content = message.content[0];
-    let text = content.type === "text" ? content.text.trim() : "";
-    const jsonMatch = text.match(/\[[\s\S]*\]/);
-    if (jsonMatch) text = jsonMatch[0];
-    const items = JSON.parse(text) as string[];
-    return { items: Array.isArray(items) ? items : [] };
-  } catch (e) {
-    console.error("Packing list AI error:", e);
-    return { items: ["Passport/ID", "Phone & charger", "Toiletries", "Clothes", "Sunglasses"] };
+
+    return { items };
+  } catch (error: any) {
+    const duration = Date.now() - operationStart;
+
+    await recordAIOperation({
+      operation: 'packing-list',
+      model,
+      success: false,
+      duration,
+      errorType: error instanceof CircuitBreakerError ? 'circuit_breaker' : error?.type || 'unknown',
+      timestamp: Date.now()
+    });
+
+    console.error("Packing list AI error:", error);
+
+    if (error instanceof CircuitBreakerError) {
+      throw new Error('AI assistant is temporarily unavailable. Please try again in a moment.');
+    }
+
+    throw new Error('Failed to generate packing list. Please try again.');
   }
 }
 
 /** Parse confirmation email text and suggest itinerary items. */
 export async function parseEmailForItinerary(params: { emailText: string; destination?: string }): Promise<{ suggestions: { name: string; description: string; location: string; type: string; dayNumber: number; time: string; pricePerPerson?: number }[] }> {
   const { emailText, destination } = params;
-  if (!process.env.AI_INTEGRATIONS_ANTHROPIC_API_KEY) {
-    return { suggestions: [] };
-  }
+  const operationStart = Date.now();
+  const model = AI_MODELS.EXTRACTION;
+
   try {
-    const prompt = `Extract travel booking details from this email. For each flight, hotel, activity, or reservation mentioned, output one line in this exact format (one per line):
+    // Don't cache email parsing - content is always unique
+    const result = await retryWithBackoff(
+      async () => {
+        return await aiCircuitBreakers.extraction.execute(async () => {
+          const prompt = `Extract travel booking details from this email. For each flight, hotel, activity, or reservation mentioned, output one line in this exact format (one per line):
 NAME|DESCRIPTION|LOCATION|TYPE|DAY|TIME|PRICE
 Where TYPE is one of: flight, hotel, dining, activity. DAY is 1-31. TIME is HH:MM. PRICE is number or 0.
 Destination context: ${destination || "unknown"}.
@@ -556,30 +864,75 @@ ${emailText.slice(0, 6000)}
 ---
 Reply with only the lines, no other text. If nothing found, reply with a single line: NONE`;
 
-    const message = await anthropic.messages.create({
-      model: AI_MODELS.EXTRACTION,
-      max_tokens: 1024,
-      messages: [{ role: "user", content: prompt }],
+          const message = await anthropic.messages.create({
+            model,
+            max_tokens: 1024,
+            messages: [{ role: "user", content: prompt }],
+          });
+
+          const content = message.content[0];
+          const text = content.type === "text" ? content.text.trim() : "";
+
+          if (!text || text.startsWith("NONE")) {
+            return { suggestions: [], usage: message.usage, model };
+          }
+
+          const lines = text.split("\n").filter((l) => l.includes("|"));
+          const suggestions = lines.slice(0, 20).map((line) => {
+            const parts = line.split("|");
+            return {
+              name: parts[0]?.trim() || "Item",
+              description: parts[1]?.trim() || "",
+              location: parts[2]?.trim() || destination || "",
+              type: ["flight", "hotel", "dining", "activity"].includes(parts[3]?.trim() || "") ? parts[3].trim()! : "activity",
+              dayNumber: Math.min(31, Math.max(1, parseInt(parts[4] || "1", 10) || 1)),
+              time: /^\d{1,2}:\d{2}$/.test(parts[5]?.trim() || "") ? parts[5].trim()! : "12:00",
+              pricePerPerson: parseInt(parts[6] || "0", 10) || 0,
+            };
+          });
+
+          return { suggestions, usage: message.usage, model };
+        });
+      },
+      { maxRetries: 3, baseDelay: 500 }
+    );
+
+    const { suggestions, usage, model: usedModel } = result.data;
+    const duration = Date.now() - operationStart;
+    const cost = usage ? calculateCost(usedModel, usage.input_tokens, usage.output_tokens) : 0;
+
+    await recordAIOperation({
+      operation: 'email-parsing',
+      model: usedModel,
+      success: true,
+      duration,
+      inputTokens: usage?.input_tokens,
+      outputTokens: usage?.output_tokens,
+      costUsd: cost,
+      cached: false,
+      attempts: result.attempts,
+      timestamp: Date.now()
     });
-    const content = message.content[0];
-    const text = content.type === "text" ? content.text.trim() : "";
-    if (!text || text.startsWith("NONE")) return { suggestions: [] };
-    const lines = text.split("\n").filter((l) => l.includes("|"));
-    const suggestions = lines.slice(0, 20).map((line) => {
-      const parts = line.split("|");
-      return {
-        name: parts[0]?.trim() || "Item",
-        description: parts[1]?.trim() || "",
-        location: parts[2]?.trim() || destination || "",
-        type: ["flight", "hotel", "dining", "activity"].includes(parts[3]?.trim() || "") ? parts[3].trim()! : "activity",
-        dayNumber: Math.min(31, Math.max(1, parseInt(parts[4] || "1", 10) || 1)),
-        time: /^\d{1,2}:\d{2}$/.test(parts[5]?.trim() || "") ? parts[5].trim()! : "12:00",
-        pricePerPerson: parseInt(parts[6] || "0", 10) || 0,
-      };
-    });
+
     return { suggestions };
-  } catch (e) {
-    console.error("Parse email error:", e);
-    return { suggestions: [] };
+  } catch (error: any) {
+    const duration = Date.now() - operationStart;
+
+    await recordAIOperation({
+      operation: 'email-parsing',
+      model,
+      success: false,
+      duration,
+      errorType: error instanceof CircuitBreakerError ? 'circuit_breaker' : error?.type || 'unknown',
+      timestamp: Date.now()
+    });
+
+    console.error("Parse email error:", error);
+
+    if (error instanceof CircuitBreakerError) {
+      throw new Error('AI assistant is temporarily unavailable. Please try again in a moment.');
+    }
+
+    throw new Error('Failed to parse email. Please try again.');
   }
 }

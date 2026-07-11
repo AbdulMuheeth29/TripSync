@@ -12,6 +12,7 @@ import { getDb } from "./db";
 import { registerRoutes } from "./routes";
 import { serveStatic } from "./static";
 import { createServer } from "http";
+import net from "net";
 import {
   initSentry,
   sentryRequestHandler,
@@ -20,6 +21,7 @@ import {
   captureException,
 } from "./sentry";
 import { httpLogger, correlationIdMiddleware, appLogger } from "./logger";
+import { startAtlasScheduler, stopAtlasScheduler } from "./atlas-monitor";
 
 const app = express();
 const httpServer = createServer(app);
@@ -193,14 +195,35 @@ validateEnv();
 
   const host = env.host;
   const preferredPort = env.port;
+  const maxPortAttempts = 10;
 
-  function tryListen(port: number) {
-    httpServer.listen(port, host, () => {
-      const displayHost = host === "0.0.0.0" ? "localhost" : host;
-      appLogger.startup(displayHost, port);
+  function findAvailablePort(startPort: number): Promise<number> {
+    return new Promise((resolve, reject) => {
+      const tryPort = (port: number, attempt: number) => {
+        if (attempt >= maxPortAttempts) {
+          reject(
+            new Error(
+              `No available port found between ${startPort} and ${startPort + maxPortAttempts - 1}`,
+            ),
+          );
+          return;
+        }
 
-      // Start periodic cleanup jobs
-      cleanupInterval = startPeriodicCleanup();
+        const tester = net.createServer();
+        tester.once("error", (err: NodeJS.ErrnoException) => {
+          if (err.code === "EADDRINUSE") {
+            appLogger.warn(`Port ${port} in use, trying ${port + 1}`);
+            tryPort(port + 1, attempt + 1);
+            return;
+          }
+          reject(err);
+        });
+        tester.listen(port, host, () => {
+          tester.close(() => resolve(port));
+        });
+      };
+
+      tryPort(startPort, 0);
     });
   }
 
@@ -225,15 +248,19 @@ validateEnv();
 
     appLogger.debug("Periodic cleanup job started");
 
-    // Start Atlas proactive monitoring
+    // Start Atlas AI monitoring scheduler (every 15 minutes)
     (async () => {
       try {
-        const { atlasProactive } = await import("./atlas-proactive-service");
-        atlasProactive.startMonitoring();
+        if (process.env.AI_INTEGRATIONS_ANTHROPIC_API_KEY) {
+          atlasScheduler = startAtlasScheduler();
+          appLogger.debug("Atlas AI monitoring scheduler started");
+        } else {
+          appLogger.debug("Skipping Atlas scheduler (AI not configured)");
+        }
       } catch (error) {
         appLogger.error(
           error instanceof Error ? error : new Error(String(error)),
-          { context: "atlas_proactive_startup" }
+          { context: "atlas_scheduler_startup" }
         );
       }
     })();
@@ -244,6 +271,7 @@ validateEnv();
   // Graceful shutdown handling
   let isShuttingDown = false;
   let cleanupInterval: NodeJS.Timeout | null = null;
+  let atlasScheduler: NodeJS.Timeout | null = null;
 
   function gracefulShutdown(signal: string) {
     if (isShuttingDown) {
@@ -255,6 +283,11 @@ validateEnv();
     appLogger.warn(`${signal} received, starting graceful shutdown`);
 
     // Stop accepting new connections
+    if (!httpServer.listening) {
+      process.exit(0);
+      return;
+    }
+
     httpServer.close(async (err) => {
       if (err) {
         appLogger.error(err instanceof Error ? err : new Error(String(err)), {
@@ -269,6 +302,12 @@ validateEnv();
         if (cleanupInterval) {
           clearInterval(cleanupInterval);
           appLogger.debug('Stopped periodic cleanup job');
+        }
+
+        // Stop Atlas AI monitoring
+        if (atlasScheduler) {
+          stopAtlasScheduler(atlasScheduler);
+          appLogger.debug('Stopped Atlas AI monitoring');
         }
 
         // Stop Atlas proactive monitoring
@@ -322,14 +361,14 @@ validateEnv();
     gracefulShutdown('UNHANDLED_REJECTION');
   });
 
-  httpServer.on("error", (err: NodeJS.ErrnoException) => {
-    if (err.code === "EADDRINUSE" && preferredPort === 3000) {
-      appLogger.warn(`Port ${preferredPort} in use, trying ${preferredPort + 1}`);
-      tryListen(preferredPort + 1);
-    } else {
-      throw err;
-    }
-  });
+  const port = await findAvailablePort(preferredPort);
+  httpServer.listen(port, host, () => {
+    const displayHost = host === "0.0.0.0" ? "localhost" : host;
+    appLogger.startup(displayHost, port);
+    cleanupInterval = startPeriodicCleanup();
 
-  tryListen(preferredPort);
+    // Start Atlas AI proactive monitoring (checks trips every 15 minutes)
+    atlasScheduler = startAtlasScheduler();
+    appLogger.ai('Atlas monitoring started', { interval: '15 minutes' });
+  });
 })();

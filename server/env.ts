@@ -8,6 +8,12 @@ const isProduction = process.env.NODE_ENV === "production";
 const DEFAULT_JWT_SECRET = "your-secret-key-change-this-in-production";
 
 export function validateEnv(): void {
+  if (isProduction && !process.env.DATABASE_URL) {
+    console.warn(
+      "[env] DATABASE_URL not set; using in-memory storage. Set DATABASE_URL for production persistence.",
+    );
+  }
+
   if (isProduction && process.env.DATABASE_URL) {
     try {
       new URL(process.env.DATABASE_URL);
@@ -88,6 +94,10 @@ export const env = {
   },
   get openaiBaseUrl(): string | undefined {
     return process.env.OPENAI_BASE_URL;
+  },
+  /** Unsplash API for destination-specific images */
+  get unsplashAccessKey(): string | undefined {
+    return process.env.UNSPLASH_ACCESS_KEY;
   },
   /** Comma-separated admin emails for metrics dashboard access */
   get adminEmails(): string[] {

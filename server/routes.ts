@@ -23,6 +23,17 @@ import {
 } from "./rate-limiter";
 import { getParam } from "./route-utils";
 import { featureFlags } from "./feature-flags";
+import aiAdminRouter from "./ai-admin-routes";
+import aiFeatureRouter from "./ai-feature-routes";
+import atlasRouter from "./atlas-routes";
+import imageRouter from "./image-routes";
+import {
+  calculateSettlements,
+  markExpenseSettled,
+  markAllExpensesSettled,
+  getUserPairBalance
+} from "./expense-settlement-service";
+import { processReceiptImage } from "./receipt-ocr-service";
 
 // Rate limiting is now handled by Redis-backed middleware in rate-limiter.ts
 
@@ -175,6 +186,32 @@ export async function registerRoutes(
       res.status(500).json({ error: "Failed to fetch feature flags" });
     }
   });
+
+  // AI Admin Dashboard Routes (with admin auth check middleware)
+  app.use("/api/admin/ai", requireAuth, async (req: Request, res: Response, next) => {
+    try {
+      const userId = (req as any).userId;
+      const user = await storage.getUserById(userId);
+
+      if (!user || !env.isAdmin(user.email)) {
+        return res.status(403).json({ error: "Admin access required" });
+      }
+
+      next();
+    } catch (error) {
+      console.error("Error checking admin access:", error);
+      res.status(500).json({ error: "Failed to verify admin access" });
+    }
+  }, aiAdminRouter);
+
+  // AI Advanced Features Routes (smart scheduling, success prediction, etc.)
+  app.use("/api/trips", requireAI, aiFeatureRouter);
+
+  // Atlas AI Assistant Routes (conversational planning)
+  app.use("/api/trips", requireAI, atlasRouter);
+
+  // Image API Routes (destination and activity images)
+  app.use("/api/images", imageRouter);
 
   // Public, read-only trip preview by share code (no auth)
   app.get("/api/public/trips/:shareCode", async (req: Request, res: Response) => {
@@ -1289,6 +1326,81 @@ export async function registerRoutes(
     } catch (error) {
       console.error("Error deleting expense:", error);
       res.status(500).json({ error: "Failed to delete expense" });
+    }
+  });
+
+  // Expense settlements - "Who owes whom" calculation
+  app.get("/api/trips/:tripId/expenses/settlements", requireAuth, requireTripAccess, async (req: Request, res: Response) => {
+    try {
+      const tripId = getParam(req.params.tripId);
+      const { settlements, balances } = await calculateSettlements(tripId);
+      res.json({ settlements, balances });
+    } catch (error) {
+      console.error("Error calculating settlements:", error);
+      res.status(500).json({ error: "Failed to calculate settlements" });
+    }
+  });
+
+  // Get balance between two specific users
+  app.get("/api/trips/:tripId/expenses/balance/:userId1/:userId2", requireAuth, requireTripAccess, async (req: Request, res: Response) => {
+    try {
+      const tripId = getParam(req.params.tripId);
+      const userId1 = getParam(req.params.userId1);
+      const userId2 = getParam(req.params.userId2);
+      const balance = await getUserPairBalance(tripId, userId1, userId2);
+      res.json(balance);
+    } catch (error) {
+      console.error("Error getting user pair balance:", error);
+      res.status(500).json({ error: "Failed to get balance" });
+    }
+  });
+
+  // Mark a specific expense as settled
+  app.post("/api/trips/:tripId/expenses/:expenseId/settle", requireAuth, requireTripAccess, async (req: Request, res: Response) => {
+    try {
+      const expenseId = getParam(req.params.expenseId);
+      await markExpenseSettled(expenseId);
+      res.json({ success: true, message: "Expense marked as settled" });
+    } catch (error) {
+      console.error("Error settling expense:", error);
+      res.status(500).json({ error: "Failed to settle expense" });
+    }
+  });
+
+  // Mark all trip expenses as settled
+  app.post("/api/trips/:tripId/expenses/settle-all", requireAuth, requireTripAccess, async (req: Request, res: Response) => {
+    try {
+      const tripId = getParam(req.params.tripId);
+      await markAllExpensesSettled(tripId);
+      res.json({ success: true, message: "All expenses marked as settled" });
+    } catch (error) {
+      console.error("Error settling all expenses:", error);
+      res.status(500).json({ error: "Failed to settle all expenses" });
+    }
+  });
+
+  // Receipt OCR (Pro feature) - Extract data from receipt image using Claude Haiku
+  app.post("/api/receipts/ocr", requireAuth, requirePro, requireAI, async (req: Request, res: Response) => {
+    try {
+      const { imageUrl } = req.body;
+
+      if (!imageUrl) {
+        return res.status(400).json({ error: "imageUrl is required" });
+      }
+
+      const receiptData = await processReceiptImage(imageUrl);
+
+      if (!receiptData) {
+        return res.status(422).json({
+          error: "Could not extract data from receipt",
+          message: "The image may be unclear or not a valid receipt. Please try again with a clearer image.",
+        });
+      }
+
+      res.json(receiptData);
+    } catch (error) {
+      console.error("Receipt OCR error:", error);
+      res.status(500).json({ error: "Failed to process receipt" });
     }
   });
 

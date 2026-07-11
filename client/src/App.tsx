@@ -1,3 +1,4 @@
+import { lazy, Suspense } from "react";
 import { Switch, Route, Redirect } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
@@ -9,24 +10,39 @@ import { AppFooter } from "@/components/app-footer";
 import { CookieConsentBanner } from "@/components/cookie-consent";
 import { AtlasAgent } from "@/components/atlas/AtlasAgent";
 import { AddToHomePrompt } from "@/components/add-to-home-prompt";
-import LandingPage from "@/pages/landing";
-import LoginPage from "@/pages/login";
-import PricingPage from "@/pages/pricing";
-import DashboardPage from "@/pages/dashboard";
-import CreateTripPage from "@/pages/create-trip";
-import TripDetailPage from "@/pages/trip-detail";
-import JoinTripPage from "@/pages/join-trip";
-import InviteRespondPage from "@/pages/invite-respond";
-import ForgotPasswordPage from "@/pages/forgot-password";
-import ContactPage from "@/pages/contact";
-import PrivacyPage from "@/pages/privacy";
-import TermsPage from "@/pages/terms";
-import BillingPage from "@/pages/billing";
-import HelpPage from "@/pages/help";
-import NotFound from "@/pages/not-found";
-import MetricsDashboard from "@/admin/MetricsDashboard";
 import { CommandPalette } from "@/components/command-palette";
-import PublicTripPage from "@/pages/public-trip";
+
+// Lazy load all page components for code splitting
+const LandingPage = lazy(() => import("@/pages/landing"));
+const LoginPage = lazy(() => import("@/pages/login"));
+const PricingPage = lazy(() => import("@/pages/pricing"));
+const DashboardPage = lazy(() => import("@/pages/dashboard"));
+const CreateTripPage = lazy(() => import("@/pages/create-trip"));
+const TripDetailPage = lazy(() => import("@/pages/trip-detail"));
+const JoinTripPage = lazy(() => import("@/pages/join-trip"));
+const InviteRespondPage = lazy(() => import("@/pages/invite-respond"));
+const ForgotPasswordPage = lazy(() => import("@/pages/forgot-password"));
+const ResetPasswordPage = lazy(() => import("@/pages/reset-password"));
+const ContactPage = lazy(() => import("@/pages/contact"));
+const PrivacyPage = lazy(() => import("@/pages/privacy"));
+const TermsPage = lazy(() => import("@/pages/terms"));
+const BillingPage = lazy(() => import("@/pages/billing"));
+const HelpPage = lazy(() => import("@/pages/help"));
+const NotFound = lazy(() => import("@/pages/not-found"));
+const MetricsDashboard = lazy(() => import("@/admin/MetricsDashboard"));
+const PublicTripPage = lazy(() => import("@/pages/public-trip"));
+
+// Loading fallback component
+function PageLoader() {
+  return (
+    <div className="min-h-screen flex items-center justify-center">
+      <div className="text-center space-y-4">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto" />
+        <p className="text-sm text-muted-foreground">Loading...</p>
+      </div>
+    </div>
+  );
+}
 
 function ProtectedRoute({ component: Component }: { component: React.ComponentType }) {
   const { user, isLoading } = useAuth();
@@ -60,7 +76,11 @@ function AppLayout({ children }: { children: React.ReactNode }) {
       <CookieConsentBanner />
       <AddToHomePrompt />
       <AtlasAgent />
-      <div className="flex-1">{children}</div>
+      <div className="flex-1">
+        <Suspense fallback={<PageLoader />}>
+          {children}
+        </Suspense>
+      </div>
       <AppFooter />
     </div>
   );
@@ -74,6 +94,7 @@ function Router() {
         <Route path="/login">{() => <PublicOnlyRoute component={LoginPage} />}</Route>
         <Route path="/pricing" component={PricingPage} />
         <Route path="/forgot-password" component={ForgotPasswordPage} />
+        <Route path="/reset-password" component={ResetPasswordPage} />
         <Route path="/contact" component={ContactPage} />
         <Route path="/help" component={HelpPage} />
         <Route path="/privacy" component={PrivacyPage} />

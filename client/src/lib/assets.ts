@@ -232,7 +232,7 @@ const CATEGORY_IMAGES: Record<string, LocationImage> = {
     alt: 'Adventure destination',
   },
   culture: {
-    url: 'https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=2400&q=90',
+    url: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=2400&q=90',
     alt: 'Cultural destination',
   },
 };

@@ -8,8 +8,18 @@ server/public
 vite.config.ts.*
 *.tar.gz
 
+# Build artifacts
+coverage/
+dist/
+*.log
+*.lock
+
+# Temporary files
+backups/
+attached_assets/
+
 # Documentation (keep local only, except README)
+# Note: docs/ folder is now tracked for proper documentation
 *.md
 !README.md
-coverage/
-backups/
+!docs/**/*.md

@@ -1,4 +1,4 @@
-import { pgTable, text, varchar, integer, timestamp, boolean, json } from "drizzle-orm/pg-core";
+import { pgTable, text, varchar, integer, timestamp, boolean, json, numeric, serial } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 import { sql } from "drizzle-orm";
@@ -93,6 +93,12 @@ export const itineraryItems = pgTable("itinerary_items", {
   confirmationImageUrl: text("confirmation_image_url"),
   endTime: text("end_time"), // Optional end time
   sortOrder: integer("sort_order"), // For drag-and-drop order within day
+  // AI metadata for deep coupling
+  aiConfidenceScore: numeric("ai_confidence_score", { precision: 3, scale: 2 }), // 0.0-1.0
+  aiReasoning: text("ai_reasoning"), // Why AI chose this
+  aiModelVersion: varchar("ai_model_version", { length: 50 }), // claude-sonnet-4-5, etc
+  aiGeneratedAt: timestamp("ai_generated_at"),
+  aiGenerationId: varchar("ai_generation_id", { length: 100 }), // Links items from same batch
   createdAt: timestamp("created_at").default(sql`CURRENT_TIMESTAMP`).notNull(),
 });
 
@@ -303,6 +309,132 @@ export const locationSharing = pgTable("location_sharing", {
   updatedAt: timestamp("updated_at").default(sql`CURRENT_TIMESTAMP`).notNull(),
 });
 
+// ============================================================================
+// AI Infrastructure Tables - Deep Coupling for Learning
+// ============================================================================
+
+// AI Generation Feedback - tracks user interactions with AI suggestions
+export const aiGenerationFeedback = pgTable("ai_generation_feedback", {
+  id: serial("id").primaryKey(),
+  tripId: varchar("trip_id", { length: 36 }).notNull(),
+  userId: varchar("user_id", { length: 36 }).notNull(),
+  generationId: varchar("generation_id", { length: 100 }).notNull(),
+  itemId: varchar("item_id", { length: 36 }),
+
+  feedbackType: text("feedback_type").notNull(), // kept, edited, deleted, upvoted, downvoted
+  originalSuggestion: json("original_suggestion").$type<any>().notNull(),
+  userModification: json("user_modification").$type<any>(),
+
+  fieldChanged: varchar("field_changed", { length: 100 }),
+  changeMagnitude: numeric("change_magnitude", { precision: 10, scale: 2 }),
+
+  userPreferences: json("user_preferences").$type<any>(),
+  tripContext: json("trip_context").$type<any>(),
+
+  createdAt: timestamp("created_at").default(sql`CURRENT_TIMESTAMP`).notNull(),
+  feedbackSource: varchar("feedback_source", { length: 50 }).default("manual"),
+});
+
+// AI Cost Log - tracks every AI operation for optimization
+export const aiCostLog = pgTable("ai_cost_log", {
+  id: serial("id").primaryKey(),
+  tripId: varchar("trip_id", { length: 36 }),
+  userId: varchar("user_id", { length: 36 }),
+  operation: varchar("operation", { length: 50 }).notNull(),
+  generationId: varchar("generation_id", { length: 100 }),
+
+  model: varchar("model", { length: 50 }).notNull(),
+  modelVersion: varchar("model_version", { length: 50 }),
+
+  inputTokens: integer("input_tokens").notNull(),
+  outputTokens: integer("output_tokens").notNull(),
+  costUsd: numeric("cost_usd", { precision: 10, scale: 6 }).notNull(),
+  cached: boolean("cached").default(false),
+
+  durationMs: integer("duration_ms"),
+  attempts: integer("attempts").default(1),
+  success: boolean("success").notNull().default(true),
+  errorType: varchar("error_type", { length: 100 }),
+
+  createdAt: timestamp("created_at").default(sql`CURRENT_TIMESTAMP`).notNull(),
+  context: json("context").$type<any>(),
+});
+
+// AI User Preferences - learned preferences (proprietary dataset)
+export const aiUserPreferences = pgTable("ai_user_preferences", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id", { length: 36 }).notNull(),
+
+  preferenceCategory: varchar("preference_category", { length: 50 }).notNull(),
+  preferenceKey: varchar("preference_key", { length: 100 }).notNull(),
+  preferenceValue: json("preference_value").$type<any>().notNull(),
+  confidenceScore: numeric("confidence_score", { precision: 3, scale: 2 }).notNull().default("0.5"),
+
+  sampleSize: integer("sample_size").notNull().default(1),
+  lastConfirmedAt: timestamp("last_confirmed_at"),
+  lastViolatedAt: timestamp("last_violated_at"),
+
+  learnedFromTrips: json("learned_from_trips").$type<number[]>().default([]),
+  destinationsApplicable: json("destinations_applicable").$type<string[]>(),
+
+  createdAt: timestamp("created_at").default(sql`CURRENT_TIMESTAMP`).notNull(),
+  updatedAt: timestamp("updated_at").default(sql`CURRENT_TIMESTAMP`).notNull(),
+});
+
+// Atlas Monitoring State - proactive monitoring per trip
+export const atlasMonitoringState = pgTable("atlas_monitoring_state", {
+  id: serial("id").primaryKey(),
+  tripId: varchar("trip_id", { length: 36 }).notNull().unique(),
+
+  lastCheckedAt: timestamp("last_checked_at").default(sql`CURRENT_TIMESTAMP`).notNull(),
+  nextCheckAt: timestamp("next_check_at").default(sql`CURRENT_TIMESTAMP + INTERVAL '15 minutes'`).notNull(),
+
+  completionPercentage: numeric("completion_percentage", { precision: 5, scale: 2 }).default("0"),
+  budgetUsagePercentage: numeric("budget_usage_percentage", { precision: 5, scale: 2 }).default("0"),
+  daysUntilTrip: integer("days_until_trip"),
+  stuckVotesCount: integer("stuck_votes_count").default(0),
+  inactiveDays: integer("inactive_days").default(0),
+  healthScore: numeric("health_score", { precision: 5, scale: 2 }).default("0"),
+  issues: json("issues").$type<string[]>().default([]),
+
+  lastInterventionAt: timestamp("last_intervention_at"),
+  lastInterventionType: varchar("last_intervention_type", { length: 50 }),
+  interventionCount: integer("intervention_count").default(0),
+
+  suppressedUntil: timestamp("suppressed_until"),
+  suppressionReason: varchar("suppression_reason", { length: 100 }),
+
+  createdAt: timestamp("created_at").default(sql`CURRENT_TIMESTAMP`).notNull(),
+  updatedAt: timestamp("updated_at").default(sql`CURRENT_TIMESTAMP`).notNull(),
+});
+
+// Atlas Interventions - log of all Atlas AI interventions
+export const atlasInterventions = pgTable("atlas_interventions", {
+  id: serial("id").primaryKey(),
+  tripId: varchar("trip_id", { length: 36 }).notNull(),
+
+  interventionType: varchar("intervention_type", { length: 50 }).notNull(),
+  triggerCondition: varchar("trigger_condition", { length: 100 }).notNull(),
+  severity: text("severity").notNull(), // info, warning, urgent
+
+  message: text("message").notNull(),
+  suggestedActions: json("suggested_actions").$type<any>(),
+
+  viewed: boolean("viewed").default(false),
+  viewedAt: timestamp("viewed_at"),
+  dismissed: boolean("dismissed").default(false),
+  dismissedAt: timestamp("dismissed_at"),
+  actionTaken: varchar("action_taken", { length: 50 }),
+  wasAccepted: boolean("was_accepted").default(false),
+
+  modelUsed: varchar("model_used", { length: 50 }),
+  generationId: varchar("generation_id", { length: 100 }),
+  confidenceScore: numeric("confidence_score", { precision: 3, scale: 2 }),
+
+  createdAt: timestamp("created_at").default(sql`CURRENT_TIMESTAMP`).notNull(),
+  expiresAt: timestamp("expires_at"),
+});
+
 // Insert schemas
 export const insertUserSchema = createInsertSchema(users).omit({
   createdAt: true,
@@ -407,6 +539,18 @@ export type LocationSharing = typeof locationSharing.$inferSelect;
 export type InsertLocationSharing = z.infer<typeof insertLocationSharingSchema>;
 export type AtlasConversation = typeof atlasConversations.$inferSelect;
 export type InsertAtlasConversation = typeof atlasConversations.$inferInsert;
+
+// AI Infrastructure types
+export type AIGenerationFeedback = typeof aiGenerationFeedback.$inferSelect;
+export type InsertAIGenerationFeedback = typeof aiGenerationFeedback.$inferInsert;
+export type AICostLog = typeof aiCostLog.$inferSelect;
+export type InsertAICostLog = typeof aiCostLog.$inferInsert;
+export type AIUserPreference = typeof aiUserPreferences.$inferSelect;
+export type InsertAIUserPreference = typeof aiUserPreferences.$inferInsert;
+export type AtlasMonitoringState = typeof atlasMonitoringState.$inferSelect;
+export type InsertAtlasMonitoringState = typeof atlasMonitoringState.$inferInsert;
+export type AtlasIntervention = typeof atlasInterventions.$inferSelect;
+export type InsertAtlasIntervention = typeof atlasInterventions.$inferInsert;
 
 // Wizard form schema
 export const tripWizardSchema = z.object({
