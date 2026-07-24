@@ -134,8 +134,13 @@ export function AddExpenseForm({
     setTaxAmount(tax);
   };
 
-  const handleSplitChange = (newSplits: Record<string, number>) => {
-    setSplits(newSplits);
+  const handleSplitChange = (newSplits: Record<string, number> | Record<string, { amount: number; note?: string }>) => {
+    // Normalize to Record<string, number> for state
+    const normalized: Record<string, number> = {};
+    for (const [key, value] of Object.entries(newSplits)) {
+      normalized[key] = typeof value === 'number' ? value : value.amount;
+    }
+    setSplits(normalized);
   };
 
   const handleSubmit = async () => {
@@ -336,7 +341,7 @@ export function AddExpenseForm({
             <SplitMethodSelector
               value={splitMethod}
               onChange={setSplitMethod}
-              memberCount={tripMembers.length}
+              peopleCount={tripMembers.length}
             />
 
             {splitMethod === "percentage" && (
@@ -414,6 +419,7 @@ export function AddExpenseForm({
 
             {isUploadingReceipt && (
               <ReceiptUploadProgress
+                isOpen={isUploadingReceipt}
                 fileName={receiptFile?.name || ""}
                 progress={uploadProgress}
                 isComplete={uploadProgress === 100}
@@ -423,7 +429,7 @@ export function AddExpenseForm({
             {isProcessingOcr && (
               <ReceiptOCRProcessing
                 isOpen={isProcessingOcr}
-                fileName={selectedReceipt?.name || "receipt"}
+                fileName={receiptFile?.name || "receipt"}
               />
             )}
 

@@ -11,7 +11,7 @@ import { hashPassword, comparePassword, generateToken, requireAuth, optionalAuth
 import { requireTripAccess, requireOrganizer, requirePlanner, requireUnlocked, requireBeforeVoteDeadline } from "./middleware";
 import { emailService } from "./email-service";
 import { getVapidPublicKey, addSubscription, startReminderScheduler } from "./push-service";
-import { createCheckoutSession, createBillingPortalSession, handleWebhook, isStripeEnabled } from "./stripe-service";
+import { createCheckoutSession, createBillingPortalSession, handleWebhook, isStripeEnabled, getSubscriptionDetails, getInvoices, getPaymentMethod, cancelSubscription, getInvoicePdf } from "./stripe-service";
 import { env } from "./env";
 import { canCreateTrip, canAddMemberToTrip, canAddPhotoToTrip, canUseAIGeneration, getEffectiveTier } from "./subscription-gates";
 import {
@@ -797,6 +797,155 @@ export async function registerRoutes(
     }
   });
 
+  // Get subscription details
+  app.get("/api/stripe/subscription", requireAuth, requireStripe, async (req: Request, res: Response) => {
+    try {
+      if (!isStripeEnabled()) {
+        return res.status(503).json({ error: "Payments are not configured" });
+      }
+      const userId = (req as any).userId;
+      const user = await storage.getUserById(userId) as { stripeCustomerId?: string | null };
+      if (!user?.stripeCustomerId) {
+        return res.status(404).json({ error: "No subscription found" });
+      }
+      const subscription = await getSubscriptionDetails(user.stripeCustomerId);
+      if (!subscription) {
+        return res.status(404).json({ error: "No subscription found" });
+      }
+      res.json(subscription);
+    } catch (error) {
+      console.error("Get subscription error:", error);
+      res.status(500).json({ error: "Failed to get subscription details" });
+    }
+  });
+
+  // Get invoices
+  app.get("/api/stripe/invoices", requireAuth, requireStripe, async (req: Request, res: Response) => {
+    try {
+      if (!isStripeEnabled()) {
+        return res.status(503).json({ error: "Payments are not configured" });
+      }
+      const userId = (req as any).userId;
+      const user = await storage.getUserById(userId) as { stripeCustomerId?: string | null };
+      if (!user?.stripeCustomerId) {
+        return res.status(404).json({ invoices: [] });
+      }
+      const invoices = await getInvoices(user.stripeCustomerId);
+      res.json({ invoices });
+    } catch (error) {
+      console.error("Get invoices error:", error);
+      res.status(500).json({ error: "Failed to get invoices" });
+    }
+  });
+
+  // Get payment method
+  app.get("/api/stripe/payment-method", requireAuth, requireStripe, async (req: Request, res: Response) => {
+    try {
+      if (!isStripeEnabled()) {
+        return res.status(503).json({ error: "Payments are not configured" });
+      }
+      const userId = (req as any).userId;
+      const user = await storage.getUserById(userId) as { stripeCustomerId?: string | null };
+      if (!user?.stripeCustomerId) {
+        return res.status(404).json({ error: "No payment method found" });
+      }
+      const paymentMethod = await getPaymentMethod(user.stripeCustomerId);
+      if (!paymentMethod) {
+        return res.status(404).json({ error: "No payment method found" });
+      }
+      res.json(paymentMethod);
+    } catch (error) {
+      console.error("Get payment method error:", error);
+      res.status(500).json({ error: "Failed to get payment method" });
+    }
+  });
+
+  // Cancel subscription
+  app.post("/api/stripe/cancel-subscription", requireAuth, requireStripe, async (req: Request, res: Response) => {
+    try {
+      if (!isStripeEnabled()) {
+        return res.status(503).json({ error: "Payments are not configured" });
+      }
+      const userId = (req as any).userId;
+      const user = await storage.getUserById(userId) as { stripeCustomerId?: string | null };
+      if (!user?.stripeCustomerId) {
+        return res.status(404).json({ error: "No subscription found" });
+      }
+      await cancelSubscription(user.stripeCustomerId);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Cancel subscription error:", error);
+      res.status(500).json({ error: "Failed to cancel subscription" });
+    }
+  });
+
+  // Get invoice PDF
+  app.get("/api/stripe/invoices/:invoiceId/pdf", requireAuth, requireStripe, async (req: Request, res: Response) => {
+    try {
+      if (!isStripeEnabled()) {
+        return res.status(503).json({ error: "Payments are not configured" });
+      }
+      const invoiceId = getParam(req.params.invoiceId);
+      const pdfUrl = await getInvoicePdf(invoiceId);
+      if (!pdfUrl) {
+        return res.status(404).json({ error: "Invoice PDF not found" });
+      }
+      // Redirect to the PDF URL
+      res.redirect(pdfUrl);
+    } catch (error) {
+      console.error("Get invoice PDF error:", error);
+      res.status(500).json({ error: "Failed to get invoice PDF" });
+    }
+  });
+
+  // Get user usage statistics
+  app.get("/api/user/usage-stats", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const userId = (req as any).userId;
+
+      // Get all trips where user is a member
+      const allTrips = await storage.getAllTrips();
+      const userTrips = allTrips.filter(trip =>
+        trip.organizerId === userId ||
+        allTrips.some(t => t.id === trip.id)
+      );
+
+      // Count active trips (not completed or cancelled)
+      const activeTrips = userTrips.filter(trip =>
+        trip.status !== "completed" && trip.status !== "cancelled"
+      ).length;
+
+      // Count AI generations (this would require tracking in production)
+      // For now, estimate based on trips with AI-generated content
+      const aiGenerations = 0; // Placeholder - would need tracking table
+
+      // Count API calls (this would require tracking in production)
+      const apiCalls = 0; // Placeholder - would need tracking table
+
+      // Calculate storage used (rough estimate based on photos/documents)
+      // In production, this should be tracked in cloud storage
+      const storageUsed = 0; // Placeholder in MB
+
+      // Storage limit based on tier
+      const user = await storage.getUserById(userId);
+      const tier = (user as any)?.subscriptionTier || "free";
+      const storageLimit = tier === "free" ? 100 : tier === "pro" ? 1000 : 10000;
+
+      res.json({
+        activeTrips,
+        aiGenerations,
+        apiCalls,
+        storageUsed,
+        limits: {
+          storage: storageLimit,
+        },
+      });
+    } catch (error) {
+      console.error("Get usage stats error:", error);
+      res.status(500).json({ error: "Failed to get usage statistics" });
+    }
+  });
+
   // Demo trip: any authenticated user can view (for "Play AI demo" from dashboard)
   const DEMO_TRIP_ID = "trip-austin-1";
   app.get("/api/demo/trip", requireAuth, async (req: Request, res: Response) => {
@@ -1068,6 +1217,26 @@ export async function registerRoutes(
     }
   });
 
+  // Regenerate share code for trip
+  app.post("/api/trips/:id/regenerate-code", requireAuth, requireTripAccess, requirePlanner, async (req: Request, res: Response) => {
+    try {
+      const tripId = getParam(req.params.id);
+
+      // Generate new share code (same algorithm as createTrip)
+      const shareCode = Math.random().toString(36).substring(2, 10).toUpperCase();
+
+      const trip = await storage.updateTrip(tripId, { shareCode });
+      if (!trip) {
+        return res.status(404).json({ error: "Trip not found" });
+      }
+
+      res.json({ shareCode: trip.shareCode });
+    } catch (error) {
+      console.error("Error regenerating share code:", error);
+      res.status(500).json({ error: "Failed to regenerate share code" });
+    }
+  });
+
   // Regenerate itinerary with member preferences
   app.post("/api/trips/:id/regenerate-itinerary", requireAuth, requireAI, requireTripAccess, requirePlanner, aiGenerationRateLimiter, async (req: Request, res: Response) => {
     try {
@@ -1244,6 +1413,59 @@ export async function registerRoutes(
     } catch (error) {
       console.error("Error voting:", error);
       res.status(500).json({ error: "Failed to vote" });
+    }
+  });
+
+  // Bulk vote on multiple items
+  app.post("/api/trips/:tripId/items/bulk-vote", requireAuth, requireTripAccess, async (req: Request, res: Response) => {
+    try {
+      const { itemIds, userId, voteType } = req.body;
+
+      if (!itemIds || !Array.isArray(itemIds) || itemIds.length === 0) {
+        return res.status(400).json({ error: "itemIds array is required" });
+      }
+
+      if (!userId || !voteType) {
+        return res.status(400).json({ error: "Missing userId or voteType" });
+      }
+
+      // Vote on each item
+      const votes = await Promise.all(
+        itemIds.map((itemId: string) =>
+          storage.createOrUpdateVote({
+            id: randomUUID(),
+            itemId,
+            userId,
+            voteType,
+          })
+        )
+      );
+
+      res.json({ success: true, count: votes.length });
+    } catch (error) {
+      console.error("Error bulk voting:", error);
+      res.status(500).json({ error: "Failed to bulk vote" });
+    }
+  });
+
+  // Bulk delete multiple items
+  app.post("/api/trips/:tripId/items/bulk-delete", requireAuth, requireTripAccess, requirePlanner, async (req: Request, res: Response) => {
+    try {
+      const { itemIds } = req.body;
+
+      if (!itemIds || !Array.isArray(itemIds) || itemIds.length === 0) {
+        return res.status(400).json({ error: "itemIds array is required" });
+      }
+
+      // Delete each item
+      await Promise.all(
+        itemIds.map((itemId: string) => storage.deleteItineraryItem(itemId))
+      );
+
+      res.json({ success: true, count: itemIds.length });
+    } catch (error) {
+      console.error("Error bulk deleting:", error);
+      res.status(500).json({ error: "Failed to bulk delete items" });
     }
   });
 

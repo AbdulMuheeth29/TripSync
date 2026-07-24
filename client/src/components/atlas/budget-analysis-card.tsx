@@ -115,7 +115,6 @@ export function BudgetAnalysisCard({
             <Progress
               value={Math.min(percentProjected, 100)}
               className="h-3"
-              indicatorClassName={isOverBudget ? "bg-red-500" : "bg-green-500"}
             />
 
             <div className="flex items-center gap-2">
@@ -162,11 +161,6 @@ export function BudgetAnalysisCard({
                   <Progress
                     value={Math.min(percentage, 100)}
                     className="h-2"
-                    indicatorClassName={
-                      insight.status === "over" ? "bg-red-500" :
-                      insight.status === "on_track" ? "bg-amber-500" :
-                      "bg-green-500"
-                    }
                   />
 
                   <p className="text-xs text-muted-foreground mt-1">

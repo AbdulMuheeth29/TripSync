@@ -157,7 +157,6 @@ export function PerPersonBreakdownChart({
                     <Progress
                       value={owedPercentage}
                       className="h-2"
-                      indicatorClassName="bg-amber-500"
                     />
                   </div>
                 </div>

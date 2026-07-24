@@ -75,7 +75,6 @@ export function UsageLimitWarningModal({
             <Progress
               value={Math.min(percentageUsed, 100)}
               className="h-3 mb-2"
-              indicatorClassName={isAtLimit ? "bg-red-500" : "bg-amber-500"}
             />
 
             <p className={`text-sm ${isAtLimit ? 'text-red-800' : 'text-amber-800'}`}>

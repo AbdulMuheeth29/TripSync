@@ -106,7 +106,7 @@ export function LocationImage({
   );
 }
 
-interface ResponsiveImageProps extends OptimizedImageProps {
+interface ResponsiveImageProps extends Omit<OptimizedImageProps, 'srcSet'> {
   srcSet?: {
     sm?: string;
     md?: string;

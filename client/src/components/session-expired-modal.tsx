@@ -13,7 +13,7 @@ export function SessionExpiredModal({
 }: SessionExpiredModalProps) {
   return (
     <Dialog open={isOpen} onOpenChange={() => {}}>
-      <DialogContent className="sm:max-w-md" hideCloseButton={true}>
+      <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <div className="flex items-center justify-center mb-4">
             <div className="h-16 w-16 rounded-full bg-destructive/10 flex items-center justify-center">

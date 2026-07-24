@@ -247,111 +247,40 @@ export default function LoginPage() {
                 >
                   Try Demo Account
                 </Button>
+                <div className="relative mt-4">
+                  <div className="absolute inset-0 flex items-center">
+                    <span className="w-full border-t" />
+                  </div>
+                  <div className="relative flex justify-center text-xs uppercase">
+                    <span className="bg-background px-2 text-muted-foreground">
+                      New to TripSync?
+                    </span>
+                  </div>
+                </div>
+                <Link href="/register" className="block mt-4">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="w-full"
+                    disabled={isLoading}
+                  >
+                    Create New Account
+                  </Button>
+                </Link>
               </form>
             </TabsContent>
 
             <TabsContent value="register">
-              <form onSubmit={handleRegister} className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="register-name">Your Name</Label>
-                  <Input
-                    id="register-name"
-                    type="text"
-                    placeholder="John Doe"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    data-testid="input-name"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="register-email">Email Address</Label>
-                  <Input
-                    id="register-email"
-                    type="email"
-                    placeholder="you@example.com"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="register-password">Password</Label>
-                  <div className="relative">
-                    <Input
-                      id="register-password"
-                      type={showPassword ? "text" : "password"}
-                      placeholder="••••••••"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                    />
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
-                      onClick={() => setShowPassword(!showPassword)}
-                    >
-                      {showPassword ? (
-                        <EyeOff className="h-4 w-4" />
-                      ) : (
-                        <Eye className="h-4 w-4" />
-                      )}
-                    </Button>
-                  </div>
-                  <p className="text-xs text-muted-foreground">
-                    Minimum 8 characters
-                  </p>
-                  {password && (
-                    <div className="space-y-1">
-                      <div className="flex gap-1">
-                        {[1, 2, 3, 4, 5].map((i) => (
-                          <div
-                            key={i}
-                            className={`h-1 flex-1 rounded ${
-                              i <= pwStrength.score ? "bg-primary" : "bg-muted"
-                            }`}
-                          />
-                        ))}
-                      </div>
-                      <p className="text-xs text-muted-foreground">{pwStrength.label}</p>
-                    </div>
-                  )}
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="register-confirm-password">Confirm Password</Label>
-                  <Input
-                    id="register-confirm-password"
-                    type={showPassword ? "text" : "password"}
-                    placeholder="••••••••"
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                  />
-                </div>
-                <div className="flex items-start gap-2 mt-2">
-                  <Checkbox
-                    id="accept-terms"
-                    checked={termsAccepted}
-                    onCheckedChange={(v) => setTermsAccepted(Boolean(v))}
-                    required
-                  />
-                  <label
-                    htmlFor="accept-terms"
-                    className="text-xs text-muted-foreground leading-normal cursor-pointer"
-                  >
-                    I agree to the{" "}
-                    <Link href="/terms" className="underline text-primary">
-                      Terms of Service
-                    </Link>{" "}
-                    and{" "}
-                    <Link href="/privacy" className="underline text-primary">
-                      Privacy Policy
-                    </Link>
-                    .
-                  </label>
-                </div>
-                <Button type="submit" className="w-full mt-2" disabled={isLoading} data-testid="button-submit-register">
-                  {isLoading ? "Creating account..." : "Create Account"}
-                </Button>
-              </form>
+              <div className="py-8 text-center space-y-4">
+                <p className="text-muted-foreground">
+                  We've moved registration to a dedicated page for a better experience.
+                </p>
+                <Link href="/register">
+                  <Button className="w-full" size="lg">
+                    Go to Registration Page
+                  </Button>
+                </Link>
+              </div>
             </TabsContent>
           </Tabs>
 

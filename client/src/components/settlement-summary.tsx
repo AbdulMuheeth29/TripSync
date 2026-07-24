@@ -4,7 +4,7 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { DollarSign, Check, AlertCircle } from "lucide-react";
-import { apiRequest } from "@/lib/api";
+import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -39,7 +39,7 @@ export function SettlementSummary({ tripId }: { tripId: string }) {
     queryKey: ["/api/trips", tripId, "settlements"],
     queryFn: async () => {
       const response = await apiRequest("GET", `/api/trips/${tripId}/expenses/settlements`);
-      return response;
+      return response.json();
     },
   });
 

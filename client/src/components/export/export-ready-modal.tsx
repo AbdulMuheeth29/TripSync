@@ -42,15 +42,15 @@ export function ExportReadyModal({
   onClose,
   onDownload,
   onEmailSend,
-  format,
+  format: exportFormat,
   tripName,
   fileSize,
   exportDate,
   numberOfExpenses,
   numberOfMembers
 }: ExportReadyModalProps) {
-  const formatInfo = FORMAT_INFO[format];
-  const fileName = `${tripName.replace(/\s+/g, '_')}_expenses_${format(exportDate, 'yyyy-MM-dd')}.${format}`;
+  const formatInfo = FORMAT_INFO[exportFormat];
+  const fileName = `${tripName.replace(/\s+/g, '_')}_expenses_${format(exportDate, 'yyyy-MM-dd')}.${exportFormat}`;
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -77,7 +77,7 @@ export function ExportReadyModal({
                 <p className="text-sm mb-2">{formatInfo.description}</p>
                 <div className="flex items-center gap-2">
                   <Badge variant="secondary" className="text-xs">
-                    {format.toUpperCase()}
+                    {exportFormat.toUpperCase()}
                   </Badge>
                   <Badge variant="outline" className="text-xs">
                     {fileSize}

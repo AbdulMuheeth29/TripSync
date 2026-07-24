@@ -76,7 +76,6 @@ export function BudgetOverviewHeader({
             <Progress
               value={Math.min(percentageSpent, 100)}
               className="h-3"
-              indicatorClassName={getProgressColor()}
             />
             {percentageSpent > 100 && (
               <div

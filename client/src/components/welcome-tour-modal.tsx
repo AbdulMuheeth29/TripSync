@@ -107,7 +107,7 @@ export function WelcomeTourModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={() => {}}>
-      <DialogContent className="sm:max-w-lg" hideCloseButton={false} onClose={handleSkip}>
+      <DialogContent className="sm:max-w-lg">
         <DialogHeader>
           <div className="flex items-center justify-center mb-4">
             <div className="h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center">

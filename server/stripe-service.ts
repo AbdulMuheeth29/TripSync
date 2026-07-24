@@ -50,6 +50,129 @@ export async function createBillingPortalSession(customerId: string, returnUrl: 
   return { url: session.url };
 }
 
+export async function getSubscriptionDetails(customerId: string): Promise<{
+  status: string;
+  currentPeriodEnd: string;
+  cancelAtPeriodEnd: boolean;
+  amount: number;
+  interval: string;
+} | null> {
+  const stripeApi = getStripe();
+
+  // Get customer's subscriptions
+  const subscriptions = await stripeApi.subscriptions.list({
+    customer: customerId,
+    limit: 1,
+    status: "all",
+  });
+
+  if (subscriptions.data.length === 0) {
+    return null;
+  }
+
+  const subscription = subscriptions.data[0];
+  const price = subscription.items.data[0].price;
+
+  return {
+    status: subscription.status,
+    currentPeriodEnd: new Date(subscription.current_period_end * 1000).toISOString(),
+    cancelAtPeriodEnd: subscription.cancel_at_period_end,
+    amount: price.unit_amount || 0,
+    interval: price.recurring?.interval || "month",
+  };
+}
+
+export async function getInvoices(customerId: string): Promise<{
+  id: string;
+  created: number;
+  number: string | null;
+  amount: number;
+  status: string;
+  invoicePdf: string | null;
+}[]> {
+  const stripeApi = getStripe();
+
+  const invoices = await stripeApi.invoices.list({
+    customer: customerId,
+    limit: 100,
+  });
+
+  return invoices.data.map((invoice) => ({
+    id: invoice.id,
+    created: invoice.created,
+    number: invoice.number,
+    amount: invoice.amount_paid,
+    status: invoice.status || "unknown",
+    invoicePdf: invoice.invoice_pdf,
+  }));
+}
+
+export async function getPaymentMethod(customerId: string): Promise<{
+  brand: string;
+  last4: string;
+  expMonth: number;
+  expYear: number;
+} | null> {
+  const stripeApi = getStripe();
+
+  const customer = await stripeApi.customers.retrieve(customerId);
+
+  if (customer.deleted) {
+    return null;
+  }
+
+  const defaultPaymentMethodId = customer.invoice_settings?.default_payment_method;
+
+  if (!defaultPaymentMethodId || typeof defaultPaymentMethodId !== "string") {
+    return null;
+  }
+
+  const paymentMethod = await stripeApi.paymentMethods.retrieve(defaultPaymentMethodId);
+
+  if (paymentMethod.type === "card" && paymentMethod.card) {
+    return {
+      brand: paymentMethod.card.brand,
+      last4: paymentMethod.card.last4,
+      expMonth: paymentMethod.card.exp_month,
+      expYear: paymentMethod.card.exp_year,
+    };
+  }
+
+  return null;
+}
+
+export async function cancelSubscription(customerId: string): Promise<{ success: boolean }> {
+  const stripeApi = getStripe();
+
+  // Get customer's active subscriptions
+  const subscriptions = await stripeApi.subscriptions.list({
+    customer: customerId,
+    status: "active",
+    limit: 1,
+  });
+
+  if (subscriptions.data.length === 0) {
+    throw new Error("No active subscription found");
+  }
+
+  const subscription = subscriptions.data[0];
+
+  // Cancel at period end
+  await stripeApi.subscriptions.update(subscription.id, {
+    cancel_at_period_end: true,
+  });
+
+  return { success: true };
+}
+
+export async function getInvoicePdf(invoiceId: string): Promise<string | null> {
+  const stripeApi = getStripe();
+
+  const invoice = await stripeApi.invoices.retrieve(invoiceId);
+
+  return invoice.invoice_pdf;
+}
+
 export async function handleWebhook(rawBody: Buffer, signature: string): Promise<{ received: boolean; error?: string }> {
   const secret = env.stripeWebhookSecret;
   if (!secret) return { received: false, error: "STRIPE_WEBHOOK_SECRET not set" };

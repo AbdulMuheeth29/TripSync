@@ -202,7 +202,7 @@ export function AnalyticsDashboardCard({
           <span className="text-xs text-muted-foreground">
             {analytics.expenseCount} expenses tracked
           </span>
-          <Button variant="link" size="sm" onClick={onViewDetails} className="text-xs">
+          <Button variant="ghost" size="sm" onClick={onViewDetails} className="text-xs">
             View Full Report
           </Button>
         </div>

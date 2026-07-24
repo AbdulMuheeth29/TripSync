@@ -90,10 +90,7 @@ export function AIGenerationProgressModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={() => {}}>
-      <DialogContent
-        className="sm:max-w-md"
-        hideCloseButton={true}
-      >
+      <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-xl">
             <Sparkles className="h-6 w-6 text-primary animate-pulse" />

@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { useParams, Link } from "wouter";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
@@ -79,6 +79,27 @@ import {
 } from "lucide-react";
 import type { Trip, ItineraryItem, Comment, Vote, Expense, User } from "@shared/schema";
 import { SettlementSummary } from "@/components/settlement-summary";
+
+// New component imports for spec-aligned features
+import { OverviewTab } from "@/components/trip/overview-tab";
+import { TripHeaderActions } from "@/components/trip/trip-header-actions";
+import { BookingWorkflowModal } from "@/components/trip/booking-workflow-modal";
+import {
+  ItineraryFiltersComponent,
+  ItineraryFilters,
+  applyItineraryFilters,
+  getActiveFilterCount
+} from "@/components/trip/itinerary-filters";
+import {
+  ItineraryBulkActions,
+  ItemSelectionCheckbox
+} from "@/components/trip/itinerary-bulk-actions";
+import {
+  ExpensesFiltersComponent,
+  ExpensesFilters,
+  applyExpensesFilters
+} from "@/components/trip/expenses-filters";
+import { exportExpensesToCSV, exportExpensesToPDF } from "@/components/trip/expenses-export";
 
 const DEMO_TRIP_ID = "trip-austin-1";
 
@@ -1299,6 +1320,33 @@ export default function TripDetailPage() {
   const [emailImportLoading, setEmailImportLoading] = useState(false);
   const [offlineEnabled, setOfflineEnabled] = useState(false);
 
+  // New state for spec-aligned features
+  // Itinerary filter state
+  const [itineraryFilters, setItineraryFilters] = useState<ItineraryFilters>({
+    type: "all",
+    bookingStatus: "all",
+    votingStatus: "all",
+    searchQuery: "",
+    sortBy: "time",
+    sortOrder: "asc",
+  });
+
+  // Bulk selection state
+  const [selectedItems, setSelectedItems] = useState<Set<string>>(new Set());
+
+  // Booking workflow state
+  const [bookingModalItem, setBookingModalItem] = useState<ItineraryItem | null>(null);
+
+  // Expenses filter state
+  const [expensesFilters, setExpensesFilters] = useState<ExpensesFilters>({
+    category: "all",
+    paidBy: "all",
+    dateFrom: null,
+    dateTo: null,
+    settlementStatus: "all",
+    sortBy: "date-desc",
+  });
+
   const { user: currentUser, isPro } = useAuth();
   // Any user can view the demo trip via the demo endpoint (no membership required)
   const useDemoEndpoint = tripId === DEMO_TRIP_ID;
@@ -2102,6 +2150,107 @@ export default function TripDetailPage() {
   if (!data) return <div className="min-h-screen bg-background" />;
   const { trip, items, comments, votes, voteDetails = {}, members, expenses, invites = [], chatMessages = [], preferences = [], photos = [], documents = [], emergencyContacts = [], moodBoard: moodBoardList = [], satisfaction = [], locationSharing = [], polls: pollsList = [], packing: packingList = [], transportation: transportationList = [], groupAvailability: groupAvailabilityList = [] } = data;
 
+  // Apply filters to itinerary items
+  const filteredItems = useMemo(() => {
+    return applyItineraryFilters(items, itineraryFilters);
+  }, [items, itineraryFilters]);
+
+  // Apply filters to expenses
+  const filteredExpenses = useMemo(() => {
+    return applyExpensesFilters(expenses, expensesFilters);
+  }, [expenses, expensesFilters]);
+
+  // Bulk selection handlers
+  const handleSelectAll = useCallback(() => {
+    setSelectedItems(new Set(filteredItems.map(item => item.id)));
+  }, [filteredItems]);
+
+  const handleDeselectAll = useCallback(() => {
+    setSelectedItems(new Set());
+  }, []);
+
+  const handleItemToggle = useCallback((itemId: string, selected: boolean) => {
+    setSelectedItems(prev => {
+      const newSet = new Set(prev);
+      if (selected) {
+        newSet.add(itemId);
+      } else {
+        newSet.delete(itemId);
+      }
+      return newSet;
+    });
+  }, []);
+
+  // Bulk vote handler
+  const handleBulkVote = useCallback(async (itemIds: string[], voteType: "up" | "down") => {
+    for (const itemId of itemIds) {
+      await apiRequest("POST", `/api/trips/${tripId}/items/${itemId}/vote`, {
+        userId: user?.id,
+        voteType,
+      });
+    }
+    queryClient.invalidateQueries({ queryKey: ["/api/trips", tripId] });
+    setSelectedItems(new Set());
+  }, [tripId, user?.id]);
+
+  // Bulk delete handler
+  const handleBulkDelete = useCallback(async (itemIds: string[]) => {
+    for (const itemId of itemIds) {
+      await apiRequest("DELETE", `/api/itinerary/${itemId}`);
+    }
+    queryClient.invalidateQueries({ queryKey: ["/api/trips", tripId] });
+    setSelectedItems(new Set());
+  }, [tripId]);
+
+  // Booking workflow handlers
+  const handleUpdateBooking = useCallback(async (itemId: string, updates: any) => {
+    await apiRequest("PATCH", `/api/itinerary/${itemId}/booking`, updates);
+    queryClient.invalidateQueries({ queryKey: ["/api/trips", tripId] });
+  }, [tripId]);
+
+  const handleUploadConfirmation = useCallback(async (itemId: string, file: File): Promise<string> => {
+    const formData = new FormData();
+    formData.append("file", file);
+
+    const response = await fetch(`/api/itinerary/${itemId}/confirmation`, {
+      method: "POST",
+      headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+      body: formData,
+    });
+
+    const data = await response.json();
+    return data.url;
+  }, []);
+
+  // Export handlers
+  const handleExportExpenses = useCallback((format: "csv" | "pdf") => {
+    // Transform expenses to match export function interface
+    const exportData = filteredExpenses.map((exp, idx) => ({
+      id: idx,
+      description: exp.description,
+      category: "General", // Schema doesn't have category - using default
+      amount: exp.amount,
+      paidBy: 0, // Not used in display - using string lookup
+      paidByName: members.find(m => m.id === exp.paidByUserId)?.name || "Unknown",
+      createdAt: exp.createdAt instanceof Date ? exp.createdAt.toISOString() : exp.createdAt,
+      splitMethod: "equal", // Schema doesn't have splitMethod - using default
+      settled: exp.isSettled || false,
+    }));
+
+    const tripData = {
+      title: trip.title || trip.destination,
+      destination: trip.destination,
+      startDate: trip.startDate,
+      endDate: trip.endDate,
+    };
+
+    if (format === "csv") {
+      exportExpensesToCSV(exportData, tripData);
+    } else {
+      exportExpensesToPDF(exportData, tripData);
+    }
+  }, [filteredExpenses, trip, members]);
+
   // Unread chat count: compare last message id to stored lastRead
   const chatUnreadCount = (() => {
     if (typeof window === "undefined" || !tripId) return 0;
@@ -2145,7 +2294,7 @@ export default function TripDetailPage() {
     if (balances[toId] <= 0.01) j++;
   }
 
-  const itemsByDay = items.reduce<Record<number, ItineraryItem[]>>((acc, item) => {
+  const itemsByDay = filteredItems.reduce<Record<number, ItineraryItem[]>>((acc, item) => {
     if (!acc[item.dayNumber]) acc[item.dayNumber] = [];
     acc[item.dayNumber].push(item);
     return acc;
@@ -2153,14 +2302,14 @@ export default function TripDetailPage() {
 
   // Personalized daily agenda: filter items by current user's interests (mustDo, type)
   const personalizedItems = personalizedView && myPreference
-    ? items.filter((item) => {
+    ? filteredItems.filter((item) => {
         const mustDo = (myPreference as { mustDoActivities?: string }).mustDoActivities?.toLowerCase() ?? "";
         const diet = myPreference.diet?.toLowerCase() ?? "";
         const matchMustDo = !mustDo || mustDo.split(/[\s,]+/).some((word) => word.length > 2 && (item.name.toLowerCase().includes(word) || item.description.toLowerCase().includes(word)));
         const matchDining = item.type === "dining" ? (!diet || diet.split(/[\s,]+/).some((w) => w.length > 2 && (item.name.toLowerCase().includes(w) || item.description.toLowerCase().includes(w)))) : true;
         return matchMustDo && matchDining;
       })
-    : items;
+    : filteredItems;
   const personalizedItemsByDay = personalizedView
     ? personalizedItems.reduce<Record<number, ItineraryItem[]>>((acc, item) => {
         if (!acc[item.dayNumber]) acc[item.dayNumber] = [];
@@ -2420,8 +2569,30 @@ export default function TripDetailPage() {
           </Card>
         </div>
 
-        <Tabs defaultValue="itinerary" onValueChange={(v) => { if (v === "chat" && data) { const latest = data.chatMessages?.[data.chatMessages.length - 1]; if (latest) localStorage.setItem(`chat-last-read-${tripId}`, latest.id); setChatTabActive(true); } else setChatTabActive(false); }}>
+        {/* Trip Header Actions - Per spec screens.md#13 */}
+        <div className="flex justify-end mb-4">
+          <TripHeaderActions
+            trip={trip}
+            isOrganizer={isOrganizer}
+            onUpdateTrip={async (updates) => {
+              await apiRequest("PATCH", `/api/trips/${tripId}`, updates);
+              queryClient.invalidateQueries({ queryKey: ["/api/trips", tripId] });
+            }}
+            onDeleteTrip={async () => {
+              await apiRequest("DELETE", `/api/trips/${tripId}`);
+              window.location.href = "/dashboard";
+            }}
+            onRegenerateShareCode={async () => {
+              const response = await apiRequest("POST", `/api/trips/${tripId}/regenerate-code`);
+              const data = await response.json();
+              return data.shareCode;
+            }}
+          />
+        </div>
+
+        <Tabs defaultValue="overview" onValueChange={(v) => { if (v === "chat" && data) { const latest = data.chatMessages?.[data.chatMessages.length - 1]; if (latest) localStorage.setItem(`chat-last-read-${tripId}`, latest.id); setChatTabActive(true); } else setChatTabActive(false); }}>
           <TabsList className="mb-6 flex-wrap">
+            <TabsTrigger value="overview" data-testid="tab-overview">Overview</TabsTrigger>
             <TabsTrigger value="itinerary" data-testid="tab-itinerary">Itinerary</TabsTrigger>
             <TabsTrigger value="map" data-testid="tab-map">Map</TabsTrigger>
             <TabsTrigger value="discover" data-testid="tab-discover">Discover</TabsTrigger>
@@ -2445,6 +2616,34 @@ export default function TripDetailPage() {
             <TabsTrigger value="analytics" data-testid="tab-analytics">Analytics</TabsTrigger>
             <TabsTrigger value="members" data-testid="tab-members">Members</TabsTrigger>
           </TabsList>
+
+          {/* Overview Tab - Per spec screens.md#13 */}
+          <TabsContent value="overview" className="space-y-4">
+            <OverviewTab
+              trip={trip}
+              itineraryItems={items}
+              expenses={expenses}
+              comments={Object.values(comments).flat()}
+              votes={[]}
+              members={members}
+              onGenerateItinerary={() => {
+                // Switch to itinerary tab - user can use existing AI generation
+                (document.querySelector('[data-testid="tab-itinerary"]') as HTMLElement)?.click();
+              }}
+              onSetPreferences={() => {
+                // Switch to members tab to set preferences
+                (document.querySelector('[data-testid="tab-members"]') as HTMLElement)?.click();
+              }}
+              onReviewVotes={() => {
+                // Switch to itinerary tab
+                (document.querySelector('[data-testid="tab-itinerary"]') as HTMLElement)?.click();
+              }}
+              onAddExpense={() => {
+                // Switch to expenses tab
+                (document.querySelector('[data-testid="tab-expenses"]') as HTMLElement)?.click();
+              }}
+            />
+          </TabsContent>
 
           <TabsContent value="map" className="space-y-4">
             {isPro ? (
@@ -2589,6 +2788,23 @@ export default function TripDetailPage() {
           </TabsContent>
 
           <TabsContent value="itinerary" className="space-y-8">
+            {/* Itinerary Filters - Per spec screens.md#13 */}
+            <ItineraryFiltersComponent
+              filters={itineraryFilters}
+              onFiltersChange={setItineraryFilters}
+              activeFilterCount={getActiveFilterCount(itineraryFilters)}
+            />
+
+            {/* Bulk Actions Bar - Per spec screens.md#13 */}
+            <ItineraryBulkActions
+              selectedItems={selectedItems}
+              totalItems={filteredItems.length}
+              onSelectAll={handleSelectAll}
+              onDeselectAll={handleDeselectAll}
+              onBulkVote={handleBulkVote}
+              onBulkDelete={handleBulkDelete}
+            />
+
             {(isOrganizer || isPlanner) && (
               <Card>
                 <CardHeader>
@@ -2872,6 +3088,18 @@ export default function TripDetailPage() {
                 </CardContent>
               </Card>
             )}
+
+            {/* Booking Workflow Modal - Per spec screens.md#13 */}
+            {bookingModalItem && (
+              <BookingWorkflowModal
+                item={bookingModalItem}
+                tripMembers={members.map(m => ({ id: String(m.id), name: m.name, email: m.email }))}
+                isOpen={!!bookingModalItem}
+                onClose={() => setBookingModalItem(null)}
+                onUpdateBooking={handleUpdateBooking}
+                onUploadConfirmation={handleUploadConfirmation}
+              />
+            )}
           </TabsContent>
 
           {todayDayNum != null && (
@@ -3130,6 +3358,15 @@ export default function TripDetailPage() {
           </TabsContent>
 
           <TabsContent value="expenses" className="space-y-6">
+            {/* Expenses Filters - Per spec screens.md#13 */}
+            <ExpensesFiltersComponent
+              filters={expensesFilters}
+              onFiltersChange={setExpensesFilters}
+              members={members.map(m => ({ id: m.id, name: m.name }))}
+              onExport={handleExportExpenses}
+              canExport={isPro}
+            />
+
             <div className="flex items-center justify-between flex-wrap gap-2">
               <div>
                 <h2 className="text-xl font-semibold">Expense Tracking</h2>
@@ -3324,7 +3561,7 @@ export default function TripDetailPage() {
                           Receipt uploaded
                           {!isProcessingReceipt && (
                             <Button
-                              variant="link"
+                              variant="ghost"
                               size="sm"
                               className="h-auto p-0 text-xs"
                               onClick={() => {
@@ -3406,7 +3643,7 @@ export default function TripDetailPage() {
             <SettlementSummary tripId={tripId!} />
 
             <div className="space-y-4">
-              {expenses.map((expense) => (
+              {filteredExpenses.map((expense) => (
                 <ExpenseItem
                   key={expense.id}
                   expense={expense}
@@ -3418,7 +3655,7 @@ export default function TripDetailPage() {
                 />
               ))}
 
-              {expenses.length === 0 && (
+              {filteredExpenses.length === 0 && (
                 <Card>
                   <CardContent className="py-12 text-center">
                     <DollarSign className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
@@ -4521,7 +4758,7 @@ export default function TripDetailPage() {
         isOpen={recapEditorOpen}
         onClose={() => setRecapEditorOpen(false)}
         tripId={tripId!}
-        tripName={trip.name}
+        tripName={trip.title || trip.destination}
         destination={trip.destination}
         startDate={trip.startDate}
         endDate={trip.endDate}

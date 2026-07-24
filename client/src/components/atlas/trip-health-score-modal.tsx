@@ -108,7 +108,6 @@ export function TripHealthScoreModal({
             <Progress
               value={overallScore}
               className="h-3 mb-3"
-              indicatorClassName={getProgressColor(overallScore)}
             />
 
             <Card className="p-3 bg-white/50">
@@ -196,7 +195,6 @@ export function TripHealthScoreModal({
                     <Progress
                       value={metric.score}
                       className="h-2 mb-3"
-                      indicatorClassName={getProgressColor(metric.score)}
                     />
 
                     {metric.recommendations.length > 0 && (

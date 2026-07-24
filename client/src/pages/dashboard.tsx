@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Link, useLocation } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import confetti from "canvas-confetti";
@@ -27,6 +27,15 @@ import {
 } from "lucide-react";
 import type { Trip } from "@shared/schema";
 import { listOfflineTripIds } from "@/lib/offline-trips";
+import {
+  DashboardFiltersComponent,
+  DashboardFilters,
+  applyDashboardFilters
+} from "@/components/dashboard/dashboard-filters";
+import {
+  DashboardQuickStats,
+  calculateDashboardStats
+} from "@/components/dashboard/dashboard-quick-stats";
 
 type TripWithCounts = Trip & {
   bookedCount?: number;
@@ -192,6 +201,14 @@ export default function DashboardPage() {
   const [offlineTripIds, setOfflineTripIds] = useState<string[]>([]);
   const [showAiDemoCard, setShowAiDemoCard] = useState(false);
 
+  // Dashboard filters state
+  const [dashboardFilters, setDashboardFilters] = useState<DashboardFilters>({
+    status: "all",
+    role: "all",
+    searchQuery: "",
+    sortBy: "date-upcoming",
+  });
+
   useEffect(() => {
     let cancelled = false;
     (async () => {
@@ -215,9 +232,21 @@ export default function DashboardPage() {
     }
   }, []);
 
-  const upcomingTrips = trips?.filter((t) => ["planning", "booked", "in_progress", "active"].includes(t.status)) || [];
-  const pastTrips = trips?.filter((t) => t.status === "completed") || [];
-  const cancelledTrips = trips?.filter((t) => t.status === "cancelled") || [];
+  // Apply dashboard filters
+  const filteredTrips = useMemo(() => {
+    if (!trips) return [];
+    return applyDashboardFilters(trips, dashboardFilters, user?.id || "");
+  }, [trips, dashboardFilters, user?.id]);
+
+  // Calculate dashboard stats
+  const stats = useMemo(() => {
+    if (!trips) return { totalTrips: 0, activeTrips: 0, completedTrips: 0, totalMembers: 0, upcomingDeparture: null };
+    return calculateDashboardStats(trips);
+  }, [trips]);
+
+  const upcomingTrips = filteredTrips.filter((t) => ["planning", "booked", "in_progress", "active"].includes(t.status));
+  const pastTrips = filteredTrips.filter((t) => t.status === "completed");
+  const cancelledTrips = filteredTrips.filter((t) => t.status === "cancelled");
 
   const upcomingPaginated = upcomingTrips.slice(upcomingPage * PAGE_SIZE, (upcomingPage + 1) * PAGE_SIZE);
   const pastPaginated = pastTrips.slice(pastPage * PAGE_SIZE, (pastPage + 1) * PAGE_SIZE);
@@ -336,6 +365,27 @@ export default function DashboardPage() {
               <p className="text-sm text-muted-foreground">{insights.trendPrediction}</p>
             </CardContent>
           </Card>
+        )}
+
+        {/* Dashboard Quick Stats - Per spec screens.md#11 */}
+        {!isLoading && trips && trips.length > 0 && (
+          <DashboardQuickStats
+            totalTrips={stats.totalTrips}
+            activeTrips={stats.activeTrips}
+            completedTrips={stats.completedTrips}
+            totalMembers={stats.totalMembers}
+            upcomingDeparture={stats.upcomingDeparture}
+          />
+        )}
+
+        {/* Dashboard Filters - Per spec screens.md#11 */}
+        {!isLoading && trips && trips.length > 0 && (
+          <div className="mb-8">
+            <DashboardFiltersComponent
+              filters={dashboardFilters}
+              onFiltersChange={setDashboardFilters}
+            />
+          </div>
         )}
 
         {!isLoading && (upcomingTrips.length + pastTrips.length) > 0 && (

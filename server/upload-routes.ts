@@ -161,6 +161,62 @@ export function registerUploadRoutes(app: Express) {
   );
 
   /**
+   * Upload a booking confirmation (alias for document upload)
+   */
+  app.post(
+    "/api/upload/confirmation",
+    requireAuth,
+    upload.single("file"),
+    async (req: Request, res: Response) => {
+      try {
+        if (!cloudStorage.isAvailable()) {
+          return res.status(503).json({
+            error: "File upload not configured",
+            code: "UPLOAD_UNAVAILABLE",
+          });
+        }
+
+        const file = req.file;
+        if (!file) {
+          return res.status(400).json({
+            error: "No file provided",
+            code: "NO_FILE",
+          });
+        }
+
+        // Validate file type
+        validateFileType(file, ALLOWED_DOCUMENT_TYPES);
+
+        // Upload to cloud storage
+        const result = await cloudStorage.uploadFile(
+          file.buffer,
+          file.originalname,
+          {
+            folder: "confirmations",
+            contentType: file.mimetype,
+            maxSizeBytes: MAX_DOCUMENT_SIZE,
+          }
+        );
+
+        res.json({
+          urls: [result.publicUrl || result.url], // Return as array for compatibility
+          url: result.publicUrl || result.url,
+          key: result.key,
+        });
+      } catch (error) {
+        console.error("Confirmation upload error:", error);
+        res.status(500).json({
+          error:
+            error instanceof Error
+              ? error.message
+              : "Failed to upload confirmation",
+          code: "UPLOAD_FAILED",
+        });
+      }
+    }
+  );
+
+  /**
    * Upload a receipt image
    */
   app.post(

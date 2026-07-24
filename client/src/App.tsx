@@ -15,6 +15,7 @@ import { CommandPalette } from "@/components/command-palette";
 // Lazy load all page components for code splitting
 const LandingPage = lazy(() => import("@/pages/landing"));
 const LoginPage = lazy(() => import("@/pages/login"));
+const RegisterPage = lazy(() => import("@/pages/register"));
 const PricingPage = lazy(() => import("@/pages/pricing"));
 const DashboardPage = lazy(() => import("@/pages/dashboard"));
 const CreateTripPage = lazy(() => import("@/pages/create-trip"));
@@ -92,6 +93,7 @@ function Router() {
       <Switch>
         <Route path="/" component={LandingPage} />
         <Route path="/login">{() => <PublicOnlyRoute component={LoginPage} />}</Route>
+        <Route path="/register">{() => <PublicOnlyRoute component={RegisterPage} />}</Route>
         <Route path="/pricing" component={PricingPage} />
         <Route path="/forgot-password" component={ForgotPasswordPage} />
         <Route path="/reset-password" component={ResetPasswordPage} />

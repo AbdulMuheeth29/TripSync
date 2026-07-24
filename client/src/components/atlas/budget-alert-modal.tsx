@@ -81,13 +81,6 @@ export function BudgetAlertModal({
               <Progress
                 value={Math.min(percentageUsed, 100)}
                 className="h-2"
-                indicatorClassName={
-                  isOverBudget
-                    ? "bg-red-500"
-                    : percentageUsed >= 80
-                    ? "bg-amber-500"
-                    : "bg-blue-500"
-                }
               />
               <div className="grid grid-cols-2 gap-2 text-sm">
                 <div>

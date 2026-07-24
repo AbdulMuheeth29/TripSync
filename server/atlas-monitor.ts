@@ -440,6 +440,13 @@ function calculateHealthScore(health: TripHealth): string {
  */
 export async function monitorAllTrips(): Promise<void> {
   console.log('🔍 Atlas: Starting trip health monitoring...');
+
+  // Skip monitoring if DATABASE_URL is not configured
+  if (!process.env.DATABASE_URL) {
+    console.log('⏭️  Atlas: Skipping monitoring (DATABASE_URL not configured)');
+    return;
+  }
+
   const db = getDb();
 
   try {
