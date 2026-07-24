@@ -64,7 +64,19 @@ export async function recordFeedback(params: {
     } = params;
 
     // Store feedback in database
-    // TODO: Insert into ai_generation_feedback table
+    await storage.createAIGenerationFeedback({
+      tripId,
+      userId,
+      generationId,
+      itemId: itemId || null,
+      feedbackType,
+      originalSuggestion,
+      userModification: userModification || null,
+      fieldChanged: fieldChanged || null,
+      changeMagnitude: changeMagnitude ? changeMagnitude.toString() : null,
+      userPreferences: null,
+      tripContext: null,
+    });
     console.log(`📝 Recorded feedback: ${feedbackType} for user ${userId} on trip ${tripId}`);
 
     // If this is an edit, learn from it immediately
@@ -230,20 +242,52 @@ async function upsertPreference(
   pref: LearnedPreference
 ): Promise<void> {
   try {
-    // TODO: Query existing preference from ai_user_preferences table
-    // If exists, update with Bayesian-style confidence adjustment
-    // If new, insert
+    // Query existing preference
+    const existing = await storage.getAIUserPreference(userId, pref.category, pref.key);
+
+    if (existing) {
+      // Bayesian-style confidence adjustment based on sample size
+      const oldSampleSize = existing.sampleSize;
+      const newSampleSize = oldSampleSize + pref.sampleSize;
+      const oldConfidence = parseFloat(existing.confidenceScore as string);
+      const newConfidence =
+        (oldConfidence * oldSampleSize + pref.confidence * pref.sampleSize) / newSampleSize;
+
+      // Merge learned trips
+      const learnedFromTrips = Array.isArray(existing.learnedFromTrips)
+        ? existing.learnedFromTrips
+        : [];
+      if (!learnedFromTrips.includes(parseInt(tripId))) {
+        learnedFromTrips.push(parseInt(tripId));
+      }
+
+      await storage.createOrUpdateAIUserPreference({
+        userId,
+        preferenceCategory: pref.category,
+        preferenceKey: pref.key,
+        preferenceValue: pref.value,
+        confidenceScore: newConfidence.toFixed(2),
+        sampleSize: newSampleSize,
+        learnedFromTrips,
+        lastConfirmedAt: new Date(),
+      });
+    } else {
+      // Create new preference
+      await storage.createOrUpdateAIUserPreference({
+        userId,
+        preferenceCategory: pref.category,
+        preferenceKey: pref.key,
+        preferenceValue: pref.value,
+        confidenceScore: pref.confidence.toFixed(2),
+        sampleSize: pref.sampleSize,
+        learnedFromTrips: [parseInt(tripId)],
+        lastConfirmedAt: new Date(),
+      });
+    }
 
     console.log(
-      `💾 Storing preference: ${pref.category}/${pref.key} (confidence: ${pref.confidence})`
+      `💾 Stored preference: ${pref.category}/${pref.key} (confidence: ${pref.confidence})`
     );
-
-    // For now, just log (would insert into DB)
-    // In production:
-    // 1. SELECT existing preference
-    // 2. If exists: merge with new data, update confidence based on sample size
-    // 3. If new: INSERT
-    // 4. Track which trips this was learned from
   } catch (error) {
     console.error('Failed to upsert preference:', error);
   }
@@ -257,16 +301,23 @@ export async function getUserPreferences(
   destination?: string
 ): Promise<Record<string, any>> {
   try {
-    // TODO: Query ai_user_preferences table
-    // Filter by destination if provided (destination-specific preferences)
-    // Return as structured object
+    // Query all preferences for this user
+    const prefs = await storage.getAIUserPreferences(userId);
 
     console.log(
       `📖 Loading preferences for user ${userId}${destination ? ` (destination: ${destination})` : ''}`
     );
 
-    // Placeholder return
-    return {
+    // Filter by destination if specified
+    const relevantPrefs = destination
+      ? prefs.filter((p) => {
+          const destinations = p.destinationsApplicable;
+          return !destinations || destinations.length === 0 || destinations.includes(destination);
+        })
+      : prefs;
+
+    // Structure by category
+    const structured: Record<string, any> = {
       budget: {},
       timing: {},
       dining: {},
@@ -275,6 +326,19 @@ export async function getUserPreferences(
       pacing: {},
       social: {},
     };
+
+    for (const pref of relevantPrefs) {
+      const category = pref.preferenceCategory as PreferenceCategory;
+      if (category in structured) {
+        structured[category][pref.preferenceKey] = {
+          ...pref.preferenceValue,
+          confidence: parseFloat(pref.confidenceScore as string),
+          sampleSize: pref.sampleSize,
+        };
+      }
+    }
+
+    return structured;
   } catch (error) {
     console.error('Failed to get user preferences:', error);
     return {};
@@ -338,20 +402,74 @@ export async function learnFromPastTrips(userId: string): Promise<void> {
   console.log(`🎓 Starting batch learning for user ${userId}...`);
 
   try {
-    // TODO: Get all user's completed trips
-    // TODO: Analyze itinerary patterns
-    // TODO: Extract preferences
-    // TODO: Store in ai_user_preferences
+    // Get all user's completed trips
+    const trips = await storage.getTripsByUserId(userId);
+    const completedTrips = trips.filter((t) => t.status === 'completed');
 
-    // Examples of what to learn:
-    // - Average budget per item
-    // - Preferred activity types (frequency analysis)
-    // - Typical start times (morning person vs night owl)
-    // - Dining preferences (frequency of each category)
-    // - Trip duration preferences
-    // - Group size preferences
+    if (completedTrips.length === 0) {
+      console.log(`No completed trips found for user ${userId}`);
+      return;
+    }
 
-    console.log(`✅ Batch learning complete for user ${userId}`);
+    // Collect all itinerary items from completed trips
+    const allItems: any[] = [];
+    for (const trip of completedTrips) {
+      const items = await storage.getItineraryItems(trip.id);
+      allItems.push(...items.map((item) => ({ ...item, tripId: trip.id })));
+    }
+
+    if (allItems.length === 0) {
+      console.log(`No itinerary items found for user ${userId}`);
+      return;
+    }
+
+    // Learn average budget preference
+    const avgPrice = allItems.reduce((sum, item) => sum + item.pricePerPerson, 0) / allItems.length;
+    await upsertPreference(userId, completedTrips[0].id, {
+      category: 'budget',
+      key: 'avg_item_price',
+      value: { averagePrice: Math.round(avgPrice) },
+      confidence: 0.7,
+      sampleSize: allItems.length,
+    });
+
+    // Learn activity type preferences (frequency)
+    const typeFrequency = new Map<string, number>();
+    allItems.forEach((item) => {
+      typeFrequency.set(item.type, (typeFrequency.get(item.type) || 0) + 1);
+    });
+    for (const [type, count] of typeFrequency) {
+      await upsertPreference(userId, completedTrips[0].id, {
+        category: 'activities',
+        key: `prefers_${type}`,
+        value: { frequency: count, percentage: (count / allItems.length) * 100 },
+        confidence: 0.6,
+        sampleSize: count,
+      });
+    }
+
+    // Learn pacing (typical start times)
+    const times = allItems
+      .map((item) => parseTime(item.time))
+      .filter((t): t is number => t !== null);
+    if (times.length > 0) {
+      const avgStartTime = times.reduce((sum, t) => sum + t, 0) / times.length;
+      await upsertPreference(userId, completedTrips[0].id, {
+        category: 'pacing',
+        key: 'typical_start_time',
+        value: {
+          averageHour: Math.round(avgStartTime),
+          tendency:
+            avgStartTime < 10 ? 'early_bird' : avgStartTime < 14 ? 'moderate' : 'late_start',
+        },
+        confidence: 0.6,
+        sampleSize: times.length,
+      });
+    }
+
+    console.log(
+      `✅ Batch learning complete for user ${userId} (${completedTrips.length} trips, ${allItems.length} items)`
+    );
   } catch (error) {
     console.error('Failed to learn from past trips:', error);
   }
@@ -362,15 +480,30 @@ export async function learnFromPastTrips(userId: string): Promise<void> {
  */
 export async function getPreferenceConfidence(userId: string): Promise<number> {
   try {
-    // TODO: Query ai_user_preferences table
+    const prefs = await storage.getAIUserPreferences(userId);
+
+    if (prefs.length === 0) {
+      return 0.0;
+    }
+
     // Calculate weighted average confidence based on sample sizes
-    // Return 0.0-1.0
+    let totalWeightedConfidence = 0;
+    let totalSampleSize = 0;
+
+    for (const pref of prefs) {
+      const confidence = parseFloat(pref.confidenceScore as string);
+      const sampleSize = pref.sampleSize;
+      totalWeightedConfidence += confidence * sampleSize;
+      totalSampleSize += sampleSize;
+    }
+
+    const avgConfidence = totalSampleSize > 0 ? totalWeightedConfidence / totalSampleSize : 0.0;
 
     // High confidence (0.8+) = lots of data, reliable predictions
     // Medium confidence (0.5-0.8) = some data, decent predictions
     // Low confidence (<0.5) = little data, use defaults
 
-    return 0.5; // Placeholder
+    return avgConfidence;
   } catch (error) {
     console.error('Failed to get preference confidence:', error);
     return 0.0;
@@ -382,17 +515,43 @@ export async function getPreferenceConfidence(userId: string): Promise<number> {
  */
 export async function exportUserPreferences(userId: string): Promise<any> {
   try {
-    // TODO: Query all preferences for this user
-    // Format as readable JSON
-    // Include metadata (confidence, sample size, learned from trips)
+    const prefs = await storage.getAIUserPreferences(userId);
+    const feedback = await storage.getAIGenerationFeedbackByUser(userId);
+
+    const avgConfidence = await getPreferenceConfidence(userId);
+
+    // Collect all trip IDs
+    const allTripIds = new Set<number>();
+    prefs.forEach((p) => {
+      if (Array.isArray(p.learnedFromTrips)) {
+        p.learnedFromTrips.forEach((id) => allTripIds.add(id));
+      }
+    });
 
     return {
       userId,
-      preferences: [],
+      preferences: prefs.map((p) => ({
+        category: p.preferenceCategory,
+        key: p.preferenceKey,
+        value: p.preferenceValue,
+        confidence: parseFloat(p.confidenceScore as string),
+        sampleSize: p.sampleSize,
+        learnedFromTrips: p.learnedFromTrips || [],
+        createdAt: p.createdAt,
+        updatedAt: p.updatedAt,
+      })),
+      feedback: feedback.map((f) => ({
+        tripId: f.tripId,
+        generationId: f.generationId,
+        feedbackType: f.feedbackType,
+        fieldChanged: f.fieldChanged,
+        createdAt: f.createdAt,
+      })),
       metadata: {
-        totalPreferences: 0,
-        averageConfidence: 0,
-        learnedFromTrips: [],
+        totalPreferences: prefs.length,
+        totalFeedback: feedback.length,
+        averageConfidence: avgConfidence,
+        learnedFromTrips: Array.from(allTripIds),
         exportedAt: new Date().toISOString(),
       },
     };
@@ -407,8 +566,8 @@ export async function exportUserPreferences(userId: string): Promise<any> {
  */
 export async function deleteUserPreferences(userId: string): Promise<boolean> {
   try {
-    // TODO: DELETE FROM ai_user_preferences WHERE user_id = userId
-    // TODO: DELETE FROM ai_generation_feedback WHERE user_id = userId
+    await storage.deleteAIUserPreferencesByUser(userId);
+    await storage.deleteAIGenerationFeedbackByUser(userId);
 
     console.log(`🗑️  Deleted all preferences for user ${userId}`);
     return true;
@@ -443,7 +602,9 @@ export async function getPreferenceAnalytics(): Promise<{
   topPatterns: Array<{ pattern: string; count: number }>;
 }> {
   try {
-    // TODO: Aggregate queries on ai_user_preferences
+    // This would require a more complex query in production
+    // For now, return placeholder data as this is an admin analytics feature
+    // In production, you'd use aggregate SQL queries for efficiency
 
     return {
       totalUsers: 0,

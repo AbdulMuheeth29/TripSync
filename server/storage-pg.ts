@@ -46,6 +46,10 @@ import type {
   InsertTripSatisfaction,
   LocationSharing,
   InsertLocationSharing,
+  AIGenerationFeedback,
+  InsertAIGenerationFeedback,
+  AIUserPreference,
+  InsertAIUserPreference,
 } from '@shared/schema';
 import {
   users,
@@ -70,6 +74,8 @@ import {
   userLearnedPreferences,
   tripSatisfaction,
   locationSharing,
+  aiGenerationFeedback,
+  aiUserPreferences,
 } from '@shared/schema';
 import type { Db } from './db';
 
@@ -879,6 +885,100 @@ export function createPgStorage(db: Db): IStorage {
         .returning();
       if (!row) throw new Error('Failed to set location');
       return row as LocationSharing;
+    },
+
+    // AI Generation Feedback
+    async createAIGenerationFeedback(feedback: InsertAIGenerationFeedback) {
+      const [row] = await db
+        .insert(aiGenerationFeedback)
+        .values(feedback as typeof aiGenerationFeedback.$inferInsert)
+        .returning();
+      if (!row) throw new Error('Failed to create AI generation feedback');
+      return row as AIGenerationFeedback;
+    },
+
+    async getAIGenerationFeedbackByUser(userId: string) {
+      const rows = await db
+        .select()
+        .from(aiGenerationFeedback)
+        .where(eq(aiGenerationFeedback.userId, userId));
+      return rows as AIGenerationFeedback[];
+    },
+
+    async getAIGenerationFeedbackByTrip(tripId: string) {
+      const rows = await db
+        .select()
+        .from(aiGenerationFeedback)
+        .where(eq(aiGenerationFeedback.tripId, tripId));
+      return rows as AIGenerationFeedback[];
+    },
+
+    async deleteAIGenerationFeedbackByUser(userId: string) {
+      await db.delete(aiGenerationFeedback).where(eq(aiGenerationFeedback.userId, userId));
+    },
+
+    // AI User Preferences
+    async getAIUserPreferences(userId: string, category?: string) {
+      if (category) {
+        const rows = await db
+          .select()
+          .from(aiUserPreferences)
+          .where(
+            and(
+              eq(aiUserPreferences.userId, userId),
+              eq(aiUserPreferences.preferenceCategory, category)
+            )
+          );
+        return rows as AIUserPreference[];
+      }
+      const rows = await db
+        .select()
+        .from(aiUserPreferences)
+        .where(eq(aiUserPreferences.userId, userId));
+      return rows as AIUserPreference[];
+    },
+
+    async getAIUserPreference(userId: string, category: string, key: string) {
+      const [row] = await db
+        .select()
+        .from(aiUserPreferences)
+        .where(
+          and(
+            eq(aiUserPreferences.userId, userId),
+            eq(aiUserPreferences.preferenceCategory, category),
+            eq(aiUserPreferences.preferenceKey, key)
+          )
+        );
+      return row as AIUserPreference | undefined;
+    },
+
+    async createOrUpdateAIUserPreference(pref: InsertAIUserPreference) {
+      const existing = await this.getAIUserPreference(
+        pref.userId,
+        pref.preferenceCategory,
+        pref.preferenceKey
+      );
+
+      if (existing) {
+        const [row] = await db
+          .update(aiUserPreferences)
+          .set({ ...pref, updatedAt: new Date() })
+          .where(eq(aiUserPreferences.id, existing.id))
+          .returning();
+        if (!row) throw new Error('Failed to update AI user preference');
+        return row as AIUserPreference;
+      }
+
+      const [row] = await db
+        .insert(aiUserPreferences)
+        .values(pref as typeof aiUserPreferences.$inferInsert)
+        .returning();
+      if (!row) throw new Error('Failed to create AI user preference');
+      return row as AIUserPreference;
+    },
+
+    async deleteAIUserPreferencesByUser(userId: string) {
+      await db.delete(aiUserPreferences).where(eq(aiUserPreferences.userId, userId));
     },
 
     async getAdminMetricsCounts() {

@@ -43,6 +43,10 @@ import {
   type InsertTripSatisfaction,
   type LocationSharing,
   type InsertLocationSharing,
+  type AIGenerationFeedback,
+  type InsertAIGenerationFeedback,
+  type AIUserPreference,
+  type InsertAIUserPreference,
 } from '@shared/schema';
 import { randomUUID } from 'crypto';
 
@@ -176,6 +180,22 @@ export interface IStorage {
     pref: InsertUserLearnedPreferences
   ): Promise<UserLearnedPreferences>;
 
+  // AI Generation Feedback
+  createAIGenerationFeedback(feedback: InsertAIGenerationFeedback): Promise<AIGenerationFeedback>;
+  getAIGenerationFeedbackByUser(userId: string): Promise<AIGenerationFeedback[]>;
+  getAIGenerationFeedbackByTrip(tripId: string): Promise<AIGenerationFeedback[]>;
+  deleteAIGenerationFeedbackByUser(userId: string): Promise<void>;
+
+  // AI User Preferences
+  getAIUserPreferences(userId: string, category?: string): Promise<AIUserPreference[]>;
+  getAIUserPreference(
+    userId: string,
+    category: string,
+    key: string
+  ): Promise<AIUserPreference | undefined>;
+  createOrUpdateAIUserPreference(pref: InsertAIUserPreference): Promise<AIUserPreference>;
+  deleteAIUserPreferencesByUser(userId: string): Promise<void>;
+
   // Trip satisfaction (analytics)
   getSatisfactionByTrip(tripId: string): Promise<(TripSatisfaction & { user: User })[]>;
   createOrUpdateTripSatisfaction(entry: InsertTripSatisfaction): Promise<TripSatisfaction>;
@@ -222,6 +242,10 @@ export class MemStorage implements IStorage {
   private userLearnedPreferences: Map<string, UserLearnedPreferences> = new Map();
   private tripSatisfaction: Map<string, TripSatisfaction> = new Map();
   private locationSharing: Map<string, LocationSharing> = new Map();
+  private aiGenerationFeedback: Map<number, AIGenerationFeedback> = new Map();
+  private aiUserPreferences: Map<number, AIUserPreference> = new Map();
+  private aiGenerationFeedbackIdCounter = 1;
+  private aiUserPreferencesIdCounter = 1;
 
   constructor() {
     this.seedDemoData();
@@ -1352,6 +1376,113 @@ export class MemStorage implements IStorage {
     const updated: LocationSharing = { id, tripId, userId, lat, lng, updatedAt: new Date() };
     this.locationSharing.set(id, updated);
     return updated;
+  }
+
+  // AI Generation Feedback
+  async createAIGenerationFeedback(
+    feedback: InsertAIGenerationFeedback
+  ): Promise<AIGenerationFeedback> {
+    const id = this.aiGenerationFeedbackIdCounter++;
+    const now = new Date();
+    const newFeedback: AIGenerationFeedback = {
+      id,
+      userId: feedback.userId,
+      tripId: feedback.tripId,
+      generationId: feedback.generationId,
+      itemId: feedback.itemId ?? null,
+      feedbackType: feedback.feedbackType,
+      originalSuggestion: feedback.originalSuggestion,
+      userModification: feedback.userModification ?? null,
+      fieldChanged: feedback.fieldChanged ?? null,
+      changeMagnitude: feedback.changeMagnitude ?? null,
+      userPreferences: feedback.userPreferences ?? null,
+      tripContext: feedback.tripContext ?? null,
+      createdAt: now,
+      feedbackSource: feedback.feedbackSource ?? 'manual',
+    };
+    this.aiGenerationFeedback.set(id, newFeedback);
+    return newFeedback;
+  }
+
+  async getAIGenerationFeedbackByUser(userId: string): Promise<AIGenerationFeedback[]> {
+    return Array.from(this.aiGenerationFeedback.values()).filter((f) => f.userId === userId);
+  }
+
+  async getAIGenerationFeedbackByTrip(tripId: string): Promise<AIGenerationFeedback[]> {
+    return Array.from(this.aiGenerationFeedback.values()).filter((f) => f.tripId === tripId);
+  }
+
+  async deleteAIGenerationFeedbackByUser(userId: string): Promise<void> {
+    for (const [id, feedback] of this.aiGenerationFeedback.entries()) {
+      if (feedback.userId === userId) {
+        this.aiGenerationFeedback.delete(id);
+      }
+    }
+  }
+
+  // AI User Preferences
+  async getAIUserPreferences(userId: string, category?: string): Promise<AIUserPreference[]> {
+    const prefs = Array.from(this.aiUserPreferences.values()).filter((p) => p.userId === userId);
+    if (category) {
+      return prefs.filter((p) => p.preferenceCategory === category);
+    }
+    return prefs;
+  }
+
+  async getAIUserPreference(
+    userId: string,
+    category: string,
+    key: string
+  ): Promise<AIUserPreference | undefined> {
+    return Array.from(this.aiUserPreferences.values()).find(
+      (p) => p.userId === userId && p.preferenceCategory === category && p.preferenceKey === key
+    );
+  }
+
+  async createOrUpdateAIUserPreference(pref: InsertAIUserPreference): Promise<AIUserPreference> {
+    // Check if exists
+    const existing = await this.getAIUserPreference(
+      pref.userId,
+      pref.preferenceCategory,
+      pref.preferenceKey
+    );
+
+    if (existing) {
+      // Update existing preference
+      const updated: AIUserPreference = {
+        ...existing,
+        ...pref,
+        updatedAt: new Date(),
+      };
+      this.aiUserPreferences.set(existing.id, updated);
+      return updated;
+    } else {
+      // Create new preference
+      const id = this.aiUserPreferencesIdCounter++;
+      const now = new Date();
+      const newPref: AIUserPreference = {
+        ...pref,
+        id,
+        confidenceScore: pref.confidenceScore || '0.5',
+        sampleSize: pref.sampleSize || 1,
+        lastConfirmedAt: pref.lastConfirmedAt || null,
+        lastViolatedAt: pref.lastViolatedAt || null,
+        learnedFromTrips: pref.learnedFromTrips || [],
+        destinationsApplicable: pref.destinationsApplicable || null,
+        createdAt: now,
+        updatedAt: now,
+      };
+      this.aiUserPreferences.set(id, newPref);
+      return newPref;
+    }
+  }
+
+  async deleteAIUserPreferencesByUser(userId: string): Promise<void> {
+    for (const [id, pref] of this.aiUserPreferences.entries()) {
+      if (pref.userId === userId) {
+        this.aiUserPreferences.delete(id);
+      }
+    }
   }
 
   async getAdminMetricsCounts() {
