@@ -75,7 +75,7 @@ export async function getSubscriptionDetails(customerId: string): Promise<{
 
   return {
     status: subscription.status,
-    currentPeriodEnd: new Date(subscription.current_period_end * 1000).toISOString(),
+    currentPeriodEnd: new Date((subscription as any).current_period_end * 1000).toISOString(),
     cancelAtPeriodEnd: subscription.cancel_at_period_end,
     amount: price.unit_amount || 0,
     interval: price.recurring?.interval || "month",
@@ -103,7 +103,7 @@ export async function getInvoices(customerId: string): Promise<{
     number: invoice.number,
     amount: invoice.amount_paid,
     status: invoice.status || "unknown",
-    invoicePdf: invoice.invoice_pdf,
+    invoicePdf: invoice.invoice_pdf || null,
   }));
 }
 
@@ -170,7 +170,7 @@ export async function getInvoicePdf(invoiceId: string): Promise<string | null> {
 
   const invoice = await stripeApi.invoices.retrieve(invoiceId);
 
-  return invoice.invoice_pdf;
+  return invoice.invoice_pdf || null;
 }
 
 export async function handleWebhook(rawBody: Buffer, signature: string): Promise<{ received: boolean; error?: string }> {

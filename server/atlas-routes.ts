@@ -22,7 +22,7 @@ const router = Router();
  */
 router.get('/:tripId/atlas/conversation', requireAuth, requireTripAccess, async (req, res) => {
   try {
-    const { tripId } = req.params;
+    const tripId = req.params.tripId as string;
     const userId = (req as any).userId;
 
     const db = getDb();
@@ -31,7 +31,7 @@ router.get('/:tripId/atlas/conversation', requireAuth, requireTripAccess, async 
       .from(atlasConversations)
       .where(
         and(
-          eq(atlasConversations.tripId, parseInt(tripId)),
+          eq(atlasConversations.tripId, tripId),
           eq(atlasConversations.userId, userId)
         )
       )
@@ -44,7 +44,7 @@ router.get('/:tripId/atlas/conversation', requireAuth, requireTripAccess, async 
         .insert(atlasConversations)
         .values({
           id: randomUUID(),
-          tripId: parseInt(tripId),
+          tripId: tripId,
           userId,
           messages: [],
         })
@@ -74,7 +74,7 @@ router.get('/:tripId/atlas/conversation', requireAuth, requireTripAccess, async 
  */
 router.post('/:tripId/atlas/message', requireAuth, requireTripAccess, async (req, res) => {
   try {
-    const { tripId } = req.params;
+    const tripId = req.params.tripId as string;
     const { message } = req.body;
     const userId = (req as any).userId;
 
@@ -90,7 +90,7 @@ router.post('/:tripId/atlas/message', requireAuth, requireTripAccess, async (req
       .from(atlasConversations)
       .where(
         and(
-          eq(atlasConversations.tripId, parseInt(tripId)),
+          eq(atlasConversations.tripId, tripId),
           eq(atlasConversations.userId, userId)
         )
       )
@@ -101,7 +101,7 @@ router.post('/:tripId/atlas/message', requireAuth, requireTripAccess, async (req
         .insert(atlasConversations)
         .values({
           id: randomUUID(),
-          tripId: parseInt(tripId),
+          tripId: tripId,
           userId,
           messages: [],
         })
@@ -111,10 +111,10 @@ router.post('/:tripId/atlas/message', requireAuth, requireTripAccess, async (req
 
     // Get trip data for context
     const [trip, items, expenses, votes, members] = await Promise.all([
-      storage.getTripById(tripId),
+      storage.getTrip(tripId),
       storage.getItineraryItems(tripId),
-      storage.getExpenses(tripId),
-      storage.getVotes(tripId),
+      storage.getExpensesByTrip(tripId),
+      storage.getVotesByTrip(tripId),
       storage.getTripMembers(tripId)
     ]);
 
@@ -126,9 +126,9 @@ router.post('/:tripId/atlas/message', requireAuth, requireTripAccess, async (req
     const tripDuration = Math.ceil(
       (new Date(trip.endDate).getTime() - new Date(trip.startDate).getTime()) / (1000 * 60 * 60 * 24)
     );
-    const daysWithActivities = new Set(items.map(i => i.dayNumber)).size;
+    const daysWithActivities = new Set(items.map((i: any) => i.dayNumber)).size;
     const totalBudget = trip.budgetPerPerson * trip.groupSize;
-    const totalSpent = expenses.reduce((sum, e) => sum + e.amount, 0);
+    const totalSpent = expenses.reduce((sum: number, e: any) => sum + e.amount, 0);
     const daysUntilTrip = Math.ceil(
       (new Date(trip.startDate).getTime() - Date.now()) / (1000 * 60 * 60 * 24)
     );
@@ -152,9 +152,9 @@ router.post('/:tripId/atlas/message', requireAuth, requireTripAccess, async (req
         totalBudget,
         overBudget: totalSpent > totalBudget,
         overAmount: Math.max(0, totalSpent - totalBudget),
-        confirmedMembers: members.filter(m => m.status === 'confirmed').length,
-        pendingMembers: members.filter(m => m.status === 'pending').length,
-        activeVotes: votes.filter(v => v.status === 'open').length,
+        confirmedMembers: members.filter((m: any) => m.status === 'confirmed').length,
+        pendingMembers: members.filter((m: any) => m.status === 'pending').length,
+        activeVotes: votes.filter((v: any) => v.status === 'open').length,
         stuckVotes: 0, // TODO: Calculate actual stuck votes
         completionPercentage: tripDuration > 0 ? (daysWithActivities / tripDuration) * 100 : 0,
         daysUntilTrip: daysUntilTrip > 0 ? daysUntilTrip : null
@@ -178,7 +178,7 @@ router.post('/:tripId/atlas/message', requireAuth, requireTripAccess, async (req
       items,
       expenses,
       votes,
-      members: members.map(m => ({
+      members: members.map((m: any) => ({
         ...m,
         user: { name: m.userId } // TODO: Get actual user names
       }))
@@ -231,7 +231,7 @@ router.post('/:tripId/atlas/message', requireAuth, requireTripAccess, async (req
  */
 router.delete('/:tripId/atlas/conversation', requireAuth, requireTripAccess, async (req, res) => {
   try {
-    const { tripId } = req.params;
+    const tripId = req.params.tripId as string;
     const userId = (req as any).userId;
 
     const db = getDb();
@@ -239,7 +239,7 @@ router.delete('/:tripId/atlas/conversation', requireAuth, requireTripAccess, asy
       .delete(atlasConversations)
       .where(
         and(
-          eq(atlasConversations.tripId, parseInt(tripId)),
+          eq(atlasConversations.tripId, tripId),
           eq(atlasConversations.userId, userId)
         )
       );
@@ -262,7 +262,7 @@ router.delete('/:tripId/atlas/conversation', requireAuth, requireTripAccess, asy
  */
 router.get('/:tripId/atlas/interventions', requireAuth, requireTripAccess, async (req, res) => {
   try {
-    const { tripId } = req.params;
+    const tripId = req.params.tripId as string;
     const limit = parseInt(req.query.limit as string) || 10;
 
     const db = getDb();
@@ -291,7 +291,7 @@ router.get('/:tripId/atlas/interventions', requireAuth, requireTripAccess, async
  */
 router.get('/:tripId/atlas/health', requireAuth, requireTripAccess, async (req, res) => {
   try {
-    const { tripId } = req.params;
+    const tripId = req.params.tripId as string;
 
     const db = getDb();
     const state = await db
@@ -340,14 +340,14 @@ router.get('/:tripId/atlas/health', requireAuth, requireTripAccess, async (req, 
  */
 router.post('/:tripId/atlas/interventions/:interventionId/dismiss', requireAuth, requireTripAccess, async (req, res) => {
   try {
-    const { interventionId } = req.params;
+    const interventionId = req.params.interventionId as string;
 
     const db = getDb();
     await db
       .update(atlasInterventions)
       .set({
-        wasAccepted: true,
-        resolvedAt: new Date()
+        dismissed: true,
+        dismissedAt: new Date()
       })
       .where(eq(atlasInterventions.id, parseInt(interventionId)));
 

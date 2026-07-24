@@ -402,6 +402,11 @@ export class MemStorage implements IStorage {
         bookingStatus: "suggested",
         locked: null,
         sortOrder: null,
+        aiConfidenceScore: null,
+        aiReasoning: null,
+        aiModelVersion: null,
+        aiGeneratedAt: null,
+        aiGenerationId: null,
         createdAt: new Date(),
       };
       this.itineraryItems.set(item.id, fullItem);
@@ -603,6 +608,11 @@ export class MemStorage implements IStorage {
         bookingStatus: "suggested",
         locked: null,
         sortOrder: null,
+        aiConfidenceScore: null,
+        aiReasoning: null,
+        aiModelVersion: null,
+        aiGeneratedAt: null,
+        aiGenerationId: null,
         createdAt: new Date(),
       };
       this.itineraryItems.set(item.id, fullItem);
@@ -766,6 +776,11 @@ export class MemStorage implements IStorage {
       bookingStatus: "not_started",
       locked: null,
       sortOrder: null,
+      aiConfidenceScore: item.aiConfidenceScore ?? null,
+      aiReasoning: item.aiReasoning ?? null,
+      aiModelVersion: item.aiModelVersion ?? null,
+      aiGeneratedAt: item.aiGeneratedAt ?? null,
+      aiGenerationId: item.aiGenerationId ?? null,
       createdAt: new Date(),
     };
     this.itineraryItems.set(item.id, newItem);

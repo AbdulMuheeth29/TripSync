@@ -10,8 +10,8 @@
  * - Emergency contacts, mood boards, satisfaction ratings
  */
 
-import { db } from "./db";
-import bcrypt from "bcrypt";
+import { getDb } from "./db";
+import * as bcrypt from "bcryptjs";
 
 const SALT_ROUNDS = 10;
 
@@ -30,6 +30,8 @@ const hoursFromNow = (hours: number) => {
 
 async function seedTestData() {
   console.log("🌱 Starting comprehensive test data seed...\n");
+
+  const db = getDb() as any; // Using any for Prisma-style API (this seed script needs migration to Drizzle)
 
   try {
     // ============================================================================
@@ -1446,7 +1448,7 @@ async function seedTestData() {
     console.log(`  ✉️ Trip Invites: ${invites.length}\n`);
 
     console.log("🔑 Test User Credentials:\n");
-    users.forEach(user => {
+    users.forEach((user: any) => {
       console.log(`  📧 ${user.email}`);
       console.log(`     Password: password123`);
       console.log(`     Name: ${user.name}`);

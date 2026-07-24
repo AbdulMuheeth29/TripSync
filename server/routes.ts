@@ -904,14 +904,10 @@ export async function registerRoutes(
       const userId = (req as any).userId;
 
       // Get all trips where user is a member
-      const allTrips = await storage.getAllTrips();
-      const userTrips = allTrips.filter(trip =>
-        trip.organizerId === userId ||
-        allTrips.some(t => t.id === trip.id)
-      );
+      const userTrips = await storage.getTripsByUserId(userId);
 
       // Count active trips (not completed or cancelled)
-      const activeTrips = userTrips.filter(trip =>
+      const activeTrips = userTrips.filter((trip: any) =>
         trip.status !== "completed" && trip.status !== "cancelled"
       ).length;
 

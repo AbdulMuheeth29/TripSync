@@ -57,7 +57,7 @@ export async function calculateSettlements(tripId: string): Promise<{
 
   // Build a map of userId -> userName for easy lookup
   const userMap = new Map<string, string>();
-  members.forEach(member => {
+  members.forEach((member: any) => {
     if (member.user) {
       userMap.set(member.userId, member.user.fullName || member.user.email);
     }

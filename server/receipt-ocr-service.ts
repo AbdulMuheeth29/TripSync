@@ -8,7 +8,7 @@ import { env } from "./env";
  */
 
 const anthropic = new Anthropic({
-  apiKey: env.ANTHROPIC_API_KEY,
+  apiKey: env.anthropicApiKey,
 });
 
 export interface ReceiptData {
