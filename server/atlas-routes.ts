@@ -124,6 +124,24 @@ router.post('/:tripId/atlas/message', requireAuth, requireTripAccess, async (req
       (new Date(trip.startDate).getTime() - Date.now()) / (1000 * 60 * 60 * 24)
     );
 
+    // Calculate stuck votes: items with conflicting vote types
+    const votesByItem = new Map<string, any[]>();
+    votes.forEach((v: any) => {
+      if (!votesByItem.has(v.itemId)) {
+        votesByItem.set(v.itemId, []);
+      }
+      votesByItem.get(v.itemId)!.push(v);
+    });
+
+    let stuckVotesCount = 0;
+    for (const [itemId, itemVotes] of votesByItem) {
+      const voteTypes = new Set(itemVotes.map((v: any) => v.voteType));
+      // If there are multiple different vote types, it's stuck (conflicting opinions)
+      if (voteTypes.size > 1) {
+        stuckVotesCount++;
+      }
+    }
+
     const context: AtlasRichContext = {
       trip: {
         id: trip.id,
@@ -145,8 +163,8 @@ router.post('/:tripId/atlas/message', requireAuth, requireTripAccess, async (req
         overAmount: Math.max(0, totalSpent - totalBudget),
         confirmedMembers: members.filter((m: any) => m.status === 'confirmed').length,
         pendingMembers: members.filter((m: any) => m.status === 'pending').length,
-        activeVotes: votes.filter((v: any) => v.status === 'open').length,
-        stuckVotes: 0, // TODO: Calculate actual stuck votes
+        activeVotes: votes.length,
+        stuckVotes: stuckVotesCount,
         completionPercentage: tripDuration > 0 ? (daysWithActivities / tripDuration) * 100 : 0,
         daysUntilTrip: daysUntilTrip > 0 ? daysUntilTrip : null,
       },
@@ -171,7 +189,7 @@ router.post('/:tripId/atlas/message', requireAuth, requireTripAccess, async (req
       votes,
       members: members.map((m: any) => ({
         ...m,
-        user: { name: m.userId }, // TODO: Get actual user names
+        user: { name: m.user?.fullName || m.user?.email || 'Unknown' },
       })),
     });
 
