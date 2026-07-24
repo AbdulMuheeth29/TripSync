@@ -146,6 +146,7 @@ END: Expense recorded and split calculated
 ```
 
 **Split Methods:**
+
 1. **Equal split**: Amount ÷ # of people
 2. **Percentage split**: Each person pays custom %
 3. **Custom amounts**: Manually enter each person's share
@@ -382,12 +383,14 @@ END: Receipt stored with optional AI extraction
 ```
 
 **OCR Accuracy:**
+
 - Amount: 98% accurate
 - Date: 95% accurate
 - Merchant: 90% accurate
 - Items: 85% accurate
 
 **Supported Formats:**
+
 - Images: JPG, PNG, HEIC
 - Documents: PDF
 - Max size: 5MB per receipt
@@ -508,6 +511,7 @@ END: Clear settlement tracking
 
 **Settlement Algorithm:**
 Uses **"Greedy Debt Simplification"** to minimize transactions:
+
 1. Calculate net balance for each person
 2. Sort by balance (creditors vs debtors)
 3. Match largest creditor with largest debtor
@@ -578,6 +582,7 @@ END: Multi-currency expense tracking
 ```
 
 **Supported Currencies:**
+
 - 150+ currencies supported
 - Live rates updated hourly
 - Historical rates preserved
@@ -814,6 +819,7 @@ END: Comprehensive expense export
 ```
 
 **Export Formats:**
+
 - **CSV**: For Excel, accounting software
 - **PDF**: Printable report with charts
 - **JSON**: For developers, integrations
@@ -823,6 +829,7 @@ END: Comprehensive expense export
 ## All Expense Management Use Cases
 
 ### 1. Adding Expenses
+
 - ✅ Basic expense (description, amount, date)
 - ✅ Equal split among all members
 - ✅ Percentage-based split
@@ -833,6 +840,7 @@ END: Comprehensive expense export
 - ✅ Multi-currency support (Pro)
 
 ### 2. Expense Categories
+
 - ✅ Accommodation
 - ✅ Transportation (flights, taxis, rentals)
 - ✅ Food & Dining
@@ -841,6 +849,7 @@ END: Comprehensive expense export
 - ✅ Other/Miscellaneous
 
 ### 3. Settlement Management
+
 - ✅ Who owes whom calculation
 - ✅ Optimized settlement (minimize transactions)
 - ✅ Mark payments as settled
@@ -849,6 +858,7 @@ END: Comprehensive expense export
 - ✅ Settlement notifications
 
 ### 4. Budget Tracking
+
 - ✅ Real-time budget usage
 - ✅ Per-category breakdown
 - ✅ Budget vs actual comparison
@@ -858,6 +868,7 @@ END: Comprehensive expense export
 - ✅ Projected final cost
 
 ### 5. Advanced Features
+
 - ✅ Receipt OCR (Pro)
 - ✅ Currency conversion (Pro)
 - ✅ Export to CSV/PDF/JSON
@@ -868,6 +879,7 @@ END: Comprehensive expense export
 - ✅ Expense search and filter
 
 ### 6. Collaboration
+
 - ✅ Any member can add expenses
 - ✅ Edit own expenses
 - ✅ Delete own expenses (organizer can delete any)
@@ -876,6 +888,7 @@ END: Comprehensive expense export
 - ✅ Expense approval workflow (optional)
 
 ### 7. Analytics
+
 - ✅ Spending by category (pie chart)
 - ✅ Daily spending trend (line chart)
 - ✅ Per person breakdown (bar chart)
@@ -888,6 +901,7 @@ END: Comprehensive expense export
 ## Analytics & Tracking
 
 **Events Tracked:**
+
 1. `expense_added` - New expense created
 2. `expense_edited` - Expense modified
 3. `expense_deleted` - Expense removed
@@ -899,6 +913,7 @@ END: Comprehensive expense export
 9. `currency_converted` - Multi-currency transaction
 
 **Metrics Tracked:**
+
 - Total expenses per trip
 - Average expense amount
 - Most common categories

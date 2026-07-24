@@ -1,23 +1,38 @@
-import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Separator } from "@/components/ui/separator";
-import { Badge } from "@/components/ui/badge";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Shield, Eye, Users, BarChart3, Cookie, Lock, AlertTriangle, CheckCircle2 } from "lucide-react";
-import { useState } from "react";
+import { Card } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Label } from '@/components/ui/label';
+import { Switch } from '@/components/ui/switch';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Separator } from '@/components/ui/separator';
+import { Badge } from '@/components/ui/badge';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import {
+  Shield,
+  Eye,
+  Users,
+  BarChart3,
+  Cookie,
+  Lock,
+  AlertTriangle,
+  CheckCircle2,
+} from 'lucide-react';
+import { useState } from 'react';
 
 interface PrivacySettings {
-  profileVisibility: "public" | "friends" | "private";
+  profileVisibility: 'public' | 'friends' | 'private';
   showEmail: boolean;
   showActiveTrips: boolean;
   allowSearchByEmail: boolean;
   allowFriendRequests: boolean;
   shareAnalytics: boolean;
   personalizedAds: boolean;
-  cookiePreferences: "all" | "essential" | "none";
+  cookiePreferences: 'all' | 'essential' | 'none';
   dataSharing: {
     analytics: boolean;
     improvements: boolean;
@@ -37,27 +52,21 @@ interface PrivacySettingsPanelProps {
 export function PrivacySettingsPanel({
   initialSettings,
   onSave,
-  onDeleteAccount
+  onDeleteAccount,
 }: PrivacySettingsPanelProps) {
   const [settings, setSettings] = useState<PrivacySettings>(initialSettings);
   const [isSaving, setIsSaving] = useState(false);
   const [hasChanges, setHasChanges] = useState(false);
 
-  const handleChange = <K extends keyof PrivacySettings>(
-    key: K,
-    value: PrivacySettings[K]
-  ) => {
-    setSettings(prev => ({ ...prev, [key]: value }));
+  const handleChange = <K extends keyof PrivacySettings>(key: K, value: PrivacySettings[K]) => {
+    setSettings((prev) => ({ ...prev, [key]: value }));
     setHasChanges(true);
   };
 
-  const handleDataSharingChange = (
-    key: keyof PrivacySettings["dataSharing"],
-    value: boolean
-  ) => {
-    setSettings(prev => ({
+  const handleDataSharingChange = (key: keyof PrivacySettings['dataSharing'], value: boolean) => {
+    setSettings((prev) => ({
       ...prev,
-      dataSharing: { ...prev.dataSharing, [key]: value }
+      dataSharing: { ...prev.dataSharing, [key]: value },
     }));
     setHasChanges(true);
   };
@@ -68,7 +77,7 @@ export function PrivacySettingsPanel({
       await onSave(settings);
       setHasChanges(false);
     } catch (error) {
-      console.error("Failed to save privacy settings:", error);
+      console.error('Failed to save privacy settings:', error);
     } finally {
       setIsSaving(false);
     }
@@ -81,18 +90,18 @@ export function PrivacySettingsPanel({
 
   const getVisibilityLabel = (visibility: string) => {
     const labels = {
-      public: "Public",
-      friends: "Friends Only",
-      private: "Private"
+      public: 'Public',
+      friends: 'Friends Only',
+      private: 'Private',
     };
     return labels[visibility as keyof typeof labels];
   };
 
   const getCookieLabel = (preference: string) => {
     const labels = {
-      all: "All Cookies",
-      essential: "Essential Only",
-      none: "Reject All"
+      all: 'All Cookies',
+      essential: 'Essential Only',
+      none: 'Reject All',
     };
     return labels[preference as keyof typeof labels];
   };
@@ -132,21 +141,22 @@ export function PrivacySettingsPanel({
             <Label htmlFor="profile-visibility">Profile Visibility</Label>
             <Select
               value={settings.profileVisibility}
-              onValueChange={(value) => handleChange("profileVisibility", value as any)}
+              onValueChange={(value) => handleChange('profileVisibility', value as any)}
             >
               <SelectTrigger id="profile-visibility">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="public">{getVisibilityLabel("public")}</SelectItem>
-                <SelectItem value="friends">{getVisibilityLabel("friends")}</SelectItem>
-                <SelectItem value="private">{getVisibilityLabel("private")}</SelectItem>
+                <SelectItem value="public">{getVisibilityLabel('public')}</SelectItem>
+                <SelectItem value="friends">{getVisibilityLabel('friends')}</SelectItem>
+                <SelectItem value="private">{getVisibilityLabel('private')}</SelectItem>
               </SelectContent>
             </Select>
             <p className="text-xs text-muted-foreground">
-              {settings.profileVisibility === "public" && "Anyone can view your profile"}
-              {settings.profileVisibility === "friends" && "Only your trip members can view your profile"}
-              {settings.profileVisibility === "private" && "Your profile is hidden from searches"}
+              {settings.profileVisibility === 'public' && 'Anyone can view your profile'}
+              {settings.profileVisibility === 'friends' &&
+                'Only your trip members can view your profile'}
+              {settings.profileVisibility === 'private' && 'Your profile is hidden from searches'}
             </p>
           </div>
 
@@ -163,7 +173,7 @@ export function PrivacySettingsPanel({
             <Switch
               id="show-email"
               checked={settings.showEmail}
-              onCheckedChange={(checked) => handleChange("showEmail", checked)}
+              onCheckedChange={(checked) => handleChange('showEmail', checked)}
             />
           </div>
 
@@ -180,7 +190,7 @@ export function PrivacySettingsPanel({
             <Switch
               id="show-trips"
               checked={settings.showActiveTrips}
-              onCheckedChange={(checked) => handleChange("showActiveTrips", checked)}
+              onCheckedChange={(checked) => handleChange('showActiveTrips', checked)}
             />
           </div>
 
@@ -197,7 +207,7 @@ export function PrivacySettingsPanel({
             <Switch
               id="allow-search"
               checked={settings.allowSearchByEmail}
-              onCheckedChange={(checked) => handleChange("allowSearchByEmail", checked)}
+              onCheckedChange={(checked) => handleChange('allowSearchByEmail', checked)}
             />
           </div>
         </div>
@@ -222,7 +232,7 @@ export function PrivacySettingsPanel({
             <Switch
               id="online-status"
               checked={settings.onlineStatus}
-              onCheckedChange={(checked) => handleChange("onlineStatus", checked)}
+              onCheckedChange={(checked) => handleChange('onlineStatus', checked)}
             />
           </div>
 
@@ -239,7 +249,7 @@ export function PrivacySettingsPanel({
             <Switch
               id="activity-status"
               checked={settings.activityStatus}
-              onCheckedChange={(checked) => handleChange("activityStatus", checked)}
+              onCheckedChange={(checked) => handleChange('activityStatus', checked)}
             />
           </div>
 
@@ -256,7 +266,7 @@ export function PrivacySettingsPanel({
             <Switch
               id="read-receipts"
               checked={settings.readReceipts}
-              onCheckedChange={(checked) => handleChange("readReceipts", checked)}
+              onCheckedChange={(checked) => handleChange('readReceipts', checked)}
             />
           </div>
         </div>
@@ -281,7 +291,7 @@ export function PrivacySettingsPanel({
             <Switch
               id="share-analytics"
               checked={settings.dataSharing.analytics}
-              onCheckedChange={(checked) => handleDataSharingChange("analytics", checked)}
+              onCheckedChange={(checked) => handleDataSharingChange('analytics', checked)}
             />
           </div>
 
@@ -298,7 +308,7 @@ export function PrivacySettingsPanel({
             <Switch
               id="improvements"
               checked={settings.dataSharing.improvements}
-              onCheckedChange={(checked) => handleDataSharingChange("improvements", checked)}
+              onCheckedChange={(checked) => handleDataSharingChange('improvements', checked)}
             />
           </div>
 
@@ -315,7 +325,7 @@ export function PrivacySettingsPanel({
             <Switch
               id="marketing"
               checked={settings.dataSharing.marketing}
-              onCheckedChange={(checked) => handleDataSharingChange("marketing", checked)}
+              onCheckedChange={(checked) => handleDataSharingChange('marketing', checked)}
             />
           </div>
         </div>
@@ -331,25 +341,25 @@ export function PrivacySettingsPanel({
         <div className="space-y-2">
           <Select
             value={settings.cookiePreferences}
-            onValueChange={(value) => handleChange("cookiePreferences", value as any)}
+            onValueChange={(value) => handleChange('cookiePreferences', value as any)}
           >
             <SelectTrigger>
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">{getCookieLabel("all")}</SelectItem>
-              <SelectItem value="essential">{getCookieLabel("essential")}</SelectItem>
-              <SelectItem value="none">{getCookieLabel("none")}</SelectItem>
+              <SelectItem value="all">{getCookieLabel('all')}</SelectItem>
+              <SelectItem value="essential">{getCookieLabel('essential')}</SelectItem>
+              <SelectItem value="none">{getCookieLabel('none')}</SelectItem>
             </SelectContent>
           </Select>
           <div className="p-3 bg-muted rounded-lg text-xs">
-            {settings.cookiePreferences === "all" && (
+            {settings.cookiePreferences === 'all' && (
               <p>All cookies enabled including analytics and marketing</p>
             )}
-            {settings.cookiePreferences === "essential" && (
+            {settings.cookiePreferences === 'essential' && (
               <p>Only essential cookies for core functionality</p>
             )}
-            {settings.cookiePreferences === "none" && (
+            {settings.cookiePreferences === 'none' && (
               <p className="text-amber-600">Warning: Some features may not work properly</p>
             )}
           </div>
@@ -390,15 +400,9 @@ export function PrivacySettingsPanel({
           <div className="flex items-center justify-between p-3 bg-red-50 rounded-lg border border-red-200">
             <div>
               <p className="text-sm font-medium text-red-900">Delete Account</p>
-              <p className="text-xs text-red-700">
-                Permanently delete your account and all data
-              </p>
+              <p className="text-xs text-red-700">Permanently delete your account and all data</p>
             </div>
-            <Button
-              variant="destructive"
-              size="sm"
-              onClick={onDeleteAccount}
-            >
+            <Button variant="destructive" size="sm" onClick={onDeleteAccount}>
               Delete
             </Button>
           </div>
@@ -407,18 +411,11 @@ export function PrivacySettingsPanel({
 
       {/* Actions */}
       <div className="flex justify-between pt-4">
-        <Button
-          variant="outline"
-          onClick={handleReset}
-          disabled={!hasChanges || isSaving}
-        >
+        <Button variant="outline" onClick={handleReset} disabled={!hasChanges || isSaving}>
           Reset Changes
         </Button>
-        <Button
-          onClick={handleSave}
-          disabled={!hasChanges || isSaving}
-        >
-          {isSaving ? "Saving..." : "Save Settings"}
+        <Button onClick={handleSave} disabled={!hasChanges || isSaving}>
+          {isSaving ? 'Saving...' : 'Save Settings'}
         </Button>
       </div>
     </div>

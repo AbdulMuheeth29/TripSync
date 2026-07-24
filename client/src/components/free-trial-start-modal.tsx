@@ -1,11 +1,18 @@
-import { useState } from "react";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Sparkles, Check } from "lucide-react";
-import { addDays, format } from "date-fns";
+import { useState } from 'react';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Sparkles, Check } from 'lucide-react';
+import { addDays, format } from 'date-fns';
 
 interface FreeTrialStartModalProps {
   isOpen: boolean;
@@ -15,19 +22,19 @@ interface FreeTrialStartModalProps {
 }
 
 const PRO_FEATURES = [
-  "Unlimited trips and members",
-  "Unlimited AI itinerary generation",
-  "Advanced expense tracking with OCR",
-  "Currency conversion",
-  "Map view & location sharing",
-  "Priority Atlas AI support",
+  'Unlimited trips and members',
+  'Unlimited AI itinerary generation',
+  'Advanced expense tracking with OCR',
+  'Currency conversion',
+  'Map view & location sharing',
+  'Priority Atlas AI support',
 ];
 
 export function FreeTrialStartModal({
   isOpen,
   onClose,
   onStartTrial,
-  userEmail = ""
+  userEmail = '',
 }: FreeTrialStartModalProps) {
   const [email, setEmail] = useState(userEmail);
   const [agreedToTerms, setAgreedToTerms] = useState(false);
@@ -62,9 +69,7 @@ export function FreeTrialStartModal({
         <div className="space-y-4">
           {/* Trial Info */}
           <div className="rounded-lg border border-primary/50 bg-primary/5 p-4">
-            <p className="text-sm font-medium text-primary mb-2">
-              Your trial includes:
-            </p>
+            <p className="text-sm font-medium text-primary mb-2">Your trial includes:</p>
             <ul className="space-y-2">
               {PRO_FEATURES.map((feature, index) => (
                 <li key={index} className="flex items-start gap-2 text-sm">
@@ -94,11 +99,11 @@ export function FreeTrialStartModal({
           <div className="rounded-lg bg-muted p-4 space-y-1">
             <div className="flex justify-between text-sm">
               <span className="text-muted-foreground">Trial Starts</span>
-              <span className="font-medium">{format(new Date(), "MMM d, yyyy")}</span>
+              <span className="font-medium">{format(new Date(), 'MMM d, yyyy')}</span>
             </div>
             <div className="flex justify-between text-sm">
               <span className="text-muted-foreground">Trial Ends</span>
-              <span className="font-medium">{format(trialEndDate, "MMM d, yyyy")}</span>
+              <span className="font-medium">{format(trialEndDate, 'MMM d, yyyy')}</span>
             </div>
           </div>
 
@@ -110,15 +115,12 @@ export function FreeTrialStartModal({
               onCheckedChange={(checked) => setAgreedToTerms(checked as boolean)}
               disabled={isStarting}
             />
-            <Label
-              htmlFor="terms"
-              className="text-sm leading-relaxed cursor-pointer"
-            >
-              I agree to the{" "}
+            <Label htmlFor="terms" className="text-sm leading-relaxed cursor-pointer">
+              I agree to the{' '}
               <a href="/terms" className="text-primary hover:underline">
                 Terms of Service
-              </a>{" "}
-              and{" "}
+              </a>{' '}
+              and{' '}
               <a href="/privacy" className="text-primary hover:underline">
                 Privacy Policy
               </a>
@@ -127,8 +129,8 @@ export function FreeTrialStartModal({
 
           {/* Fine Print */}
           <p className="text-xs text-muted-foreground text-center">
-            No credit card required. Cancel anytime during the trial with no charges.
-            After 14 days, you'll be asked to choose a plan.
+            No credit card required. Cancel anytime during the trial with no charges. After 14 days,
+            you'll be asked to choose a plan.
           </p>
         </div>
 
@@ -136,11 +138,8 @@ export function FreeTrialStartModal({
           <Button variant="outline" onClick={onClose} disabled={isStarting}>
             Maybe Later
           </Button>
-          <Button
-            onClick={handleStartTrial}
-            disabled={!email || !agreedToTerms || isStarting}
-          >
-            {isStarting ? "Starting Trial..." : "Start Free Trial"}
+          <Button onClick={handleStartTrial} disabled={!email || !agreedToTerms || isStarting}>
+            {isStarting ? 'Starting Trial...' : 'Start Free Trial'}
           </Button>
         </DialogFooter>
       </DialogContent>

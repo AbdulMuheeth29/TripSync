@@ -9,6 +9,7 @@ Trip-Sync uses Redis for caching frequently accessed data to improve performance
 **Cache Service Location**: `server/cache.ts`
 
 **Key Features**:
+
 - Redis-backed caching with in-memory fallback
 - Automatic TTL (time-to-live) expiration
 - Cache-aside pattern for data fetching
@@ -34,6 +35,7 @@ REDIS_URL=rediss://username:password@host:port
 ### Connection Settings
 
 The cache service automatically:
+
 - Connects lazily (doesn't block server startup)
 - Retries failed connections with exponential backoff
 - Reconnects automatically on connection loss
@@ -135,11 +137,11 @@ Use predefined TTL values for consistency:
 
 ```typescript
 export const CacheTTL = {
-  SHORT: 60,        // 1 minute - frequently changing data
-  MEDIUM: 300,      // 5 minutes - user data, profiles
-  LONG: 3600,       // 1 hour - rate limits, counters
-  DAY: 86400,       // 24 hours - AI-generated content
-  WEEK: 604800,     // 7 days - rarely changing data
+  SHORT: 60, // 1 minute - frequently changing data
+  MEDIUM: 300, // 5 minutes - user data, profiles
+  LONG: 3600, // 1 hour - rate limits, counters
+  DAY: 86400, // 24 hours - AI-generated content
+  WEEK: 604800, // 7 days - rarely changing data
 };
 ```
 
@@ -152,10 +154,7 @@ Always invalidate cache after updating data:
 ```typescript
 async function updateUser(id: string, updates: Partial<User>) {
   // Update database
-  const user = await db.update(users)
-    .set(updates)
-    .where(eq(users.id, id))
-    .returning();
+  const user = await db.update(users).set(updates).where(eq(users.id, id)).returning();
 
   // Invalidate cache
   await cache.del(CacheKeys.user(id));
@@ -173,10 +172,7 @@ Invalidate related caches when updating parent entities:
 
 ```typescript
 async function updateTrip(id: string, updates: Partial<Trip>) {
-  const trip = await db.update(trips)
-    .set(updates)
-    .where(eq(trips.id, id))
-    .returning();
+  const trip = await db.update(trips).set(updates).where(eq(trips.id, id)).returning();
 
   // Invalidate all trip-related caches
   await cache.del(CacheKeys.trip(id));
@@ -190,21 +186,25 @@ async function updateTrip(id: string, updates: Partial<Trip>) {
 ## Current Cached Data
 
 ### User Data
+
 - **Key**: `user:{userId}`
 - **TTL**: 5 minutes
 - **Invalidated on**: User profile update, email change
 
 ### Trip Data
+
 - **Key**: `trip:{tripId}`
 - **TTL**: 1 minute
 - **Invalidated on**: Trip update, status change
 
 ### Trip Members
+
 - **Key**: `trip:{tripId}:members`
 - **TTL**: 1 minute
 - **Invalidated on**: Member added/removed, role changed
 
 ### Token Blacklist
+
 - **Key**: `blacklist:{token}`
 - **TTL**: Token expiration time
 - **Purpose**: Session revocation for logout
@@ -240,11 +240,7 @@ if (cache.isEnabled()) {
 
 ```typescript
 // ✅ Good - automatic cache management
-const user = await cache.getOrSet(
-  CacheKeys.user(id),
-  () => fetchUserFromDb(id),
-  CacheTTL.MEDIUM
-);
+const user = await cache.getOrSet(CacheKeys.user(id), () => fetchUserFromDb(id), CacheTTL.MEDIUM);
 
 // ❌ Bad - manual cache management
 let user = await cache.get(CacheKeys.user(id));
@@ -362,11 +358,13 @@ npm run dev
 Redis is highly recommended for production:
 
 1. **Single Server**: Use local Redis
+
    ```bash
    REDIS_URL=redis://localhost:6379
    ```
 
 2. **Multiple Servers**: Use managed Redis (Redis Cloud, Upstash, AWS ElastiCache)
+
    ```bash
    REDIS_URL=redis://username:password@host:port
    ```
@@ -403,6 +401,7 @@ maxmemory-policy allkeys-lru
 **Symptom**: "Redis connection failed" in logs
 
 **Solutions**:
+
 1. Verify REDIS_URL is correct
 2. Check Redis is running: `redis-cli ping`
 3. Check firewall rules
@@ -415,6 +414,7 @@ maxmemory-policy allkeys-lru
 **Symptom**: Database queries still high despite caching
 
 **Check**:
+
 1. Verify cache keys are consistent
 2. Check TTLs aren't too short
 3. Ensure cache invalidation isn't too aggressive
@@ -425,6 +425,7 @@ maxmemory-policy allkeys-lru
 **Symptom**: Users see outdated data
 
 **Solutions**:
+
 1. Reduce TTL for frequently changing data
 2. Add cache invalidation on updates
 3. Use cascade invalidation for related data

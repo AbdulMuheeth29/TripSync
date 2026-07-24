@@ -19,16 +19,19 @@
 **Status**: By Design (for v1.0)
 
 **Description**:
+
 - Chat messages are stored in memory, not in the database
 - Messages will be lost when the server restarts
 - Not suitable for long-term chat history
 
 **Workaround**:
+
 - Minimize server restarts
 - Use chat for immediate coordination only
 - Important information should be added to trip notes or itinerary
 
 **Future Fix**:
+
 - v1.1 will migrate chat to PostgreSQL
 - Migration path planned (see `/migrations/` folder)
 
@@ -40,15 +43,18 @@
 **Status**: Optional Feature
 
 **Description**:
+
 - AI trip itinerary generation requires Anthropic API key
 - Atlas AI assistant requires API key
 - Feature gracefully disabled if key not configured
 
 **Workaround**:
+
 - Users can manually create itineraries
 - All other features work without AI
 
 **How to Enable**:
+
 ```bash
 # Add to .env
 AI_INTEGRATIONS_ANTHROPIC_API_KEY=sk-ant-...
@@ -62,15 +68,18 @@ AI_INTEGRATIONS_ANTHROPIC_API_KEY=sk-ant-...
 **Status**: Optional Feature
 
 **Description**:
+
 - Photo uploads require S3 or R2 configuration
 - Document uploads require S3 or R2 configuration
 - Feature gracefully disabled if not configured
 
 **Workaround**:
+
 - Users can share photos via external links
 - Core trip planning works without photo uploads
 
 **How to Enable**:
+
 ```bash
 # Option 1: Cloudflare R2 (recommended)
 R2_ACCOUNT_ID=your-account-id
@@ -93,15 +102,18 @@ AWS_REGION=us-east-1
 **Status**: Optional Feature
 
 **Description**:
+
 - All users default to "free" tier
 - Paid tiers (Pro, Teams) require Stripe configuration
 - Subscription limits not enforced without Stripe
 
 **Workaround**:
+
 - App works fully without billing
 - All features available to all users
 
 **How to Enable**:
+
 ```bash
 # Add to .env
 STRIPE_SECRET_KEY=sk_live_...
@@ -122,16 +134,19 @@ STRIPE_PRICE_TEAMS_ANNUAL=price_...
 **Status**: Planned Optimization
 
 **Description**:
+
 - Database queries are functional but not fully optimized
 - No performance issues expected for <10,000 users
 - May see slowdowns with larger datasets
 
 **Monitoring**:
+
 - Watch database query times
 - Monitor API response times
 - Alert if queries exceed 200ms average
 
 **Future Optimization**:
+
 - Add database indexes for frequent queries
 - Implement query result caching
 - Add database connection pooling tuning
@@ -144,15 +159,18 @@ STRIPE_PRICE_TEAMS_ANNUAL=price_...
 **Status**: Planned Enhancement
 
 **Description**:
+
 - Static assets served directly from app server
 - Slower load times for international users
 - Higher bandwidth usage
 
 **Workaround**:
+
 - Assets are small and load quickly for most users
 - Gzip compression enabled
 
 **Future Enhancement**:
+
 - Add Cloudflare CDN
 - Or use Vercel/Netlify for frontend
 
@@ -164,15 +182,18 @@ STRIPE_PRICE_TEAMS_ANNUAL=price_...
 **Status**: Planned Enhancement
 
 **Description**:
+
 - Uploaded images stored at original size
 - May consume more storage than necessary
 - May load slower on slow connections
 
 **Workaround**:
+
 - Users can manually compress images before upload
 - Most modern phones produce reasonable file sizes
 
 **Future Enhancement**:
+
 - Add Sharp for server-side image compression
 - Generate multiple sizes (thumbnail, medium, full)
 - Convert to WebP format
@@ -185,20 +206,22 @@ STRIPE_PRICE_TEAMS_ANNUAL=price_...
 
 **Status**: ✅ Fully Supported
 
-| Browser | Status | Notes |
-|---------|--------|-------|
-| Chrome/Edge (v100+) | ✅ Fully Supported | Recommended |
-| Safari (v15+) | ✅ Fully Supported | iOS and macOS |
-| Firefox (v100+) | ✅ Fully Supported | |
-| Safari (v14) | ⚠️ Mostly Works | Some CSS issues |
-| Chrome/Edge (<v100) | ⚠️ Mostly Works | Update recommended |
-| Internet Explorer 11 | ❌ Not Supported | Use modern browser |
+| Browser              | Status             | Notes              |
+| -------------------- | ------------------ | ------------------ |
+| Chrome/Edge (v100+)  | ✅ Fully Supported | Recommended        |
+| Safari (v15+)        | ✅ Fully Supported | iOS and macOS      |
+| Firefox (v100+)      | ✅ Fully Supported |                    |
+| Safari (v14)         | ⚠️ Mostly Works    | Some CSS issues    |
+| Chrome/Edge (<v100)  | ⚠️ Mostly Works    | Update recommended |
+| Internet Explorer 11 | ❌ Not Supported   | Use modern browser |
 
 **Known Issues**:
+
 - Safari v14: Date picker styling slightly different
 - Older browsers: Some modern CSS features may not work
 
 **Recommendation**:
+
 - Encourage users to keep browsers updated
 - Display notice for unsupported browsers
 
@@ -209,11 +232,13 @@ STRIPE_PRICE_TEAMS_ANNUAL=price_...
 **Status**: ✅ Mobile-First Design
 
 **Description**:
+
 - App fully responsive and works on all screen sizes
 - PWA installable on iOS and Android
 - Touch-optimized interface
 
 **Known Issues**:
+
 - None significant
 
 ---
@@ -226,15 +251,18 @@ STRIPE_PRICE_TEAMS_ANNUAL=price_...
 **Status**: Planned Enhancement
 
 **Description**:
+
 - API endpoints not rate-limited yet
 - Potential for abuse or DDoS
 - Not a concern for initial small-scale launch
 
 **Mitigation**:
+
 - Nginx rate limiting in production setup
 - Cloudflare provides DDoS protection (if used)
 
 **Future Enhancement**:
+
 ```bash
 # Add express-rate-limit
 npm install express-rate-limit
@@ -248,15 +276,18 @@ npm install express-rate-limit
 **Status**: By Design (for v1.0)
 
 **Description**:
+
 - Users can register with any email address
 - Email not verified before account activation
 - Potential for fake accounts
 
 **Mitigation**:
+
 - Admin can delete fake accounts
 - Trip invites verify email implicitly
 
 **Future Enhancement**:
+
 - Add email verification flow
 - Add email confirmation requirement
 
@@ -269,11 +300,13 @@ npm install express-rate-limit
 **Status**: ✅ All Tests Passing
 
 **Description**:
+
 - 89 automated tests passing
 - 0 TypeScript errors
 - All critical user flows tested
 
 **Test Coverage**:
+
 - ✅ Authentication
 - ✅ Trip CRUD operations
 - ✅ Itinerary management
@@ -291,11 +324,13 @@ npm install express-rate-limit
 **Status**: Works Correctly
 
 **Description**:
+
 - All dates stored in UTC
 - Displayed in user's local timezone
 - Edge case: Trip with members in multiple timezones may see different dates
 
 **Workaround**:
+
 - Trip dates interpreted in trip destination timezone (implicit)
 - Users should coordinate on timezone for meetings
 
@@ -306,15 +341,18 @@ npm install express-rate-limit
 **Status**: Not Implemented
 
 **Description**:
+
 - Expenses can be entered in any currency
 - No automatic conversion between currencies
 - Split calculations work per-currency
 
 **Workaround**:
+
 - Users should agree on single currency for trip
 - Or manually convert when entering expenses
 
 **Future Enhancement**:
+
 - Add currency conversion API
 - Auto-convert all expenses to trip currency
 
@@ -325,11 +363,13 @@ npm install express-rate-limit
 **Status**: Limited
 
 **Description**:
+
 - Max file size: 25MB for photos
 - Max file size: 10MB for documents
 - No upload progress indicator
 
 **Workaround**:
+
 - Compress large files before upload
 - Split large documents into smaller files
 
@@ -342,11 +382,13 @@ npm install express-rate-limit
 **Status**: ⚠️ Partial
 
 **Description**:
+
 - Semantic HTML used throughout
 - ARIA labels on interactive elements
 - Not fully tested with screen readers
 
 **Future Enhancement**:
+
 - Comprehensive screen reader testing
 - WCAG 2.1 AA compliance audit
 
@@ -357,6 +399,7 @@ npm install express-rate-limit
 **Status**: ✅ Fully Supported
 
 **Description**:
+
 - All features accessible via keyboard
 - Tab order logical
 - Focus indicators visible
@@ -370,10 +413,12 @@ npm install express-rate-limit
 **Status**: By Design (for v1.0)
 
 **Description**:
+
 - UI and documentation in English only
 - No multi-language support
 
 **Future Enhancement**:
+
 - Add i18n framework (react-i18next)
 - Start with Spanish, French, German, Japanese
 
@@ -386,16 +431,19 @@ npm install express-rate-limit
 **Status**: ✅ Compliant (for basic features)
 
 **Description**:
+
 - Privacy policy implemented
 - Cookie consent implemented
 - User data deletion supported
 - No tracking without consent
 
 **Limitations**:
+
 - No formal GDPR audit yet
 - No Data Protection Officer
 
 **Recommendation**:
+
 - If targeting EU: Get formal audit
 - If targeting EU: Appoint DPO
 
@@ -406,14 +454,17 @@ npm install express-rate-limit
 **Status**: ⚠️ Partial
 
 **Description**:
+
 - Users can view all their data
 - No one-click "export all data" feature yet
 
 **Workaround**:
+
 - Admin can export from database
 - Users can copy/paste data manually
 
 **Future Enhancement**:
+
 - Add "Download My Data" feature
 - Export to JSON or CSV
 
@@ -426,28 +477,34 @@ npm install express-rate-limit
 **Potential Issues**:
 
 **PostgreSQL Database**:
+
 - If database goes down, entire app is unavailable
 - Mitigation: Use reliable hosting (Supabase, Railway, AWS RDS)
 
 **Redis Cache** (Optional):
+
 - If Redis goes down, app continues working
 - Token blacklist disabled (logout may not work immediately)
 - Cache disabled (slightly slower)
 
 **Email/SMTP**:
+
 - If SMTP goes down, password reset and invites fail
 - Rest of app continues working
 
 **Anthropic API** (Optional):
+
 - If API goes down, AI features disabled
 - Rest of app continues working
 
 **Stripe** (Optional):
+
 - If Stripe goes down, billing features disabled
 - Existing subscriptions continue
 - Rest of app continues working
 
 **S3/R2 Storage** (Optional):
+
 - If storage goes down, file uploads fail
 - Existing files still viewable (if public URLs)
 - Rest of app continues working
@@ -456,15 +513,15 @@ npm install express-rate-limit
 
 ## Workarounds Summary
 
-| Issue | Severity | Workaround | ETA for Fix |
-|-------|----------|------------|-------------|
-| Chat in-memory | Medium | Minimize restarts | v1.1 |
-| No rate limiting | Low | Use Nginx | v1.2 |
-| No CDN | Low | Acceptable for MVP | v1.3 |
-| No email verification | Low | Admin moderation | v1.2 |
-| No currency conversion | Low | Use single currency | v2.0 |
-| English only | Low | Use translation tools | v2.0 |
-| No data export | Low | Manual export | v1.3 |
+| Issue                  | Severity | Workaround            | ETA for Fix |
+| ---------------------- | -------- | --------------------- | ----------- |
+| Chat in-memory         | Medium   | Minimize restarts     | v1.1        |
+| No rate limiting       | Low      | Use Nginx             | v1.2        |
+| No CDN                 | Low      | Acceptable for MVP    | v1.3        |
+| No email verification  | Low      | Admin moderation      | v1.2        |
+| No currency conversion | Low      | Use single currency   | v2.0        |
+| English only           | Low      | Use translation tools | v2.0        |
+| No data export         | Low      | Manual export         | v1.3        |
 
 ---
 

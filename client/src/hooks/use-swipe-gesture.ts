@@ -1,4 +1,4 @@
-import { useRef, useState, useEffect } from "react";
+import { useRef, useState, useEffect } from 'react';
 
 interface UseSwipeGestureOptions {
   onSwipeLeft?: () => void;
@@ -15,7 +15,7 @@ export function useSwipeGesture({
   onSwipeUp,
   onSwipeDown,
   threshold = 50,
-  velocity = 0.3
+  velocity = 0.3,
 }: UseSwipeGestureOptions) {
   const elementRef = useRef<HTMLElement | null>(null);
   const [isSwiping, setIsSwiping] = useState(false);
@@ -33,7 +33,7 @@ export function useSwipeGesture({
       touchStart.current = {
         x: touch.clientX,
         y: touch.clientY,
-        time: Date.now()
+        time: Date.now(),
       };
       setIsSwiping(true);
     };
@@ -44,7 +44,7 @@ export function useSwipeGesture({
       const touch = e.touches[0];
       touchCurrent.current = {
         x: touch.clientX,
-        y: touch.clientY
+        y: touch.clientY,
       };
 
       const deltaX = touchCurrent.current.x - touchStart.current.x;
@@ -95,26 +95,35 @@ export function useSwipeGesture({
       touchCurrent.current = { x: 0, y: 0 };
     };
 
-    element.addEventListener("touchstart", handleTouchStart, { passive: true });
-    element.addEventListener("touchmove", handleTouchMove, { passive: false });
-    element.addEventListener("touchend", handleTouchEnd);
-    element.addEventListener("touchcancel", handleTouchEnd);
+    element.addEventListener('touchstart', handleTouchStart, { passive: true });
+    element.addEventListener('touchmove', handleTouchMove, { passive: false });
+    element.addEventListener('touchend', handleTouchEnd);
+    element.addEventListener('touchcancel', handleTouchEnd);
 
     return () => {
-      element.removeEventListener("touchstart", handleTouchStart);
-      element.removeEventListener("touchmove", handleTouchMove);
-      element.removeEventListener("touchend", handleTouchEnd);
-      element.removeEventListener("touchcancel", handleTouchEnd);
+      element.removeEventListener('touchstart', handleTouchStart);
+      element.removeEventListener('touchmove', handleTouchMove);
+      element.removeEventListener('touchend', handleTouchEnd);
+      element.removeEventListener('touchcancel', handleTouchEnd);
     };
-  }, [isSwiping, swipeDistance, threshold, velocity, onSwipeLeft, onSwipeRight, onSwipeUp, onSwipeDown]);
+  }, [
+    isSwiping,
+    swipeDistance,
+    threshold,
+    velocity,
+    onSwipeLeft,
+    onSwipeRight,
+    onSwipeUp,
+    onSwipeDown,
+  ]);
 
   return {
     elementRef,
     isSwiping,
     swipeDistance,
     getTransform: () => ({
-      transform: isSwiping ? `translateX(${swipeDistance.x}px)` : "translateX(0)",
-      transition: isSwiping ? "none" : "transform 0.3s ease"
-    })
+      transform: isSwiping ? `translateX(${swipeDistance.x}px)` : 'translateX(0)',
+      transition: isSwiping ? 'none' : 'transform 0.3s ease',
+    }),
   };
 }

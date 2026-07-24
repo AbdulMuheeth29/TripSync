@@ -1,4 +1,5 @@
 # TripSync Legal Documents Guide
+
 **Privacy Policy & Terms of Service Implementation**
 
 ---
@@ -20,6 +21,7 @@ You are **not legally required** to hire a lawyer to create Privacy Policy or Te
 ### 💡 **For TripSync (Travel Planning SaaS): Templates are FINE**
 
 **Why?**
+
 - You collect standard data (names, emails, travel preferences)
 - You're a pre-revenue startup
 - Your data practices are straightforward
@@ -36,6 +38,7 @@ You are **not legally required** to hire a lawyer to create Privacy Policy or Te
 #### 1. **Privacy Policy** (LEGALLY REQUIRED)
 
 **Required by:**
+
 - GDPR (EU users)
 - CCPA/CPRA (California users, revenue >$26.6M or >100k consumers)
 - CalOPPA (California - applies to ALL websites collecting personal data)
@@ -51,6 +54,7 @@ You are **not legally required** to hire a lawyer to create Privacy Policy or Te
 #### 2. **Terms of Service** (HIGHLY RECOMMENDED)
 
 **Not legally required, but ESSENTIAL** to:
+
 - Protect your business from liability
 - Define user responsibilities
 - Establish dispute resolution process
@@ -87,6 +91,7 @@ Can be included in Privacy Policy or separate document.
 **Applies to**: Any business with EU users, regardless of your location
 
 **Requirements:**
+
 - ✅ Privacy Policy with specific disclosures (see below)
 - ✅ Cookie consent banner (users must opt-in BEFORE cookies set)
 - ✅ Data subject rights (access, delete, export, rectify)
@@ -103,6 +108,7 @@ Can be included in Privacy Policy or separate document.
 ### CCPA/CPRA (California Users)
 
 **Applies to**: Businesses that:
+
 - Have **$26.6M+** annual revenue, OR
 - Buy/sell personal info of **100,000+** consumers, OR
 - Derive **50%+** revenue from selling personal data
@@ -112,6 +118,7 @@ Can be included in Privacy Policy or separate document.
 **However**: Best practice is to comply anyway (easy to implement, builds trust)
 
 **Requirements:**
+
 - "Do Not Sell My Personal Information" link
 - Privacy Policy disclosures
 - Right to delete, access, correct data
@@ -122,11 +129,13 @@ Can be included in Privacy Policy or separate document.
 ### Other Regulations
 
 **CalOPPA (California Online Privacy Protection Act)**
+
 - **Applies to**: ALL websites collecting personal data from California residents
 - **TripSync**: ✅ YES, applies
 - **Requirement**: Privacy Policy with specific disclosures
 
 **Children's Data (COPPA)**
+
 - **Applies if**: You knowingly collect data from children under 13
 - **TripSync**: ❌ No - minimum age should be 18+ (set in Terms of Service)
 
@@ -134,13 +143,13 @@ Can be included in Privacy Policy or separate document.
 
 ## Cost Comparison: Lawyer vs Templates
 
-| Option | Cost | Pros | Cons | Best For |
-|--------|------|------|------|----------|
-| **Free Generator** | $0 | Instant, easy, compliant | Generic, no customization | Pre-launch, no revenue |
-| **Paid Generator** | $50-200/year | Better customization, updates | Still templates | Early stage, <$100k revenue |
-| **Contract Lawyer** | $500-2,000 | Basic review, some custom | Limited depth | Seed stage, <$500k revenue |
-| **Privacy Lawyer** | $2,000-10,000+ | Fully custom, expert review | Expensive, slow | Series A+, >$1M revenue |
-| **Law Firm Retainer** | $5,000-25,000+ | Ongoing support, updates | Very expensive | Enterprise, complex |
+| Option                | Cost           | Pros                          | Cons                      | Best For                    |
+| --------------------- | -------------- | ----------------------------- | ------------------------- | --------------------------- |
+| **Free Generator**    | $0             | Instant, easy, compliant      | Generic, no customization | Pre-launch, no revenue      |
+| **Paid Generator**    | $50-200/year   | Better customization, updates | Still templates           | Early stage, <$100k revenue |
+| **Contract Lawyer**   | $500-2,000     | Basic review, some custom     | Limited depth             | Seed stage, <$500k revenue  |
+| **Privacy Lawyer**    | $2,000-10,000+ | Fully custom, expert review   | Expensive, slow           | Series A+, >$1M revenue     |
+| **Law Firm Retainer** | $5,000-25,000+ | Ongoing support, updates      | Very expensive            | Enterprise, complex         |
 
 **Recommendation for TripSync**: Start with **Free Generator** ($0), upgrade to **Paid Generator** ($100/year) after launch, hire **lawyer** after $100k revenue.
 
@@ -151,30 +160,35 @@ Can be included in Privacy Policy or separate document.
 ### Top Recommended (Free)
 
 #### 1. **Termly** (Best Overall)
+
 - **Website**: [termly.io/products/privacy-policy-generator](https://termly.io/products/privacy-policy-generator/)
 - **Cost**: Free (basic), $12/month (pro with updates)
 - **Features**: GDPR, CCPA, CalOPPA compliant, AI disclosures, consent management
 - **Best for**: TripSync ✅
 
 #### 2. **TermsFeed**
+
 - **Website**: [termsfeed.com/privacy-policy-generator](https://www.termsfeed.com/privacy-policy-generator/)
 - **Cost**: Free
 - **Features**: Download HTML, DOCX, TXT formats
 - **Best for**: Quick start
 
 #### 3. **FreePrivacyPolicy.com**
+
 - **Website**: [freeprivacypolicy.com](https://www.freeprivacypolicy.com/)
 - **Cost**: Free
 - **Features**: GDPR, CCPA, CPRA compliant
 - **Best for**: Comprehensive coverage
 
 #### 4. **Privacy Policy Generator (.info)**
+
 - **Website**: [privacypolicygenerator.info](https://www.privacypolicygenerator.info/)
 - **Cost**: Free, no registration
 - **Features**: Fast, industry-specific
 - **Best for**: Simple policies
 
 #### 5. **Rocket Lawyer**
+
 - **Website**: [rocketlawyer.com](https://www.rocketlawyer.com/business-and-contracts/business-operations/starting-a-website/document/online-privacy-policy)
 - **Cost**: Free trial, then $39.99/month
 - **Features**: Lawyer review available
@@ -185,11 +199,13 @@ Can be included in Privacy Policy or separate document.
 ### Top Terms of Service Generators
 
 #### 1. **Termly ToS Generator**
+
 - **Website**: [termly.io/products/terms-and-conditions-generator](https://termly.io/products/terms-and-conditions-generator/)
 - **Cost**: Free
 - **Features**: SaaS-specific, payment terms, liability limits
 
 #### 2. **TermsFeed ToS**
+
 - **Website**: [termsfeed.com/terms-conditions-generator](https://www.termsfeed.com/terms-conditions-generator/)
 - **Cost**: Free
 
@@ -200,6 +216,7 @@ Can be included in Privacy Policy or separate document.
 ### Required Sections (GDPR + CCPA + CalOPPA)
 
 #### 1. **Introduction**
+
 - Who you are (company name, contact)
 - What this policy covers
 - Effective date, last updated date
@@ -207,6 +224,7 @@ Can be included in Privacy Policy or separate document.
 #### 2. **Information We Collect**
 
 **For TripSync**:
+
 - ✅ Account information (name, email, password)
 - ✅ Profile information (optional: bio, avatar)
 - ✅ Trip data (destination, dates, budget, preferences)
@@ -219,6 +237,7 @@ Can be included in Privacy Policy or separate document.
 #### 3. **How We Use Information**
 
 **For TripSync**:
+
 - ✅ Provide the service (trip planning, AI generation, collaboration)
 - ✅ Process payments and subscriptions
 - ✅ Send notifications (trip updates, invites, reminders)
@@ -229,6 +248,7 @@ Can be included in Privacy Policy or separate document.
 #### 4. **Legal Basis for Processing (GDPR)**
 
 **For TripSync**:
+
 - **Contract**: Processing necessary to provide the service
 - **Consent**: Marketing emails, location sharing, analytics cookies
 - **Legitimate Interest**: Fraud prevention, service improvement
@@ -236,6 +256,7 @@ Can be included in Privacy Policy or separate document.
 #### 5. **How We Share Information**
 
 **For TripSync**:
+
 - ✅ With other trip members (names, preferences, photos you upload)
 - ✅ With service providers (Stripe for payments, AWS S3 for storage, Anthropic for AI)
 - ✅ For legal compliance (if required by law)
@@ -257,6 +278,7 @@ Can be included in Privacy Policy or separate document.
 #### 7. **Data Retention**
 
 **For TripSync**:
+
 - Account data: Until you delete your account
 - Trip data: 30 days after account deletion (for recovery)
 - Payment data: 7 years (tax/legal requirements)
@@ -273,6 +295,7 @@ Can be included in Privacy Policy or separate document.
 #### 9. **Cookies**
 
 **For TripSync**:
+
 - **Essential cookies**: Authentication, session (cannot opt-out)
 - **Analytics cookies**: Google Analytics or similar (can opt-out)
 - **Preference cookies**: Dark mode, language (can opt-out)
@@ -282,6 +305,7 @@ Include cookie banner with opt-in (GDPR) or opt-out (CCPA)
 #### 10. **Third-Party Services**
 
 **For TripSync**:
+
 - Stripe (payment processing) - [stripe.com/privacy](https://stripe.com/privacy)
 - AWS S3 (file storage) - [aws.amazon.com/privacy](https://aws.amazon.com/privacy)
 - Anthropic (AI generation) - [anthropic.com/privacy](https://www.anthropic.com/privacy)
@@ -315,15 +339,18 @@ Include cookie banner with opt-in (GDPR) or opt-out (CCPA)
 ### Required Sections
 
 #### 1. **Acceptance of Terms**
+
 - By using the service, you agree to these terms
 - If you don't agree, don't use the service
 - Minimum age requirement (18+)
 
 #### 2. **Description of Service**
+
 - What TripSync does (AI-powered group trip planning)
 - What's included in free vs paid plans
 
 #### 3. **Account Registration**
+
 - User must provide accurate information
 - User is responsible for account security
 - One account per person
@@ -332,6 +359,7 @@ Include cookie banner with opt-in (GDPR) or opt-out (CCPA)
 #### 4. **Subscription and Payments**
 
 **For TripSync**:
+
 - Pricing (Free, Pro $4.99/month or $39/year, Teams $9.99/month or $89/year)
 - Auto-renewal (subscriptions renew automatically)
 - Billing cycle (monthly or annual)
@@ -343,16 +371,19 @@ Include cookie banner with opt-in (GDPR) or opt-out (CCPA)
 #### 5. **User Content and Conduct**
 
 **User grants you license to**:
+
 - Store and display their trip data, photos, comments
 - Process with AI to generate itineraries
 - Share with other trip members
 
 **User represents that**:
+
 - They own or have rights to content they upload
 - Content doesn't violate laws or rights
 - Photos are theirs or they have permission
 
 **Prohibited conduct**:
+
 - No illegal activity
 - No harassment, hate speech, threats
 - No spam or commercial use without permission
@@ -371,6 +402,7 @@ Include cookie banner with opt-in (GDPR) or opt-out (CCPA)
 **IMPORTANT**: Protects you from liability
 
 "THE SERVICE IS PROVIDED 'AS IS' WITHOUT WARRANTIES OF ANY KIND. WE DO NOT GUARANTEE:
+
 - The service will be uninterrupted or error-free
 - AI-generated itineraries will be accurate or suitable
 - Third-party links (flights, hotels) will be available
@@ -381,11 +413,13 @@ Include cookie banner with opt-in (GDPR) or opt-out (CCPA)
 **CRITICAL**: Caps your liability
 
 "TO THE MAXIMUM EXTENT PERMITTED BY LAW, TRIPSYNC SHALL NOT BE LIABLE FOR:
+
 - Indirect, incidental, special, or consequential damages
 - Lost profits, data, or opportunities
 - Damages exceeding the amount you paid in the last 12 months ($39 max for Pro users)"
 
 **Exceptions** (cannot limit):
+
 - Gross negligence or willful misconduct
 - Personal injury or death
 - Fraud
@@ -393,6 +427,7 @@ Include cookie banner with opt-in (GDPR) or opt-out (CCPA)
 #### 9. **Indemnification**
 
 User agrees to defend and hold you harmless if:
+
 - Their content violates someone's rights
 - They violate these terms
 - Their use of the service causes claims against you
@@ -408,15 +443,18 @@ User agrees to defend and hold you harmless if:
 **Options**:
 
 **A. Arbitration (Recommended)**
+
 - Disputes resolved through binding arbitration
 - Cheaper and faster than court
 - Prevents class action lawsuits
 
 **B. Jurisdiction and Venue**
+
 - Disputes resolved in courts of [Your State]
 - User agrees to personal jurisdiction
 
 **C. Mediation**
+
 - Good-faith attempt to resolve before litigation
 
 **For TripSync**: Include **mandatory arbitration clause** (consult lawyer for exact wording)
@@ -461,17 +499,20 @@ If one provision is invalid, the rest remain enforceable
 ### Step 3: Implement Consent (2-3 hours)
 
 **Cookie Consent Banner**:
+
 - [ ] Install cookie consent library (e.g., CookieYes, Termly, Osano)
 - [ ] Show banner on first visit
 - [ ] Block non-essential cookies until consent
 - [ ] Provide opt-in (GDPR) and opt-out (CCPA) options
 
 **Signup Flow**:
+
 - [ ] Add checkbox: "I agree to the [Terms of Service] and [Privacy Policy]"
 - [ ] Make checkbox required (cannot register without agreement)
 - [ ] Log consent timestamp in database
 
 **Account Deletion**:
+
 - [ ] Add "Delete Account" button in settings
 - [ ] Show warning (permanent, 30-day recovery period)
 - [ ] Implement deletion logic (soft delete → hard delete after 30 days)
@@ -515,9 +556,9 @@ If one provision is invalid, the rest remain enforceable
 
 ```tsx
 // client/src/pages/privacy.tsx
-import { AppLogo } from "@/components/app-logo";
-import { Link } from "wouter";
-import { Button } from "@/components/ui/button";
+import { AppLogo } from '@/components/app-logo';
+import { Link } from 'wouter';
+import { Button } from '@/components/ui/button';
 
 export default function PrivacyPage() {
   return (
@@ -539,33 +580,47 @@ export default function PrivacyPage() {
       <main className="container mx-auto px-4 py-12 max-w-4xl">
         <h1 className="text-4xl font-bold mb-2">Privacy Policy</h1>
         <p className="text-muted-foreground mb-8">
-          Last updated: {new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+          Last updated:{' '}
+          {new Date().toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+          })}
         </p>
 
         <div className="prose dark:prose-invert max-w-none">
           <h2>1. Introduction</h2>
           <p>
-            TripSync ("we", "our", or "us") operates tripsync.app (the "Service").
-            This Privacy Policy explains how we collect, use, disclose, and safeguard
-            your information when you use our Service.
+            TripSync ("we", "our", or "us") operates tripsync.app (the "Service"). This Privacy
+            Policy explains how we collect, use, disclose, and safeguard your information when you
+            use our Service.
           </p>
 
           <h2>2. Information We Collect</h2>
           <h3>2.1 Information You Provide</h3>
           <ul>
-            <li><strong>Account Information:</strong> Name, email address, password (encrypted)</li>
-            <li><strong>Trip Data:</strong> Destinations, dates, budgets, preferences, itineraries</li>
-            <li><strong>Payment Information:</strong> Credit card details (processed securely by Stripe, we do not store)</li>
-            <li><strong>User Content:</strong> Photos, comments, chat messages you create</li>
-            <li><strong>Location Data:</strong> GPS coordinates (only if you enable location sharing)</li>
+            <li>
+              <strong>Account Information:</strong> Name, email address, password (encrypted)
+            </li>
+            <li>
+              <strong>Trip Data:</strong> Destinations, dates, budgets, preferences, itineraries
+            </li>
+            <li>
+              <strong>Payment Information:</strong> Credit card details (processed securely by
+              Stripe, we do not store)
+            </li>
+            <li>
+              <strong>User Content:</strong> Photos, comments, chat messages you create
+            </li>
+            <li>
+              <strong>Location Data:</strong> GPS coordinates (only if you enable location sharing)
+            </li>
           </ul>
 
           {/* Continue with rest of policy... */}
 
           <h2>11. Contact Us</h2>
-          <p>
-            If you have questions about this Privacy Policy, please contact us:
-          </p>
+          <p>If you have questions about this Privacy Policy, please contact us:</p>
           <ul>
             <li>Email: privacy@tripsync.app</li>
             <li>Address: [Your Business Address]</li>
@@ -616,18 +671,18 @@ export function CookieBanner() {
           <div className="flex-1">
             <h3 className="font-semibold mb-2">We use cookies</h3>
             <p className="text-sm text-muted-foreground">
-              We use cookies to improve your experience and analyze site usage.
-              Essential cookies are required for the site to function.
-              <a href="/cookies" className="underline ml-1">Learn more</a>
+              We use cookies to improve your experience and analyze site usage. Essential cookies
+              are required for the site to function.
+              <a href="/cookies" className="underline ml-1">
+                Learn more
+              </a>
             </p>
           </div>
           <div className="flex gap-2">
             <Button variant="outline" onClick={acceptEssential}>
               Essential Only
             </Button>
-            <Button onClick={acceptAll}>
-              Accept All
-            </Button>
+            <Button onClick={acceptAll}>Accept All</Button>
           </div>
         </div>
       </Card>
@@ -641,12 +696,7 @@ export function CookieBanner() {
 ```tsx
 // Add to client/src/pages/login.tsx
 <div className="flex items-start gap-2">
-  <Checkbox
-    id="terms"
-    checked={acceptedTerms}
-    onCheckedChange={setAcceptedTerms}
-    required
-  />
+  <Checkbox id="terms" checked={acceptedTerms} onCheckedChange={setAcceptedTerms} required />
   <label htmlFor="terms" className="text-sm text-muted-foreground">
     I agree to the{' '}
     <Link href="/terms" className="text-primary hover:underline">
@@ -670,6 +720,7 @@ export function CookieBanner() {
 **Cost**: $0 (free generators)
 
 **Tasks**:
+
 1. Day 1: Generate documents, customize, review (4-6 hours)
 2. Day 2: Implement pages, consent banner, acceptance flow (4-6 hours)
 
@@ -683,6 +734,7 @@ export function CookieBanner() {
 **Cost**: $500-2,000
 
 **Tasks**:
+
 1. Generate documents yourself
 2. Hire contract lawyer for review ($500-2,000)
 3. Implement feedback
@@ -696,6 +748,7 @@ export function CookieBanner() {
 **Cost**: $5,000-15,000
 
 **Includes**:
+
 - Custom Privacy Policy
 - Custom Terms of Service
 - Data Processing Agreement (for B2B)
@@ -723,6 +776,7 @@ export function CookieBanner() {
 ## Red Flags: When Templates Aren't Enough
 
 ❌ **Do NOT use templates if**:
+
 - You collect health data (HIPAA compliance required)
 - You collect financial data (PCI-DSS, SOC 2 required)
 - You target children under 13 (COPPA lawyer required)
@@ -731,6 +785,7 @@ export function CookieBanner() {
 - You operate in highly regulated industry (legal, healthcare, finance)
 
 ✅ **Templates are FINE if** (TripSync ✅):
+
 - You collect standard data (names, emails, travel preferences)
 - You don't sell user data
 - You're a straightforward SaaS
@@ -768,6 +823,7 @@ export function CookieBanner() {
 ### For TripSync: Recommended Action Plan
 
 **Week 1-2** (Before Launch):
+
 1. ✅ Use **Termly free generator** to create Privacy Policy
 2. ✅ Use **Termly free generator** to create Terms of Service
 3. ✅ Create `/privacy` and `/terms` pages
@@ -776,16 +832,19 @@ export function CookieBanner() {
 6. ✅ Add footer links
 
 **Month 3-6** (After Launch):
+
 - Monitor for changes in privacy laws
 - Review and update policies quarterly
 - Add data export feature (GDPR compliance)
 
 **Year 1** ($50k-100k revenue):
+
 - Hire contract lawyer for policy review ($500-1,000)
 - Implement feedback
 - Add Data Processing Agreement for B2B customers
 
 **Year 2+** ($500k+ revenue):
+
 - Engage privacy lawyer for full audit ($5,000-10,000)
 - Consider SOC 2 compliance
 - Dedicated legal counsel or retainer
@@ -799,6 +858,7 @@ export function CookieBanner() {
 While the information provided is based on current laws and best practices, privacy laws change frequently. For specific legal advice tailored to your situation, consult a qualified attorney licensed in your jurisdiction.
 
 **We recommend**:
+
 - Starting with free templates for launch
 - Consulting a lawyer before accepting payments
 - Upgrading to lawyer-reviewed documents once you have revenue

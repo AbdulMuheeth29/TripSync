@@ -1,11 +1,11 @@
-import { useState, useEffect } from "react";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Card } from "@/components/ui/card";
-import { Textarea } from "@/components/ui/textarea";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { AlertCircle, CheckCircle2 } from "lucide-react";
+import { useState, useEffect } from 'react';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Card } from '@/components/ui/card';
+import { Textarea } from '@/components/ui/textarea';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { AlertCircle, CheckCircle2 } from 'lucide-react';
 
 interface Member {
   id: string;
@@ -24,12 +24,10 @@ export function CustomAmountSplit({
   members,
   totalAmount,
   onSplitChange,
-  currency = "USD"
+  currency = 'USD',
 }: CustomAmountSplitProps) {
   const [splits, setSplits] = useState<Record<string, { amount: number; note: string }>>(
-    Object.fromEntries(
-      members.map(m => [m.id, { amount: 0, note: "" }])
-    )
+    Object.fromEntries(members.map((m) => [m.id, { amount: 0, note: '' }]))
   );
 
   const totalAllocated = Object.values(splits).reduce((sum, s) => sum + s.amount, 0);
@@ -42,16 +40,16 @@ export function CustomAmountSplit({
 
   const handleAmountChange = (memberId: string, value: string) => {
     const numValue = Math.max(0, parseFloat(value) || 0);
-    setSplits(prev => ({
+    setSplits((prev) => ({
       ...prev,
-      [memberId]: { ...prev[memberId], amount: numValue }
+      [memberId]: { ...prev[memberId], amount: numValue },
     }));
   };
 
   const handleNoteChange = (memberId: string, note: string) => {
-    setSplits(prev => ({
+    setSplits((prev) => ({
       ...prev,
-      [memberId]: { ...prev[memberId], note }
+      [memberId]: { ...prev[memberId], note },
     }));
   };
 
@@ -66,7 +64,7 @@ export function CustomAmountSplit({
   const getInitials = (name: string) => {
     return name
       .split(' ')
-      .map(n => n[0])
+      .map((n) => n[0])
       .join('')
       .toUpperCase()
       .slice(0, 2);
@@ -93,7 +91,7 @@ export function CustomAmountSplit({
 
       <Card className="divide-y">
         {members.map((member) => {
-          const split = splits[member.id] || { amount: 0, note: "" };
+          const split = splits[member.id] || { amount: 0, note: '' };
 
           return (
             <div key={member.id} className="p-4 space-y-3">
@@ -104,9 +102,7 @@ export function CustomAmountSplit({
 
                 <div className="flex-1">
                   <p className="font-medium">{member.name}</p>
-                  {member.email && (
-                    <p className="text-sm text-muted-foreground">{member.email}</p>
-                  )}
+                  {member.email && <p className="text-sm text-muted-foreground">{member.email}</p>}
                 </div>
 
                 <div className="text-right">
@@ -116,7 +112,7 @@ export function CustomAmountSplit({
                       type="number"
                       min="0"
                       step="0.01"
-                      value={split.amount || ""}
+                      value={split.amount || ''}
                       onChange={(e) => handleAmountChange(member.id, e.target.value)}
                       placeholder="0.00"
                       className="w-28 text-right"
@@ -138,13 +134,12 @@ export function CustomAmountSplit({
       </Card>
 
       {!isValid && remaining !== totalAmount && (
-        <Alert variant={remaining > 0 ? "default" : "destructive"}>
+        <Alert variant={remaining > 0 ? 'default' : 'destructive'}>
           <AlertCircle className="h-4 w-4" />
           <AlertDescription>
             {remaining > 0
               ? `${formatCurrency(remaining)} left to allocate`
-              : `Over-allocated by ${formatCurrency(Math.abs(remaining))}`
-            }
+              : `Over-allocated by ${formatCurrency(Math.abs(remaining))}`}
           </AlertDescription>
         </Alert>
       )}
@@ -160,11 +155,13 @@ export function CustomAmountSplit({
         </div>
         <div className="flex justify-between items-center pt-2 border-t">
           <span className="font-medium">Remaining</span>
-          <span className={`text-lg font-bold ${
-            remaining > 0 ? "text-amber-600" : remaining < 0 ? "text-red-600" : "text-green-600"
-          }`}>
+          <span
+            className={`text-lg font-bold ${
+              remaining > 0 ? 'text-amber-600' : remaining < 0 ? 'text-red-600' : 'text-green-600'
+            }`}
+          >
             {formatCurrency(Math.abs(remaining))}
-            {remaining < 0 && " over"}
+            {remaining < 0 && ' over'}
           </span>
         </div>
       </div>

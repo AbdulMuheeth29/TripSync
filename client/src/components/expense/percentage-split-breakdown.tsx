@@ -1,10 +1,10 @@
-import { useState, useEffect } from "react";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Card } from "@/components/ui/card";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { AlertCircle, CheckCircle2 } from "lucide-react";
+import { useState, useEffect } from 'react';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Card } from '@/components/ui/card';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { AlertCircle, CheckCircle2 } from 'lucide-react';
 
 interface Member {
   id: string;
@@ -23,12 +23,10 @@ export function PercentageSplitBreakdown({
   members,
   totalAmount,
   onSplitChange,
-  currency = "USD"
+  currency = 'USD',
 }: PercentageSplitBreakdownProps) {
   const [percentages, setPercentages] = useState<Record<string, number>>(
-    Object.fromEntries(
-      members.map(m => [m.id, Math.floor(100 / members.length)])
-    )
+    Object.fromEntries(members.map((m) => [m.id, Math.floor(100 / members.length)]))
   );
 
   const totalPercentage = Object.values(percentages).reduce((sum, val) => sum + val, 0);
@@ -36,19 +34,16 @@ export function PercentageSplitBreakdown({
 
   useEffect(() => {
     const splits = Object.fromEntries(
-      Object.entries(percentages).map(([id, percentage]) => [
-        id,
-        (totalAmount * percentage) / 100
-      ])
+      Object.entries(percentages).map(([id, percentage]) => [id, (totalAmount * percentage) / 100])
     );
     onSplitChange(splits);
   }, [percentages, totalAmount, onSplitChange]);
 
   const handlePercentageChange = (memberId: string, value: string) => {
     const numValue = Math.max(0, Math.min(100, parseInt(value) || 0));
-    setPercentages(prev => ({
+    setPercentages((prev) => ({
       ...prev,
-      [memberId]: numValue
+      [memberId]: numValue,
     }));
   };
 
@@ -63,7 +58,7 @@ export function PercentageSplitBreakdown({
   const getInitials = (name: string) => {
     return name
       .split(' ')
-      .map(n => n[0])
+      .map((n) => n[0])
       .join('')
       .toUpperCase()
       .slice(0, 2);
@@ -102,9 +97,7 @@ export function PercentageSplitBreakdown({
 
                 <div className="flex-1">
                   <p className="font-medium">{member.name}</p>
-                  {member.email && (
-                    <p className="text-sm text-muted-foreground">{member.email}</p>
-                  )}
+                  {member.email && <p className="text-sm text-muted-foreground">{member.email}</p>}
                 </div>
 
                 <div className="flex items-center gap-3">
@@ -120,9 +113,7 @@ export function PercentageSplitBreakdown({
                       />
                       <span className="text-sm font-medium">%</span>
                     </div>
-                    <p className="text-sm text-muted-foreground mt-1">
-                      {formatCurrency(amount)}
-                    </p>
+                    <p className="text-sm text-muted-foreground mt-1">{formatCurrency(amount)}</p>
                   </div>
                 </div>
               </div>

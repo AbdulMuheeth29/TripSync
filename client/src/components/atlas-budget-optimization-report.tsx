@@ -1,8 +1,14 @@
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
-import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Sparkles, TrendingDown, DollarSign, Check, AlertCircle, Info } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from '@/components/ui/dialog';
+import { Card, CardContent } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Sparkles, TrendingDown, DollarSign, Check, AlertCircle, Info } from 'lucide-react';
 
 interface BudgetOptimizationReportProps {
   isOpen: boolean;
@@ -19,8 +25,8 @@ interface BudgetOptimizationReportProps {
       title: string;
       description: string;
       savingsAmount: number;
-      difficulty: "easy" | "medium" | "hard";
-      impact: "low" | "medium" | "high";
+      difficulty: 'easy' | 'medium' | 'hard';
+      impact: 'low' | 'medium' | 'high';
     }>;
     aiReasoning: string;
   };
@@ -30,9 +36,16 @@ export function AtlasBudgetOptimizationReport({
   isOpen,
   onClose,
   onApplySuggestion,
-  reportData
+  reportData,
 }: BudgetOptimizationReportProps) {
-  const { currentBudget, currentSpending, projectedTotal, potentialSavings, suggestions, aiReasoning } = reportData;
+  const {
+    currentBudget,
+    currentSpending,
+    projectedTotal,
+    potentialSavings,
+    suggestions,
+    aiReasoning,
+  } = reportData;
 
   const budgetUsagePercent = Math.round((currentSpending / currentBudget) * 100);
   const projectedUsagePercent = Math.round((projectedTotal / currentBudget) * 100);
@@ -40,27 +53,27 @@ export function AtlasBudgetOptimizationReport({
 
   const getDifficultyBadge = (difficulty: string) => {
     switch (difficulty) {
-      case "easy":
-        return { label: "Easy", variant: "default" as const };
-      case "medium":
-        return { label: "Medium", variant: "secondary" as const };
-      case "hard":
-        return { label: "Hard", variant: "outline" as const };
+      case 'easy':
+        return { label: 'Easy', variant: 'default' as const };
+      case 'medium':
+        return { label: 'Medium', variant: 'secondary' as const };
+      case 'hard':
+        return { label: 'Hard', variant: 'outline' as const };
       default:
-        return { label: "Unknown", variant: "outline" as const };
+        return { label: 'Unknown', variant: 'outline' as const };
     }
   };
 
   const getImpactColor = (impact: string) => {
     switch (impact) {
-      case "high":
-        return "text-green-500";
-      case "medium":
-        return "text-yellow-500";
-      case "low":
-        return "text-gray-500";
+      case 'high':
+        return 'text-green-500';
+      case 'medium':
+        return 'text-yellow-500';
+      case 'low':
+        return 'text-gray-500';
       default:
-        return "text-gray-500";
+        return 'text-gray-500';
     }
   };
 
@@ -93,7 +106,9 @@ export function AtlasBudgetOptimizationReport({
             <Card>
               <CardContent className="p-4">
                 <div className="text-sm text-muted-foreground mb-1">Projected Total</div>
-                <div className={`text-2xl font-bold ${overBudget ? "text-red-500" : "text-green-500"}`}>
+                <div
+                  className={`text-2xl font-bold ${overBudget ? 'text-red-500' : 'text-green-500'}`}
+                >
                   ${projectedTotal.toFixed(2)}
                 </div>
                 <div className="text-xs text-muted-foreground mt-1">
@@ -115,7 +130,8 @@ export function AtlasBudgetOptimizationReport({
               </div>
             </div>
             <p className="text-sm text-muted-foreground">
-              By implementing these suggestions, you could save up to ${potentialSavings.toFixed(2)} total
+              By implementing these suggestions, you could save up to ${potentialSavings.toFixed(2)}{' '}
+              total
             </p>
           </div>
 
@@ -164,7 +180,9 @@ export function AtlasBudgetOptimizationReport({
                           <div className="flex items-center gap-1">
                             <TrendingDown className={`h-3 w-3 ${impactColor}`} />
                             <span className={impactColor}>
-                              {suggestion.impact.charAt(0).toUpperCase() + suggestion.impact.slice(1)} impact
+                              {suggestion.impact.charAt(0).toUpperCase() +
+                                suggestion.impact.slice(1)}{' '}
+                              impact
                             </span>
                           </div>
                         </div>
@@ -195,8 +213,9 @@ export function AtlasBudgetOptimizationReport({
             <div className="flex items-start gap-2">
               <AlertCircle className="h-4 w-4 text-muted-foreground flex-shrink-0 mt-0.5" />
               <p className="text-xs text-muted-foreground">
-                <span className="font-medium">Note:</span> These are AI-generated suggestions based on your trip data.
-                Actual savings may vary. Always verify recommendations before making changes.
+                <span className="font-medium">Note:</span> These are AI-generated suggestions based
+                on your trip data. Actual savings may vary. Always verify recommendations before
+                making changes.
               </p>
             </div>
           </div>

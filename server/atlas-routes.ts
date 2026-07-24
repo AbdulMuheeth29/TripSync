@@ -29,12 +29,7 @@ router.get('/:tripId/atlas/conversation', requireAuth, requireTripAccess, async 
     const conversation = await db
       .select()
       .from(atlasConversations)
-      .where(
-        and(
-          eq(atlasConversations.tripId, tripId),
-          eq(atlasConversations.userId, userId)
-        )
-      )
+      .where(and(eq(atlasConversations.tripId, tripId), eq(atlasConversations.userId, userId)))
       .orderBy(desc(atlasConversations.updatedAt))
       .limit(1);
 
@@ -52,18 +47,18 @@ router.get('/:tripId/atlas/conversation', requireAuth, requireTripAccess, async 
 
       return res.json({
         success: true,
-        data: newConversation[0]
+        data: newConversation[0],
       });
     }
 
     res.json({
       success: true,
-      data: conversation[0]
+      data: conversation[0],
     });
   } catch (error: any) {
     console.error('Failed to get Atlas conversation:', error);
     res.status(500).json({
-      error: 'Failed to load conversation'
+      error: 'Failed to load conversation',
     });
   }
 });
@@ -88,12 +83,7 @@ router.post('/:tripId/atlas/message', requireAuth, requireTripAccess, async (req
     let conversation = await db
       .select()
       .from(atlasConversations)
-      .where(
-        and(
-          eq(atlasConversations.tripId, tripId),
-          eq(atlasConversations.userId, userId)
-        )
-      )
+      .where(and(eq(atlasConversations.tripId, tripId), eq(atlasConversations.userId, userId)))
       .limit(1);
 
     if (conversation.length === 0) {
@@ -115,7 +105,7 @@ router.post('/:tripId/atlas/message', requireAuth, requireTripAccess, async (req
       storage.getItineraryItems(tripId),
       storage.getExpensesByTrip(tripId),
       storage.getVotesByTrip(tripId),
-      storage.getTripMembers(tripId)
+      storage.getTripMembers(tripId),
     ]);
 
     if (!trip) {
@@ -124,7 +114,8 @@ router.post('/:tripId/atlas/message', requireAuth, requireTripAccess, async (req
 
     // Build rich context for Atlas
     const tripDuration = Math.ceil(
-      (new Date(trip.endDate).getTime() - new Date(trip.startDate).getTime()) / (1000 * 60 * 60 * 24)
+      (new Date(trip.endDate).getTime() - new Date(trip.startDate).getTime()) /
+        (1000 * 60 * 60 * 24)
     );
     const daysWithActivities = new Set(items.map((i: any) => i.dayNumber)).size;
     const totalBudget = trip.budgetPerPerson * trip.groupSize;
@@ -142,7 +133,7 @@ router.post('/:tripId/atlas/message', requireAuth, requireTripAccess, async (req
         budgetPerPerson: trip.budgetPerPerson,
         groupSize: trip.groupSize,
         status: trip.status,
-        isLocked: trip.isLocked
+        isLocked: trip.isLocked,
       },
       progress: {
         itineraryItems: items.length,
@@ -157,16 +148,16 @@ router.post('/:tripId/atlas/message', requireAuth, requireTripAccess, async (req
         activeVotes: votes.filter((v: any) => v.status === 'open').length,
         stuckVotes: 0, // TODO: Calculate actual stuck votes
         completionPercentage: tripDuration > 0 ? (daysWithActivities / tripDuration) * 100 : 0,
-        daysUntilTrip: daysUntilTrip > 0 ? daysUntilTrip : null
+        daysUntilTrip: daysUntilTrip > 0 ? daysUntilTrip : null,
       },
       behavior: {
         currentPage: req.body.currentPage,
         timeOnPage: req.body.timeOnPage,
-        lastAction: req.body.lastAction
+        lastAction: req.body.lastAction,
       },
       group: {
-        vibes: trip.vibes
-      }
+        vibes: trip.vibes,
+      },
     };
 
     // Get AI response
@@ -180,32 +171,32 @@ router.post('/:tripId/atlas/message', requireAuth, requireTripAccess, async (req
       votes,
       members: members.map((m: any) => ({
         ...m,
-        user: { name: m.userId } // TODO: Get actual user names
-      }))
+        user: { name: m.userId }, // TODO: Get actual user names
+      })),
     });
 
     // Update conversation with new messages
-    const currentMessages = conversation[0].messages as any[] || [];
+    const currentMessages = (conversation[0].messages as any[]) || [];
     const newMessages = [
       ...currentMessages,
       {
         role: 'user',
         content: message,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       },
       {
         role: 'assistant',
         content: suggestion,
         action,
-        timestamp: new Date().toISOString()
-      }
+        timestamp: new Date().toISOString(),
+      },
     ];
 
     await db
       .update(atlasConversations)
       .set({
         messages: newMessages,
-        updatedAt: new Date()
+        updatedAt: new Date(),
       })
       .where(eq(atlasConversations.id, conversation[0].id));
 
@@ -214,13 +205,13 @@ router.post('/:tripId/atlas/message', requireAuth, requireTripAccess, async (req
       data: {
         message: suggestion,
         action,
-        context
-      }
+        context,
+      },
     });
   } catch (error: any) {
     console.error('Failed to send Atlas message:', error);
     res.status(500).json({
-      error: error?.message || 'Failed to send message'
+      error: error?.message || 'Failed to send message',
     });
   }
 });
@@ -237,21 +228,16 @@ router.delete('/:tripId/atlas/conversation', requireAuth, requireTripAccess, asy
     const db = getDb();
     await db
       .delete(atlasConversations)
-      .where(
-        and(
-          eq(atlasConversations.tripId, tripId),
-          eq(atlasConversations.userId, userId)
-        )
-      );
+      .where(and(eq(atlasConversations.tripId, tripId), eq(atlasConversations.userId, userId)));
 
     res.json({
       success: true,
-      message: 'Conversation cleared'
+      message: 'Conversation cleared',
     });
   } catch (error: any) {
     console.error('Failed to clear Atlas conversation:', error);
     res.status(500).json({
-      error: 'Failed to clear conversation'
+      error: 'Failed to clear conversation',
     });
   }
 });
@@ -275,12 +261,12 @@ router.get('/:tripId/atlas/interventions', requireAuth, requireTripAccess, async
 
     res.json({
       success: true,
-      data: interventions
+      data: interventions,
     });
   } catch (error: any) {
     console.error('Failed to get interventions:', error);
     res.status(500).json({
-      error: 'Failed to load interventions'
+      error: 'Failed to load interventions',
     });
   }
 });
@@ -306,8 +292,8 @@ router.get('/:tripId/atlas/health', requireAuth, requireTripAccess, async (req, 
         data: {
           healthScore: 100,
           issues: [],
-          lastChecked: null
-        }
+          lastChecked: null,
+        },
       });
     }
 
@@ -323,13 +309,13 @@ router.get('/:tripId/atlas/health', requireAuth, requireTripAccess, async (req, 
         issues: state[0].issues || [],
         lastChecked: state[0].lastCheckedAt,
         interventionCount: state[0].interventionCount,
-        lastIntervention: state[0].lastInterventionAt
-      }
+        lastIntervention: state[0].lastInterventionAt,
+      },
     });
   } catch (error: any) {
     console.error('Failed to get trip health:', error);
     res.status(500).json({
-      error: 'Failed to load trip health'
+      error: 'Failed to load trip health',
     });
   }
 });
@@ -338,29 +324,34 @@ router.get('/:tripId/atlas/health', requireAuth, requireTripAccess, async (req, 
  * POST /api/trips/:tripId/atlas/interventions/:interventionId/dismiss
  * Mark an intervention as seen/dismissed
  */
-router.post('/:tripId/atlas/interventions/:interventionId/dismiss', requireAuth, requireTripAccess, async (req, res) => {
-  try {
-    const interventionId = req.params.interventionId as string;
+router.post(
+  '/:tripId/atlas/interventions/:interventionId/dismiss',
+  requireAuth,
+  requireTripAccess,
+  async (req, res) => {
+    try {
+      const interventionId = req.params.interventionId as string;
 
-    const db = getDb();
-    await db
-      .update(atlasInterventions)
-      .set({
-        dismissed: true,
-        dismissedAt: new Date()
-      })
-      .where(eq(atlasInterventions.id, parseInt(interventionId)));
+      const db = getDb();
+      await db
+        .update(atlasInterventions)
+        .set({
+          dismissed: true,
+          dismissedAt: new Date(),
+        })
+        .where(eq(atlasInterventions.id, parseInt(interventionId)));
 
-    res.json({
-      success: true,
-      message: 'Intervention dismissed'
-    });
-  } catch (error: any) {
-    console.error('Failed to dismiss intervention:', error);
-    res.status(500).json({
-      error: 'Failed to dismiss intervention'
-    });
+      res.json({
+        success: true,
+        message: 'Intervention dismissed',
+      });
+    } catch (error: any) {
+      console.error('Failed to dismiss intervention:', error);
+      res.status(500).json({
+        error: 'Failed to dismiss intervention',
+      });
+    }
   }
-});
+);
 
 export default router;

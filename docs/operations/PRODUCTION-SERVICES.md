@@ -14,11 +14,11 @@ This will guide you through configuring all three services.
 
 ## Service Overview
 
-| Service | Purpose | Required? | Free Tier | Monthly Cost |
-|---------|---------|-----------|-----------|--------------|
-| **Redis** | Cache & sessions | Highly Recommended | ✅ 10K cmds/day | $0 - $5 |
-| **S3/R2** | File storage | Recommended | ✅ 10GB storage | $0 - $5 |
-| **Sentry** | Error tracking | Recommended | ✅ 5K errors/month | $0 - $29 |
+| Service    | Purpose          | Required?          | Free Tier          | Monthly Cost |
+| ---------- | ---------------- | ------------------ | ------------------ | ------------ |
+| **Redis**  | Cache & sessions | Highly Recommended | ✅ 10K cmds/day    | $0 - $5      |
+| **S3/R2**  | File storage     | Recommended        | ✅ 10GB storage    | $0 - $5      |
+| **Sentry** | Error tracking   | Recommended        | ✅ 5K errors/month | $0 - $29     |
 
 **Total estimated cost for small deployment: $0-10/month**
 
@@ -27,6 +27,7 @@ This will guide you through configuring all three services.
 ## 1. Redis Cache
 
 ### What It Does
+
 - Reduces database queries by 60-80%
 - Enables horizontal scaling
 - Token blacklist for security
@@ -35,12 +36,14 @@ This will guide you through configuring all three services.
 ### Recommended: Upstash (Free)
 
 **Why Upstash:**
+
 - ✅ Free tier: 10,000 commands/day
 - ✅ Global edge network
 - ✅ Serverless pricing
 - ✅ 5-minute setup
 
 **Setup:**
+
 1. Go to [upstash.com](https://upstash.com/)
 2. Create account and database
 3. Copy Redis URL
@@ -50,6 +53,7 @@ This will guide you through configuring all three services.
    ```
 
 **Alternative Providers:**
+
 - Redis Cloud: $0 (30MB)
 - AWS ElastiCache: ~$12/month
 - Local: Free (dev only)
@@ -61,6 +65,7 @@ This will guide you through configuring all three services.
 ## 2. Cloud Storage (S3 or R2)
 
 ### What It Does
+
 - Photo uploads
 - Document storage
 - Booking confirmations
@@ -69,12 +74,14 @@ This will guide you through configuring all three services.
 ### Recommended: Cloudflare R2 (Free)
 
 **Why R2:**
+
 - ✅ Free tier: 10GB storage
 - ✅ Zero egress fees (vs $45/month on S3)
 - ✅ S3-compatible API
 - ✅ 5-minute setup
 
 **Setup:**
+
 1. Go to [Cloudflare Dashboard](https://dash.cloudflare.com/)
 2. Navigate to R2 Object Storage
 3. Create bucket: `tripsync-uploads`
@@ -88,6 +95,7 @@ This will guide you through configuring all three services.
    ```
 
 **AWS S3 Alternative:**
+
 ```bash
 AWS_ACCESS_KEY_ID=AKIA...
 AWS_SECRET_ACCESS_KEY=...
@@ -96,6 +104,7 @@ AWS_REGION=us-east-1
 ```
 
 **Cost Comparison (500GB transfer):**
+
 - R2: $0.75 storage + $0 egress = **$0.75/month**
 - S3: $11.50 storage + $45 egress = **$56.50/month**
 
@@ -106,6 +115,7 @@ AWS_REGION=us-east-1
 ## 3. Sentry Error Tracking
 
 ### What It Does
+
 - Real-time error alerts
 - Performance monitoring
 - Full stack traces
@@ -114,6 +124,7 @@ AWS_REGION=us-east-1
 ### Setup: Sentry (Free)
 
 **Why Sentry:**
+
 - ✅ Free tier: 5,000 errors/month
 - ✅ Real-time alerts
 - ✅ Performance monitoring
@@ -121,6 +132,7 @@ AWS_REGION=us-east-1
 - ✅ 2-minute setup
 
 **Setup:**
+
 1. Go to [sentry.io/signup](https://sentry.io/signup/)
 2. Create project (select Node.js)
 3. Copy DSN
@@ -130,6 +142,7 @@ AWS_REGION=us-east-1
    ```
 
 **What's Included:**
+
 - Automatic error capture
 - Performance monitoring (10% sampling)
 - Security filtering (passwords, tokens removed)
@@ -149,6 +162,7 @@ npm run test:services
 ```
 
 This will verify:
+
 - ✅ Database connection
 - ✅ Redis connectivity and read/write
 - ✅ S3/R2 upload and delete
@@ -156,6 +170,7 @@ This will verify:
 - ✅ SMTP email (if configured)
 
 **Expected Output:**
+
 ```
 ╔═══════════════════════════════════════════╗
 ║  TripSync Service Configuration Test     ║
@@ -186,11 +201,13 @@ This will verify:
 ## Health Monitoring
 
 ### Basic Health Check
+
 ```bash
 curl http://localhost:3000/api/health
 ```
 
 Response:
+
 ```json
 {
   "ok": true,
@@ -199,11 +216,13 @@ Response:
 ```
 
 ### Detailed Health Check
+
 ```bash
 curl http://localhost:3000/api/health?detailed=true
 ```
 
 Response:
+
 ```json
 {
   "ok": true,
@@ -278,6 +297,7 @@ SENTRY_DSN=https://...@sentry.io/...
 ## Without These Services
 
 ### Without Redis
+
 - ✅ App works normally
 - ❌ Higher database load
 - ❌ Slower response times
@@ -285,6 +305,7 @@ SENTRY_DSN=https://...@sentry.io/...
 - ❌ In-memory cache (lost on restart)
 
 ### Without S3/R2
+
 - ✅ App works normally
 - ❌ Photo uploads disabled
 - ❌ Document uploads disabled
@@ -292,6 +313,7 @@ SENTRY_DSN=https://...@sentry.io/...
 - ❌ Mood board disabled
 
 ### Without Sentry
+
 - ✅ App works normally
 - ❌ No proactive error detection
 - ❌ Limited debugging info
@@ -303,6 +325,7 @@ SENTRY_DSN=https://...@sentry.io/...
 ## Cost Breakdown
 
 ### Minimal Setup (Recommended for Start)
+
 - Database: $25/month (Railway/Render)
 - Redis: **$0** (Upstash free tier)
 - Storage: **$0** (R2 free tier - first 10GB)
@@ -310,6 +333,7 @@ SENTRY_DSN=https://...@sentry.io/...
 - **Total: ~$25/month**
 
 ### Small Business Setup
+
 - Database: $25/month
 - Redis: $5/month (Upstash paid)
 - Storage: $1-5/month (R2 50GB)
@@ -317,6 +341,7 @@ SENTRY_DSN=https://...@sentry.io/...
 - **Total: ~$31-60/month**
 
 ### Growing Business
+
 - Database: $60/month
 - Redis: $10/month
 - Storage: $10/month (R2 200GB)
@@ -328,17 +353,20 @@ SENTRY_DSN=https://...@sentry.io/...
 ## Monitoring & Alerts
 
 ### Daily Checks (Automated)
+
 - Sentry dashboard for errors
 - Health endpoint monitoring
 - Uptime monitoring (UptimeRobot)
 
 ### Weekly Review
+
 - Redis memory usage
 - Storage usage and costs
 - Sentry error trends
 - Performance metrics
 
 ### Monthly Analysis
+
 - Cost optimization
 - Service utilization
 - Capacity planning
@@ -351,6 +379,7 @@ SENTRY_DSN=https://...@sentry.io/...
 ### Service Won't Connect
 
 1. **Check environment variables:**
+
    ```bash
    npm run test:services
    ```

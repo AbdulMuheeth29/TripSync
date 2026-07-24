@@ -1,8 +1,15 @@
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Lock, MapPin, Navigation, Sparkles, Check } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Lock, MapPin, Navigation, Sparkles, Check } from 'lucide-react';
 
 interface MapViewPaywallProps {
   isOpen: boolean;
@@ -11,19 +18,15 @@ interface MapViewPaywallProps {
 }
 
 const MAP_FEATURES = [
-  "Interactive map view of all trip activities",
-  "Real-time location sharing with your group",
-  "Directions to activities and accommodations",
-  "Nearby recommendations and points of interest",
-  "Custom map markers and route planning",
-  "Offline map access for your trip"
+  'Interactive map view of all trip activities',
+  'Real-time location sharing with your group',
+  'Directions to activities and accommodations',
+  'Nearby recommendations and points of interest',
+  'Custom map markers and route planning',
+  'Offline map access for your trip',
 ];
 
-export function MapViewPaywall({
-  isOpen,
-  onClose,
-  onUpgrade
-}: MapViewPaywallProps) {
+export function MapViewPaywall({ isOpen, onClose, onUpgrade }: MapViewPaywallProps) {
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-lg">
@@ -32,9 +35,7 @@ export function MapViewPaywall({
             <MapPin className="h-8 w-8 text-white" />
           </div>
           <div className="flex items-center justify-center gap-2 mb-2">
-            <DialogTitle className="text-center text-2xl">
-              Map View
-            </DialogTitle>
+            <DialogTitle className="text-center text-2xl">Map View</DialogTitle>
             <Badge className="bg-gradient-to-r from-blue-500 to-purple-600">
               <Sparkles className="h-3 w-3 mr-1" />
               Pro Feature
@@ -84,9 +85,7 @@ export function MapViewPaywall({
               <p className="text-3xl font-bold text-primary mb-1">
                 $4.99<span className="text-base font-normal text-muted-foreground">/month</span>
               </p>
-              <p className="text-xs text-muted-foreground">
-                14-day free trial • Cancel anytime
-              </p>
+              <p className="text-xs text-muted-foreground">14-day free trial • Cancel anytime</p>
             </div>
           </Card>
         </div>

@@ -1,6 +1,6 @@
-import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Calendar, Users, MapPin, TrendingUp, Clock } from "lucide-react";
+import { Card, CardContent } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Calendar, Users, MapPin, TrendingUp, Clock } from 'lucide-react';
 
 interface DashboardQuickStatsProps {
   totalTrips: number;
@@ -84,10 +84,13 @@ export function DashboardQuickStats({
                 <p className="text-3xl font-bold">
                   {upcomingDeparture.daysUntil}
                   <span className="text-base font-normal text-muted-foreground ml-1">
-                    {upcomingDeparture.daysUntil === 1 ? "day" : "days"}
+                    {upcomingDeparture.daysUntil === 1 ? 'day' : 'days'}
                   </span>
                 </p>
-                <p className="text-xs text-muted-foreground truncate" title={upcomingDeparture.tripTitle}>
+                <p
+                  className="text-xs text-muted-foreground truncate"
+                  title={upcomingDeparture.tripTitle}
+                >
                   {upcomingDeparture.tripTitle}
                 </p>
               </div>
@@ -113,23 +116,25 @@ export function DashboardQuickStats({
 }
 
 // Helper function to calculate stats from trips data
-export function calculateDashboardStats<T extends {
-  status: string;
-  startDate: string;
-  title: string | null;
-  destination: string;
-  members?: Array<{ userId: string }>;
-}>(trips: T[]) {
+export function calculateDashboardStats<
+  T extends {
+    status: string;
+    startDate: string;
+    title: string | null;
+    destination: string;
+    members?: Array<{ userId: string }>;
+  },
+>(trips: T[]) {
   const now = new Date();
 
   const totalTrips = trips.length;
-  const activeTrips = trips.filter(t => t.status === "active" || t.status === "booking").length;
-  const completedTrips = trips.filter(t => t.status === "completed").length;
+  const activeTrips = trips.filter((t) => t.status === 'active' || t.status === 'booking').length;
+  const completedTrips = trips.filter((t) => t.status === 'completed').length;
 
   // Calculate total unique members across all trips
   const allMemberIds = new Set<string>();
-  trips.forEach(trip => {
-    trip.members?.forEach(member => {
+  trips.forEach((trip) => {
+    trip.members?.forEach((member) => {
       allMemberIds.add(member.userId);
     });
   });
@@ -137,17 +142,25 @@ export function calculateDashboardStats<T extends {
 
   // Find upcoming departure
   const upcomingTrips = trips
-    .filter(t => {
+    .filter((t) => {
       const startDate = new Date(t.startDate);
-      return startDate > now && (t.status === "planning" || t.status === "booking" || t.status === "active");
+      return (
+        startDate > now &&
+        (t.status === 'planning' || t.status === 'booking' || t.status === 'active')
+      );
     })
     .sort((a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime());
 
-  const upcomingDeparture = upcomingTrips.length > 0 ? {
-    tripTitle: upcomingTrips[0].title || upcomingTrips[0].destination,
-    destination: upcomingTrips[0].destination,
-    daysUntil: Math.ceil((new Date(upcomingTrips[0].startDate).getTime() - now.getTime()) / (1000 * 60 * 60 * 24)),
-  } : null;
+  const upcomingDeparture =
+    upcomingTrips.length > 0
+      ? {
+          tripTitle: upcomingTrips[0].title || upcomingTrips[0].destination,
+          destination: upcomingTrips[0].destination,
+          daysUntil: Math.ceil(
+            (new Date(upcomingTrips[0].startDate).getTime() - now.getTime()) / (1000 * 60 * 60 * 24)
+          ),
+        }
+      : null;
 
   return {
     totalTrips,

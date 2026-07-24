@@ -158,7 +158,11 @@ export function clearUserContext(): void {
 /**
  * Add breadcrumb for debugging
  */
-export function addBreadcrumb(message: string, category?: string, data?: Record<string, any>): void {
+export function addBreadcrumb(
+  message: string,
+  category?: string,
+  data?: Record<string, any>
+): void {
   Sentry.addBreadcrumb({
     message,
     category,

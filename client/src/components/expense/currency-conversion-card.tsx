@@ -1,9 +1,16 @@
-import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
-import { ArrowRightLeft, TrendingUp, TrendingDown, RefreshCw, Clock, AlertCircle } from "lucide-react";
-import { format } from "date-fns";
+import { Card } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Separator } from '@/components/ui/separator';
+import {
+  ArrowRightLeft,
+  TrendingUp,
+  TrendingDown,
+  RefreshCw,
+  Clock,
+  AlertCircle,
+} from 'lucide-react';
+import { format } from 'date-fns';
 
 interface CurrencyConversionCardProps {
   fromAmount: number;
@@ -26,7 +33,7 @@ export function CurrencyConversionCard({
   onRefreshRate,
   isRefreshing = false,
   showTrend = true,
-  rateChange
+  rateChange,
 }: CurrencyConversionCardProps) {
   const toAmount = fromAmount * exchangeRate;
 
@@ -35,7 +42,7 @@ export function CurrencyConversionCard({
       style: 'currency',
       currency: currency,
       minimumFractionDigits: 2,
-      maximumFractionDigits: 2
+      maximumFractionDigits: 2,
     }).format(amount);
   };
 
@@ -46,7 +53,7 @@ export function CurrencyConversionCard({
     const now = new Date();
     const diffMinutes = Math.floor((now.getTime() - lastUpdated.getTime()) / (1000 * 60));
 
-    if (diffMinutes < 1) return "Just now";
+    if (diffMinutes < 1) return 'Just now';
     if (diffMinutes < 60) return `${diffMinutes}m ago`;
 
     const diffHours = Math.floor(diffMinutes / 60);
@@ -69,12 +76,7 @@ export function CurrencyConversionCard({
           </div>
 
           {onRefreshRate && (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={onRefreshRate}
-              disabled={isRefreshing}
-            >
+            <Button variant="outline" size="sm" onClick={onRefreshRate} disabled={isRefreshing}>
               <RefreshCw className={`h-4 w-4 mr-2 ${isRefreshing ? 'animate-spin' : ''}`} />
               Refresh
             </Button>
@@ -88,7 +90,9 @@ export function CurrencyConversionCard({
             <span className="text-sm text-muted-foreground">From</span>
             <div className="text-right">
               <p className="text-2xl font-bold">{formatCurrency(fromAmount, fromCurrency)}</p>
-              <Badge variant="outline" className="mt-1">{fromCurrency}</Badge>
+              <Badge variant="outline" className="mt-1">
+                {fromCurrency}
+              </Badge>
             </div>
           </div>
 
@@ -103,7 +107,9 @@ export function CurrencyConversionCard({
           <div className="flex items-center justify-between p-3 bg-primary/5 border-2 border-primary rounded-lg">
             <span className="text-sm text-muted-foreground">To</span>
             <div className="text-right">
-              <p className="text-2xl font-bold text-primary">{formatCurrency(toAmount, toCurrency)}</p>
+              <p className="text-2xl font-bold text-primary">
+                {formatCurrency(toAmount, toCurrency)}
+              </p>
               <Badge className="mt-1">{toCurrency}</Badge>
             </div>
           </div>
@@ -126,12 +132,17 @@ export function CurrencyConversionCard({
               <div className="flex items-center gap-1">
                 {isRateIncreasing && <TrendingUp className="h-4 w-4 text-green-600" />}
                 {isRateDecreasing && <TrendingDown className="h-4 w-4 text-red-600" />}
-                <span className={`font-medium ${
-                  isRateIncreasing ? 'text-green-600' :
-                  isRateDecreasing ? 'text-red-600' :
-                  'text-muted-foreground'
-                }`}>
-                  {rateChange > 0 ? '+' : ''}{rateChange.toFixed(2)}%
+                <span
+                  className={`font-medium ${
+                    isRateIncreasing
+                      ? 'text-green-600'
+                      : isRateDecreasing
+                        ? 'text-red-600'
+                        : 'text-muted-foreground'
+                  }`}
+                >
+                  {rateChange > 0 ? '+' : ''}
+                  {rateChange.toFixed(2)}%
                 </span>
               </div>
             </div>
@@ -142,7 +153,8 @@ export function CurrencyConversionCard({
         <Card className="p-3 bg-blue-50 border-blue-200">
           <p className="text-xs text-blue-900 mb-2 font-medium">Calculation</p>
           <p className="text-xs text-blue-800 font-mono">
-            {formatCurrency(fromAmount, fromCurrency)} × {exchangeRate.toFixed(4)} = {formatCurrency(toAmount, toCurrency)}
+            {formatCurrency(fromAmount, fromCurrency)} × {exchangeRate.toFixed(4)} ={' '}
+            {formatCurrency(toAmount, toCurrency)}
           </p>
         </Card>
 
@@ -151,8 +163,8 @@ export function CurrencyConversionCard({
           <div className="flex items-start gap-2">
             <AlertCircle className="h-4 w-4 text-muted-foreground mt-0.5" />
             <p className="text-xs text-muted-foreground">
-              <strong>Note:</strong> Exchange rates fluctuate constantly. The actual rate charged by your
-              bank or payment processor may differ slightly from this mid-market rate.
+              <strong>Note:</strong> Exchange rates fluctuate constantly. The actual rate charged by
+              your bank or payment processor may differ slightly from this mid-market rate.
             </p>
           </div>
         </Card>

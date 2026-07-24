@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from "react";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Card } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
-import { DollarSign, Percent } from "lucide-react";
+import React, { useState, useEffect } from 'react';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Card } from '@/components/ui/card';
+import { Separator } from '@/components/ui/separator';
+import { DollarSign, Percent } from 'lucide-react';
 
 interface TipTaxConfigProps {
   baseAmount: number;
@@ -12,11 +12,7 @@ interface TipTaxConfigProps {
   currency?: string;
 }
 
-export function TipTaxConfig({
-  baseAmount,
-  onTotalChange,
-  currency = "USD"
-}: TipTaxConfigProps) {
+export function TipTaxConfig({ baseAmount, onTotalChange, currency = 'USD' }: TipTaxConfigProps) {
   const [includeTip, setIncludeTip] = useState(false);
   const [tipPercentage, setTipPercentage] = useState(18);
   const [customTip, setCustomTip] = useState(false);
@@ -28,11 +24,15 @@ export function TipTaxConfig({
   const [customTaxAmount, setCustomTaxAmount] = useState(0);
 
   const tipAmount = includeTip
-    ? (customTip ? customTipAmount : (baseAmount * tipPercentage) / 100)
+    ? customTip
+      ? customTipAmount
+      : (baseAmount * tipPercentage) / 100
     : 0;
 
   const taxAmount = includeTax
-    ? (customTax ? customTaxAmount : (baseAmount * taxPercentage) / 100)
+    ? customTax
+      ? customTaxAmount
+      : (baseAmount * taxPercentage) / 100
     : 0;
 
   const totalAmount = baseAmount + tipAmount + taxAmount;
@@ -92,7 +92,7 @@ export function TipTaxConfig({
                   type="number"
                   min="0"
                   step="0.01"
-                  value={customTipAmount || ""}
+                  value={customTipAmount || ''}
                   onChange={(e) => setCustomTipAmount(parseFloat(e.target.value) || 0)}
                   placeholder="0.00"
                   className="w-32"
@@ -109,9 +109,7 @@ export function TipTaxConfig({
                   className="w-20"
                 />
                 <Percent className="h-4 w-4 text-muted-foreground" />
-                <span className="text-sm text-muted-foreground">
-                  = {formatCurrency(tipAmount)}
-                </span>
+                <span className="text-sm text-muted-foreground">= {formatCurrency(tipAmount)}</span>
               </div>
             )}
 
@@ -125,8 +123,8 @@ export function TipTaxConfig({
                     onClick={() => setTipPercentage(percent)}
                     className={`px-3 py-1 text-sm rounded border ${
                       tipPercentage === percent
-                        ? "bg-primary text-primary-foreground border-primary"
-                        : "bg-background hover:bg-muted"
+                        ? 'bg-primary text-primary-foreground border-primary'
+                        : 'bg-background hover:bg-muted'
                     }`}
                   >
                     {percent}%
@@ -173,7 +171,7 @@ export function TipTaxConfig({
                   type="number"
                   min="0"
                   step="0.01"
-                  value={customTaxAmount || ""}
+                  value={customTaxAmount || ''}
                   onChange={(e) => setCustomTaxAmount(parseFloat(e.target.value) || 0)}
                   placeholder="0.00"
                   className="w-32"
@@ -190,9 +188,7 @@ export function TipTaxConfig({
                   className="w-20"
                 />
                 <Percent className="h-4 w-4 text-muted-foreground" />
-                <span className="text-sm text-muted-foreground">
-                  = {formatCurrency(taxAmount)}
-                </span>
+                <span className="text-sm text-muted-foreground">= {formatCurrency(taxAmount)}</span>
               </div>
             )}
           </div>
@@ -209,17 +205,13 @@ export function TipTaxConfig({
         </div>
         {includeTip && (
           <div className="flex justify-between text-sm">
-            <span className="text-muted-foreground">
-              Tip {!customTip && `(${tipPercentage}%)`}
-            </span>
+            <span className="text-muted-foreground">Tip {!customTip && `(${tipPercentage}%)`}</span>
             <span>{formatCurrency(tipAmount)}</span>
           </div>
         )}
         {includeTax && (
           <div className="flex justify-between text-sm">
-            <span className="text-muted-foreground">
-              Tax {!customTax && `(${taxPercentage}%)`}
-            </span>
+            <span className="text-muted-foreground">Tax {!customTax && `(${taxPercentage}%)`}</span>
             <span>{formatCurrency(taxAmount)}</span>
           </div>
         )}

@@ -66,26 +66,23 @@ function getRateLimitKey(req: Request, keyPrefix: string): string {
  * Increment rate limit counter
  * Returns current count or null if operation failed
  */
-async function incrementRateLimit(
-  key: string,
-  windowSeconds: number
-): Promise<number | null> {
+async function incrementRateLimit(key: string, windowSeconds: number): Promise<number | null> {
   // Try Redis first
   if (cache.isEnabled()) {
     try {
       const count = await cache.incr(key, windowSeconds);
       return count;
     } catch (error) {
-      appLogger.error(
-        error instanceof Error ? error : new Error(String(error)),
-        { context: 'rate_limit_redis_incr', key }
-      );
+      appLogger.error(error instanceof Error ? error : new Error(String(error)), {
+        context: 'rate_limit_redis_incr',
+        key,
+      });
     }
   }
 
   // Fallback to in-memory store
   const now = Date.now();
-  const resetAt = now + (windowSeconds * 1000);
+  const resetAt = now + windowSeconds * 1000;
 
   const existing = inMemoryStore.get(key);
 
@@ -108,10 +105,10 @@ async function getRateLimitCount(key: string): Promise<number> {
       const value = await cache.get<string>(key);
       return value ? parseInt(value, 10) : 0;
     } catch (error) {
-      appLogger.error(
-        error instanceof Error ? error : new Error(String(error)),
-        { context: 'rate_limit_get_count', key }
-      );
+      appLogger.error(error instanceof Error ? error : new Error(String(error)), {
+        context: 'rate_limit_get_count',
+        key,
+      });
     }
   }
 
@@ -156,7 +153,7 @@ export function createRateLimiter(config: RateLimitConfig) {
         // Set rate limit headers
         res.setHeader('X-RateLimit-Limit', config.max);
         res.setHeader('X-RateLimit-Remaining', 0);
-        res.setHeader('X-RateLimit-Reset', Date.now() + (windowSeconds * 1000));
+        res.setHeader('X-RateLimit-Reset', Date.now() + windowSeconds * 1000);
         res.setHeader('Retry-After', retryAfter);
 
         appLogger.warn('Rate limit exceeded', {
@@ -187,7 +184,7 @@ export function createRateLimiter(config: RateLimitConfig) {
       const remaining = Math.max(0, config.max - count);
       res.setHeader('X-RateLimit-Limit', config.max);
       res.setHeader('X-RateLimit-Remaining', remaining);
-      res.setHeader('X-RateLimit-Reset', Date.now() + (windowSeconds * 1000));
+      res.setHeader('X-RateLimit-Reset', Date.now() + windowSeconds * 1000);
 
       // If this is a rate-limited request, reset counter on successful completion
       if (config.skipSuccessfulRequests) {
@@ -195,10 +192,9 @@ export function createRateLimiter(config: RateLimitConfig) {
         res.json = function (body: any) {
           if (res.statusCode < 400) {
             resetRateLimit(key).catch((error) => {
-              appLogger.error(
-                error instanceof Error ? error : new Error(String(error)),
-                { context: 'rate_limit_reset_on_success' }
-              );
+              appLogger.error(error instanceof Error ? error : new Error(String(error)), {
+                context: 'rate_limit_reset_on_success',
+              });
             });
           }
           return originalSend(body);
@@ -207,10 +203,10 @@ export function createRateLimiter(config: RateLimitConfig) {
 
       next();
     } catch (error) {
-      appLogger.error(
-        error instanceof Error ? error : new Error(String(error)),
-        { context: 'rate_limiter_middleware', path: req.path }
-      );
+      appLogger.error(error instanceof Error ? error : new Error(String(error)), {
+        context: 'rate_limiter_middleware',
+        path: req.path,
+      });
       // Don't block request if rate limiting fails
       next();
     }

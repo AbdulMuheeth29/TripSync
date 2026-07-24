@@ -1,16 +1,16 @@
-import { Card } from "@/components/ui/card";
-import { Sparkles } from "lucide-react";
+import { Card } from '@/components/ui/card';
+import { Sparkles } from 'lucide-react';
 
 interface AtlasTypingIndicatorProps {
   message?: string;
-  variant?: "default" | "compact";
+  variant?: 'default' | 'compact';
 }
 
 export function AtlasTypingIndicator({
-  message = "Atlas is thinking",
-  variant = "default"
+  message = 'Atlas is thinking',
+  variant = 'default',
 }: AtlasTypingIndicatorProps) {
-  if (variant === "compact") {
+  if (variant === 'compact') {
     return (
       <div className="flex items-center gap-2">
         <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-purple-600">

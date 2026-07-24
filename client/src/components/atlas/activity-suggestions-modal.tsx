@@ -1,11 +1,18 @@
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Sparkles, MapPin, Clock, DollarSign, Users, ThumbsUp, Calendar, Star } from "lucide-react";
-import { useState } from "react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Sparkles, MapPin, Clock, DollarSign, Users, ThumbsUp, Calendar, Star } from 'lucide-react';
+import { useState } from 'react';
 
 interface ActivitySuggestion {
   id: string;
@@ -17,8 +24,8 @@ interface ActivitySuggestion {
   estimatedCost: number;
   bestFor: string[];
   rating: number;
-  popularity: "trending" | "hidden_gem" | "must_see";
-  timeOfDay: "morning" | "afternoon" | "evening" | "any";
+  popularity: 'trending' | 'hidden_gem' | 'must_see';
+  timeOfDay: 'morning' | 'afternoon' | 'evening' | 'any';
 }
 
 interface ActivitySuggestionsModalProps {
@@ -31,10 +38,13 @@ interface ActivitySuggestionsModalProps {
   currency?: string;
 }
 
-const POPULARITY_LABELS: Record<ActivitySuggestion['popularity'], { label: string; color: string; icon: string }> = {
-  trending: { label: "Trending", color: "bg-orange-100 text-orange-800", icon: "🔥" },
-  hidden_gem: { label: "Hidden Gem", color: "bg-purple-100 text-purple-800", icon: "💎" },
-  must_see: { label: "Must-See", color: "bg-blue-100 text-blue-800", icon: "⭐" }
+const POPULARITY_LABELS: Record<
+  ActivitySuggestion['popularity'],
+  { label: string; color: string; icon: string }
+> = {
+  trending: { label: 'Trending', color: 'bg-orange-100 text-orange-800', icon: '🔥' },
+  hidden_gem: { label: 'Hidden Gem', color: 'bg-purple-100 text-purple-800', icon: '💎' },
+  must_see: { label: 'Must-See', color: 'bg-blue-100 text-blue-800', icon: '⭐' },
 };
 
 export function ActivitySuggestionsModal({
@@ -44,12 +54,12 @@ export function ActivitySuggestionsModal({
   destination,
   tripVibe,
   onAddToItinerary,
-  currency = "USD"
+  currency = 'USD',
 }: ActivitySuggestionsModalProps) {
   const [selectedActivities, setSelectedActivities] = useState<Set<string>>(new Set());
 
   const handleToggleActivity = (activityId: string) => {
-    setSelectedActivities(prev => {
+    setSelectedActivities((prev) => {
       const newSet = new Set(prev);
       if (newSet.has(activityId)) {
         newSet.delete(activityId);
@@ -61,7 +71,7 @@ export function ActivitySuggestionsModal({
   };
 
   const handleSelectAll = () => {
-    setSelectedActivities(new Set(suggestions.map(s => s.id)));
+    setSelectedActivities(new Set(suggestions.map((s) => s.id)));
   };
 
   const handleDeselectAll = () => {
@@ -78,7 +88,7 @@ export function ActivitySuggestionsModal({
       style: 'currency',
       currency: currency,
       minimumFractionDigits: 0,
-      maximumFractionDigits: 0
+      maximumFractionDigits: 0,
     }).format(amount);
   };
 
@@ -121,8 +131,8 @@ export function ActivitySuggestionsModal({
               <div>
                 <p className="text-sm font-medium text-primary mb-1">Atlas AI Insight</p>
                 <p className="text-sm text-muted-foreground">
-                  These activities are curated based on your {tripVibe || "trip"} preferences, group size, and budget.
-                  Select the ones you like and I'll add them to your itinerary.
+                  These activities are curated based on your {tripVibe || 'trip'} preferences, group
+                  size, and budget. Select the ones you like and I'll add them to your itinerary.
                 </p>
               </div>
             </div>
@@ -139,7 +149,9 @@ export function ActivitySuggestionsModal({
                   <Card
                     key={activity.id}
                     className={`p-4 cursor-pointer transition-all ${
-                      isSelected ? "border-primary border-2 bg-primary/5" : "hover:border-primary/50"
+                      isSelected
+                        ? 'border-primary border-2 bg-primary/5'
+                        : 'hover:border-primary/50'
                     }`}
                     onClick={() => handleToggleActivity(activity.id)}
                   >
@@ -163,7 +175,9 @@ export function ActivitySuggestionsModal({
                         <div className="flex items-center gap-3 mb-2">
                           <div className="flex items-center gap-1">
                             <Star className="h-4 w-4 fill-amber-400 text-amber-400" />
-                            <span className="text-sm font-medium">{activity.rating.toFixed(1)}</span>
+                            <span className="text-sm font-medium">
+                              {activity.rating.toFixed(1)}
+                            </span>
                           </div>
                           <Badge variant="outline" className="text-xs">
                             {activity.category}
@@ -171,9 +185,7 @@ export function ActivitySuggestionsModal({
                         </div>
 
                         {/* Description */}
-                        <p className="text-sm text-muted-foreground mb-3">
-                          {activity.description}
-                        </p>
+                        <p className="text-sm text-muted-foreground mb-3">{activity.description}</p>
 
                         {/* Details Grid */}
                         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
@@ -197,7 +209,9 @@ export function ActivitySuggestionsModal({
                             <DollarSign className="h-4 w-4 text-muted-foreground" />
                             <div>
                               <p className="text-xs text-muted-foreground">Est. Cost</p>
-                              <p className="text-sm font-medium">{formatCurrency(activity.estimatedCost)}</p>
+                              <p className="text-sm font-medium">
+                                {formatCurrency(activity.estimatedCost)}
+                              </p>
                             </div>
                           </div>
 
@@ -236,12 +250,14 @@ export function ActivitySuggestionsModal({
                   <ThumbsUp className="h-5 w-5 text-green-600" />
                   <div>
                     <p className="text-sm font-medium text-green-900">
-                      {selectedActivities.size} {selectedActivities.size === 1 ? 'activity' : 'activities'} selected
+                      {selectedActivities.size}{' '}
+                      {selectedActivities.size === 1 ? 'activity' : 'activities'} selected
                     </p>
                     <p className="text-xs text-green-700">
-                      Estimated total: {formatCurrency(
+                      Estimated total:{' '}
+                      {formatCurrency(
                         suggestions
-                          .filter(s => selectedActivities.has(s.id))
+                          .filter((s) => selectedActivities.has(s.id))
                           .reduce((sum, s) => sum + s.estimatedCost, 0)
                       )}
                     </p>
@@ -256,10 +272,7 @@ export function ActivitySuggestionsModal({
           <Button variant="outline" onClick={onClose}>
             Maybe Later
           </Button>
-          <Button
-            onClick={handleAddSelected}
-            disabled={selectedActivities.size === 0}
-          >
+          <Button onClick={handleAddSelected} disabled={selectedActivities.size === 0}>
             <Calendar className="h-4 w-4 mr-2" />
             Add {selectedActivities.size > 0 ? `${selectedActivities.size}` : ''} to Itinerary
           </Button>

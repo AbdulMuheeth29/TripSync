@@ -1,4 +1,5 @@
 # TripSync End-to-End Test Report
+
 **Comprehensive UI/UX Assessment & Backend Readiness Check**
 
 **Test Date**: February 24, 2026
@@ -12,6 +13,7 @@
 ### Overall Status: **95% Ready** ✅
 
 **Key Findings:**
+
 - ✅ **Backend**: Fully implemented with 40+ API endpoints, Stripe integration, subscription gates
 - ✅ **Frontend**: 81 files, 12 pages, 50+ UI components built
 - ✅ **Core Features**: Trip planning, AI generation, voting, expenses, chat all functional
@@ -43,6 +45,7 @@ You can begin backend/middleware setup immediately. The missing UI items are non
 ## Test Methodology
 
 ### Scope
+
 - ✅ All pages reviewed (12 total)
 - ✅ All user flows mapped
 - ✅ Backend API endpoints audited (40+)
@@ -52,6 +55,7 @@ You can begin backend/middleware setup immediately. The missing UI items are non
 - ✅ Subscription system verified
 
 ### Test Approach
+
 1. **Page-by-Page Analysis**: Review each route for functionality
 2. **User Flow Testing**: Trace key user journeys end-to-end
 3. **API Coverage Check**: Verify frontend/backend alignment
@@ -64,20 +68,20 @@ You can begin backend/middleware setup immediately. The missing UI items are non
 
 ### ✅ Implemented Pages (12 total)
 
-| Page | Route | Status | Backend API | Auth | Notes |
-|------|-------|--------|-------------|------|-------|
-| **Landing** | `/` | ✅ Complete | N/A | Public | Hero, features, how-it-works, CTA |
-| **Login** | `/login` | ✅ Complete | `/api/auth/login`, `/api/auth/register` | Public | Login/Register tabs, password strength |
-| **Pricing** | `/pricing` | ✅ Complete | `/api/stripe/checkout` | Public | Annual/monthly toggle, comparison table |
-| **Dashboard** | `/dashboard` | ✅ Complete | `/api/trips` | Protected | Trip cards, create button, AI insights |
-| **Create Trip** | `/create` | ✅ Complete | `/api/trips` (POST) | Protected | 5-step wizard with progress |
-| **Trip Detail** | `/trip/:id` | ✅ Complete | `/api/trips/:id` | Protected | Itinerary, voting, chat, expenses, photos |
-| **Join Trip** | `/join/:code` | ✅ Complete | `/api/trips/join/:code` | Public | Public join via share code |
-| **Invite Respond** | `/invite/:inviteId` | ✅ Complete | `/api/invites/:inviteId/respond` | Public | Accept/decline email invites |
-| **Billing** | `/dashboard/billing` | ✅ Complete | `/api/stripe/portal` | Protected | Subscription management, Stripe portal |
-| **Contact** | `/contact` | ✅ Complete | `/api/contact` | Public | Contact form with validation |
-| **Forgot Password** | `/forgot-password` | ✅ Complete | `/api/auth/forgot-password` | Public | Password reset flow |
-| **404** | `*` | ✅ Complete | N/A | All | Not found page |
+| Page                | Route                | Status      | Backend API                             | Auth      | Notes                                     |
+| ------------------- | -------------------- | ----------- | --------------------------------------- | --------- | ----------------------------------------- |
+| **Landing**         | `/`                  | ✅ Complete | N/A                                     | Public    | Hero, features, how-it-works, CTA         |
+| **Login**           | `/login`             | ✅ Complete | `/api/auth/login`, `/api/auth/register` | Public    | Login/Register tabs, password strength    |
+| **Pricing**         | `/pricing`           | ✅ Complete | `/api/stripe/checkout`                  | Public    | Annual/monthly toggle, comparison table   |
+| **Dashboard**       | `/dashboard`         | ✅ Complete | `/api/trips`                            | Protected | Trip cards, create button, AI insights    |
+| **Create Trip**     | `/create`            | ✅ Complete | `/api/trips` (POST)                     | Protected | 5-step wizard with progress               |
+| **Trip Detail**     | `/trip/:id`          | ✅ Complete | `/api/trips/:id`                        | Protected | Itinerary, voting, chat, expenses, photos |
+| **Join Trip**       | `/join/:code`        | ✅ Complete | `/api/trips/join/:code`                 | Public    | Public join via share code                |
+| **Invite Respond**  | `/invite/:inviteId`  | ✅ Complete | `/api/invites/:inviteId/respond`        | Public    | Accept/decline email invites              |
+| **Billing**         | `/dashboard/billing` | ✅ Complete | `/api/stripe/portal`                    | Protected | Subscription management, Stripe portal    |
+| **Contact**         | `/contact`           | ✅ Complete | `/api/contact`                          | Public    | Contact form with validation              |
+| **Forgot Password** | `/forgot-password`   | ✅ Complete | `/api/auth/forgot-password`             | Public    | Password reset flow                       |
+| **404**             | `*`                  | ✅ Complete | N/A                                     | All       | Not found page                            |
 
 **Score: 12/12 pages (100%)**
 
@@ -85,11 +89,11 @@ You can begin backend/middleware setup immediately. The missing UI items are non
 
 ### ❌ Missing Pages (Critical)
 
-| Page | Route | Priority | Why Needed | Effort |
-|------|-------|----------|------------|--------|
-| **Privacy Policy** | `/privacy` | 🔴 CRITICAL | Legal requirement (GDPR, CCPA) | 2 hours |
-| **Terms of Service** | `/terms` | 🔴 CRITICAL | Legal requirement, protects business | 2 hours |
-| **Cookie Policy** | `/cookies` | 🟡 MEDIUM | GDPR requirement | 1 hour |
+| Page                 | Route      | Priority    | Why Needed                           | Effort  |
+| -------------------- | ---------- | ----------- | ------------------------------------ | ------- |
+| **Privacy Policy**   | `/privacy` | 🔴 CRITICAL | Legal requirement (GDPR, CCPA)       | 2 hours |
+| **Terms of Service** | `/terms`   | 🔴 CRITICAL | Legal requirement, protects business | 2 hours |
+| **Cookie Policy**    | `/cookies` | 🟡 MEDIUM   | GDPR requirement                     | 1 hour  |
 
 **Missing: 3 legal pages (CRITICAL before accepting payments)**
 
@@ -100,6 +104,7 @@ You can begin backend/middleware setup immediately. The missing UI items are non
 ### ✅ Implemented API Endpoints (40+)
 
 #### Authentication (5 endpoints)
+
 - ✅ `POST /api/auth/register` - User registration
 - ✅ `POST /api/auth/login` - User login
 - ✅ `POST /api/auth/quick-login` - Quick auth (for demos)
@@ -107,12 +112,14 @@ You can begin backend/middleware setup immediately. The missing UI items are non
 - ✅ `POST /api/auth/forgot-password` - Password reset
 
 #### Subscriptions (4 endpoints)
+
 - ✅ `GET /api/subscription/status` - Check subscription tier
 - ✅ `POST /api/stripe/checkout` - Create Stripe checkout session
 - ✅ `POST /api/stripe/portal` - Open billing portal
 - ✅ `POST /api/stripe/webhook` - Handle Stripe events
 
 #### Trips (7 endpoints)
+
 - ✅ `GET /api/trips` - List user's trips
 - ✅ `POST /api/trips` - Create new trip (with AI generation)
 - ✅ `GET /api/trips/:id` - Get trip details
@@ -122,6 +129,7 @@ You can begin backend/middleware setup immediately. The missing UI items are non
 - ✅ `POST /api/trips/join/:code` - Join trip via share code
 
 #### Itinerary (5 endpoints)
+
 - ✅ `POST /api/trips/:tripId/itinerary/reorder` - Drag-and-drop reorder
 - ✅ `POST /api/trips/:tripId/items` - Add itinerary item
 - ✅ `PATCH /api/trips/:tripId/items/:itemId` - Update item
@@ -129,33 +137,39 @@ You can begin backend/middleware setup immediately. The missing UI items are non
 - ✅ `POST /api/trips/:tripId/items/:itemId/comments` - Comment on item
 
 #### Expenses (3 endpoints)
+
 - ✅ `POST /api/trips/:tripId/expenses` - Add expense
 - ✅ `PATCH /api/trips/:tripId/expenses/:expenseId` - Update expense
 - ✅ `DELETE /api/trips/:tripId/expenses/:expenseId` - Delete expense
 
 #### Invites (3 endpoints)
+
 - ✅ `POST /api/trips/:id/invites` - Send email invite
 - ✅ `GET /api/invites/:inviteId` - Get invite details
 - ✅ `POST /api/invites/:inviteId/respond` - Accept/decline invite
 
 #### Chat & Photos (4 endpoints)
+
 - ✅ `POST /api/trips/:tripId/chat` - Send chat message
 - ✅ `POST /api/trips/:tripId/photos` - Upload photo
 - ✅ `PATCH /api/trips/:tripId/photos/:photoId` - Update photo caption
 - ✅ `DELETE /api/trips/:tripId/photos/:photoId` - Delete photo
 
 #### AI Features (4 endpoints)
+
 - ✅ `POST /api/trips/:tripId/budget-optimize` - AI budget suggestions
 - ✅ `POST /api/trips/:tripId/converse` - AI trip concierge chat
 - ✅ `POST /api/trips/:tripId/generate-packing-list` - AI packing list
 - ✅ `POST /api/trips/:tripId/generate-recap` - AI trip summary
 
 #### Location & Push (3 endpoints)
+
 - ✅ `PUT /api/trips/:tripId/location` - Update real-time location
 - ✅ `GET /api/push/vapid-public` - Get VAPID public key
 - ✅ `POST /api/trips/:tripId/push/subscribe` - Subscribe to push notifications
 
 #### Other (2 endpoints)
+
 - ✅ `GET /api/health` - Health check
 - ✅ `POST /api/contact` - Contact form submission
 
@@ -166,6 +180,7 @@ You can begin backend/middleware setup immediately. The missing UI items are non
 ### ✅ Backend Features Implemented
 
 #### Database Schema
+
 - ✅ Users table (with subscription fields)
 - ✅ Subscriptions table (Stripe integration)
 - ✅ Trips table
@@ -185,6 +200,7 @@ You can begin backend/middleware setup immediately. The missing UI items are non
 **Total: 15 tables**
 
 #### Middleware & Security
+
 - ✅ JWT authentication (`requireAuth`)
 - ✅ Trip access control (`requireTripAccess`)
 - ✅ Role-based access (`requirePlanner`, `requireOrganizer`)
@@ -197,6 +213,7 @@ You can begin backend/middleware setup immediately. The missing UI items are non
 - ✅ HTTPS enforcement
 
 #### Third-Party Integrations
+
 - ✅ Stripe (payments, webhooks, portal)
 - ✅ Anthropic Claude (AI generation)
 - ✅ AWS S3 / Cloudflare R2 (file uploads)
@@ -213,24 +230,28 @@ You can begin backend/middleware setup immediately. The missing UI items are non
 ### 🔴 CRITICAL (Must Have Before Launch)
 
 #### 1. **Privacy Policy Page** (2 hours)
+
 - **Route**: `/privacy`
 - **Why**: Legal requirement (GDPR, CCPA, CalOPPA)
 - **Content**: Generated via Termly (see LEGAL-DOCUMENTS-GUIDE.md)
 - **Status**: Not implemented
 
 #### 2. **Terms of Service Page** (2 hours)
+
 - **Route**: `/terms`
 - **Why**: Legal requirement, protects business from liability
 - **Content**: Generated via Termly
 - **Status**: Not implemented
 
 #### 3. **Cookie Consent Banner** (3 hours)
+
 - **Component**: `<CookieBanner />`
 - **Why**: GDPR requirement (EU users must opt-in)
 - **Implementation**: CookieYes, Termly, or custom
 - **Status**: Not implemented
 
 #### 4. **Terms Acceptance Checkbox** (1 hour)
+
 - **Location**: Login/Register page
 - **Text**: "I agree to the Terms of Service and Privacy Policy"
 - **Required**: Must be checked before registration
@@ -243,28 +264,33 @@ You can begin backend/middleware setup immediately. The missing UI items are non
 ### 🟡 IMPORTANT (Should Have Soon)
 
 #### 5. **Account Deletion Flow** (2 hours)
+
 - **Location**: Settings/Billing page
 - **Why**: GDPR right to erasure
 - **Flow**: Confirm → soft delete → hard delete after 30 days
 - **Status**: Backend exists, UI missing
 
 #### 6. **Data Export Feature** (2 hours)
+
 - **Location**: Settings page
 - **Why**: GDPR right to data portability
 - **Flow**: Click "Download My Data" → export JSON
 - **Status**: Backend exists, button missing
 
 #### 7. **Settings Page** (3 hours)
+
 - **Route**: `/settings`
 - **Includes**: Profile, email preferences, privacy, account deletion
 - **Status**: Not implemented (using `/dashboard/billing` instead)
 
 #### 8. **Onboarding Tour** (2 hours)
+
 - **Component**: Already exists (`onboarding-tour.tsx`)
 - **Status**: Built but not integrated
 - **Action**: Add to Dashboard first visit
 
 #### 9. **Empty State Illustrations** (1 hour)
+
 - **Location**: Dashboard (no trips), trip detail (no expenses)
 - **Current**: Plain text only
 - **Needed**: Custom illustrations or Lottie animations
@@ -277,26 +303,31 @@ You can begin backend/middleware setup immediately. The missing UI items are non
 ### 🟢 NICE TO HAVE (Can Wait)
 
 #### 10. **Loading Skeletons** (2 hours)
+
 - **Status**: Partially implemented
 - **Missing**: Some async content still shows blank
 - **Action**: Add skeletons everywhere
 
 #### 11. **Error Boundaries** (1 hour)
+
 - **Status**: React error boundaries needed
 - **Missing**: App crashes if component errors
 - **Action**: Wrap routes in error boundary
 
 #### 12. **Toast Notifications Polish** (1 hour)
+
 - **Status**: Working but inconsistent
 - **Missing**: Success/error toasts on all actions
 - **Action**: Standardize toast messages
 
 #### 13. **Keyboard Shortcuts** (1 hour)
+
 - **Status**: Command palette exists but not everywhere
 - **Missing**: Keyboard nav on modals, forms
 - **Action**: Add aria-labels, keyboard handlers
 
 #### 14. **Accessibility Audit** (2 hours)
+
 - **Status**: Radix UI provides basics
 - **Missing**: Full WCAG 2.1 AA compliance
 - **Action**: Run Lighthouse, fix issues
@@ -309,44 +340,45 @@ You can begin backend/middleware setup immediately. The missing UI items are non
 
 ### Core Features Status
 
-| Feature | Backend | Frontend | Integration | Status |
-|---------|---------|----------|-------------|--------|
-| **User Registration** | ✅ | ✅ | ✅ | 100% |
-| **Login/Logout** | ✅ | ✅ | ✅ | 100% |
-| **Password Reset** | ✅ | ✅ | ✅ | 100% |
-| **Trip Creation Wizard** | ✅ | ✅ | ✅ | 100% |
-| **AI Itinerary Generation** | ✅ | ✅ | ✅ | 100% |
-| **Trip Dashboard** | ✅ | ✅ | ✅ | 100% |
-| **Trip Detail Page** | ✅ | ✅ | ✅ | 100% |
-| **Voting System** | ✅ | ✅ | ✅ | 100% |
-| **Comments** | ✅ | ✅ | ✅ | 100% |
-| **Group Chat** | ✅ | ✅ | ✅ | 100% |
-| **Expense Tracking** | ✅ | ✅ | ✅ | 100% |
-| **Expense Splitting** | ✅ | ✅ | ✅ | 100% |
-| **Photo Uploads** | ✅ | ✅ | ✅ | 100% |
-| **Email Invites** | ✅ | ✅ | ✅ | 100% |
-| **Share Link Join** | ✅ | ✅ | ✅ | 100% |
-| **Real-time Location** | ✅ | ✅ | ✅ | 100% |
-| **Weather Forecasts** | ✅ | ✅ | ✅ | 100% |
-| **Push Notifications** | ✅ | ✅ | ✅ | 100% |
-| **Subscription (Free)** | ✅ | ✅ | ✅ | 100% |
-| **Subscription (Pro)** | ✅ | ✅ | ✅ | 100% |
-| **Stripe Checkout** | ✅ | ✅ | ✅ | 100% |
-| **Stripe Webhooks** | ✅ | N/A | ✅ | 100% |
-| **Billing Portal** | ✅ | ✅ | ✅ | 100% |
-| **Usage Limits (Free)** | ✅ | ✅ | ✅ | 100% |
-| **Drag-and-Drop Reorder** | ✅ | ✅ | ✅ | 100% |
-| **AI Budget Optimizer** | ✅ | ✅ | ✅ | 100% |
-| **AI Trip Concierge** | ✅ | ✅ | ✅ | 100% |
-| **AI Packing List** | ✅ | ✅ | ✅ | 100% |
-| **AI Trip Recap** | ✅ | ✅ | ✅ | 100% |
-| **Privacy Policy** | N/A | ❌ | ❌ | 0% |
-| **Terms of Service** | N/A | ❌ | ❌ | 0% |
-| **Cookie Banner** | N/A | ❌ | ❌ | 0% |
-| **Account Deletion UI** | ✅ | ⚠️ | 50% | 50% |
-| **Data Export UI** | ✅ | ⚠️ | 50% | 50% |
+| Feature                     | Backend | Frontend | Integration | Status |
+| --------------------------- | ------- | -------- | ----------- | ------ |
+| **User Registration**       | ✅      | ✅       | ✅          | 100%   |
+| **Login/Logout**            | ✅      | ✅       | ✅          | 100%   |
+| **Password Reset**          | ✅      | ✅       | ✅          | 100%   |
+| **Trip Creation Wizard**    | ✅      | ✅       | ✅          | 100%   |
+| **AI Itinerary Generation** | ✅      | ✅       | ✅          | 100%   |
+| **Trip Dashboard**          | ✅      | ✅       | ✅          | 100%   |
+| **Trip Detail Page**        | ✅      | ✅       | ✅          | 100%   |
+| **Voting System**           | ✅      | ✅       | ✅          | 100%   |
+| **Comments**                | ✅      | ✅       | ✅          | 100%   |
+| **Group Chat**              | ✅      | ✅       | ✅          | 100%   |
+| **Expense Tracking**        | ✅      | ✅       | ✅          | 100%   |
+| **Expense Splitting**       | ✅      | ✅       | ✅          | 100%   |
+| **Photo Uploads**           | ✅      | ✅       | ✅          | 100%   |
+| **Email Invites**           | ✅      | ✅       | ✅          | 100%   |
+| **Share Link Join**         | ✅      | ✅       | ✅          | 100%   |
+| **Real-time Location**      | ✅      | ✅       | ✅          | 100%   |
+| **Weather Forecasts**       | ✅      | ✅       | ✅          | 100%   |
+| **Push Notifications**      | ✅      | ✅       | ✅          | 100%   |
+| **Subscription (Free)**     | ✅      | ✅       | ✅          | 100%   |
+| **Subscription (Pro)**      | ✅      | ✅       | ✅          | 100%   |
+| **Stripe Checkout**         | ✅      | ✅       | ✅          | 100%   |
+| **Stripe Webhooks**         | ✅      | N/A      | ✅          | 100%   |
+| **Billing Portal**          | ✅      | ✅       | ✅          | 100%   |
+| **Usage Limits (Free)**     | ✅      | ✅       | ✅          | 100%   |
+| **Drag-and-Drop Reorder**   | ✅      | ✅       | ✅          | 100%   |
+| **AI Budget Optimizer**     | ✅      | ✅       | ✅          | 100%   |
+| **AI Trip Concierge**       | ✅      | ✅       | ✅          | 100%   |
+| **AI Packing List**         | ✅      | ✅       | ✅          | 100%   |
+| **AI Trip Recap**           | ✅      | ✅       | ✅          | 100%   |
+| **Privacy Policy**          | N/A     | ❌       | ❌          | 0%     |
+| **Terms of Service**        | N/A     | ❌       | ❌          | 0%     |
+| **Cookie Banner**           | N/A     | ❌       | ❌          | 0%     |
+| **Account Deletion UI**     | ✅      | ⚠️       | 50%         | 50%    |
+| **Data Export UI**          | ✅      | ⚠️       | 50%         | 50%    |
 
 **Overall Feature Completeness: 90%**
+
 - Core product features: 100% ✅
 - Legal/compliance: 40% ⚠️
 - Settings/account: 70% ⚠️
@@ -358,6 +390,7 @@ You can begin backend/middleware setup immediately. The missing UI items are non
 ### ✅ Production-Ready Components
 
 #### Infrastructure
+
 - ✅ **Database**: PostgreSQL with Drizzle ORM
 - ✅ **Migrations**: Auto-run on startup
 - ✅ **Health check**: `/api/health` endpoint
@@ -366,6 +399,7 @@ You can begin backend/middleware setup immediately. The missing UI items are non
 - ✅ **Error handling**: Global error middleware
 
 #### Security
+
 - ✅ **Authentication**: JWT with 7-day expiration
 - ✅ **Authorization**: Role-based access control
 - ✅ **Password hashing**: bcrypt
@@ -376,18 +410,21 @@ You can begin backend/middleware setup immediately. The missing UI items are non
 - ✅ **SQL injection**: Drizzle ORM prevents
 
 #### Payments
+
 - ✅ **Stripe integration**: Checkout, webhooks, portal
 - ✅ **Subscription management**: Create, update, cancel
 - ✅ **Webhook handling**: Secure signature verification
 - ✅ **Usage gates**: Free tier limits enforced
 
 #### Third-Party Services
+
 - ✅ **Anthropic Claude**: AI generation with error handling
 - ✅ **S3/R2**: File uploads with presigned URLs
 - ✅ **Email**: Nodemailer configured (needs SMTP)
 - ✅ **Push**: VAPID keys, service worker
 
 #### Deployment
+
 - ✅ **Docker**: Dockerfile + multi-stage build
 - ✅ **Build script**: `npm run build`
 - ✅ **Start script**: `npm start`
@@ -402,6 +439,7 @@ You can begin backend/middleware setup immediately. The missing UI items are non
 #### Required Environment Variables
 
 **CRITICAL (App won't work without these)**:
+
 ```bash
 # Database
 DATABASE_URL=postgresql://user:password@host:5432/tripsync
@@ -421,6 +459,7 @@ HOST=0.0.0.0
 ```
 
 **OPTIONAL (App works without, features degraded)**:
+
 ```bash
 # AI Features
 AI_INTEGRATIONS_ANTHROPIC_API_KEY=sk-ant-...
@@ -447,11 +486,13 @@ ADMIN_EMAILS=admin@tripsync.app
 #### Pre-Launch Tasks
 
 **Database**:
+
 - [ ] Create PostgreSQL database
 - [ ] Run migrations: `npm run db:push`
 - [ ] Test connection
 
 **Stripe**:
+
 - [ ] Create Stripe account
 - [ ] Create products (Free, Pro $39/yr, Teams $89/yr)
 - [ ] Get API keys
@@ -459,16 +500,19 @@ ADMIN_EMAILS=admin@tripsync.app
 - [ ] Test checkout flow
 
 **Domain & SSL**:
+
 - [ ] Purchase domain (tripsync.app)
 - [ ] Configure DNS
 - [ ] Enable HTTPS (Let's Encrypt or hosting provider)
 
 **Email**:
+
 - [ ] Set up SMTP (Gmail, SendGrid, AWS SES)
 - [ ] Test email delivery
 - [ ] Configure SPF, DKIM, DMARC
 
 **Monitoring**:
+
 - [ ] Set up error tracking (Sentry)
 - [ ] Set up uptime monitoring (UptimeRobot)
 - [ ] Set up analytics (Google Analytics, Plausible)
@@ -486,8 +530,10 @@ ADMIN_EMAILS=admin@tripsync.app
 ### 🟡 HIGH PRIORITY (Fix in Week 1)
 
 #### 1. **Add Legal Pages** (6 hours)
+
 **Why**: Required by law (GDPR, CCPA, CalOPPA)
 **Tasks**:
+
 - [ ] Generate Privacy Policy using Termly
 - [ ] Generate Terms of Service using Termly
 - [ ] Create `/privacy` page component
@@ -497,16 +543,20 @@ ADMIN_EMAILS=admin@tripsync.app
 - [ ] Add terms acceptance checkbox to signup
 
 #### 2. **Complete Account Management** (3 hours)
+
 **Why**: GDPR compliance, user rights
 **Tasks**:
+
 - [ ] Add "Download My Data" button to billing page
 - [ ] Add "Delete Account" button to billing page
 - [ ] Implement soft delete confirmation dialog
 - [ ] Add 30-day recovery period notice
 
 #### 3. **Add Missing Error Handling** (2 hours)
+
 **Why**: Improve user experience
 **Tasks**:
+
 - [ ] Add error boundaries to all routes
 - [ ] Add fallback UI for errors
 - [ ] Add retry mechanisms for failed API calls
@@ -521,22 +571,26 @@ ADMIN_EMAILS=admin@tripsync.app
 ### 🟢 LOW PRIORITY (Post-Launch)
 
 #### 1. **Enhanced Onboarding** (3 hours)
+
 - [ ] Integrate existing onboarding tour component
 - [ ] Show on first visit to dashboard
 - [ ] Highlight key features (create trip, invite, vote)
 - [ ] Add dismissible tooltips
 
 #### 2. **Better Empty States** (2 hours)
+
 - [ ] Add custom illustrations (unDraw, Humaaans)
 - [ ] Add Lottie animations
 - [ ] Improve empty state copy
 
 #### 3. **Loading State Polish** (2 hours)
+
 - [ ] Add skeleton screens everywhere
 - [ ] Add optimistic UI updates
 - [ ] Improve perceived performance
 
 #### 4. **Accessibility Improvements** (3 hours)
+
 - [ ] Run Lighthouse audit
 - [ ] Fix color contrast issues
 - [ ] Add aria-labels everywhere
@@ -544,6 +598,7 @@ ADMIN_EMAILS=admin@tripsync.app
 - [ ] Improve keyboard navigation
 
 #### 5. **Performance Optimization** (2 hours)
+
 - [ ] Add React.lazy for code splitting
 - [ ] Optimize images (WebP, lazy load)
 - [ ] Add service worker for caching
@@ -556,6 +611,7 @@ ADMIN_EMAILS=admin@tripsync.app
 ## Implementation Priority
 
 ### Phase 1: Legal Compliance (BEFORE LAUNCH) 🔴
+
 **Timeline**: 1-2 days (8-12 hours)
 **Blocking**: YES - Cannot accept payments without legal docs
 
@@ -574,6 +630,7 @@ ADMIN_EMAILS=admin@tripsync.app
 ---
 
 ### Phase 2: Account Management (BEFORE LAUNCH) 🟡
+
 **Timeline**: 1 day (4-6 hours)
 **Blocking**: Partial - GDPR requires deletion/export
 
@@ -589,6 +646,7 @@ ADMIN_EMAILS=admin@tripsync.app
 ---
 
 ### Phase 3: Backend Setup & Testing (Week 1) ✅
+
 **Timeline**: 2-3 days (Start NOW)
 **Blocking**: NO - Can run in parallel with UI fixes
 
@@ -607,6 +665,7 @@ ADMIN_EMAILS=admin@tripsync.app
 ---
 
 ### Phase 4: Production Deployment (Week 2) 🚀
+
 **Timeline**: 1-2 days
 
 1. Set up production database - 1 hour
@@ -622,6 +681,7 @@ ADMIN_EMAILS=admin@tripsync.app
 ---
 
 ### Phase 5: Polish & Optimization (Week 3-4) 🎨
+
 **Timeline**: 1 week
 
 1. Add onboarding tour - 3 hours
@@ -640,6 +700,7 @@ ADMIN_EMAILS=admin@tripsync.app
 ### Pre-Launch (Must Complete)
 
 **Legal & Compliance**:
+
 - [ ] Privacy Policy published at `/privacy`
 - [ ] Terms of Service published at `/terms`
 - [ ] Cookie consent banner implemented
@@ -649,6 +710,7 @@ ADMIN_EMAILS=admin@tripsync.app
 - [ ] GDPR account deletion feature
 
 **Backend**:
+
 - [ ] PostgreSQL database provisioned
 - [ ] Migrations run successfully
 - [ ] JWT_SECRET generated and set
@@ -660,6 +722,7 @@ ADMIN_EMAILS=admin@tripsync.app
 - [ ] Test email delivery
 
 **Frontend**:
+
 - [ ] All pages load without errors
 - [ ] Mobile responsive (test on real devices)
 - [ ] Dark mode works properly
@@ -668,6 +731,7 @@ ADMIN_EMAILS=admin@tripsync.app
 - [ ] Loading states show correctly
 
 **Security**:
+
 - [ ] HTTPS enabled
 - [ ] Security headers configured (Helmet)
 - [ ] Rate limiting active
@@ -677,6 +741,7 @@ ADMIN_EMAILS=admin@tripsync.app
 - [ ] Password hashing (bcrypt)
 
 **Monitoring**:
+
 - [ ] Error tracking (Sentry)
 - [ ] Uptime monitoring (UptimeRobot)
 - [ ] Analytics (Google Analytics or Plausible)
@@ -684,6 +749,7 @@ ADMIN_EMAILS=admin@tripsync.app
 - [ ] Health check endpoint working
 
 **Testing**:
+
 - [ ] User registration works
 - [ ] User login works
 - [ ] Trip creation works (with AI)
@@ -698,6 +764,7 @@ ADMIN_EMAILS=admin@tripsync.app
 ### Launch Day
 
 **Morning**:
+
 - [ ] Deploy to production
 - [ ] Verify all env vars set correctly
 - [ ] Run smoke tests (key user flows)
@@ -706,6 +773,7 @@ ADMIN_EMAILS=admin@tripsync.app
 - [ ] Send test email invite
 
 **Soft Launch** (First 24 hours):
+
 - [ ] Monitor error logs continuously
 - [ ] Watch server metrics (CPU, memory, DB)
 - [ ] Test on multiple browsers
@@ -714,6 +782,7 @@ ADMIN_EMAILS=admin@tripsync.app
 - [ ] Be ready to roll back if issues
 
 **Post-Launch** (Week 1):
+
 - [ ] Monitor user signups
 - [ ] Track conversion rates
 - [ ] Collect user feedback
@@ -728,6 +797,7 @@ ADMIN_EMAILS=admin@tripsync.app
 ### Current Status: **95% Complete** ✅
 
 **What's Working:**
+
 - ✅ All core features functional (trip planning, AI, voting, expenses, chat)
 - ✅ Backend 100% ready for deployment
 - ✅ Subscription system with Stripe fully integrated
@@ -736,6 +806,7 @@ ADMIN_EMAILS=admin@tripsync.app
 - ✅ UI/UX 90% complete (beautiful, functional)
 
 **What's Missing:**
+
 - ⚠️ Legal pages (Privacy, Terms, Cookie banner) - 8 hours
 - ⚠️ Account management UI (Delete, Export) - 4 hours
 - ⚠️ Minor polish (error boundaries, loading states) - 4 hours
@@ -747,6 +818,7 @@ ADMIN_EMAILS=admin@tripsync.app
 ### Recommendation: **START BACKEND NOW** 🚀
 
 **You can begin backend setup TODAY because:**
+
 1. ✅ Backend is 100% ready
 2. ✅ Core features all work
 3. ⚠️ Legal pages are non-blocking (can be added in parallel)
@@ -755,21 +827,25 @@ ADMIN_EMAILS=admin@tripsync.app
 **Suggested Timeline:**
 
 **Today (Feb 24)**:
+
 - ✅ Start backend setup (database, env vars)
 - ✅ Deploy to staging
 - ✅ Test API endpoints
 
 **Tomorrow (Feb 25)**:
+
 - ✅ Add legal pages (Privacy, Terms)
 - ✅ Add cookie banner
 - ✅ Complete account management
 
 **Day 3 (Feb 26)**:
+
 - ✅ Production deployment
 - ✅ Stripe testing (real payments)
 - ✅ Smoke tests
 
 **Day 4-5 (Feb 27-28)**:
+
 - ✅ Polish & bug fixes
 - ✅ Beta user testing
 - 🚀 **SOFT LAUNCH**
@@ -779,6 +855,7 @@ ADMIN_EMAILS=admin@tripsync.app
 ### Final Score: **A+ (95/100)**
 
 **Breakdown:**
+
 - Backend: **100/100** (Perfect)
 - Core Features: **100/100** (All working)
 - UI/UX: **90/100** (Minor gaps)
@@ -792,6 +869,7 @@ ADMIN_EMAILS=admin@tripsync.app
 ## Resources
 
 **Documents Created:**
+
 - ✅ DEPLOYMENT-GUIDE.md - How to deploy (Render, Railway, AWS, etc.)
 - ✅ PRICING-STRATEGY.md - Subscription pricing & Stripe setup
 - ✅ LEGAL-DOCUMENTS-GUIDE.md - Privacy Policy & Terms setup
@@ -799,6 +877,7 @@ ADMIN_EMAILS=admin@tripsync.app
 - ✅ END-TO-END-TEST-REPORT.md (this document)
 
 **Next Steps:**
+
 1. Review this report
 2. Prioritize Phase 1 (Legal) & Phase 3 (Backend) to run in parallel
 3. Follow DEPLOYMENT-GUIDE.md for backend setup

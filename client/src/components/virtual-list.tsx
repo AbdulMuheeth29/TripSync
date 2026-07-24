@@ -1,4 +1,4 @@
-import { ReactNode, useEffect, useRef, useState } from "react";
+import { ReactNode, useEffect, useRef, useState } from 'react';
 
 interface VirtualListProps<T> {
   items: T[];
@@ -15,7 +15,7 @@ export function VirtualList<T>({
   renderItem,
   containerHeight = 600,
   overscan = 3,
-  className = ""
+  className = '',
 }: VirtualListProps<T>) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [scrollTop, setScrollTop] = useState(0);
@@ -25,10 +25,7 @@ export function VirtualList<T>({
 
   // Calculate visible range with overscan
   const startIndex = Math.max(0, Math.floor(scrollTop / itemHeight) - overscan);
-  const endIndex = Math.min(
-    items.length - 1,
-    startIndex + visibleCount + overscan * 2
-  );
+  const endIndex = Math.min(items.length - 1, startIndex + visibleCount + overscan * 2);
 
   const visibleItems = items.slice(startIndex, endIndex + 1);
 
@@ -63,18 +60,18 @@ export function VirtualList<T>({
       style={{ height: containerHeight }}
       onScroll={handleScroll}
     >
-      <div style={{ height: totalHeight, position: "relative" }}>
+      <div style={{ height: totalHeight, position: 'relative' }}>
         {visibleItems.map((item, index) => {
           const actualIndex = startIndex + index;
           return (
             <div
               key={actualIndex}
               style={{
-                position: "absolute",
+                position: 'absolute',
                 top: actualIndex * itemHeight,
                 height: itemHeight,
                 left: 0,
-                right: 0
+                right: 0,
               }}
             >
               {renderItem(item, actualIndex)}

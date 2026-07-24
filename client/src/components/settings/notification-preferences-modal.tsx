@@ -1,11 +1,28 @@
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
-import { Separator } from "@/components/ui/separator";
-import { Bell, Mail, Smartphone, MessageSquare, DollarSign, Calendar, Users, TrendingUp, Sparkles } from "lucide-react";
-import { useState } from "react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+import { Label } from '@/components/ui/label';
+import { Switch } from '@/components/ui/switch';
+import { Separator } from '@/components/ui/separator';
+import {
+  Bell,
+  Mail,
+  Smartphone,
+  MessageSquare,
+  DollarSign,
+  Calendar,
+  Users,
+  TrendingUp,
+  Sparkles,
+} from 'lucide-react';
+import { useState } from 'react';
 
 interface NotificationChannel {
   email: boolean;
@@ -34,7 +51,7 @@ export function NotificationPreferencesModal({
   isOpen,
   onClose,
   initialPreferences,
-  onSave
+  onSave,
 }: NotificationPreferencesModalProps) {
   const [preferences, setPreferences] = useState<NotificationPreferences>(initialPreferences);
   const [isSaving, setIsSaving] = useState(false);
@@ -43,23 +60,23 @@ export function NotificationPreferencesModal({
     category: keyof NotificationPreferences,
     channel: keyof NotificationChannel
   ) => {
-    setPreferences(prev => ({
+    setPreferences((prev) => ({
       ...prev,
       [category]: {
         ...prev[category],
-        [channel]: !prev[category][channel]
-      }
+        [channel]: !prev[category][channel],
+      },
     }));
   };
 
   const handleToggleAll = (category: keyof NotificationPreferences, enabled: boolean) => {
-    setPreferences(prev => ({
+    setPreferences((prev) => ({
       ...prev,
       [category]: {
         email: enabled,
         push: enabled,
-        sms: enabled
-      }
+        sms: enabled,
+      },
     }));
   };
 
@@ -69,7 +86,7 @@ export function NotificationPreferencesModal({
       await onSave(preferences);
       onClose();
     } catch (error) {
-      console.error("Failed to save notification preferences:", error);
+      console.error('Failed to save notification preferences:', error);
     } finally {
       setIsSaving(false);
     }
@@ -87,61 +104,61 @@ export function NotificationPreferencesModal({
 
   const notificationCategories = [
     {
-      key: "expenses" as keyof NotificationPreferences,
+      key: 'expenses' as keyof NotificationPreferences,
       icon: DollarSign,
-      label: "Expenses",
-      description: "New expenses, splits, and settlements",
-      color: "text-green-600",
-      bgColor: "bg-green-50"
+      label: 'Expenses',
+      description: 'New expenses, splits, and settlements',
+      color: 'text-green-600',
+      bgColor: 'bg-green-50',
     },
     {
-      key: "activities" as keyof NotificationPreferences,
+      key: 'activities' as keyof NotificationPreferences,
       icon: Calendar,
-      label: "Activities",
-      description: "Itinerary updates and activity changes",
-      color: "text-blue-600",
-      bgColor: "bg-blue-50"
+      label: 'Activities',
+      description: 'Itinerary updates and activity changes',
+      color: 'text-blue-600',
+      bgColor: 'bg-blue-50',
     },
     {
-      key: "chat" as keyof NotificationPreferences,
+      key: 'chat' as keyof NotificationPreferences,
       icon: MessageSquare,
-      label: "Chat Messages",
-      description: "New messages and @mentions",
-      color: "text-purple-600",
-      bgColor: "bg-purple-50"
+      label: 'Chat Messages',
+      description: 'New messages and @mentions',
+      color: 'text-purple-600',
+      bgColor: 'bg-purple-50',
     },
     {
-      key: "votes" as keyof NotificationPreferences,
+      key: 'votes' as keyof NotificationPreferences,
       icon: Users,
-      label: "Votes & Decisions",
-      description: "New votes and voting deadlines",
-      color: "text-orange-600",
-      bgColor: "bg-orange-50"
+      label: 'Votes & Decisions',
+      description: 'New votes and voting deadlines',
+      color: 'text-orange-600',
+      bgColor: 'bg-orange-50',
     },
     {
-      key: "payments" as keyof NotificationPreferences,
+      key: 'payments' as keyof NotificationPreferences,
       icon: TrendingUp,
-      label: "Payments",
-      description: "Payment reminders and confirmations",
-      color: "text-pink-600",
-      bgColor: "bg-pink-50"
+      label: 'Payments',
+      description: 'Payment reminders and confirmations',
+      color: 'text-pink-600',
+      bgColor: 'bg-pink-50',
     },
     {
-      key: "atlas" as keyof NotificationPreferences,
+      key: 'atlas' as keyof NotificationPreferences,
       icon: Sparkles,
-      label: "Atlas AI Insights",
-      description: "Smart recommendations and alerts",
-      color: "text-indigo-600",
-      bgColor: "bg-indigo-50"
+      label: 'Atlas AI Insights',
+      description: 'Smart recommendations and alerts',
+      color: 'text-indigo-600',
+      bgColor: 'bg-indigo-50',
     },
     {
-      key: "tripUpdates" as keyof NotificationPreferences,
+      key: 'tripUpdates' as keyof NotificationPreferences,
       icon: Bell,
-      label: "Trip Updates",
-      description: "Members joining, trip changes, and reminders",
-      color: "text-cyan-600",
-      bgColor: "bg-cyan-50"
-    }
+      label: 'Trip Updates',
+      description: 'Members joining, trip changes, and reminders',
+      color: 'text-cyan-600',
+      bgColor: 'bg-cyan-50',
+    },
   ];
 
   return (
@@ -188,7 +205,9 @@ export function NotificationPreferencesModal({
                   <div className="space-y-3">
                     <div className="flex items-start justify-between">
                       <div className="flex items-start gap-3 flex-1">
-                        <div className={`flex h-10 w-10 items-center justify-center rounded-full ${category.bgColor}`}>
+                        <div
+                          className={`flex h-10 w-10 items-center justify-center rounded-full ${category.bgColor}`}
+                        >
                           <Icon className={`h-5 w-5 ${category.color}`} />
                         </div>
                         <div className="flex-1">
@@ -209,7 +228,7 @@ export function NotificationPreferencesModal({
                         onClick={() => handleToggleAll(category.key, !isAllEnabled(category.key))}
                         className="text-xs"
                       >
-                        {isAllEnabled(category.key) ? "Disable All" : "Enable All"}
+                        {isAllEnabled(category.key) ? 'Disable All' : 'Enable All'}
                       </Button>
                     </div>
 
@@ -217,19 +236,19 @@ export function NotificationPreferencesModal({
                       <div className="flex items-center justify-center">
                         <Switch
                           checked={categoryPrefs.email}
-                          onCheckedChange={() => handleToggle(category.key, "email")}
+                          onCheckedChange={() => handleToggle(category.key, 'email')}
                         />
                       </div>
                       <div className="flex items-center justify-center">
                         <Switch
                           checked={categoryPrefs.push}
-                          onCheckedChange={() => handleToggle(category.key, "push")}
+                          onCheckedChange={() => handleToggle(category.key, 'push')}
                         />
                       </div>
                       <div className="flex items-center justify-center">
                         <Switch
                           checked={categoryPrefs.sms}
-                          onCheckedChange={() => handleToggle(category.key, "sms")}
+                          onCheckedChange={() => handleToggle(category.key, 'sms')}
                         />
                       </div>
                     </div>
@@ -260,7 +279,7 @@ export function NotificationPreferencesModal({
             Cancel
           </Button>
           <Button onClick={handleSave} disabled={isSaving}>
-            {isSaving ? "Saving..." : "Save Preferences"}
+            {isSaving ? 'Saving...' : 'Save Preferences'}
           </Button>
         </DialogFooter>
       </DialogContent>

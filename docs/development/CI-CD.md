@@ -7,12 +7,14 @@ Trip-Sync uses GitHub Actions for continuous integration and deployment.
 ### 1. CI Workflow (`ci.yml`)
 
 **Triggers:**
+
 - Push to `main` or `develop` branches
 - Pull requests to `main` or `develop`
 
 **Jobs:**
 
 #### Test & Build
+
 - ✅ TypeScript type checking
 - ✅ Run test suite (Vitest)
 - ✅ Generate coverage report
@@ -20,10 +22,12 @@ Trip-Sync uses GitHub Actions for continuous integration and deployment.
 - ✅ Upload artifacts
 
 #### Security Audit
+
 - ✅ Run `npm audit` for vulnerabilities
 - ✅ Check for outdated dependencies
 
 #### Lint Check
+
 - 🔄 Placeholder for ESLint (to be configured)
 
 **Configuration:**
@@ -34,6 +38,7 @@ No secrets required. Runs automatically on every push/PR.
 ### 2. Deploy Workflow (`deploy.yml`)
 
 **Triggers:**
+
 - Manual trigger via GitHub Actions UI
 - Push to `main` branch
 - Git tags matching `v*`
@@ -57,6 +62,7 @@ The deploy workflow includes templates for multiple deployment platforms. Uncomm
 ```
 
 **Setup:**
+
 1. Create Docker Hub account
 2. Add secrets to GitHub repository settings
 3. Uncomment Docker steps in `deploy.yml`
@@ -72,6 +78,7 @@ The deploy workflow includes templates for multiple deployment platforms. Uncomm
 ```
 
 **Setup:**
+
 1. Create Railway account and project
 2. Generate API token: `railway login` → Account Settings → Tokens
 3. Add `RAILWAY_TOKEN` secret to GitHub
@@ -89,6 +96,7 @@ The deploy workflow includes templates for multiple deployment platforms. Uncomm
 ```
 
 **Setup:**
+
 1. Create Render account and web service
 2. Get API key from Account Settings
 3. Get Service ID from service dashboard URL
@@ -115,6 +123,7 @@ The deploy workflow includes templates for multiple deployment platforms. Uncomm
 ```
 
 **Setup:**
+
 1. Generate SSH key: `ssh-keygen -t ed25519`
 2. Add public key to server: `ssh-copy-id user@server`
 3. Add private key to GitHub secrets
@@ -127,35 +136,41 @@ The deploy workflow includes templates for multiple deployment platforms. Uncomm
 Add these secrets in: **GitHub Repo** → **Settings** → **Secrets and variables** → **Actions**
 
 ### Required for All Deployments
+
 - None (deployment method determines requirements)
 
 ### Docker Deployment
-| Secret | Description | How to Get |
-|--------|-------------|------------|
-| `DOCKER_USERNAME` | Docker Hub username | Your Docker Hub account |
+
+| Secret            | Description             | How to Get                               |
+| ----------------- | ----------------------- | ---------------------------------------- |
+| `DOCKER_USERNAME` | Docker Hub username     | Your Docker Hub account                  |
 | `DOCKER_PASSWORD` | Docker Hub access token | Docker Hub → Account Settings → Security |
 
 ### Railway Deployment
-| Secret | Description | How to Get |
-|--------|-------------|------------|
+
+| Secret          | Description       | How to Get                                  |
+| --------------- | ----------------- | ------------------------------------------- |
 | `RAILWAY_TOKEN` | Railway API token | `railway login` → Account Settings → Tokens |
 
 ### Render Deployment
-| Secret | Description | How to Get |
-|--------|-------------|------------|
-| `RENDER_API_KEY` | Render API key | Render Dashboard → Account Settings → API Keys |
-| `RENDER_SERVICE_ID` | Service identifier | Service URL: `render.com/services/{this-id}` |
+
+| Secret              | Description        | How to Get                                     |
+| ------------------- | ------------------ | ---------------------------------------------- |
+| `RENDER_API_KEY`    | Render API key     | Render Dashboard → Account Settings → API Keys |
+| `RENDER_SERVICE_ID` | Service identifier | Service URL: `render.com/services/{this-id}`   |
 
 ### SSH Deployment
-| Secret | Description | How to Get |
-|--------|-------------|------------|
-| `SSH_HOST` | Server IP or hostname | Your VPS provider |
-| `SSH_USERNAME` | SSH username | Usually `root` or custom user |
-| `SSH_PRIVATE_KEY` | SSH private key | `cat ~/.ssh/id_ed25519` |
+
+| Secret            | Description           | How to Get                    |
+| ----------------- | --------------------- | ----------------------------- |
+| `SSH_HOST`        | Server IP or hostname | Your VPS provider             |
+| `SSH_USERNAME`    | SSH username          | Usually `root` or custom user |
+| `SSH_PRIVATE_KEY` | SSH private key       | `cat ~/.ssh/id_ed25519`       |
 
 ### Optional: Sentry Release Tracking
-| Secret | Description | How to Get |
-|--------|-------------|------------|
+
+| Secret              | Description       | How to Get                      |
+| ------------------- | ----------------- | ------------------------------- |
 | `SENTRY_AUTH_TOKEN` | Sentry auth token | Sentry → Settings → Auth Tokens |
 
 ---
@@ -189,6 +204,7 @@ gh run list --workflow=deploy.yml
 Create GitHub environment: **Settings** → **Environments** → **New environment** → `staging`
 
 **Environment Variables** (configure in GitHub):
+
 ```
 DATABASE_URL=postgresql://...
 SENTRY_DSN=https://...
@@ -200,11 +216,13 @@ STRIPE_SECRET_KEY=sk_test_...
 Create GitHub environment: `production`
 
 **Protection Rules:**
+
 - ✅ Required reviewers (1+)
 - ✅ Deployment branches: `main` only
 - ✅ Wait timer: 5 minutes
 
 **Environment Variables:**
+
 ```
 DATABASE_URL=postgresql://... (production)
 SENTRY_DSN=https://... (production)
@@ -229,6 +247,7 @@ Add to README.md:
 ### Tests Failing in CI but Pass Locally
 
 **Common causes:**
+
 1. **Environment differences**: Check Node.js versions match
 2. **Missing environment variables**: Add to GitHub secrets
 3. **Timezone issues**: Use UTC in tests or set `TZ=UTC` in workflow
@@ -236,6 +255,7 @@ Add to README.md:
 ### Build Failing
 
 **Common causes:**
+
 1. **TypeScript errors**: Run `npm run check` locally first
 2. **Missing dependencies**: Ensure `package-lock.json` is committed
 3. **Build script issues**: Test `npm run build` locally
@@ -243,6 +263,7 @@ Add to README.md:
 ### Deployment Failing
 
 **Common causes:**
+
 1. **Missing secrets**: Verify all required secrets are set
 2. **Wrong secret names**: Check for typos
 3. **Permission errors**: Ensure service account has deploy permissions
@@ -251,6 +272,7 @@ Add to README.md:
 ### Docker Build Failing
 
 **Common causes:**
+
 1. **Dockerfile errors**: Test locally with `docker build .`
 2. **Missing .dockerignore**: Ensure `node_modules` is excluded
 3. **Build context too large**: Optimize Dockerfile layers
@@ -331,6 +353,7 @@ GitHub Actions is free for public repositories. For private repositories:
 - **Team**: 10,000 minutes/month
 
 **Tips to reduce CI/CD costs:**
+
 1. Use `cache: 'npm'` in setup-node (already configured)
 2. Skip CI for documentation changes: `[skip ci]` in commit message
 3. Use matrix strategy sparingly

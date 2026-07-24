@@ -1,10 +1,17 @@
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
-import { AlertTriangle, Users, RefreshCw, Save, Eye } from "lucide-react";
-import { formatDistanceToNow } from "date-fns";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Badge } from '@/components/ui/badge';
+import { AlertTriangle, Users, RefreshCw, Save, Eye } from 'lucide-react';
+import { formatDistanceToNow } from 'date-fns';
 
 interface EditorInfo {
   userId: string;
@@ -15,7 +22,7 @@ interface EditorInfo {
 interface ConcurrentEditWarningDialogProps {
   isOpen: boolean;
   onClose: () => void;
-  itemType: "activity" | "expense" | "itinerary" | "note";
+  itemType: 'activity' | 'expense' | 'itinerary' | 'note';
   itemName: string;
   currentEditor: EditorInfo;
   onOverwrite: () => void;
@@ -33,10 +40,15 @@ export function ConcurrentEditWarningDialog({
   onOverwrite,
   onViewChanges,
   onRefresh,
-  currentUserEdits
+  currentUserEdits,
 }: ConcurrentEditWarningDialogProps) {
   const getInitials = (name: string) => {
-    return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+    return name
+      .split(' ')
+      .map((n) => n[0])
+      .join('')
+      .toUpperCase()
+      .slice(0, 2);
   };
 
   const itemTypeLabel = itemType.charAt(0).toUpperCase() + itemType.slice(1);
@@ -49,9 +61,7 @@ export function ConcurrentEditWarningDialog({
             <AlertTriangle className="h-5 w-5 text-amber-600" />
             <DialogTitle>Concurrent Edit Detected</DialogTitle>
           </div>
-          <DialogDescription>
-            Someone else is editing this {itemType}
-          </DialogDescription>
+          <DialogDescription>Someone else is editing this {itemType}</DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4">
@@ -63,12 +73,8 @@ export function ConcurrentEditWarningDialog({
               </div>
 
               <div className="flex-1">
-                <h4 className="font-semibold text-amber-900 mb-1">
-                  {itemTypeLabel} Being Edited
-                </h4>
-                <p className="text-sm text-amber-800 font-medium mb-2">
-                  "{itemName}"
-                </p>
+                <h4 className="font-semibold text-amber-900 mb-1">{itemTypeLabel} Being Edited</h4>
+                <p className="text-sm text-amber-800 font-medium mb-2">"{itemName}"</p>
               </div>
             </div>
           </Card>
@@ -104,9 +110,7 @@ export function ConcurrentEditWarningDialog({
           {currentUserEdits && (
             <Card className="p-4 bg-blue-50 border-blue-200">
               <h4 className="font-semibold text-blue-900 mb-2">Your Unsaved Changes</h4>
-              <p className="text-sm text-blue-800 whitespace-pre-wrap">
-                {currentUserEdits}
-              </p>
+              <p className="text-sm text-blue-800 whitespace-pre-wrap">{currentUserEdits}</p>
             </Card>
           )}
 
@@ -143,29 +147,17 @@ export function ConcurrentEditWarningDialog({
         </div>
 
         <DialogFooter className="flex-col sm:flex-row gap-2">
-          <Button
-            variant="outline"
-            onClick={onRefresh}
-            className="flex-1"
-          >
+          <Button variant="outline" onClick={onRefresh} className="flex-1">
             <RefreshCw className="h-4 w-4 mr-2" />
             Refresh & View Latest
           </Button>
 
-          <Button
-            variant="outline"
-            onClick={onViewChanges}
-            className="flex-1"
-          >
+          <Button variant="outline" onClick={onViewChanges} className="flex-1">
             <Eye className="h-4 w-4 mr-2" />
             Compare Changes
           </Button>
 
-          <Button
-            onClick={onOverwrite}
-            variant="destructive"
-            className="flex-1"
-          >
+          <Button onClick={onOverwrite} variant="destructive" className="flex-1">
             <Save className="h-4 w-4 mr-2" />
             Save Anyway
           </Button>

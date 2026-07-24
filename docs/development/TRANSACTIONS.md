@@ -167,7 +167,8 @@ async function processPayment(userId: string, amount: number) {
     const charge = await stripe.charges.create({ amount, customer: userId });
 
     // 2. Update user subscription
-    await tx.update(users)
+    await tx
+      .update(users)
       .set({ subscriptionTier: 'pro', subscriptionExpiresAt: newDate })
       .where(eq(users.id, userId));
 
@@ -233,9 +234,7 @@ async function settleAllExpenses(tripId: string) {
     }
 
     // Mark all expenses as settled
-    await tx.update(expenses)
-      .set({ settled: true })
-      .where(eq(expenses.tripId, tripId));
+    await tx.update(expenses).set({ settled: true }).where(eq(expenses.tripId, tripId));
 
     return settlements;
   });
@@ -300,7 +299,7 @@ await withTransaction(async (tx) => {
   await tx.insert(trips).values(tripData);
 
   await generateAIItinerary(); // Slow AI call!
-  await sendWelcomeEmail();    // Slow email send!
+  await sendWelcomeEmail(); // Slow email send!
 
   await tx.insert(itineraryItems).values(items);
 });
@@ -348,9 +347,7 @@ describe('createTripWithMembers', () => {
 
   it('should rollback on member insertion failure', async () => {
     // This test requires test database
-    await expect(
-      createTripWithMembers(tripData, invalidMemberData)
-    ).rejects.toThrow();
+    await expect(createTripWithMembers(tripData, invalidMemberData)).rejects.toThrow();
 
     // Verify trip was not created
     const trip = await storage.getTrip(tripData.id);

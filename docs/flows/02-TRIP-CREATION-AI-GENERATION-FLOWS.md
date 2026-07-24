@@ -250,6 +250,7 @@ END: Trip created with full AI-generated itinerary
 ```
 
 **Success Criteria:**
+
 - ✅ All 5 wizard steps completed
 - ✅ Trip saved as "active" status
 - ✅ AI generation completes in <60 seconds
@@ -259,6 +260,7 @@ END: Trip created with full AI-generated itinerary
 - ✅ Members invited (if specified)
 
 **Error Handling:**
+
 - Incomplete wizard → Highlight missing fields
 - AI generation timeout (>2 min) → Retry with fallback
 - API error → Show error + option to regenerate
@@ -480,6 +482,7 @@ END: Complete itinerary generated and saved
 ```
 
 **AI Generation Stats:**
+
 - Average time: 30-60 seconds
 - Success rate: 98%+
 - Average items per trip: 15-25
@@ -487,6 +490,7 @@ END: Complete itinerary generated and saved
 - Cache hit rate: ~40% (significant cost savings)
 
 **Cost Optimization:**
+
 - Claude Sonnet 4.5: $3 per 1M input tokens
 - Average prompt: ~1,500 tokens
 - Average response: ~6,000 tokens
@@ -550,11 +554,13 @@ END: Fresh itinerary generated
 ```
 
 **Regeneration Triggers:**
+
 - User manually clicks "Regenerate"
 - Trip preferences significantly changed
 - Atlas AI suggests regeneration (if trip health score low)
 
 **Data Preservation:**
+
 - Trip metadata (dates, destination, etc.) preserved
 - Member list preserved
 - Expenses preserved
@@ -772,6 +778,7 @@ END: Email booking automatically added to trip
 ```
 
 **Supported Email Types:**
+
 - ✅ Flights (airlines, booking sites)
 - ✅ Hotels (major chains, Airbnb, Booking.com)
 - ✅ Activities (Viator, GetYourGuide, etc.)
@@ -779,6 +786,7 @@ END: Email booking automatically added to trip
 - ✅ Transportation (car rentals, train tickets)
 
 **AI Model Used:**
+
 - Claude Haiku (fast, cost-effective for parsing)
 - Average parsing time: 2-5 seconds
 - Cost: ~$0.001 per email
@@ -881,6 +889,7 @@ User B refreshes → Sees new itinerary
 ## Analytics & Tracking
 
 **Events Tracked:**
+
 1. `trip_creation_started` - Wizard step 1 loaded
 2. `trip_creation_step_completed` - Each step finished
 3. `trip_creation_abandoned` - User left wizard mid-flow
@@ -893,6 +902,7 @@ User B refreshes → Sees new itinerary
 10. `email_imported` - Booking email parsed
 
 **Metrics Tracked:**
+
 - Average wizard completion time
 - Step abandonment rates
 - AI generation success rate

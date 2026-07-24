@@ -423,6 +423,7 @@ This banner is required for GDPR (EU users) and recommended for all users. Store
 After Cursor generates the legal documents, verify they include:
 
 ### Privacy Policy Must Have:
+
 - [ ] What data is collected (account, trip data, usage, payment)
 - [ ] How data is used (service delivery, AI features, payments)
 - [ ] Third-party services listed (Stripe, AWS S3, Anthropic, Google Maps, Open-Meteo)
@@ -439,6 +440,7 @@ After Cursor generates the legal documents, verify they include:
 - [ ] GDPR representative if you have EU users
 
 ### Terms of Service Must Have:
+
 - [ ] Acceptance of terms
 - [ ] Age requirements (13+, 16+ in EU)
 - [ ] Account registration rules
@@ -457,6 +459,7 @@ After Cursor generates the legal documents, verify they include:
 - [ ] Contact information (legal@tripsync.app)
 
 ### Cookie Banner Must Have:
+
 - [ ] Clear explanation of cookie types
 - [ ] Strictly necessary cookies always active
 - [ ] Optional categories (Analytics, Preferences)
@@ -483,6 +486,7 @@ After Cursor generates the legal documents, verify they include:
    - Create `client/src/components/cookie-banner.tsx` for cookie consent
 
 3. **Add Routes in App.tsx**
+
    ```typescript
    import PrivacyPage from "@/pages/privacy";
    import TermsPage from "@/pages/terms";
@@ -512,6 +516,7 @@ After Cursor generates the legal documents, verify they include:
 If you prefer not to use Cursor agent, you can use free generators:
 
 **Recommended: Termly** (https://termly.io)
+
 1. Sign up for free account
 2. Select "Privacy Policy" generator
 3. Answer questions about TripSync (use the data inventory above)
@@ -520,6 +525,7 @@ If you prefer not to use Cursor agent, you can use free generators:
 6. Repeat for Cookie Policy
 
 **Other Options:**
+
 - TermsFeed (https://www.termsfeed.com)
 - FreePrivacyPolicy.com (https://www.freeprivacypolicy.com)
 - GetTerms.io (https://getterms.io)
@@ -531,6 +537,7 @@ All are free for basic use and GDPR/CCPA compliant.
 ## 📞 When to Consult a Lawyer
 
 Use these templates/generators for now. Consult a lawyer when:
+
 - Revenue exceeds $100,000/year
 - You handle sensitive data (health, financial beyond Stripe)
 - You operate in heavily regulated industries
@@ -544,6 +551,7 @@ Cost: $2,000-5,000 for lawyer review vs $0 for templates.
 ## ⏱️ Time Estimate
 
 **Using Cursor Agent with these prompts:** 30-60 minutes
+
 - Generate Privacy Policy: 10 minutes
 - Generate Terms of Service: 10 minutes
 - Generate Cookie Banner text: 5 minutes
@@ -552,6 +560,7 @@ Cost: $2,000-5,000 for lawyer review vs $0 for templates.
 - Review and customize: 15 minutes
 
 **Using Termly or other generator:** 2-3 hours
+
 - Answer questions for each policy
 - Copy/paste generated content
 - Create page components

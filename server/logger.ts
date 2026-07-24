@@ -65,7 +65,7 @@ export function httpLogger() {
     // Generate unique request ID for correlation
     genReqId: (req) => {
       // Use existing request ID if present, otherwise generate new one
-      return req.headers['x-request-id'] as string || randomUUID();
+      return (req.headers['x-request-id'] as string) || randomUUID();
     },
 
     // Add request ID to response headers
@@ -137,10 +137,13 @@ export function logWithUser(
   userId?: string,
   data?: Record<string, any>
 ) {
-  logger[level]({
-    ...data,
-    userId,
-  }, message);
+  logger[level](
+    {
+      ...data,
+      userId,
+    },
+    message
+  );
 }
 
 /**
@@ -151,92 +154,123 @@ export const appLogger = {
    * Log server startup
    */
   startup: (host: string, port: number) => {
-    logger.info({
-      event: 'server_start',
-      host,
-      port,
-    }, `Server listening on ${host}:${port}`);
+    logger.info(
+      {
+        event: 'server_start',
+        host,
+        port,
+      },
+      `Server listening on ${host}:${port}`
+    );
   },
 
   /**
    * Log database connection
    */
   database: (message: string, metadata?: Record<string, any>) => {
-    logger.info({
-      event: 'database',
-      ...metadata,
-    }, message);
+    logger.info(
+      {
+        event: 'database',
+        ...metadata,
+      },
+      message
+    );
   },
 
   /**
    * Log migration events
    */
   migration: (message: string, metadata?: Record<string, any>) => {
-    logger.info({
-      event: 'migration',
-      ...metadata,
-    }, message);
+    logger.info(
+      {
+        event: 'migration',
+        ...metadata,
+      },
+      message
+    );
   },
 
   /**
    * Log authentication events
    */
-  auth: (event: 'login' | 'register' | 'logout' | 'token_refresh', userId?: string, metadata?: Record<string, any>) => {
-    logger.info({
-      event: `auth_${event}`,
-      userId,
-      ...metadata,
-    }, `Authentication: ${event}`);
+  auth: (
+    event: 'login' | 'register' | 'logout' | 'token_refresh',
+    userId?: string,
+    metadata?: Record<string, any>
+  ) => {
+    logger.info(
+      {
+        event: `auth_${event}`,
+        userId,
+        ...metadata,
+      },
+      `Authentication: ${event}`
+    );
   },
 
   /**
    * Log AI service calls
    */
   ai: (operation: string, metadata?: Record<string, any>) => {
-    logger.info({
-      event: 'ai_operation',
-      operation,
-      ...metadata,
-    }, `AI: ${operation}`);
+    logger.info(
+      {
+        event: 'ai_operation',
+        operation,
+        ...metadata,
+      },
+      `AI: ${operation}`
+    );
   },
 
   /**
    * Log payment events
    */
   payment: (event: string, metadata?: Record<string, any>) => {
-    logger.info({
-      event: 'payment',
-      paymentEvent: event,
-      ...metadata,
-    }, `Payment: ${event}`);
+    logger.info(
+      {
+        event: 'payment',
+        paymentEvent: event,
+        ...metadata,
+      },
+      `Payment: ${event}`
+    );
   },
 
   /**
    * Log errors with context
    */
   error: (error: Error, context?: Record<string, any>) => {
-    logger.error({
-      err: error,
-      ...context,
-    }, error.message);
+    logger.error(
+      {
+        err: error,
+        ...context,
+      },
+      error.message
+    );
   },
 
   /**
    * Log warnings
    */
   warn: (message: string, metadata?: Record<string, any>) => {
-    logger.warn({
-      ...metadata,
-    }, message);
+    logger.warn(
+      {
+        ...metadata,
+      },
+      message
+    );
   },
 
   /**
    * Log debug information
    */
   debug: (message: string, metadata?: Record<string, any>) => {
-    logger.debug({
-      ...metadata,
-    }, message);
+    logger.debug(
+      {
+        ...metadata,
+      },
+      message
+    );
   },
 };
 

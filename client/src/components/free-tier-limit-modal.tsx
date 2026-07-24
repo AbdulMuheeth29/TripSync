@@ -1,42 +1,49 @@
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Lock, Sparkles, Check, Zap } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Lock, Sparkles, Check, Zap } from 'lucide-react';
 
 interface FreeTierLimitModalProps {
   isOpen: boolean;
   onClose: () => void;
   onUpgrade: () => void;
-  limitType: "trips" | "members" | "ai_generations" | "storage";
+  limitType: 'trips' | 'members' | 'ai_generations' | 'storage';
   currentUsage: number;
   limit: number;
 }
 
 const LIMIT_MESSAGES = {
   trips: {
-    title: "Trip Limit Reached",
+    title: 'Trip Limit Reached',
     description: "You've reached the 3-trip limit on the Free plan.",
-    icon: "🗺️",
-    action: "Create unlimited trips"
+    icon: '🗺️',
+    action: 'Create unlimited trips',
   },
   members: {
-    title: "Member Limit Reached",
+    title: 'Member Limit Reached',
     description: "You've hit the 6-member limit for this trip on the Free plan.",
-    icon: "👥",
-    action: "Add unlimited members"
+    icon: '👥',
+    action: 'Add unlimited members',
   },
   ai_generations: {
-    title: "AI Generation Limit Reached",
+    title: 'AI Generation Limit Reached',
     description: "You've used your 1 AI generation for this month on the Free plan.",
-    icon: "🤖",
-    action: "Get unlimited AI generations"
+    icon: '🤖',
+    action: 'Get unlimited AI generations',
   },
   storage: {
-    title: "Storage Limit Reached",
+    title: 'Storage Limit Reached',
     description: "You've reached the 100MB storage limit on the Free plan.",
-    icon: "📦",
-    action: "Get 10GB storage"
-  }
+    icon: '📦',
+    action: 'Get 10GB storage',
+  },
 };
 
 export function FreeTierLimitModal({
@@ -45,19 +52,19 @@ export function FreeTierLimitModal({
   onUpgrade,
   limitType,
   currentUsage,
-  limit
+  limit,
 }: FreeTierLimitModalProps) {
   const limitInfo = LIMIT_MESSAGES[limitType];
 
   const proFeatures = [
-    "Unlimited trips and members",
-    "Unlimited AI generations",
-    "Receipt OCR with Claude AI",
-    "Currency conversion (10+ currencies)",
-    "10GB file storage",
-    "Priority Atlas AI responses",
-    "Export trip data (CSV, PDF)",
-    "Remove TripSync branding"
+    'Unlimited trips and members',
+    'Unlimited AI generations',
+    'Receipt OCR with Claude AI',
+    'Currency conversion (10+ currencies)',
+    '10GB file storage',
+    'Priority Atlas AI responses',
+    'Export trip data (CSV, PDF)',
+    'Remove TripSync branding',
   ];
 
   return (
@@ -70,16 +77,12 @@ export function FreeTierLimitModal({
             </div>
           </div>
           <div className="flex items-center justify-center gap-2 mb-2">
-            <DialogTitle className="text-center text-xl">
-              {limitInfo.title}
-            </DialogTitle>
+            <DialogTitle className="text-center text-xl">{limitInfo.title}</DialogTitle>
             <Badge variant="secondary" className="text-xs">
               Free Plan
             </Badge>
           </div>
-          <DialogDescription className="text-center">
-            {limitInfo.description}
-          </DialogDescription>
+          <DialogDescription className="text-center">{limitInfo.description}</DialogDescription>
         </DialogHeader>
 
         <div className="py-4 space-y-4">
@@ -120,18 +123,10 @@ export function FreeTierLimitModal({
         </div>
 
         <DialogFooter className="flex-col sm:flex-row gap-2">
-          <Button
-            variant="outline"
-            onClick={onClose}
-            className="w-full sm:w-auto"
-          >
+          <Button variant="outline" onClick={onClose} className="w-full sm:w-auto">
             Maybe Later
           </Button>
-          <Button
-            onClick={onUpgrade}
-            className="w-full sm:w-auto"
-            size="lg"
-          >
+          <Button onClick={onUpgrade} className="w-full sm:w-auto" size="lg">
             <Zap className="h-4 w-4 mr-2" />
             Upgrade to Pro
           </Button>

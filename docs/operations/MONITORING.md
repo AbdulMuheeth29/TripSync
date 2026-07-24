@@ -59,43 +59,43 @@ docker-compose logs app --tail=1000 | grep -i error
 
 ### Application Health
 
-| Metric | Threshold | Alert Level |
-|--------|-----------|-------------|
-| API Response Time (p95) | >500ms | Warning |
-| API Response Time (p95) | >1000ms | Critical |
-| Error Rate | >1% | Warning |
-| Error Rate | >5% | Critical |
-| Request Rate | <5 req/min | Warning (too quiet) |
+| Metric                  | Threshold  | Alert Level         |
+| ----------------------- | ---------- | ------------------- |
+| API Response Time (p95) | >500ms     | Warning             |
+| API Response Time (p95) | >1000ms    | Critical            |
+| Error Rate              | >1%        | Warning             |
+| Error Rate              | >5%        | Critical            |
+| Request Rate            | <5 req/min | Warning (too quiet) |
 
 ### System Resources
 
-| Metric | Threshold | Alert Level |
-|--------|-----------|-------------|
-| CPU Usage | >80% for 5min | Warning |
-| CPU Usage | >95% for 5min | Critical |
-| Memory Usage | >85% | Warning |
-| Memory Usage | >95% | Critical |
-| Disk Usage | >80% | Warning |
-| Disk Usage | >90% | Critical |
+| Metric       | Threshold     | Alert Level |
+| ------------ | ------------- | ----------- |
+| CPU Usage    | >80% for 5min | Warning     |
+| CPU Usage    | >95% for 5min | Critical    |
+| Memory Usage | >85%          | Warning     |
+| Memory Usage | >95%          | Critical    |
+| Disk Usage   | >80%          | Warning     |
+| Disk Usage   | >90%          | Critical    |
 
 ### Database
 
-| Metric | Threshold | Alert Level |
-|--------|-----------|-------------|
-| Connection Count | >80 | Warning |
-| Connection Count | >95 | Critical |
-| Query Time (p95) | >100ms | Warning |
-| Query Time (p95) | >500ms | Critical |
-| Database Size | >80% of disk | Warning |
+| Metric           | Threshold    | Alert Level |
+| ---------------- | ------------ | ----------- |
+| Connection Count | >80          | Warning     |
+| Connection Count | >95          | Critical    |
+| Query Time (p95) | >100ms       | Warning     |
+| Query Time (p95) | >500ms       | Critical    |
+| Database Size    | >80% of disk | Warning     |
 
 ### Business Metrics
 
-| Metric | Threshold | Alert Level |
-|--------|-----------|-------------|
-| Sign-ups per day | <5 | Warning (growth issue) |
-| Active users (DAU) | <10 | Warning |
-| Error rate on auth | >2% | Critical |
-| Trip creation rate | Drops >50% | Critical |
+| Metric             | Threshold  | Alert Level            |
+| ------------------ | ---------- | ---------------------- |
+| Sign-ups per day   | <5         | Warning (growth issue) |
+| Active users (DAU) | <10        | Warning                |
+| Error rate on auth | >2%        | Critical               |
+| Trip creation rate | Drops >50% | Critical               |
 
 ---
 
@@ -109,6 +109,7 @@ SENTRY_DSN=https://your-key@sentry.io/your-project
 ```
 
 **What you get:**
+
 - ✅ Automatic error capture
 - ✅ Error grouping and deduplication
 - ✅ Stack traces with source maps
@@ -124,6 +125,7 @@ SENTRY_DSN=https://your-key@sentry.io/your-project
 ## Setting Up UptimeRobot (Free Uptime Monitoring)
 
 **Steps:**
+
 1. Sign up at https://uptimerobot.com (free tier: 50 monitors)
 2. Add HTTP(s) monitor:
    - URL: `https://tripsync.app/api/health`
@@ -131,6 +133,7 @@ SENTRY_DSN=https://your-key@sentry.io/your-project
    - Alert contacts: Your email/Slack
 
 **What you get:**
+
 - ✅ Uptime percentage tracking
 - ✅ Response time monitoring
 - ✅ Email alerts when site is down
@@ -160,18 +163,21 @@ grafana:
 ### What to Monitor
 
 **System Dashboard**:
+
 - CPU usage over time
 - Memory usage over time
 - Disk I/O
 - Network throughput
 
 **Application Dashboard**:
+
 - Requests per minute
 - Error rate (%)
 - Response time (p50, p95, p99)
 - Active users
 
 **Database Dashboard**:
+
 - Connections over time
 - Query duration
 - Deadlocks
@@ -203,6 +209,7 @@ docker-compose logs app > logs/app-$(date +%Y%m%d).log
 ### Log Patterns to Alert On
 
 **Critical Errors:**
+
 ```bash
 # Database connection errors
 grep "ECONNREFUSED.*postgres" logs
@@ -218,6 +225,7 @@ grep "FATAL\|CRITICAL\|Process exited" logs
 ```
 
 **Warning Signs:**
+
 ```bash
 # Slow queries
 grep "slow query" logs | grep -oP "duration: \d+" | sort -rn
@@ -245,6 +253,7 @@ grep "authentication failed\|invalid credentials" logs
 ### Alert Rules
 
 **Immediate (Critical)**:
+
 - Site is down (health check fails)
 - Error rate >5%
 - Database connection failure
@@ -252,6 +261,7 @@ grep "authentication failed\|invalid credentials" logs
 - Disk >95% full
 
 **Within 1 Hour (Warning)**:
+
 - Error rate >1%
 - p95 response time >1s
 - Memory >85%
@@ -259,6 +269,7 @@ grep "authentication failed\|invalid credentials" logs
 - Unusual traffic patterns
 
 **Daily Digest (Info)**:
+
 - Daily active users
 - New sign-ups
 - Total trips created
@@ -310,6 +321,7 @@ echo "✅ All systems healthy"
 ### Track These Over Time
 
 **Response Times**:
+
 ```bash
 # Test API endpoints
 for i in {1..100}; do
@@ -318,6 +330,7 @@ done | awk '{sum+=$1; count++} END {print "Average:", sum/count "s"}'
 ```
 
 **Database Performance**:
+
 ```sql
 -- Slowest queries
 SELECT query, mean_exec_time, calls
@@ -335,6 +348,7 @@ ORDER BY pg_total_relation_size(schemaname||'.'||tablename) DESC;
 ```
 
 **Memory Leaks**:
+
 ```bash
 # Monitor app memory over time
 watch -n 60 'docker stats tripsync-app-prod --no-stream | grep tripsync'
@@ -386,12 +400,14 @@ watch -n 60 'docker stats tripsync-app-prod --no-stream | grep tripsync'
 ## Monitoring Checklist
 
 ### Daily (Automated)
+
 - [ ] Health check passes
 - [ ] Error rate <1%
 - [ ] Response time <500ms p95
 - [ ] No critical alerts
 
 ### Weekly (Manual)
+
 - [ ] Review Sentry errors
 - [ ] Check disk space
 - [ ] Review slow queries
@@ -399,6 +415,7 @@ watch -n 60 'docker stats tripsync-app-prod --no-stream | grep tripsync'
 - [ ] Review user growth metrics
 
 ### Monthly (Manual)
+
 - [ ] Load test in staging
 - [ ] Review and update baselines
 - [ ] Check SSL expiry (>30 days)
@@ -409,14 +426,14 @@ watch -n 60 'docker stats tripsync-app-prod --no-stream | grep tripsync'
 
 ## Monitoring Tools Comparison
 
-| Tool | Free Tier | Best For | Setup Time |
-|------|-----------|----------|------------|
-| Sentry | 5K errors/mo | Error tracking | 5 min |
-| UptimeRobot | 50 monitors | Uptime | 5 min |
-| PostHog | 1M events/mo | Product analytics | 10 min |
-| Grafana + Prometheus | Yes (self-hosted) | Custom dashboards | 2 hours |
-| Better Stack | 1GB logs/mo | Log aggregation | 15 min |
-| DataDog | 14-day trial | All-in-one (expensive) | 1 hour |
+| Tool                 | Free Tier         | Best For               | Setup Time |
+| -------------------- | ----------------- | ---------------------- | ---------- |
+| Sentry               | 5K errors/mo      | Error tracking         | 5 min      |
+| UptimeRobot          | 50 monitors       | Uptime                 | 5 min      |
+| PostHog              | 1M events/mo      | Product analytics      | 10 min     |
+| Grafana + Prometheus | Yes (self-hosted) | Custom dashboards      | 2 hours    |
+| Better Stack         | 1GB logs/mo       | Log aggregation        | 15 min     |
+| DataDog              | 14-day trial      | All-in-one (expensive) | 1 hour     |
 
 ---
 
@@ -431,12 +448,14 @@ watch -n 60 'docker stats tripsync-app-prod --no-stream | grep tripsync'
 ## Support
 
 Questions about monitoring?
+
 - Email: abdulmuheethmd29@gmail.com
 - Docs: See project README
 
 ---
 
 **Next Steps**:
+
 1. ✅ Set up Sentry error tracking
 2. ✅ Set up UptimeRobot uptime monitoring
 3. ✅ Create health check cron job

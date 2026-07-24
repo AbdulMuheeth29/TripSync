@@ -13,6 +13,7 @@ Atlas is Trip-Sync's intelligent AI assistant that proactively monitors your tri
 **Triggers when**: Total expenses exceed 110% of trip budget
 
 **Alert example**:
+
 ```
 💰 Budget Alert
 
@@ -24,6 +25,7 @@ Total spent: $2,750.00 / $2,500.00
 ```
 
 **Actions**:
+
 - **Optimize Budget**: Triggers AI-powered budget optimization suggestions
 - **Dismiss**: Hide this alert
 
@@ -34,10 +36,12 @@ Total spent: $2,750.00 / $2,500.00
 **Triggers when**: Itinerary items have tied or closely split votes for >24 hours
 
 **Criteria**:
+
 - Tied votes (e.g., 5 upvotes, 5 downvotes) with ≥4 total votes
 - Controversial votes (e.g., 7 vs 6) with ≥6 total votes
 
 **Alert example**:
+
 ```
 🗳️ Vote Deadlock
 
@@ -50,6 +54,7 @@ I can suggest a fair compromise - want me to help?
 ```
 
 **Actions**:
+
 - **Suggest Compromise**: AI generates compromise suggestions (e.g., "Morning snorkeling + afternoon beach time")
 - **Let Group Decide**: Dismiss and let group resolve naturally
 
@@ -60,11 +65,13 @@ I can suggest a fair compromise - want me to help?
 **Triggers when**: Trip starts in <7 days and completion is <50%
 
 **Completion calculation**:
+
 - 40% weight: Itinerary items per day (2 items/day = 100%)
 - 30% weight: Member confirmations (RSVPs)
 - 30% weight: Budget planning started (expenses tracked)
 
 **Alert example**:
+
 ```
 ⏰ Trip Deadline Approaching
 
@@ -78,6 +85,7 @@ Your trip starts in 4 days and is only 35% complete!
 ```
 
 **Actions**:
+
 - **Help Me Finish**: Opens Atlas chat with contextual suggestions
 - **I'm On It**: Dismiss alert
 
@@ -89,14 +97,17 @@ Your trip starts in 4 days and is only 35% complete!
 
 ```typescript
 // Runs every 15 minutes
-setInterval(() => {
-  // Check all active trips
-  for (const trip of activeTrips) {
-    checkBudgetOverrun(trip.id);
-    checkVoteDeadlocks(trip.id);
-    checkDeadlineUrgency(trip.id);
-  }
-}, 15 * 60 * 1000);
+setInterval(
+  () => {
+    // Check all active trips
+    for (const trip of activeTrips) {
+      checkBudgetOverrun(trip.id);
+      checkVoteDeadlocks(trip.id);
+      checkDeadlineUrgency(trip.id);
+    }
+  },
+  15 * 60 * 1000
+);
 ```
 
 ### Data Flow
@@ -154,6 +165,7 @@ GET /api/trips/:tripId/atlas/notifications
 **Authorization**: Required (JWT token)
 
 **Response**:
+
 ```json
 {
   "notifications": [
@@ -226,7 +238,7 @@ Content-Type: application/json
 useEffect(() => {
   const fetchNotifications = async () => {
     const res = await fetch(`/api/trips/${tripId}/atlas/notifications`, {
-      headers: { Authorization: `Bearer ${token}` }
+      headers: { Authorization: `Bearer ${token}` },
     });
     const data = await res.json();
     setNotifications(data.notifications);
@@ -242,29 +254,28 @@ useEffect(() => {
 **2. Display notification UI** (floating badge, toast, or modal)
 
 ```tsx
-{notifications.length > 0 && (
-  <div className="atlas-notification-badge">
-    <span className="count">{notifications.length}</span>
-    <div className="dropdown">
-      {notifications.map(notif => (
-        <div key={notif.id} className="notification-card">
-          <h4>{notif.title}</h4>
-          <p>{notif.message}</p>
-          <div className="actions">
-            {notif.actions.map(action => (
-              <button
-                key={action.label}
-                onClick={() => handleAction(notif.id, action)}
-              >
-                {action.label}
-              </button>
-            ))}
+{
+  notifications.length > 0 && (
+    <div className="atlas-notification-badge">
+      <span className="count">{notifications.length}</span>
+      <div className="dropdown">
+        {notifications.map((notif) => (
+          <div key={notif.id} className="notification-card">
+            <h4>{notif.title}</h4>
+            <p>{notif.message}</p>
+            <div className="actions">
+              {notif.actions.map((action) => (
+                <button key={action.label} onClick={() => handleAction(notif.id, action)}>
+                  {action.label}
+                </button>
+              ))}
+            </div>
           </div>
-        </div>
-      ))}
+        ))}
+      </div>
     </div>
-  </div>
-)}
+  );
+}
 ```
 
 **3. Handle actions**
@@ -274,7 +285,7 @@ const handleAction = async (notificationId: string, action: any) => {
   if (action.action === 'dismiss') {
     await fetch(`/api/atlas/notifications/${notificationId}/dismiss`, {
       method: 'POST',
-      headers: { Authorization: `Bearer ${token}` }
+      headers: { Authorization: `Bearer ${token}` },
     });
   } else if (action.action === 'optimize_budget') {
     // Trigger budget optimization flow
@@ -300,35 +311,45 @@ Edit `server/atlas-proactive-service.ts`:
 
 ```typescript
 // Default: 15 minutes
-this.monitoringInterval = setInterval(async () => {
-  await this.checkAllTrips();
-}, 15 * 60 * 1000); // Change this value
+this.monitoringInterval = setInterval(
+  async () => {
+    await this.checkAllTrips();
+  },
+  15 * 60 * 1000
+); // Change this value
 ```
 
 ### Trigger Thresholds
 
 **Budget threshold** (default: 110%):
+
 ```typescript
-if (budgetPercentage > 110) { // Change this value
+if (budgetPercentage > 110) {
+  // Change this value
   // Create notification
 }
 ```
 
 **Vote deadlock duration** (default: 24 hours):
+
 ```typescript
-if (itemAge > 24 * 60 * 60 * 1000) { // Change this value
+if (itemAge > 24 * 60 * 60 * 1000) {
+  // Change this value
   // Create notification
 }
 ```
 
 **Deadline urgency window** (default: 7 days):
+
 ```typescript
 if (daysUntilStart > 7 || daysUntilStart < 0) return; // Change 7 to desired value
 ```
 
 **Completion threshold** (default: 50%):
+
 ```typescript
-if (completionPercentage < 50) { // Change this value
+if (completionPercentage < 50) {
+  // Change this value
   // Create notification
 }
 ```
@@ -357,6 +378,7 @@ LOG_LEVEL=debug npm start
 ```
 
 **Log examples**:
+
 ```
 [DEBUG] Starting Atlas proactive monitoring
 [DEBUG] Atlas checking trips { count: 5 }
@@ -406,6 +428,7 @@ await service.checkTrip('trip-123');
 ### Database Queries
 
 Each check cycle runs these queries:
+
 - `getTrip(tripId)` - 1 query per trip
 - `getExpensesByTrip(tripId)` - 1 query per trip
 - `getItineraryItems(tripId)` - 1 query per trip
@@ -413,6 +436,7 @@ Each check cycle runs these queries:
 - `getTripMembers(tripId)` - 1 query per trip
 
 **Estimated load** (100 active trips):
+
 - Budget check: 200 queries (2 per trip)
 - Vote check: 200-500 queries (varies by itinerary size)
 - Deadline check: 300 queries (3 per trip)
@@ -421,6 +445,7 @@ Each check cycle runs these queries:
 ### Optimization Strategies
 
 1. **Add indexes** on frequently queried columns:
+
    ```sql
    CREATE INDEX idx_trips_status ON trips(status);
    CREATE INDEX idx_expenses_trip_id ON expenses(trip_id);
@@ -433,9 +458,10 @@ Each check cycle runs these queries:
    - Trip members cache: 2 minutes
 
 3. **Batch queries** (future optimization):
+
    ```typescript
    // Instead of N individual queries
-   const trips = await Promise.all(tripIds.map(id => getTrip(id)));
+   const trips = await Promise.all(tripIds.map((id) => getTrip(id)));
 
    // Use bulk fetch
    const trips = await getTrips({ ids: tripIds });
@@ -515,12 +541,14 @@ Each check cycle runs these queries:
 ### Notifications Not Appearing
 
 **Check 1**: Is Atlas monitoring running?
+
 ```bash
 # Look for this log on server startup
 [DEBUG] Starting Atlas proactive monitoring
 ```
 
 **Check 2**: Are trips active?
+
 ```typescript
 // Trip must have status 'planning' or 'active'
 const trip = await storage.getTrip(tripId);
@@ -528,11 +556,13 @@ console.log(trip.status); // Should be 'planning' or 'active'
 ```
 
 **Check 3**: Do thresholds match?
+
 - Budget: Is total expenses > 110% of budget?
 - Vote: Are votes tied for >24 hours?
 - Deadline: Is trip <7 days away and <50% complete?
 
 **Check 4**: Was notification recently dismissed?
+
 ```typescript
 const stats = await atlasProactive.getStats();
 console.log(stats.byStatus); // Check 'dismissed' count
@@ -541,6 +571,7 @@ console.log(stats.byStatus); // Check 'dismissed' count
 ### Notifications Appearing Too Often
 
 **Solution 1**: Increase cooldown period
+
 ```typescript
 // Change from 24 hours to 48 hours
 const existingNotification = this.findRecentNotification(
@@ -551,6 +582,7 @@ const existingNotification = this.findRecentNotification(
 ```
 
 **Solution 2**: Adjust thresholds
+
 ```typescript
 // Budget: Only alert at 120% instead of 110%
 if (budgetPercentage > 120) {
@@ -561,12 +593,14 @@ if (budgetPercentage > 120) {
 ### Performance Issues
 
 **Check 1**: How many trips are being checked?
+
 ```bash
 # Look for this log every 15 minutes
 [DEBUG] Atlas checking trips { count: X }
 ```
 
 **Check 2**: Query duration
+
 ```bash
 # Look for check duration
 [DEBUG] Atlas check complete { trips: 100, duration: 2000ms }

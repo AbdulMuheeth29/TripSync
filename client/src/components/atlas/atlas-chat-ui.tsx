@@ -1,15 +1,15 @@
-import { useState, useRef, useEffect } from "react";
-import { Card } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Send, Loader2, Sparkles, User } from "lucide-react";
-import { format } from "date-fns";
+import { useState, useRef, useEffect } from 'react';
+import { Card } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Send, Loader2, Sparkles, User } from 'lucide-react';
+import { format } from 'date-fns';
 
 interface Message {
   id: string;
-  type: "user" | "assistant";
+  type: 'user' | 'assistant';
   content: string;
   timestamp: Date;
   isTyping?: boolean;
@@ -26,9 +26,9 @@ export function AtlasChatUI({
   messages,
   onSendMessage,
   isLoading = false,
-  placeholder = "Ask Atlas anything about your trip..."
+  placeholder = 'Ask Atlas anything about your trip...',
 }: AtlasChatUIProps) {
-  const [input, setInput] = useState("");
+  const [input, setInput] = useState('');
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -41,7 +41,7 @@ export function AtlasChatUI({
     e.preventDefault();
     if (input.trim() && !isLoading) {
       onSendMessage(input.trim());
-      setInput("");
+      setInput('');
     }
   };
 
@@ -55,9 +55,7 @@ export function AtlasChatUI({
           </div>
           <div>
             <h3 className="font-semibold">Atlas AI Assistant</h3>
-            <p className="text-sm text-muted-foreground">
-              {isLoading ? "Typing..." : "Online"}
-            </p>
+            <p className="text-sm text-muted-foreground">{isLoading ? 'Typing...' : 'Online'}</p>
           </div>
         </div>
       </div>
@@ -81,12 +79,10 @@ export function AtlasChatUI({
           {messages.map((message) => (
             <div
               key={message.id}
-              className={`flex gap-3 ${
-                message.type === "user" ? "flex-row-reverse" : "flex-row"
-              }`}
+              className={`flex gap-3 ${message.type === 'user' ? 'flex-row-reverse' : 'flex-row'}`}
             >
               <Avatar className="h-8 w-8 shrink-0">
-                {message.type === "assistant" ? (
+                {message.type === 'assistant' ? (
                   <div className="bg-gradient-to-br from-blue-500 to-purple-600 w-full h-full flex items-center justify-center">
                     <Sparkles className="h-4 w-4 text-white" />
                   </div>
@@ -97,14 +93,16 @@ export function AtlasChatUI({
                 )}
               </Avatar>
 
-              <div className={`flex-1 max-w-[80%] ${
-                message.type === "user" ? "items-end" : "items-start"
-              } flex flex-col gap-1`}>
-                <div className={`rounded-2xl px-4 py-2 ${
-                  message.type === "user"
-                    ? "bg-primary text-primary-foreground"
-                    : "bg-muted"
-                }`}>
+              <div
+                className={`flex-1 max-w-[80%] ${
+                  message.type === 'user' ? 'items-end' : 'items-start'
+                } flex flex-col gap-1`}
+              >
+                <div
+                  className={`rounded-2xl px-4 py-2 ${
+                    message.type === 'user' ? 'bg-primary text-primary-foreground' : 'bg-muted'
+                  }`}
+                >
                   {message.isTyping ? (
                     <div className="flex items-center gap-1 py-2">
                       <div className="w-2 h-2 bg-current rounded-full animate-bounce [animation-delay:-0.3s]" />
@@ -116,7 +114,7 @@ export function AtlasChatUI({
                   )}
                 </div>
                 <span className="text-xs text-muted-foreground px-2">
-                  {format(message.timestamp, "h:mm a")}
+                  {format(message.timestamp, 'h:mm a')}
                 </span>
               </div>
             </div>

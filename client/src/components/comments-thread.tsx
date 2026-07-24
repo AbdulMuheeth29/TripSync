@@ -1,12 +1,17 @@
-import { useState } from "react";
-import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
-import { MessageSquare, Reply, ThumbsUp, MoreVertical } from "lucide-react";
-import { formatDistanceToNow } from "date-fns";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { useState } from 'react';
+import { Card } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/textarea';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Badge } from '@/components/ui/badge';
+import { MessageSquare, Reply, ThumbsUp, MoreVertical } from 'lucide-react';
+import { formatDistanceToNow } from 'date-fns';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
 interface Comment {
   id: string;
@@ -38,41 +43,44 @@ export function CommentsThread({
   onAddComment,
   onLikeComment,
   onDeleteComment,
-  onEditComment
+  onEditComment,
 }: CommentsThreadProps) {
-  const [newComment, setNewComment] = useState("");
+  const [newComment, setNewComment] = useState('');
   const [replyingTo, setReplyingTo] = useState<string | null>(null);
-  const [replyContent, setReplyContent] = useState("");
+  const [replyContent, setReplyContent] = useState('');
 
   const handleSubmitComment = () => {
     if (newComment.trim()) {
       onAddComment(newComment);
-      setNewComment("");
+      setNewComment('');
     }
   };
 
   const handleSubmitReply = (parentId: string) => {
     if (replyContent.trim()) {
       onAddComment(replyContent, parentId);
-      setReplyContent("");
+      setReplyContent('');
       setReplyingTo(null);
     }
   };
 
   const getInitials = (name: string) => {
-    return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+    return name
+      .split(' ')
+      .map((n) => n[0])
+      .join('')
+      .toUpperCase()
+      .slice(0, 2);
   };
 
   const CommentItem = ({ comment, isReply = false }: { comment: Comment; isReply?: boolean }) => {
     const isOwnComment = comment.author.id === currentUserId;
 
     return (
-      <div className={`${isReply ? "ml-12 mt-3" : ""}`}>
+      <div className={`${isReply ? 'ml-12 mt-3' : ''}`}>
         <div className="flex gap-3">
           <Avatar className="h-8 w-8">
-            <AvatarFallback className="text-xs">
-              {getInitials(comment.author.name)}
-            </AvatarFallback>
+            <AvatarFallback className="text-xs">{getInitials(comment.author.name)}</AvatarFallback>
           </Avatar>
 
           <div className="flex-1 min-w-0">
@@ -81,7 +89,9 @@ export function CommentsThread({
                 <div>
                   <span className="font-semibold text-sm">{comment.author.name}</span>
                   {isOwnComment && (
-                    <Badge variant="secondary" className="ml-2 text-xs">You</Badge>
+                    <Badge variant="secondary" className="ml-2 text-xs">
+                      You
+                    </Badge>
                   )}
                 </div>
                 <DropdownMenu>
@@ -93,7 +103,9 @@ export function CommentsThread({
                   <DropdownMenuContent align="end">
                     {isOwnComment && (
                       <>
-                        <DropdownMenuItem onClick={() => onEditComment(comment.id, comment.content)}>
+                        <DropdownMenuItem
+                          onClick={() => onEditComment(comment.id, comment.content)}
+                        >
                           Edit
                         </DropdownMenuItem>
                         <DropdownMenuItem
@@ -104,9 +116,7 @@ export function CommentsThread({
                         </DropdownMenuItem>
                       </>
                     )}
-                    {!isOwnComment && (
-                      <DropdownMenuItem>Report</DropdownMenuItem>
-                    )}
+                    {!isOwnComment && <DropdownMenuItem>Report</DropdownMenuItem>}
                   </DropdownMenuContent>
                 </DropdownMenu>
               </div>
@@ -122,7 +132,9 @@ export function CommentsThread({
                 className="h-6 px-2"
                 onClick={() => onLikeComment(comment.id)}
               >
-                <ThumbsUp className={`h-3 w-3 mr-1 ${comment.hasLiked ? "fill-current text-primary" : ""}`} />
+                <ThumbsUp
+                  className={`h-3 w-3 mr-1 ${comment.hasLiked ? 'fill-current text-primary' : ''}`}
+                />
                 {comment.likes > 0 && comment.likes}
               </Button>
               {!isReply && (
@@ -161,7 +173,7 @@ export function CommentsThread({
                     variant="ghost"
                     onClick={() => {
                       setReplyingTo(null);
-                      setReplyContent("");
+                      setReplyContent('');
                     }}
                   >
                     Cancel
@@ -173,7 +185,7 @@ export function CommentsThread({
             {/* Replies */}
             {comment.replies && comment.replies.length > 0 && (
               <div className="mt-3 space-y-3">
-                {comment.replies.map(reply => (
+                {comment.replies.map((reply) => (
                   <CommentItem key={reply.id} comment={reply} isReply />
                 ))}
               </div>
@@ -188,9 +200,7 @@ export function CommentsThread({
     <div className="space-y-4">
       <div className="flex items-center gap-2">
         <MessageSquare className="h-5 w-5 text-muted-foreground" />
-        <h3 className="font-semibold">
-          Comments {comments.length > 0 && `(${comments.length})`}
-        </h3>
+        <h3 className="font-semibold">Comments {comments.length > 0 && `(${comments.length})`}</h3>
       </div>
 
       {/* New Comment Form */}
@@ -203,13 +213,8 @@ export function CommentsThread({
             rows={3}
           />
           <div className="flex justify-between items-center">
-            <p className="text-xs text-muted-foreground">
-              Tip: Use @ to mention team members
-            </p>
-            <Button
-              onClick={handleSubmitComment}
-              disabled={!newComment.trim()}
-            >
+            <p className="text-xs text-muted-foreground">Tip: Use @ to mention team members</p>
+            <Button onClick={handleSubmitComment} disabled={!newComment.trim()}>
               Comment
             </Button>
           </div>
@@ -226,7 +231,7 @@ export function CommentsThread({
         </Card>
       ) : (
         <div className="space-y-4">
-          {comments.map(comment => (
+          {comments.map((comment) => (
             <CommentItem key={comment.id} comment={comment} />
           ))}
         </div>

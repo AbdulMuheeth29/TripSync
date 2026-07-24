@@ -1,29 +1,25 @@
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { Badge } from "@/components/ui/badge";
-import { Search, Filter, X, SlidersHorizontal, ArrowUpDown } from "lucide-react";
+} from '@/components/ui/select';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Badge } from '@/components/ui/badge';
+import { Search, Filter, X, SlidersHorizontal, ArrowUpDown } from 'lucide-react';
 
 export interface ItineraryFilters {
   type: string;
   bookingStatus: string;
   votingStatus: string;
   searchQuery: string;
-  sortBy: "time" | "price" | "votes" | "name";
-  sortOrder: "asc" | "desc";
+  sortBy: 'time' | 'price' | 'votes' | 'name';
+  sortOrder: 'asc' | 'desc';
 }
 
 interface ItineraryFiltersProps {
@@ -45,12 +41,12 @@ export function ItineraryFiltersComponent({
 
   const clearAllFilters = () => {
     onFiltersChange({
-      type: "all",
-      bookingStatus: "all",
-      votingStatus: "all",
-      searchQuery: "",
-      sortBy: "time",
-      sortOrder: "asc",
+      type: 'all',
+      bookingStatus: 'all',
+      votingStatus: 'all',
+      searchQuery: '',
+      sortBy: 'time',
+      sortOrder: 'asc',
     });
   };
 
@@ -65,7 +61,7 @@ export function ItineraryFiltersComponent({
           <Input
             placeholder="Search itinerary..."
             value={filters.searchQuery}
-            onChange={(e) => updateFilter("searchQuery", e.target.value)}
+            onChange={(e) => updateFilter('searchQuery', e.target.value)}
             className="pl-9"
           />
           {filters.searchQuery && (
@@ -73,7 +69,7 @@ export function ItineraryFiltersComponent({
               variant="ghost"
               size="icon"
               className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7"
-              onClick={() => updateFilter("searchQuery", "")}
+              onClick={() => updateFilter('searchQuery', '')}
             >
               <X className="h-4 w-4" />
             </Button>
@@ -112,10 +108,7 @@ export function ItineraryFiltersComponent({
               {/* Type Filter */}
               <div className="space-y-2">
                 <Label htmlFor="type-filter">Item Type</Label>
-                <Select
-                  value={filters.type}
-                  onValueChange={(value) => updateFilter("type", value)}
-                >
+                <Select value={filters.type} onValueChange={(value) => updateFilter('type', value)}>
                   <SelectTrigger id="type-filter">
                     <SelectValue />
                   </SelectTrigger>
@@ -134,7 +127,7 @@ export function ItineraryFiltersComponent({
                 <Label htmlFor="booking-filter">Booking Status</Label>
                 <Select
                   value={filters.bookingStatus}
-                  onValueChange={(value) => updateFilter("bookingStatus", value)}
+                  onValueChange={(value) => updateFilter('bookingStatus', value)}
                 >
                   <SelectTrigger id="booking-filter">
                     <SelectValue />
@@ -155,7 +148,7 @@ export function ItineraryFiltersComponent({
                 <Label htmlFor="voting-filter">Voting Status</Label>
                 <Select
                   value={filters.votingStatus}
-                  onValueChange={(value) => updateFilter("votingStatus", value)}
+                  onValueChange={(value) => updateFilter('votingStatus', value)}
                 >
                   <SelectTrigger id="voting-filter">
                     <SelectValue />
@@ -177,7 +170,10 @@ export function ItineraryFiltersComponent({
         <Select
           value={`${filters.sortBy}-${filters.sortOrder}`}
           onValueChange={(value) => {
-            const [sortBy, sortOrder] = value.split("-") as [typeof filters.sortBy, typeof filters.sortOrder];
+            const [sortBy, sortOrder] = value.split('-') as [
+              typeof filters.sortBy,
+              typeof filters.sortOrder,
+            ];
             onFiltersChange({ ...filters, sortBy, sortOrder });
           }}
         >
@@ -202,30 +198,27 @@ export function ItineraryFiltersComponent({
       {hasActiveFilters && (
         <div className="flex items-center gap-2 flex-wrap">
           <span className="text-sm text-muted-foreground">Active filters:</span>
-          {filters.type !== "all" && (
+          {filters.type !== 'all' && (
             <Badge variant="secondary" className="gap-1">
               Type: {filters.type}
-              <X
-                className="h-3 w-3 cursor-pointer"
-                onClick={() => updateFilter("type", "all")}
-              />
+              <X className="h-3 w-3 cursor-pointer" onClick={() => updateFilter('type', 'all')} />
             </Badge>
           )}
-          {filters.bookingStatus !== "all" && (
+          {filters.bookingStatus !== 'all' && (
             <Badge variant="secondary" className="gap-1">
-              Booking: {filters.bookingStatus.replace("_", " ")}
+              Booking: {filters.bookingStatus.replace('_', ' ')}
               <X
                 className="h-3 w-3 cursor-pointer"
-                onClick={() => updateFilter("bookingStatus", "all")}
+                onClick={() => updateFilter('bookingStatus', 'all')}
               />
             </Badge>
           )}
-          {filters.votingStatus !== "all" && (
+          {filters.votingStatus !== 'all' && (
             <Badge variant="secondary" className="gap-1">
               Voting: {filters.votingStatus}
               <X
                 className="h-3 w-3 cursor-pointer"
-                onClick={() => updateFilter("votingStatus", "all")}
+                onClick={() => updateFilter('votingStatus', 'all')}
               />
             </Badge>
           )}
@@ -234,7 +227,7 @@ export function ItineraryFiltersComponent({
               Search: "{filters.searchQuery}"
               <X
                 className="h-3 w-3 cursor-pointer"
-                onClick={() => updateFilter("searchQuery", "")}
+                onClick={() => updateFilter('searchQuery', '')}
               />
             </Badge>
           )}
@@ -245,44 +238,43 @@ export function ItineraryFiltersComponent({
 }
 
 // Helper function to apply filters to itinerary items
-export function applyItineraryFilters<T extends {
-  type: string;
-  bookingStatus?: string;
-  name: string;
-  startTime?: string;
-  pricePerPerson?: number;
-  votes?: Array<{ voteType: string }>;
-}>(
-  items: T[],
-  filters: ItineraryFilters
-): T[] {
+export function applyItineraryFilters<
+  T extends {
+    type: string;
+    bookingStatus?: string;
+    name: string;
+    startTime?: string;
+    pricePerPerson?: number;
+    votes?: Array<{ voteType: string }>;
+  },
+>(items: T[], filters: ItineraryFilters): T[] {
   let filtered = [...items];
 
   // Apply type filter
-  if (filters.type !== "all") {
-    filtered = filtered.filter(item => item.type === filters.type);
+  if (filters.type !== 'all') {
+    filtered = filtered.filter((item) => item.type === filters.type);
   }
 
   // Apply booking status filter
-  if (filters.bookingStatus !== "all") {
-    filtered = filtered.filter(item => item.bookingStatus === filters.bookingStatus);
+  if (filters.bookingStatus !== 'all') {
+    filtered = filtered.filter((item) => item.bookingStatus === filters.bookingStatus);
   }
 
   // Apply voting status filter
-  if (filters.votingStatus !== "all") {
-    filtered = filtered.filter(item => {
+  if (filters.votingStatus !== 'all') {
+    filtered = filtered.filter((item) => {
       const votes = item.votes || [];
-      const upVotes = votes.filter(v => v.voteType === "up").length;
-      const downVotes = votes.filter(v => v.voteType === "down").length;
+      const upVotes = votes.filter((v) => v.voteType === 'up').length;
+      const downVotes = votes.filter((v) => v.voteType === 'down').length;
 
       switch (filters.votingStatus) {
-        case "pending":
+        case 'pending':
           return votes.length === 0;
-        case "approved":
+        case 'approved':
           return upVotes > downVotes;
-        case "rejected":
+        case 'rejected':
           return downVotes > upVotes;
-        case "tied":
+        case 'tied':
           return upVotes === downVotes && votes.length > 0;
         default:
           return true;
@@ -293,9 +285,7 @@ export function applyItineraryFilters<T extends {
   // Apply search query
   if (filters.searchQuery) {
     const query = filters.searchQuery.toLowerCase();
-    filtered = filtered.filter(item =>
-      item.name.toLowerCase().includes(query)
-    );
+    filtered = filtered.filter((item) => item.name.toLowerCase().includes(query));
   }
 
   // Apply sorting
@@ -303,23 +293,23 @@ export function applyItineraryFilters<T extends {
     let comparison = 0;
 
     switch (filters.sortBy) {
-      case "time":
-        comparison = (a.startTime || "").localeCompare(b.startTime || "");
+      case 'time':
+        comparison = (a.startTime || '').localeCompare(b.startTime || '');
         break;
-      case "price":
+      case 'price':
         comparison = (a.pricePerPerson || 0) - (b.pricePerPerson || 0);
         break;
-      case "votes":
+      case 'votes':
         const aVotes = (a.votes || []).length;
         const bVotes = (b.votes || []).length;
         comparison = aVotes - bVotes;
         break;
-      case "name":
+      case 'name':
         comparison = a.name.localeCompare(b.name);
         break;
     }
 
-    return filters.sortOrder === "asc" ? comparison : -comparison;
+    return filters.sortOrder === 'asc' ? comparison : -comparison;
   });
 
   return filtered;
@@ -328,9 +318,9 @@ export function applyItineraryFilters<T extends {
 // Helper to count active filters
 export function getActiveFilterCount(filters: ItineraryFilters): number {
   let count = 0;
-  if (filters.type !== "all") count++;
-  if (filters.bookingStatus !== "all") count++;
-  if (filters.votingStatus !== "all") count++;
+  if (filters.type !== 'all') count++;
+  if (filters.bookingStatus !== 'all') count++;
+  if (filters.votingStatus !== 'all') count++;
   if (filters.searchQuery) count++;
   return count;
 }

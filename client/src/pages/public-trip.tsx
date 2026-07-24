@@ -1,12 +1,12 @@
-import { useEffect } from "react";
-import { useParams, Link } from "wouter";
-import { useQuery } from "@tanstack/react-query";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Skeleton } from "@/components/ui/skeleton";
-import { TripDestinationHero } from "@/components/trip-destination-hero";
-import { TripMap } from "@/components/trip-map";
-import type { Trip, ItineraryItem } from "@shared/schema";
+import { useEffect } from 'react';
+import { useParams, Link } from 'wouter';
+import { useQuery } from '@tanstack/react-query';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Skeleton } from '@/components/ui/skeleton';
+import { TripDestinationHero } from '@/components/trip-destination-hero';
+import { TripMap } from '@/components/trip-map';
+import type { Trip, ItineraryItem } from '@shared/schema';
 
 interface PublicTripResponse {
   trip: Trip;
@@ -17,11 +17,11 @@ export default function PublicTripPage() {
   const { code } = useParams<{ code: string }>();
 
   const { data, isLoading, error } = useQuery<PublicTripResponse>({
-    queryKey: ["/api/public/trips", code],
+    queryKey: ['/api/public/trips', code],
     queryFn: async () => {
       const res = await fetch(`/api/public/trips/${encodeURIComponent(code)}`);
       if (!res.ok) {
-        throw new Error("Trip not found");
+        throw new Error('Trip not found');
       }
       return res.json();
     },
@@ -53,7 +53,8 @@ export default function PublicTripPage() {
           <CardHeader>
             <CardTitle>Trip not found</CardTitle>
             <CardDescription>
-              This public trip link may have expired or never existed. Ask the organizer to share a new link.
+              This public trip link may have expired or never existed. Ask the organizer to share a
+              new link.
             </CardDescription>
           </CardHeader>
           <CardContent className="flex justify-end">
@@ -78,9 +79,14 @@ export default function PublicTripPage() {
           <div>
             <h1 className="font-heading text-3xl font-bold">{trip.destination}</h1>
             <p className="text-muted-foreground mt-1">
-              {start.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })} –{" "}
-              {end.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })} ·{" "}
-              {trip.groupSize} travelers
+              {start.toLocaleDateString('en-US', {
+                month: 'short',
+                day: 'numeric',
+                year: 'numeric',
+              })}{' '}
+              –{' '}
+              {end.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}{' '}
+              · {trip.groupSize} travelers
             </p>
           </div>
           <div className="flex flex-wrap gap-2">
@@ -115,23 +121,28 @@ export default function PublicTripPage() {
                     <Card key={day}>
                       <CardHeader>
                         <CardTitle className="text-base">
-                          Day {day} ·{" "}
-                          {date.toLocaleDateString("en-US", {
-                            weekday: "short",
-                            month: "short",
-                            day: "numeric",
+                          Day {day} ·{' '}
+                          {date.toLocaleDateString('en-US', {
+                            weekday: 'short',
+                            month: 'short',
+                            day: 'numeric',
                           })}
                         </CardTitle>
                       </CardHeader>
                       <CardContent className="space-y-3">
                         {dayItems.map((item) => (
-                          <div key={item.id} className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                          <div
+                            key={item.id}
+                            className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2"
+                          >
                             <div>
                               <div className="text-xs text-muted-foreground">{item.time}</div>
                               <div className="font-medium">{item.name}</div>
                               <div className="text-xs text-muted-foreground">{item.location}</div>
                             </div>
-                            <div className="text-xs text-muted-foreground capitalize">{item.type}</div>
+                            <div className="text-xs text-muted-foreground capitalize">
+                              {item.type}
+                            </div>
                           </div>
                         ))}
                       </CardContent>
@@ -145,4 +156,3 @@ export default function PublicTripPage() {
     </div>
   );
 }
-

@@ -1,14 +1,43 @@
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Separator } from "@/components/ui/separator";
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
-import { FileText, Download, ExternalLink, Edit2, Trash2, AlertTriangle, Calendar, User, X, ChevronLeft, ChevronRight } from "lucide-react";
-import { useState } from "react";
-import { format, differenceInDays } from "date-fns";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Separator } from '@/components/ui/separator';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
+import {
+  FileText,
+  Download,
+  ExternalLink,
+  Edit2,
+  Trash2,
+  AlertTriangle,
+  Calendar,
+  User,
+  X,
+  ChevronLeft,
+  ChevronRight,
+} from 'lucide-react';
+import { useState } from 'react';
+import { format, differenceInDays } from 'date-fns';
 
 interface TripDocument {
   id: string;
@@ -26,7 +55,10 @@ interface DocumentViewerModalProps {
   onClose: () => void;
   documents: TripDocument[];
   initialDocumentId?: string;
-  onUpdateDocument: (docId: string, updates: { name?: string; notes?: string; expiryDate?: string | null }) => Promise<void>;
+  onUpdateDocument: (
+    docId: string,
+    updates: { name?: string; notes?: string; expiryDate?: string | null }
+  ) => Promise<void>;
   onDeleteDocument: (docId: string) => Promise<void>;
 }
 
@@ -36,17 +68,17 @@ export function DocumentViewerModal({
   documents,
   initialDocumentId,
   onUpdateDocument,
-  onDeleteDocument
+  onDeleteDocument,
 }: DocumentViewerModalProps) {
   const [currentIndex, setCurrentIndex] = useState(() => {
     if (initialDocumentId) {
-      const index = documents.findIndex(d => d.id === initialDocumentId);
+      const index = documents.findIndex((d) => d.id === initialDocumentId);
       return index >= 0 ? index : 0;
     }
     return 0;
   });
   const [isEditing, setIsEditing] = useState(false);
-  const [editForm, setEditForm] = useState({ name: "", notes: "", expiryDate: "" });
+  const [editForm, setEditForm] = useState({ name: '', notes: '', expiryDate: '' });
 
   const currentDoc = documents[currentIndex];
 
@@ -63,8 +95,8 @@ export function DocumentViewerModal({
   const handleStartEdit = () => {
     setEditForm({
       name: currentDoc.name,
-      notes: currentDoc.notes || "",
-      expiryDate: currentDoc.expiryDate || ""
+      notes: currentDoc.notes || '',
+      expiryDate: currentDoc.expiryDate || '',
     });
     setIsEditing(true);
   };
@@ -73,7 +105,7 @@ export function DocumentViewerModal({
     await onUpdateDocument(currentDoc.id, {
       name: editForm.name,
       notes: editForm.notes || undefined,
-      expiryDate: editForm.expiryDate || null
+      expiryDate: editForm.expiryDate || null,
     });
     setIsEditing(false);
   };
@@ -84,13 +116,17 @@ export function DocumentViewerModal({
 
   const getDocumentTypeInfo = (type: string) => {
     const types: Record<string, { label: string; color: string; icon: string }> = {
-      boarding_pass: { label: "Boarding Pass", color: "bg-blue-100 text-blue-800", icon: "✈️" },
-      hotel_confirmation: { label: "Hotel Confirmation", color: "bg-purple-100 text-purple-800", icon: "🏨" },
-      vaccination: { label: "Vaccination", color: "bg-green-100 text-green-800", icon: "💉" },
-      insurance: { label: "Insurance", color: "bg-amber-100 text-amber-800", icon: "🛡️" },
-      visa: { label: "Visa", color: "bg-pink-100 text-pink-800", icon: "📋" },
-      rental: { label: "Rental Confirmation", color: "bg-cyan-100 text-cyan-800", icon: "🚗" },
-      other: { label: "Document", color: "bg-gray-100 text-gray-800", icon: "📄" }
+      boarding_pass: { label: 'Boarding Pass', color: 'bg-blue-100 text-blue-800', icon: '✈️' },
+      hotel_confirmation: {
+        label: 'Hotel Confirmation',
+        color: 'bg-purple-100 text-purple-800',
+        icon: '🏨',
+      },
+      vaccination: { label: 'Vaccination', color: 'bg-green-100 text-green-800', icon: '💉' },
+      insurance: { label: 'Insurance', color: 'bg-amber-100 text-amber-800', icon: '🛡️' },
+      visa: { label: 'Visa', color: 'bg-pink-100 text-pink-800', icon: '📋' },
+      rental: { label: 'Rental Confirmation', color: 'bg-cyan-100 text-cyan-800', icon: '🚗' },
+      other: { label: 'Document', color: 'bg-gray-100 text-gray-800', icon: '📄' },
     };
     return types[type] || types.other;
   };
@@ -101,14 +137,26 @@ export function DocumentViewerModal({
     const days = differenceInDays(new Date(expiryDate), new Date());
 
     if (days < 0) {
-      return { label: "Expired", color: "bg-red-100 text-red-800", urgent: true };
+      return { label: 'Expired', color: 'bg-red-100 text-red-800', urgent: true };
     } else if (days <= 14) {
-      return { label: `Expires in ${days} days`, color: "bg-amber-100 text-amber-800", urgent: true };
+      return {
+        label: `Expires in ${days} days`,
+        color: 'bg-amber-100 text-amber-800',
+        urgent: true,
+      };
     } else if (days <= 30) {
-      return { label: `Expires in ${days} days`, color: "bg-yellow-100 text-yellow-800", urgent: false };
+      return {
+        label: `Expires in ${days} days`,
+        color: 'bg-yellow-100 text-yellow-800',
+        urgent: false,
+      };
     }
 
-    return { label: `Expires ${format(new Date(expiryDate), "MMM d, yyyy")}`, color: "bg-gray-100 text-gray-700", urgent: false };
+    return {
+      label: `Expires ${format(new Date(expiryDate), 'MMM d, yyyy')}`,
+      color: 'bg-gray-100 text-gray-700',
+      urgent: false,
+    };
   };
 
   if (!currentDoc) {
@@ -190,7 +238,7 @@ export function DocumentViewerModal({
             )}
             <Badge variant="outline">
               <Calendar className="h-3 w-3 mr-1" />
-              {format(new Date(currentDoc.createdAt), "MMM d, yyyy")}
+              {format(new Date(currentDoc.createdAt), 'MMM d, yyyy')}
             </Badge>
           </div>
 
@@ -203,7 +251,7 @@ export function DocumentViewerModal({
                   <Label>Document Name</Label>
                   <Input
                     value={editForm.name}
-                    onChange={(e) => setEditForm(prev => ({ ...prev, name: e.target.value }))}
+                    onChange={(e) => setEditForm((prev) => ({ ...prev, name: e.target.value }))}
                     className="mt-1"
                   />
                 </div>
@@ -211,7 +259,7 @@ export function DocumentViewerModal({
                   <Label>Notes</Label>
                   <Input
                     value={editForm.notes}
-                    onChange={(e) => setEditForm(prev => ({ ...prev, notes: e.target.value }))}
+                    onChange={(e) => setEditForm((prev) => ({ ...prev, notes: e.target.value }))}
                     placeholder="Optional notes or reminders"
                     className="mt-1"
                   />
@@ -221,13 +269,19 @@ export function DocumentViewerModal({
                   <Input
                     type="date"
                     value={editForm.expiryDate}
-                    onChange={(e) => setEditForm(prev => ({ ...prev, expiryDate: e.target.value }))}
+                    onChange={(e) =>
+                      setEditForm((prev) => ({ ...prev, expiryDate: e.target.value }))
+                    }
                     className="mt-1"
                   />
                 </div>
                 <div className="flex gap-2 pt-2">
-                  <Button size="sm" onClick={handleSaveEdit}>Save Changes</Button>
-                  <Button size="sm" variant="outline" onClick={() => setIsEditing(false)}>Cancel</Button>
+                  <Button size="sm" onClick={handleSaveEdit}>
+                    Save Changes
+                  </Button>
+                  <Button size="sm" variant="outline" onClick={() => setIsEditing(false)}>
+                    Cancel
+                  </Button>
                 </div>
               </div>
             </Card>
@@ -247,8 +301,11 @@ export function DocumentViewerModal({
                     <div>
                       <p className="text-sm font-medium text-amber-900">Expiry Warning</p>
                       <p className="text-sm text-amber-800 mt-1">
-                        This document {differenceInDays(new Date(currentDoc.expiryDate!), new Date()) < 0 ? 'has expired' : 'is expiring soon'}.
-                        Please renew or update as needed.
+                        This document{' '}
+                        {differenceInDays(new Date(currentDoc.expiryDate!), new Date()) < 0
+                          ? 'has expired'
+                          : 'is expiring soon'}
+                        . Please renew or update as needed.
                       </p>
                     </div>
                   </div>
@@ -311,7 +368,7 @@ export function DocumentViewerModal({
                     onClick={async () => {
                       await onDeleteDocument(currentDoc.id);
                       if (documents.length > 1) {
-                        setCurrentIndex(prev => Math.min(prev, documents.length - 2));
+                        setCurrentIndex((prev) => Math.min(prev, documents.length - 2));
                       } else {
                         onClose();
                       }
@@ -331,7 +388,9 @@ export function DocumentViewerModal({
             <p className="text-xs text-muted-foreground">
               Use arrow buttons to navigate between documents
             </p>
-            <Button variant="outline" onClick={onClose}>Close</Button>
+            <Button variant="outline" onClick={onClose}>
+              Close
+            </Button>
           </div>
         </DialogFooter>
       </DialogContent>

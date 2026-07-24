@@ -376,12 +376,14 @@ User Browser        API Server     Feature Flags    S3/R2       Database
 ## Scaling Strategy (Future)
 
 ### Phase 1: Current (v1.0) - Single Server
+
 - **Capacity**: 1,000-5,000 concurrent users
 - **Architecture**: Monolithic (all services on one server)
 - **Database**: Single PostgreSQL instance
 - **Caching**: Redis on same server
 
 ### Phase 2: Horizontal Scaling (v1.5+)
+
 ```
 ┌─────────────────────────────────────────────────────────┐
 │  Load Balancer (NGINX / AWS ALB)                        │
@@ -404,6 +406,7 @@ User Browser        API Server     Feature Flags    S3/R2       Database
 ```
 
 ### Phase 3: Microservices (v2.0+)
+
 ```
                  ┌──────────────┐
                  │ API Gateway  │
@@ -461,29 +464,29 @@ User Browser        API Server     Feature Flags    S3/R2       Database
 
 ## Technology Stack Summary
 
-| Layer | Technology | Purpose |
-|-------|-----------|---------|
-| **Frontend** | React 19 + TypeScript | UI components and state |
-| | Vite | Build tool and dev server |
-| | TailwindCSS | Styling |
-| | Radix UI | Accessible components |
-| | TanStack Query | Server state management |
-| **Backend** | Node.js 20 + Express | API server |
-| | TypeScript | Type safety |
-| | JWT | Authentication |
-| **Database** | PostgreSQL 16 | Primary data store |
-| | Drizzle ORM | Type-safe queries |
-| **Cache** | Redis 7 | Sessions, rate limiting |
-| **AI** | Anthropic Claude Sonnet 4.5 | Trip generation, chat |
-| **Storage** | Cloudflare R2 / AWS S3 | File uploads |
-| **Email** | SMTP (SendGrid/Gmail) | Transactional emails |
-| **Payments** | Stripe | Subscriptions |
-| **Monitoring** | Sentry | Error tracking |
-| | UptimeRobot | Uptime monitoring |
-| | PostHog / GA | Product analytics |
-| **Deployment** | Docker + Compose | Containerization |
-| | NGINX | Reverse proxy |
-| | Let's Encrypt | SSL certificates |
+| Layer          | Technology                  | Purpose                   |
+| -------------- | --------------------------- | ------------------------- |
+| **Frontend**   | React 19 + TypeScript       | UI components and state   |
+|                | Vite                        | Build tool and dev server |
+|                | TailwindCSS                 | Styling                   |
+|                | Radix UI                    | Accessible components     |
+|                | TanStack Query              | Server state management   |
+| **Backend**    | Node.js 20 + Express        | API server                |
+|                | TypeScript                  | Type safety               |
+|                | JWT                         | Authentication            |
+| **Database**   | PostgreSQL 16               | Primary data store        |
+|                | Drizzle ORM                 | Type-safe queries         |
+| **Cache**      | Redis 7                     | Sessions, rate limiting   |
+| **AI**         | Anthropic Claude Sonnet 4.5 | Trip generation, chat     |
+| **Storage**    | Cloudflare R2 / AWS S3      | File uploads              |
+| **Email**      | SMTP (SendGrid/Gmail)       | Transactional emails      |
+| **Payments**   | Stripe                      | Subscriptions             |
+| **Monitoring** | Sentry                      | Error tracking            |
+|                | UptimeRobot                 | Uptime monitoring         |
+|                | PostHog / GA                | Product analytics         |
+| **Deployment** | Docker + Compose            | Containerization          |
+|                | NGINX                       | Reverse proxy             |
+|                | Let's Encrypt               | SSL certificates          |
 
 ---
 

@@ -1,7 +1,7 @@
-import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { TrendingUp, TrendingDown } from "lucide-react";
-import { format, parseISO } from "date-fns";
+import { Card } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { TrendingUp, TrendingDown } from 'lucide-react';
+import { format, parseISO } from 'date-fns';
 
 interface DailySpending {
   date: string; // ISO date string
@@ -14,16 +14,13 @@ interface DailySpendingTrendChartProps {
   currency: string;
 }
 
-export function DailySpendingTrendChart({
-  data,
-  currency
-}: DailySpendingTrendChartProps) {
+export function DailySpendingTrendChart({ data, currency }: DailySpendingTrendChartProps) {
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
       currency: currency,
       minimumFractionDigits: 0,
-      maximumFractionDigits: 0
+      maximumFractionDigits: 0,
     }).format(amount);
   };
 
@@ -49,7 +46,7 @@ export function DailySpendingTrendChart({
   const innerHeight = chartHeight - padding.top - padding.bottom;
 
   // Find min and max values
-  const maxAmount = Math.max(...data.map(d => d.amount));
+  const maxAmount = Math.max(...data.map((d) => d.amount));
   const minAmount = 0;
 
   // Calculate scales
@@ -58,22 +55,26 @@ export function DailySpendingTrendChart({
   };
 
   const yScale = (value: number) => {
-    return padding.top + innerHeight - ((value - minAmount) / (maxAmount - minAmount)) * innerHeight;
+    return (
+      padding.top + innerHeight - ((value - minAmount) / (maxAmount - minAmount)) * innerHeight
+    );
   };
 
   // Generate path for line
-  const linePath = data.map((d, i) => {
-    const x = xScale(i);
-    const y = yScale(d.amount);
-    return i === 0 ? `M ${x} ${y}` : `L ${x} ${y}`;
-  }).join(' ');
+  const linePath = data
+    .map((d, i) => {
+      const x = xScale(i);
+      const y = yScale(d.amount);
+      return i === 0 ? `M ${x} ${y}` : `L ${x} ${y}`;
+    })
+    .join(' ');
 
   // Generate area path
   const areaPath = [
     linePath,
     `L ${xScale(data.length - 1)} ${padding.top + innerHeight}`,
     `L ${xScale(0)} ${padding.top + innerHeight}`,
-    'Z'
+    'Z',
   ].join(' ');
 
   // Calculate trend
@@ -93,19 +94,18 @@ export function DailySpendingTrendChart({
         <div className="flex items-center gap-2">
           {trend === 'up' && (
             <Badge variant="destructive" className="flex items-center gap-1">
-              <TrendingUp className="h-3 w-3" />
-              +{Math.abs(trendPercentage).toFixed(1)}%
+              <TrendingUp className="h-3 w-3" />+{Math.abs(trendPercentage).toFixed(1)}%
             </Badge>
           )}
           {trend === 'down' && (
-            <Badge variant="secondary" className="flex items-center gap-1 bg-green-100 text-green-800">
-              <TrendingDown className="h-3 w-3" />
-              -{Math.abs(trendPercentage).toFixed(1)}%
+            <Badge
+              variant="secondary"
+              className="flex items-center gap-1 bg-green-100 text-green-800"
+            >
+              <TrendingDown className="h-3 w-3" />-{Math.abs(trendPercentage).toFixed(1)}%
             </Badge>
           )}
-          {trend === 'stable' && (
-            <Badge variant="outline">Stable</Badge>
-          )}
+          {trend === 'stable' && <Badge variant="outline">Stable</Badge>}
         </div>
       </div>
 
@@ -118,7 +118,7 @@ export function DailySpendingTrendChart({
         >
           {/* Grid lines */}
           {[0, 0.25, 0.5, 0.75, 1].map((percent, i) => {
-            const y = padding.top + innerHeight - (percent * innerHeight);
+            const y = padding.top + innerHeight - percent * innerHeight;
             return (
               <g key={i}>
                 <line
@@ -142,11 +142,7 @@ export function DailySpendingTrendChart({
           })}
 
           {/* Area */}
-          <path
-            d={areaPath}
-            fill="url(#areaGradient)"
-            opacity="0.3"
-          />
+          <path d={areaPath} fill="url(#areaGradient)" opacity="0.3" />
 
           {/* Line */}
           <path
@@ -214,7 +210,8 @@ export function DailySpendingTrendChart({
       {trend === 'up' && (
         <div className="mt-4 p-3 bg-amber-50 border border-amber-200 rounded-lg">
           <p className="text-sm text-amber-900">
-            <strong>Note:</strong> Your daily spending has increased by {Math.abs(trendPercentage).toFixed(1)}% since the start of your trip
+            <strong>Note:</strong> Your daily spending has increased by{' '}
+            {Math.abs(trendPercentage).toFixed(1)}% since the start of your trip
           </p>
         </div>
       )}
@@ -222,7 +219,8 @@ export function DailySpendingTrendChart({
       {trend === 'down' && (
         <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded-lg">
           <p className="text-sm text-green-900">
-            <strong>Great job!</strong> Your daily spending has decreased by {Math.abs(trendPercentage).toFixed(1)}% since the start of your trip
+            <strong>Great job!</strong> Your daily spending has decreased by{' '}
+            {Math.abs(trendPercentage).toFixed(1)}% since the start of your trip
           </p>
         </div>
       )}

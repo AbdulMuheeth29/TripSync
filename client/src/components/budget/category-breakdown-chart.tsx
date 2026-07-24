@@ -1,6 +1,6 @@
-import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { PieChart } from "lucide-react";
+import { Card } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { PieChart } from 'lucide-react';
 
 interface CategoryData {
   category: string;
@@ -16,27 +16,27 @@ interface CategoryBreakdownChartProps {
 }
 
 const CATEGORY_COLORS: Record<string, string> = {
-  "Accommodation": "#3b82f6", // blue
-  "Transportation": "#10b981", // green
-  "Food & Dining": "#f59e0b", // amber
-  "Activities": "#8b5cf6", // purple
-  "Shopping": "#ec4899", // pink
-  "Entertainment": "#14b8a6", // teal
-  "Groceries": "#84cc16", // lime
-  "Other": "#6b7280" // gray
+  Accommodation: '#3b82f6', // blue
+  Transportation: '#10b981', // green
+  'Food & Dining': '#f59e0b', // amber
+  Activities: '#8b5cf6', // purple
+  Shopping: '#ec4899', // pink
+  Entertainment: '#14b8a6', // teal
+  Groceries: '#84cc16', // lime
+  Other: '#6b7280', // gray
 };
 
 export function CategoryBreakdownChart({
   data,
   totalAmount,
-  currency
+  currency,
 }: CategoryBreakdownChartProps) {
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
       currency: currency,
       minimumFractionDigits: 0,
-      maximumFractionDigits: 0
+      maximumFractionDigits: 0,
     }).format(amount);
   };
 
@@ -64,17 +64,16 @@ export function CategoryBreakdownChart({
 
     const largeArc = angle > 180 ? 1 : 0;
 
-    const pathData = [
-      `M ${x1} ${y1}`,
-      `A ${radius} ${radius} 0 ${largeArc} 1 ${x2} ${y2}`
-    ].join(' ');
+    const pathData = [`M ${x1} ${y1}`, `A ${radius} ${radius} 0 ${largeArc} 1 ${x2} ${y2}`].join(
+      ' '
+    );
 
     currentAngle = endAngle;
 
     return {
       ...item,
       pathData,
-      color: CATEGORY_COLORS[item.category] || CATEGORY_COLORS["Other"]
+      color: CATEGORY_COLORS[item.category] || CATEGORY_COLORS['Other'],
     };
   });
 
@@ -88,10 +87,7 @@ export function CategoryBreakdownChart({
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
         {/* Donut Chart */}
         <div className="flex flex-col items-center">
-          <svg
-            viewBox="0 0 200 200"
-            className="w-full max-w-[280px]"
-          >
+          <svg viewBox="0 0 200 200" className="w-full max-w-[280px]">
             {/* Background circle */}
             <circle
               cx={centerX}
@@ -146,13 +142,13 @@ export function CategoryBreakdownChart({
               <div className="flex items-center gap-3 flex-1 min-w-0">
                 <div
                   className="w-4 h-4 rounded-full flex-shrink-0"
-                  style={{ backgroundColor: CATEGORY_COLORS[item.category] || CATEGORY_COLORS["Other"] }}
+                  style={{
+                    backgroundColor: CATEGORY_COLORS[item.category] || CATEGORY_COLORS['Other'],
+                  }}
                 />
                 <div className="flex-1 min-w-0">
                   <p className="font-medium truncate">{item.category}</p>
-                  <p className="text-sm text-muted-foreground">
-                    {formatCurrency(item.amount)}
-                  </p>
+                  <p className="text-sm text-muted-foreground">{formatCurrency(item.amount)}</p>
                 </div>
               </div>
               <Badge variant="secondary" className="flex-shrink-0">
@@ -175,7 +171,8 @@ export function CategoryBreakdownChart({
       {data.length > 0 && (
         <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
           <p className="text-sm text-blue-900">
-            <strong>Top category:</strong> {data[0]?.category} ({data[0]?.percentage.toFixed(1)}% of total spending)
+            <strong>Top category:</strong> {data[0]?.category} ({data[0]?.percentage.toFixed(1)}% of
+            total spending)
           </p>
         </div>
       )}

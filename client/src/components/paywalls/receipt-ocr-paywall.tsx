@@ -1,8 +1,15 @@
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Scan, FileImage, Sparkles, Check, Zap } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Scan, FileImage, Sparkles, Check, Zap } from 'lucide-react';
 
 interface ReceiptOCRPaywallProps {
   isOpen: boolean;
@@ -12,25 +19,25 @@ interface ReceiptOCRPaywallProps {
 }
 
 const OCR_FEATURES = [
-  "Instant receipt scanning with AI",
-  "Auto-extract amount, date, and merchant",
-  "Detect line items and categories",
-  "Support for 15+ currencies",
-  "Batch upload multiple receipts",
-  "Cloud storage for all receipts"
+  'Instant receipt scanning with AI',
+  'Auto-extract amount, date, and merchant',
+  'Detect line items and categories',
+  'Support for 15+ currencies',
+  'Batch upload multiple receipts',
+  'Cloud storage for all receipts',
 ];
 
 const TIME_SAVINGS = [
-  { task: "Manual entry", time: "~2 min per receipt" },
-  { task: "With OCR", time: "~5 seconds" },
-  { task: "Time saved", time: "115 seconds" }
+  { task: 'Manual entry', time: '~2 min per receipt' },
+  { task: 'With OCR', time: '~5 seconds' },
+  { task: 'Time saved', time: '115 seconds' },
 ];
 
 export function ReceiptOCRPaywall({
   isOpen,
   onClose,
   onUpgrade,
-  onManualEntry
+  onManualEntry,
 }: ReceiptOCRPaywallProps) {
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -40,9 +47,7 @@ export function ReceiptOCRPaywall({
             <Scan className="h-8 w-8 text-white" />
           </div>
           <div className="flex items-center justify-center gap-2 mb-2">
-            <DialogTitle className="text-center text-2xl">
-              Receipt OCR
-            </DialogTitle>
+            <DialogTitle className="text-center text-2xl">Receipt OCR</DialogTitle>
             <Badge className="bg-gradient-to-r from-green-500 to-emerald-600">
               <Sparkles className="h-3 w-3 mr-1" />
               Pro Feature
@@ -79,9 +84,9 @@ export function ReceiptOCRPaywall({
               {TIME_SAVINGS.map((item, index) => (
                 <div key={index} className="flex justify-between text-sm">
                   <span className="text-muted-foreground">{item.task}</span>
-                  <span className={`font-medium ${
-                    index === 2 ? "text-green-600" : ""
-                  }`}>{item.time}</span>
+                  <span className={`font-medium ${index === 2 ? 'text-green-600' : ''}`}>
+                    {item.time}
+                  </span>
                 </div>
               ))}
             </div>
@@ -105,8 +110,8 @@ export function ReceiptOCRPaywall({
           {/* Example */}
           <Card className="p-3 bg-blue-50 border-blue-200">
             <p className="text-xs text-blue-800">
-              <strong>Example:</strong> Upload a restaurant receipt → AI detects:
-              "$45.50, Dinner, Italian Bistro, April 15, 2024" → Click save!
+              <strong>Example:</strong> Upload a restaurant receipt → AI detects: "$45.50, Dinner,
+              Italian Bistro, April 15, 2024" → Click save!
             </p>
           </Card>
 
@@ -117,9 +122,7 @@ export function ReceiptOCRPaywall({
               <p className="text-3xl font-bold text-primary mb-1">
                 $4.99<span className="text-base font-normal text-muted-foreground">/month</span>
               </p>
-              <p className="text-xs text-muted-foreground">
-                14-day free trial • Cancel anytime
-              </p>
+              <p className="text-xs text-muted-foreground">14-day free trial • Cancel anytime</p>
             </div>
           </Card>
         </div>

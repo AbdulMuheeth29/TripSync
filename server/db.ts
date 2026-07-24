@@ -1,6 +1,6 @@
-import { drizzle } from "drizzle-orm/node-postgres";
-import pg from "pg";
-import * as schema from "@shared/schema";
+import { drizzle } from 'drizzle-orm/node-postgres';
+import pg from 'pg';
+import * as schema from '@shared/schema';
 
 /**
  * PostgreSQL connection. Required in production.
@@ -13,7 +13,7 @@ let _pool: pg.Pool | null = null;
 let _db: ReturnType<typeof drizzle> | null = null;
 
 export function getDb(): ReturnType<typeof drizzle<typeof schema>> {
-  if (!connectionString) throw new Error("DATABASE_URL is not set");
+  if (!connectionString) throw new Error('DATABASE_URL is not set');
   if (!_db) {
     _pool = new pg.Pool({
       connectionString,

@@ -12,16 +12,19 @@
 ### 1. **Landing Page** (`client/src/pages/landing.tsx`)
 
 #### Hero Section:
+
 - **Tagline:** "Group travel, simplified" → "Group trip planning, perfected"
 - **Headline:** "Plan group trips in 10 minutes, not 10 hours" → "Plan unforgettable group trips in minutes, not hours"
 - **Subheadline:** Complete rewrite with stronger value proposition and benefits
 
 #### Trust Signals:
+
 - "Free to use" → "Free forever plan"
 - "No credit card" → "No credit card required"
 - "Invite by email" → "Instant collaboration via email"
 
 #### Features Section (6 features updated):
+
 1. **AI-Powered Planning** → **AI-Powered Itineraries** (expanded description)
 2. **Group Collaboration** → **Real-Time Collaboration** (clearer benefits)
 3. **Smart Scheduling** → **Intelligent Scheduling** (more professional)
@@ -30,12 +33,14 @@
 6. **One-Click Booking** → **Seamless Booking Links** (modern terminology)
 
 #### How It Works Steps:
+
 - Step 1: "Enter details" → "Set Your Trip Details"
 - Step 2: "Invite & preferences" → "Invite Your Group"
 - Step 3: "AI generates" → "Get AI Recommendations"
 - Step 4: "Vote, chat & book" → "Collaborate & Book"
 
 #### Final CTA:
+
 - "Ready to plan your next adventure?" → "Start planning smarter group trips today"
 - Added social proof: "Join thousands of travelers..."
 - Button: "Start Planning for Free" → "Create Your First Trip—Free"
@@ -45,26 +50,31 @@
 ### 2. **Pricing Page** (`client/src/pages/pricing.tsx`)
 
 #### Hero:
+
 - "Simple, transparent pricing" → "Transparent pricing that grows with you"
 - Removed casual "no questions asked" → "Flexible billing with no long-term commitment"
 
 #### Plan Descriptions:
+
 - **Free:** "Perfect for trying out TripSync" → "Perfect for occasional group trips"
 - **Pro:** "For frequent travelers & groups" → "Best for frequent travelers"
 - **Teams:** "For travel agents & professionals" → "Built for travel professionals"
 
 #### Trust Signals (4 cards):
+
 1. "14-Day Trial / Try Pro risk-free" → "Risk-Free Trial / 14 days to explore Pro features"
 2. "Instant Access / Start planning immediately" → "Instant Activation / Start planning within minutes"
 3. "Cancel Anytime / No long-term commitment" → "Flexible Billing / Cancel anytime without penalties"
 4. "10,000+ Trips / Trusted by travelers" → "Trusted Globally / Join 10,000+ travelers"
 
 #### FAQ Updates (3 key questions):
+
 - Free trial answer: "Yes!" → "Yes." (more professional, removed exclamation)
 - Cancel answer: "Absolutely." → "Yes." (consistency)
 - Free limits: Clearer explanation with "read-only mode" specifics
 
 #### Final CTA:
+
 - "Ready to start planning?" → "Start planning smarter group trips"
 - "creating amazing group trips" → "who've transformed their group trip planning"
 
@@ -128,14 +138,14 @@
 
 ### Tone Transformation:
 
-| Before | After |
-|--------|-------|
-| Casual, vague | Professional, specific |
-| "killer website" | "outstanding platform" |
-| "no questions asked" | "no penalties" |
-| "Stress-free" | "Seamless" |
-| "Get started" | "Start planning" / "Create your trip" |
-| "Awesome" | "Powerful" / "Advanced" |
+| Before               | After                                 |
+| -------------------- | ------------------------------------- |
+| Casual, vague        | Professional, specific                |
+| "killer website"     | "outstanding platform"                |
+| "no questions asked" | "no penalties"                        |
+| "Stress-free"        | "Seamless"                            |
+| "Get started"        | "Start planning" / "Create your trip" |
+| "Awesome"            | "Powerful" / "Advanced"               |
 
 ### Key Improvements:
 
@@ -176,16 +186,19 @@ Based on industry benchmarks for professional copywriting:
 ## 🔍 COMPARISON TO COMPETITORS
 
 ### Wanderlog:
+
 - **Their tone:** Professional, travel-focused
 - **TripSync now:** ✅ Matches professional level
 - **Example:** "Build your perfect itinerary in minutes" vs our "Generate complete trip plans in minutes"
 
 ### TripIt:
+
 - **Their tone:** Enterprise-grade, precise
 - **TripSync now:** ✅ Professional terminology adopted
 - **Example:** "Organize your travel plans" vs our "Manage your plan"
 
 ### Roadtrippers:
+
 - **Their tone:** Adventurous but professional
 - **TripSync now:** ✅ Balanced emotional + functional
 - **Example:** "Discover extraordinary places" vs our "Plan unforgettable group trips"
@@ -205,6 +218,7 @@ Based on industry benchmarks for professional copywriting:
 ### Maintained Warmth:
 
 While making the copy professional, we kept:
+
 - ✅ Approachable tone (not corporate-stiff)
 - ✅ Emotional benefits ("unforgettable trips", "creating memories")
 - ✅ User-centric language ("your group", "your trip")
@@ -255,6 +269,7 @@ Then you're **100% ready for launch!** 🎉
 ## ✅ QUALITY ASSURANCE
 
 All copy changes:
+
 - ✅ Preserve existing functionality (no code logic changed)
 - ✅ Maintain responsive design
 - ✅ Keep accessibility attributes

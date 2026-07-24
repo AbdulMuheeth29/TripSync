@@ -1,13 +1,28 @@
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Sparkles, Users, TrendingUp, DollarSign, Calendar, AlertCircle, Lightbulb } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import {
+  Sparkles,
+  Users,
+  TrendingUp,
+  DollarSign,
+  Calendar,
+  AlertCircle,
+  Lightbulb,
+} from 'lucide-react';
 
 interface GroupSizeRecommendation {
   suggestedSize: number;
   reason: string;
-  impact: "budget" | "logistics" | "activities";
+  impact: 'budget' | 'logistics' | 'activities';
 }
 
 interface GroupSizeAlertModalProps {
@@ -20,10 +35,13 @@ interface GroupSizeAlertModalProps {
   onAdjustGroup?: () => void;
 }
 
-const IMPACT_INFO: Record<GroupSizeRecommendation['impact'], { icon: typeof DollarSign; color: string; label: string }> = {
-  budget: { icon: DollarSign, label: "Budget Impact", color: "text-green-600" },
-  logistics: { icon: Calendar, label: "Logistics", color: "text-blue-600" },
-  activities: { icon: Users, label: "Activities", color: "text-purple-600" }
+const IMPACT_INFO: Record<
+  GroupSizeRecommendation['impact'],
+  { icon: typeof DollarSign; color: string; label: string }
+> = {
+  budget: { icon: DollarSign, label: 'Budget Impact', color: 'text-green-600' },
+  logistics: { icon: Calendar, label: 'Logistics', color: 'text-blue-600' },
+  activities: { icon: Users, label: 'Activities', color: 'text-purple-600' },
 };
 
 export function GroupSizeAlertModal({
@@ -33,7 +51,7 @@ export function GroupSizeAlertModal({
   recommendations,
   tripType,
   destination,
-  onAdjustGroup
+  onAdjustGroup,
 }: GroupSizeAlertModalProps) {
   const topRecommendation = recommendations[0];
 
@@ -60,8 +78,8 @@ export function GroupSizeAlertModal({
               <div className="flex-1">
                 <p className="text-sm font-medium text-primary mb-1">Atlas Recommendation</p>
                 <p className="text-sm text-muted-foreground">
-                  Based on your {tripType} trip to {destination}, I've analyzed the optimal group size
-                  for the best experience.
+                  Based on your {tripType} trip to {destination}, I've analyzed the optimal group
+                  size for the best experience.
                 </p>
               </div>
             </div>
@@ -84,10 +102,10 @@ export function GroupSizeAlertModal({
               <div className="text-center">
                 <TrendingUp className="h-6 w-6 text-green-600 mx-auto mb-2" />
                 <p className="text-xs text-muted-foreground mb-1">Recommended</p>
-                <p className="text-3xl font-bold text-green-900">{topRecommendation.suggestedSize}</p>
-                <Badge className="mt-2 bg-green-100 text-green-800">
-                  Optimal
-                </Badge>
+                <p className="text-3xl font-bold text-green-900">
+                  {topRecommendation.suggestedSize}
+                </p>
+                <Badge className="mt-2 bg-green-100 text-green-800">Optimal</Badge>
               </div>
             </Card>
           </div>
@@ -113,9 +131,7 @@ export function GroupSizeAlertModal({
                             {impactInfo.label}
                           </Badge>
                           {rec.suggestedSize === topRecommendation.suggestedSize && index === 0 && (
-                            <Badge className="text-xs bg-primary">
-                              Primary Reason
-                            </Badge>
+                            <Badge className="text-xs bg-primary">Primary Reason</Badge>
                           )}
                         </div>
                         <p className="text-sm text-muted-foreground">{rec.reason}</p>
@@ -140,13 +156,15 @@ export function GroupSizeAlertModal({
                   <p className="flex items-start gap-2">
                     <span className="text-blue-600">•</span>
                     <span>
-                      Smaller groups ({topRecommendation.suggestedSize} people) can more easily book restaurant reservations and coordinate schedules
+                      Smaller groups ({topRecommendation.suggestedSize} people) can more easily book
+                      restaurant reservations and coordinate schedules
                     </span>
                   </p>
                   <p className="flex items-start gap-2">
                     <span className="text-blue-600">•</span>
                     <span>
-                      Transportation costs per person are usually lower with {topRecommendation.suggestedSize} people (optimal for ride-sharing)
+                      Transportation costs per person are usually lower with{' '}
+                      {topRecommendation.suggestedSize} people (optimal for ride-sharing)
                     </span>
                   </p>
                   <p className="flex items-start gap-2">
@@ -161,20 +179,20 @@ export function GroupSizeAlertModal({
                   <p className="flex items-start gap-2">
                     <span className="text-blue-600">•</span>
                     <span>
-                      Larger groups ({topRecommendation.suggestedSize} people) can split accommodation costs more effectively
+                      Larger groups ({topRecommendation.suggestedSize} people) can split
+                      accommodation costs more effectively
                     </span>
                   </p>
                   <p className="flex items-start gap-2">
                     <span className="text-blue-600">•</span>
                     <span>
-                      Group activities and tours often have better per-person rates with {topRecommendation.suggestedSize}+ people
+                      Group activities and tours often have better per-person rates with{' '}
+                      {topRecommendation.suggestedSize}+ people
                     </span>
                   </p>
                   <p className="flex items-start gap-2">
                     <span className="text-blue-600">•</span>
-                    <span>
-                      More people means more diverse perspectives and shared experiences
-                    </span>
+                    <span>More people means more diverse perspectives and shared experiences</span>
                   </p>
                 </>
               )}

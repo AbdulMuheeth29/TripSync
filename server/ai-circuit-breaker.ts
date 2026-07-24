@@ -14,14 +14,14 @@
 export enum CircuitState {
   CLOSED = 'CLOSED',
   OPEN = 'OPEN',
-  HALF_OPEN = 'HALF_OPEN'
+  HALF_OPEN = 'HALF_OPEN',
 }
 
 export interface CircuitBreakerOptions {
-  failureThreshold?: number;      // Failures before opening (default: 5)
-  successThreshold?: number;      // Successes in half-open before closing (default: 2)
-  timeout?: number;               // Time to wait before trying half-open (default: 30s)
-  monitoringWindow?: number;      // Time window for counting failures (default: 60s)
+  failureThreshold?: number; // Failures before opening (default: 5)
+  successThreshold?: number; // Successes in half-open before closing (default: 2)
+  timeout?: number; // Time to wait before trying half-open (default: 30s)
+  monitoringWindow?: number; // Time window for counting failures (default: 60s)
 }
 
 export class CircuitBreaker {
@@ -36,7 +36,10 @@ export class CircuitBreaker {
   private readonly timeout: number;
   private readonly monitoringWindow: number;
 
-  constructor(private readonly name: string, options: CircuitBreakerOptions = {}) {
+  constructor(
+    private readonly name: string,
+    options: CircuitBreakerOptions = {}
+  ) {
     this.failureThreshold = options.failureThreshold ?? 5;
     this.successThreshold = options.successThreshold ?? 2;
     this.timeout = options.timeout ?? 30000; // 30 seconds
@@ -62,7 +65,7 @@ export class CircuitBreaker {
 
       throw new CircuitBreakerError(
         `AI service circuit breaker is OPEN for "${this.name}". ` +
-        `Try again in ${waitTime}s. This prevents system overload during AI service issues.`,
+          `Try again in ${waitTime}s. This prevents system overload during AI service issues.`,
         this.state
       );
     }
@@ -86,7 +89,9 @@ export class CircuitBreaker {
 
     if (this.state === CircuitState.HALF_OPEN) {
       this.successCount++;
-      console.log(`✅ Circuit breaker "${this.name}" success in HALF_OPEN (${this.successCount}/${this.successThreshold})`);
+      console.log(
+        `✅ Circuit breaker "${this.name}" success in HALF_OPEN (${this.successCount}/${this.successThreshold})`
+      );
 
       if (this.successCount >= this.successThreshold) {
         console.log(`🔓 Circuit breaker "${this.name}" closing (service recovered)`);
@@ -105,13 +110,15 @@ export class CircuitBreaker {
     this.lastFailureTime = now;
 
     // Reset failure count if outside monitoring window
-    if (this.lastFailureTime && (now - this.lastFailureTime) > this.monitoringWindow) {
+    if (this.lastFailureTime && now - this.lastFailureTime > this.monitoringWindow) {
       this.failureCount = 0;
     }
 
     this.failureCount++;
 
-    console.warn(`⚠️  Circuit breaker "${this.name}" failure (${this.failureCount}/${this.failureThreshold})`);
+    console.warn(
+      `⚠️  Circuit breaker "${this.name}" failure (${this.failureCount}/${this.failureThreshold})`
+    );
 
     // Open circuit if threshold exceeded
     if (this.failureCount >= this.failureThreshold) {
@@ -135,7 +142,7 @@ export class CircuitBreaker {
    */
   private shouldAttemptReset(): boolean {
     if (!this.openedAt) return false;
-    return (Date.now() - this.openedAt) >= this.timeout;
+    return Date.now() - this.openedAt >= this.timeout;
   }
 
   /**
@@ -148,7 +155,7 @@ export class CircuitBreaker {
       failureCount: this.failureCount,
       successCount: this.successCount,
       openedAt: this.openedAt,
-      lastFailureTime: this.lastFailureTime
+      lastFailureTime: this.lastFailureTime,
     };
   }
 
@@ -207,6 +214,6 @@ export const aiCircuitBreakers = {
 export function getAllCircuitBreakerStatus() {
   return Object.entries(aiCircuitBreakers).map(([key, breaker]) => ({
     key,
-    ...breaker.getStatus()
+    ...breaker.getStatus(),
   }));
 }

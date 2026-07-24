@@ -1,11 +1,18 @@
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Progress } from "@/components/ui/progress";
-import { AlertCircle, Clock, Users, CheckCircle2, XCircle, Calendar } from "lucide-react";
-import { format, formatDistanceToNow, differenceInHours } from "date-fns";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Progress } from '@/components/ui/progress';
+import { AlertCircle, Clock, Users, CheckCircle2, XCircle, Calendar } from 'lucide-react';
+import { format, formatDistanceToNow, differenceInHours } from 'date-fns';
 
 interface VoterStatus {
   userId: string;
@@ -18,7 +25,7 @@ interface VoteItem {
   id: string;
   title: string;
   description: string;
-  type: "activity" | "destination" | "budget" | "date" | "general";
+  type: 'activity' | 'destination' | 'budget' | 'date' | 'general';
   deadline: Date;
   createdBy: string;
   totalVoters: number;
@@ -44,10 +51,15 @@ export function VoteDeadlineModal({
   currentUserId,
   onVoteNow,
   onExtendDeadline,
-  onRemindMembers
+  onRemindMembers,
 }: VoteDeadlineModalProps) {
   const getInitials = (name: string) => {
-    return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+    return name
+      .split(' ')
+      .map((n) => n[0])
+      .join('')
+      .toUpperCase()
+      .slice(0, 2);
   };
 
   const hoursUntilDeadline = differenceInHours(vote.deadline, new Date());
@@ -56,35 +68,35 @@ export function VoteDeadlineModal({
   const isPast = hoursUntilDeadline < 0;
 
   const percentageVoted = (vote.votedCount / vote.totalVoters) * 100;
-  const currentUserVoted = vote.voters.find(v => v.userId === currentUserId)?.hasVoted;
+  const currentUserVoted = vote.voters.find((v) => v.userId === currentUserId)?.hasVoted;
 
   const getTypeIcon = () => {
     switch (vote.type) {
-      case "activity":
-        return "🎯";
-      case "destination":
-        return "📍";
-      case "budget":
-        return "💰";
-      case "date":
-        return "📅";
+      case 'activity':
+        return '🎯';
+      case 'destination':
+        return '📍';
+      case 'budget':
+        return '💰';
+      case 'date':
+        return '📅';
       default:
-        return "📋";
+        return '📋';
     }
   };
 
   const getUrgencyColor = () => {
-    if (isPast) return "text-red-600";
-    if (isCritical) return "text-red-600";
-    if (isUrgent) return "text-amber-600";
-    return "text-blue-600";
+    if (isPast) return 'text-red-600';
+    if (isCritical) return 'text-red-600';
+    if (isUrgent) return 'text-amber-600';
+    return 'text-blue-600';
   };
 
   const getUrgencyBg = () => {
-    if (isPast) return "bg-red-50 border-red-200";
-    if (isCritical) return "bg-red-50 border-red-200";
-    if (isUrgent) return "bg-amber-50 border-amber-200";
-    return "bg-blue-50 border-blue-200";
+    if (isPast) return 'bg-red-50 border-red-200';
+    if (isCritical) return 'bg-red-50 border-red-200';
+    if (isUrgent) return 'bg-amber-50 border-amber-200';
+    return 'bg-blue-50 border-blue-200';
   };
 
   return (
@@ -97,15 +109,12 @@ export function VoteDeadlineModal({
             ) : (
               <Clock className="h-5 w-5 text-primary" />
             )}
-            <DialogTitle>
-              {isPast ? "Vote Deadline Passed" : "Vote Deadline Reminder"}
-            </DialogTitle>
+            <DialogTitle>{isPast ? 'Vote Deadline Passed' : 'Vote Deadline Reminder'}</DialogTitle>
           </div>
           <DialogDescription>
             {isPast
               ? "This vote's deadline has passed"
-              : `Deadline: ${format(vote.deadline, "MMM d, yyyy 'at' h:mm a")}`
-            }
+              : `Deadline: ${format(vote.deadline, "MMM d, yyyy 'at' h:mm a")}`}
           </DialogDescription>
         </DialogHeader>
 
@@ -124,8 +133,7 @@ export function VoteDeadlineModal({
                   <span className="text-sm">
                     {isPast
                       ? `Deadline was ${formatDistanceToNow(vote.deadline, { addSuffix: true })}`
-                      : `${formatDistanceToNow(vote.deadline, { addSuffix: true })}`
-                    }
+                      : `${formatDistanceToNow(vote.deadline, { addSuffix: true })}`}
                   </span>
                 </div>
               </div>
@@ -139,7 +147,7 @@ export function VoteDeadlineModal({
                 <Users className="h-5 w-5 text-muted-foreground" />
                 <h4 className="font-semibold">Voting Progress</h4>
               </div>
-              <Badge variant={percentageVoted === 100 ? "secondary" : "outline"}>
+              <Badge variant={percentageVoted === 100 ? 'secondary' : 'outline'}>
                 {vote.votedCount}/{vote.totalVoters} voted
               </Badge>
             </div>
@@ -148,7 +156,10 @@ export function VoteDeadlineModal({
 
             <div className="space-y-2">
               {vote.voters.map((voter) => (
-                <div key={voter.userId} className="flex items-center justify-between p-2 rounded-lg hover:bg-muted/50">
+                <div
+                  key={voter.userId}
+                  className="flex items-center justify-between p-2 rounded-lg hover:bg-muted/50"
+                >
                   <div className="flex items-center gap-2">
                     <Avatar className="h-7 w-7">
                       <AvatarFallback className="text-xs">
@@ -179,9 +190,8 @@ export function VoteDeadlineModal({
               <h4 className="font-semibold mb-3">Current Results</h4>
               <div className="space-y-2">
                 {vote.options.map((option) => {
-                  const optionPercentage = vote.votedCount > 0
-                    ? (option.voteCount / vote.votedCount) * 100
-                    : 0;
+                  const optionPercentage =
+                    vote.votedCount > 0 ? (option.voteCount / vote.votedCount) * 100 : 0;
                   return (
                     <div key={option.id}>
                       <div className="flex justify-between text-sm mb-1">
@@ -207,9 +217,7 @@ export function VoteDeadlineModal({
               <div className="flex items-start gap-2 mb-2">
                 <AlertCircle className="h-5 w-5 text-green-600 mt-0.5" />
                 <div>
-                  <p className="text-sm font-semibold text-green-900">
-                    You haven't voted yet!
-                  </p>
+                  <p className="text-sm font-semibold text-green-900">You haven't voted yet!</p>
                   <p className="text-xs text-green-800 mt-1">
                     Your opinion matters. Cast your vote before the deadline.
                   </p>

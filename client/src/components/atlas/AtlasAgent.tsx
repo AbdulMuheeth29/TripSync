@@ -1,23 +1,23 @@
-import { useEffect, useMemo, useRef, useState } from "react";
-import { useLocation } from "wouter";
-import { useAuth } from "@/lib/auth-context";
-import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { cn } from "@/lib/utils";
-import { MessageCircle, Sparkles, X, Minus, MapPin, Calendar, Users } from "lucide-react";
-import { useProactiveTriggers, type AtlasContext } from "@/hooks/atlas/useProactiveTriggers";
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { useLocation } from 'wouter';
+import { useAuth } from '@/lib/auth-context';
+import { Button } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/textarea';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { cn } from '@/lib/utils';
+import { MessageCircle, Sparkles, X, Minus, MapPin, Calendar, Users } from 'lucide-react';
+import { useProactiveTriggers, type AtlasContext } from '@/hooks/atlas/useProactiveTriggers';
 
-type AtlasRole = "atlas" | "user" | "system";
+type AtlasRole = 'atlas' | 'user' | 'system';
 
 type AtlasMessage = {
   id: string;
   role: AtlasRole;
   text: string;
   createdAt: string;
-  kind?: "proactive" | "reply" | "note";
+  kind?: 'proactive' | 'reply' | 'note';
   meta?: {
-    source?: "trip-detail" | "dashboard" | "landing" | "unknown";
+    source?: 'trip-detail' | 'dashboard' | 'landing' | 'unknown';
   };
 };
 
@@ -62,13 +62,13 @@ function createInitialGreeting(pathname: string): AtlasMessage {
     : "Hey, I'm Atlas. I help you plan smarter group trips, from first idea to final recap. Where are you in your planning right now?";
 
   return {
-    id: "atlas-welcome",
-    role: "atlas",
+    id: 'atlas-welcome',
+    role: 'atlas',
     text,
     createdAt: new Date().toISOString(),
-    kind: "reply",
+    kind: 'reply',
     meta: {
-      source: isTripPage ? "trip-detail" : "unknown",
+      source: isTripPage ? 'trip-detail' : 'unknown',
     },
   };
 }
@@ -86,7 +86,7 @@ export function AtlasAgent() {
 function AtlasAgentInner({ pathname }: { pathname: string }) {
   const [isOpen, setIsOpen] = useState(false);
   const [hasEverOpened, setHasEverOpened] = useState(false);
-  const [input, setInput] = useState("");
+  const [input, setInput] = useState('');
   const [isSending, setIsSending] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
   const [state, setState] = useState<AtlasAgentState>(() => ({
@@ -95,9 +95,7 @@ function AtlasAgentInner({ pathname }: { pathname: string }) {
     pathname,
     tripId: extractTripId(pathname),
   }));
-  const [messages, setMessages] = useState<AtlasMessage[]>(() => [
-    createInitialGreeting(pathname),
-  ]);
+  const [messages, setMessages] = useState<AtlasMessage[]>(() => [createInitialGreeting(pathname)]);
   const [hasFiredInactivityNudge, setHasFiredInactivityNudge] = useState(false);
   const [tripSummary, setTripSummary] = useState<AtlasTripSummary | null>(null);
   const [tripSummaryLoading, setTripSummaryLoading] = useState(false);
@@ -115,9 +113,12 @@ function AtlasAgentInner({ pathname }: { pathname: string }) {
     const loadConversation = async () => {
       if (!state.tripId) return;
       try {
-        const res = await fetch(`/api/trips/${encodeURIComponent(state.tripId)}/atlas/conversation`, {
-          credentials: "include",
-        });
+        const res = await fetch(
+          `/api/trips/${encodeURIComponent(state.tripId)}/atlas/conversation`,
+          {
+            credentials: 'include',
+          }
+        );
         if (!res.ok) return;
         const data = (await res.json()) as { messages?: AtlasMessage[] };
         if (data.messages && data.messages.length > 0) {
@@ -134,9 +135,9 @@ function AtlasAgentInner({ pathname }: { pathname: string }) {
     if (!state.tripId) return;
     try {
       await fetch(`/api/trips/${encodeURIComponent(state.tripId)}/atlas/conversation`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify({ message }),
       });
     } catch {
@@ -170,46 +171,55 @@ function AtlasAgentInner({ pathname }: { pathname: string }) {
         setTripSummaryLoading(true);
         setTripSummaryError(null);
         const res = await fetch(`/api/trips/${encodeURIComponent(state.tripId!)}`, {
-          credentials: "include",
+          credentials: 'include',
         });
         if (!res.ok) {
-          throw new Error("Failed to load trip");
+          throw new Error('Failed to load trip');
         }
         const data = await res.json();
         const t = data?.trip;
         if (!cancelled && t) {
           const items = Array.isArray(data?.items) ? (data.items as any[]) : [];
           const expenses = Array.isArray(data?.expenses) ? (data.expenses as any[]) : [];
-          const votesRecord = (data?.votes ?? {}) as Record<string, { up?: number; down?: number; abstain?: number }>;
+          const votesRecord = (data?.votes ?? {}) as Record<
+            string,
+            { up?: number; down?: number; abstain?: number }
+          >;
           const voteValues = Object.values(votesRecord);
           const stuckVotes = voteValues.filter((v) => {
-            const up = typeof v.up === "number" ? v.up : 0;
-            const down = typeof v.down === "number" ? v.down : 0;
+            const up = typeof v.up === 'number' ? v.up : 0;
+            const down = typeof v.down === 'number' ? v.down : 0;
             return up === down && up + down > 0;
           }).length;
           const start = t.startDate ? new Date(t.startDate) : null;
           const end = t.endDate ? new Date(t.endDate) : null;
           const tripDays =
             start && end && !Number.isNaN(start.getTime()) && !Number.isNaN(end.getTime())
-              ? Math.max(1, Math.round((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)) + 1)
+              ? Math.max(
+                  1,
+                  Math.round((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)) + 1
+                )
               : null;
           const daysUntilTrip =
             start && !Number.isNaN(start.getTime())
               ? Math.ceil((start.getTime() - Date.now()) / (1000 * 60 * 60 * 24))
               : null;
-          const groupSize = typeof t.groupSize === "number" ? t.groupSize : null;
-          const budgetPerPerson = typeof t.budgetPerPerson === "number" ? t.budgetPerPerson : 0;
-          const computedGroupSize = groupSize && groupSize > 0 ? groupSize : data?.members?.length ?? 0;
+          const groupSize = typeof t.groupSize === 'number' ? t.groupSize : null;
+          const budgetPerPerson = typeof t.budgetPerPerson === 'number' ? t.budgetPerPerson : 0;
+          const computedGroupSize =
+            groupSize && groupSize > 0 ? groupSize : (data?.members?.length ?? 0);
           const totalBudget = budgetPerPerson * (computedGroupSize || 0);
           const totalExpenses = expenses.reduce(
-            (sum, e: any) => sum + (typeof e.amount === "number" ? e.amount : 0),
+            (sum, e: any) => sum + (typeof e.amount === 'number' ? e.amount : 0),
             0
           );
           const overBudget = totalBudget > 0 && totalExpenses > totalBudget;
           const overAmount = overBudget ? totalExpenses - totalBudget : 0;
           const completionBase = tripDays && tripDays > 0 ? tripDays * 3 : 6;
           const completionPercentage =
-            completionBase > 0 ? Math.min(100, Math.round((items.length / completionBase) * 100)) : 0;
+            completionBase > 0
+              ? Math.min(100, Math.round((items.length / completionBase) * 100))
+              : 0;
 
           setTripSummary({
             id: t.id,
@@ -232,7 +242,7 @@ function AtlasAgentInner({ pathname }: { pathname: string }) {
         }
       } catch (err) {
         if (!cancelled) {
-          setTripSummaryError("Couldn’t load trip context.");
+          setTripSummaryError('Couldn’t load trip context.');
         }
       } finally {
         if (!cancelled) {
@@ -258,14 +268,14 @@ function AtlasAgentInner({ pathname }: { pathname: string }) {
       }));
     }
 
-    window.addEventListener("click", markActivity);
-    window.addEventListener("keydown", markActivity);
-    window.addEventListener("scroll", markActivity, { passive: true });
+    window.addEventListener('click', markActivity);
+    window.addEventListener('keydown', markActivity);
+    window.addEventListener('scroll', markActivity, { passive: true });
 
     const handlePopState = () => {
       setBackButtonClicks((prev) => prev + 1);
     };
-    window.addEventListener("popstate", handlePopState);
+    window.addEventListener('popstate', handlePopState);
 
     idleTimerRef.current = window.setInterval(() => {
       const now = Date.now();
@@ -278,10 +288,10 @@ function AtlasAgentInner({ pathname }: { pathname: string }) {
     }, 1000);
 
     return () => {
-      window.removeEventListener("click", markActivity);
-      window.removeEventListener("keydown", markActivity);
-      window.removeEventListener("scroll", markActivity);
-      window.removeEventListener("popstate", handlePopState);
+      window.removeEventListener('click', markActivity);
+      window.removeEventListener('keydown', markActivity);
+      window.removeEventListener('scroll', markActivity);
+      window.removeEventListener('popstate', handlePopState);
       if (idleTimerRef.current != null) {
         window.clearInterval(idleTimerRef.current);
       }
@@ -303,7 +313,8 @@ function AtlasAgentInner({ pathname }: { pathname: string }) {
               ? Math.max(
                   1,
                   Math.round(
-                    (new Date(tripSummary.endDate).getTime() - new Date(tripSummary.startDate).getTime()) /
+                    (new Date(tripSummary.endDate).getTime() -
+                      new Date(tripSummary.startDate).getTime()) /
                       (1000 * 60 * 60 * 24)
                   ) + 1
                 )
@@ -331,21 +342,21 @@ function AtlasAgentInner({ pathname }: { pathname: string }) {
     if (tripSummary.destination) pieces.push(tripSummary.destination);
     if (tripDatesLabel) pieces.push(tripDatesLabel);
 
-    const base = pieces.length ? pieces.join(" · ") : "this trip";
+    const base = pieces.length ? pieces.join(' · ') : 'this trip';
     const groupPart =
-      typeof tripSummary.groupSize === "number" && tripSummary.groupSize > 0
+      typeof tripSummary.groupSize === 'number' && tripSummary.groupSize > 0
         ? ` with ${tripSummary.groupSize} travelers`
-        : "";
+        : '';
 
     const text = `I’m looking at ${base}${groupPart}. Tell me what feels unclear or where the plan isn’t quite right yet.`;
 
     const msg: AtlasMessage = {
       id: `atlas-context-${Date.now()}`,
-      role: "atlas",
+      role: 'atlas',
       text,
       createdAt: new Date().toISOString(),
-      kind: "proactive",
-      meta: { source: "trip-detail" },
+      kind: 'proactive',
+      meta: { source: 'trip-detail' },
     };
 
     setMessages((prev) => [...prev, msg]);
@@ -363,12 +374,11 @@ function AtlasAgentInner({ pathname }: { pathname: string }) {
 
     const nudge: AtlasMessage = {
       id: `atlas-nudge-${Date.now()}`,
-      role: "atlas",
-      text:
-        "Not sure what to do next on this trip? I can suggest quick changes like adding meals, rebalancing days, or resolving voting deadlocks. Ask me something like “spread out our activities more” or “help us pick a dinner spot for night two.”",
+      role: 'atlas',
+      text: 'Not sure what to do next on this trip? I can suggest quick changes like adding meals, rebalancing days, or resolving voting deadlocks. Ask me something like “spread out our activities more” or “help us pick a dinner spot for night two.”',
       createdAt: new Date().toISOString(),
-      kind: "proactive",
-      meta: { source: "trip-detail" },
+      kind: 'proactive',
+      meta: { source: 'trip-detail' },
     };
 
     setMessages((prev) => [...prev, nudge]);
@@ -389,46 +399,41 @@ function AtlasAgentInner({ pathname }: { pathname: string }) {
 
   const placeholder = useMemo(() => {
     if (isTripPage) {
-      return "Ask Atlas to tweak this itinerary or fix a trip problem…";
+      return 'Ask Atlas to tweak this itinerary or fix a trip problem…';
     }
-    return "Ask Atlas anything about planning a group trip…";
+    return 'Ask Atlas anything about planning a group trip…';
   }, [isTripPage]);
 
   const quickPrompts: AtlasQuickPrompt[] = useMemo(() => {
     if (isTripPage) {
       return [
         {
-          id: "rebalance-days",
-          label: "Rebalance busy days",
-          text:
-            "Our itinerary feels too packed on some days. Suggest how to rebalance activities across days to make the trip feel more relaxed.",
+          id: 'rebalance-days',
+          label: 'Rebalance busy days',
+          text: 'Our itinerary feels too packed on some days. Suggest how to rebalance activities across days to make the trip feel more relaxed.',
         },
         {
-          id: "add-local-food",
-          label: "Add local food",
-          text:
-            "Suggest 2-3 local food spots we should add to this itinerary and which days they best fit on.",
+          id: 'add-local-food',
+          label: 'Add local food',
+          text: 'Suggest 2-3 local food spots we should add to this itinerary and which days they best fit on.',
         },
         {
-          id: "resolve-decision",
-          label: "Resolve a decision",
-          text:
-            "We’re stuck deciding between a few activities. Ask me a couple of questions and then propose a fair resolution for the group.",
+          id: 'resolve-decision',
+          label: 'Resolve a decision',
+          text: 'We’re stuck deciding between a few activities. Ask me a couple of questions and then propose a fair resolution for the group.',
         },
       ];
     }
     return [
       {
-        id: "plan-first-trip",
-        label: "Plan my first trip",
-        text:
-          "Help me plan my first group trip in TripSync, step by step, using the main features that will save us the most time.",
+        id: 'plan-first-trip',
+        label: 'Plan my first trip',
+        text: 'Help me plan my first group trip in TripSync, step by step, using the main features that will save us the most time.',
       },
       {
-        id: "get-more-value",
-        label: "Make trips better",
-        text:
-          "Explain how to get the most value from TripSync with my group, from first idea to post-trip recap.",
+        id: 'get-more-value',
+        label: 'Make trips better',
+        text: 'Explain how to get the most value from TripSync with my group, from first idea to post-trip recap.',
       },
     ];
   }, [isTripPage]);
@@ -439,58 +444,57 @@ function AtlasAgentInner({ pathname }: { pathname: string }) {
 
     const userMessage: AtlasMessage = {
       id: `user-${Date.now()}`,
-      role: "user",
+      role: 'user',
       text,
       createdAt: new Date().toISOString(),
-      kind: "reply",
+      kind: 'reply',
     };
     setMessages((prev) => [...prev, userMessage]);
     void saveMessage(userMessage);
-    setInput("");
+    setInput('');
     setIsSending(true);
-    lastActionRef.current = "atlas_message";
+    lastActionRef.current = 'atlas_message';
 
     try {
       if (!tripId) {
         const fallback: AtlasMessage = {
           id: `atlas-fallback-${Date.now()}`,
-          role: "atlas",
-          text:
-            "Right now I’m best at helping on specific trips. Open a trip detail page and ask me to adjust the itinerary, rebalance days, or help with decisions there.",
+          role: 'atlas',
+          text: 'Right now I’m best at helping on specific trips. Open a trip detail page and ask me to adjust the itinerary, rebalance days, or help with decisions there.',
           createdAt: new Date().toISOString(),
-          kind: "note",
+          kind: 'note',
         };
         setMessages((prev) => [...prev, fallback]);
         return;
       }
 
       const res = await fetch(`/api/trips/${encodeURIComponent(tripId)}/planning-chat`, {
-        method: "POST",
+        method: 'POST',
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
         },
-        credentials: "include",
+        credentials: 'include',
         body: JSON.stringify({
           userMessage: text,
           currentPage: pathname,
           timeOnPage: state.timeOnPageSeconds,
-          lastAction: lastActionRef.current ?? "atlas_message",
+          lastAction: lastActionRef.current ?? 'atlas_message',
           inactivityTime: state.inactivitySeconds,
         }),
       });
 
       if (!res.ok) {
-        throw new Error("Request failed");
+        throw new Error('Request failed');
       }
 
       const data = (await res.json()) as { suggestion: string; action?: string };
       const reply: AtlasMessage = {
         id: `atlas-reply-${Date.now()}`,
-        role: "atlas",
-        text: data.suggestion || "Got it. You can also adjust items directly in the Itinerary tab.",
+        role: 'atlas',
+        text: data.suggestion || 'Got it. You can also adjust items directly in the Itinerary tab.',
         createdAt: new Date().toISOString(),
-        kind: "reply",
-        meta: { source: "trip-detail" },
+        kind: 'reply',
+        meta: { source: 'trip-detail' },
       };
       setMessages((prev) => [...prev, reply]);
       void saveMessage(reply);
@@ -500,11 +504,10 @@ function AtlasAgentInner({ pathname }: { pathname: string }) {
     } catch (err) {
       const errorMessage: AtlasMessage = {
         id: `atlas-error-${Date.now()}`,
-        role: "system",
-        text:
-          "Atlas ran into a connection issue. Try again in a moment, or use the usual trip actions while I reconnect.",
+        role: 'system',
+        text: 'Atlas ran into a connection issue. Try again in a moment, or use the usual trip actions while I reconnect.',
         createdAt: new Date().toISOString(),
-        kind: "note",
+        kind: 'note',
       };
       setMessages((prev) => [...prev, errorMessage]);
     } finally {
@@ -535,8 +538,8 @@ function AtlasAgentInner({ pathname }: { pathname: string }) {
             type="button"
             onClick={handleToggleOpen}
             className={cn(
-              "relative flex h-12 w-12 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg hover:shadow-xl transition-all duration-200",
-              "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+              'relative flex h-12 w-12 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg hover:shadow-xl transition-all duration-200',
+              'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2'
             )}
             aria-label="Open Atlas, your trip planning assistant"
           >
@@ -584,7 +587,7 @@ function AtlasAgentInner({ pathname }: { pathname: string }) {
                             <span>{tripDatesLabel}</span>
                           </span>
                         )}
-                        {typeof tripSummary.groupSize === "number" && tripSummary.groupSize > 0 && (
+                        {typeof tripSummary.groupSize === 'number' && tripSummary.groupSize > 0 && (
                           <span className="inline-flex items-center gap-1 rounded-full bg-background/80 px-2 py-0.5 border border-border/60">
                             <Users className="h-3 w-3" />
                             <span>{tripSummary.groupSize} travelers</span>
@@ -594,7 +597,7 @@ function AtlasAgentInner({ pathname }: { pathname: string }) {
                           <span className="inline-flex items-center gap-1 rounded-full bg-background/80 px-2 py-0.5 border border-border/60">
                             <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
                             <span className="capitalize">
-                              {tripSummary.isLocked ? "Locked" : tripSummary.status}
+                              {tripSummary.isLocked ? 'Locked' : tripSummary.status}
                             </span>
                           </span>
                         )}
@@ -648,22 +651,18 @@ function AtlasAgentInner({ pathname }: { pathname: string }) {
                 {messages.map((m) => (
                   <div
                     key={m.id}
-                    className={cn(
-                      "flex",
-                      m.role === "user" ? "justify-end" : "justify-start"
-                    )}
+                    className={cn('flex', m.role === 'user' ? 'justify-end' : 'justify-start')}
                   >
                     <div
                       className={cn(
-                        "max-w-[80%] rounded-2xl px-3 py-2 text-xs leading-relaxed",
-                        m.role === "user" && "bg-primary text-primary-foreground rounded-br-sm",
-                        m.role === "atlas" &&
-                          "bg-muted text-foreground rounded-bl-sm border border-border/60",
-                        m.role === "system" &&
-                          "bg-amber-50 text-amber-900 border border-amber-200"
+                        'max-w-[80%] rounded-2xl px-3 py-2 text-xs leading-relaxed',
+                        m.role === 'user' && 'bg-primary text-primary-foreground rounded-br-sm',
+                        m.role === 'atlas' &&
+                          'bg-muted text-foreground rounded-bl-sm border border-border/60',
+                        m.role === 'system' && 'bg-amber-50 text-amber-900 border border-amber-200'
                       )}
                     >
-                      {m.role === "atlas" && (
+                      {m.role === 'atlas' && (
                         <div className="mb-1 inline-flex items-center gap-1 text-[11px] font-medium text-primary">
                           <Sparkles className="h-3 w-3" />
                           <span>Atlas</span>
@@ -714,8 +713,8 @@ function AtlasAgentInner({ pathname }: { pathname: string }) {
                     <MessageCircle className="h-3 w-3" />
                     <span>
                       {tripId
-                        ? "Atlas is tuned to this trip’s itinerary."
-                        : "Atlas works best on specific trips."}
+                        ? 'Atlas is tuned to this trip’s itinerary.'
+                        : 'Atlas works best on specific trips.'}
                     </span>
                   </div>
                   <Button
@@ -724,7 +723,7 @@ function AtlasAgentInner({ pathname }: { pathname: string }) {
                     disabled={!input.trim() || isSending}
                     className="h-7 px-3 text-xs"
                   >
-                    {isSending ? "Thinking…" : "Ask Atlas"}
+                    {isSending ? 'Thinking…' : 'Ask Atlas'}
                   </Button>
                 </div>
               </form>
@@ -745,7 +744,7 @@ function formatShortDate(value: string | null | undefined): string | null {
   if (!value) return null;
   const d = new Date(value);
   if (Number.isNaN(d.getTime())) return null;
-  return d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
 }
 
 function formatDateRange(
@@ -757,4 +756,3 @@ function formatDateRange(
   if (startLabel && endLabel) return `${startLabel} – ${endLabel}`;
   return startLabel ?? endLabel;
 }
-

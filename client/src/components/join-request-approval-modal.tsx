@@ -1,10 +1,17 @@
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
-import { UserPlus, Mail, Calendar, CheckCircle2, XCircle } from "lucide-react";
-import { formatDistanceToNow } from "date-fns";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Badge } from '@/components/ui/badge';
+import { UserPlus, Mail, Calendar, CheckCircle2, XCircle } from 'lucide-react';
+import { formatDistanceToNow } from 'date-fns';
 
 interface JoinRequest {
   id: string;
@@ -35,10 +42,15 @@ export function JoinRequestApprovalModal({
   request,
   tripName,
   currentMemberCount,
-  isProcessing = false
+  isProcessing = false,
 }: JoinRequestApprovalModalProps) {
   const getInitials = (name: string) => {
-    return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+    return name
+      .split(' ')
+      .map((n) => n[0])
+      .join('')
+      .toUpperCase()
+      .slice(0, 2);
   };
 
   const handleApprove = async () => {
@@ -56,9 +68,7 @@ export function JoinRequestApprovalModal({
           <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-blue-100">
             <UserPlus className="h-6 w-6 text-blue-600" />
           </div>
-          <DialogTitle className="text-center">
-            New Join Request
-          </DialogTitle>
+          <DialogTitle className="text-center">New Join Request</DialogTitle>
           <DialogDescription className="text-center">
             Someone wants to join your trip to <strong>{tripName}</strong>
           </DialogDescription>
@@ -118,8 +128,8 @@ export function JoinRequestApprovalModal({
           {/* Warning */}
           <div className="rounded-lg bg-amber-50 border border-amber-200 p-3">
             <p className="text-xs text-amber-800">
-              <strong>Note:</strong> Once approved, this person will have full access to your trip itinerary,
-              expenses, and group chat. You can remove them later if needed.
+              <strong>Note:</strong> Once approved, this person will have full access to your trip
+              itinerary, expenses, and group chat. You can remove them later if needed.
             </p>
           </div>
         </div>
@@ -132,15 +142,11 @@ export function JoinRequestApprovalModal({
             className="flex-1 text-red-600 border-red-200 hover:bg-red-50 hover:text-red-600"
           >
             <XCircle className="h-4 w-4 mr-2" />
-            {isProcessing ? "Declining..." : "Decline"}
+            {isProcessing ? 'Declining...' : 'Decline'}
           </Button>
-          <Button
-            onClick={handleApprove}
-            disabled={isProcessing}
-            className="flex-1"
-          >
+          <Button onClick={handleApprove} disabled={isProcessing} className="flex-1">
             <CheckCircle2 className="h-4 w-4 mr-2" />
-            {isProcessing ? "Approving..." : "Approve & Add"}
+            {isProcessing ? 'Approving...' : 'Approve & Add'}
           </Button>
         </DialogFooter>
       </DialogContent>

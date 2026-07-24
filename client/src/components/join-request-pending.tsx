@@ -1,8 +1,8 @@
-import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Clock, Mail, CheckCircle2 } from "lucide-react";
-import { format } from "date-fns";
+import { Card } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Clock, Mail, CheckCircle2 } from 'lucide-react';
+import { format } from 'date-fns';
 
 interface JoinRequestPendingProps {
   tripName: string;
@@ -19,7 +19,7 @@ export function JoinRequestPending({
   organizerEmail,
   requestSentDate,
   onCancel,
-  onResendRequest
+  onResendRequest,
 }: JoinRequestPendingProps) {
   return (
     <div className="max-w-2xl mx-auto py-12 px-4">
@@ -37,7 +37,7 @@ export function JoinRequestPending({
         <Alert className="mb-6">
           <CheckCircle2 className="h-4 w-4" />
           <AlertDescription>
-            Your join request was successfully sent to {organizerName} on{" "}
+            Your join request was successfully sent to {organizerName} on{' '}
             {format(requestSentDate, "MMM d, yyyy 'at' h:mm a")}
           </AlertDescription>
         </Alert>
@@ -48,21 +48,15 @@ export function JoinRequestPending({
             <ol className="space-y-2 text-sm text-muted-foreground">
               <li className="flex gap-2">
                 <span className="font-medium text-foreground">1.</span>
-                <span>
-                  The trip organizer ({organizerName}) will review your request
-                </span>
+                <span>The trip organizer ({organizerName}) will review your request</span>
               </li>
               <li className="flex gap-2">
                 <span className="font-medium text-foreground">2.</span>
-                <span>
-                  You'll receive an email notification when they approve or decline
-                </span>
+                <span>You'll receive an email notification when they approve or decline</span>
               </li>
               <li className="flex gap-2">
                 <span className="font-medium text-foreground">3.</span>
-                <span>
-                  Once approved, you'll get instant access to the trip
-                </span>
+                <span>Once approved, you'll get instant access to the trip</span>
               </li>
             </ol>
           </Card>
@@ -71,9 +65,7 @@ export function JoinRequestPending({
             <div className="flex items-start gap-3">
               <Mail className="h-5 w-5 text-blue-600 mt-0.5" />
               <div>
-                <p className="text-sm font-medium text-blue-900 mb-1">
-                  Organizer Contact
-                </p>
+                <p className="text-sm font-medium text-blue-900 mb-1">Organizer Contact</p>
                 <p className="text-sm text-blue-700">
                   {organizerName} ({organizerEmail})
                 </p>
@@ -85,11 +77,7 @@ export function JoinRequestPending({
           </Card>
 
           <div className="pt-4 space-y-2">
-            <Button
-              variant="outline"
-              className="w-full"
-              onClick={onResendRequest}
-            >
+            <Button variant="outline" className="w-full" onClick={onResendRequest}>
               <Mail className="h-4 w-4 mr-2" />
               Resend Request
             </Button>

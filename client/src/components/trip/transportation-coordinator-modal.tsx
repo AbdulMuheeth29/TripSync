@@ -1,16 +1,39 @@
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
-import { Car, Plane, Train, MapPin, Users, Plus, Trash2, Calendar, User } from "lucide-react";
-import { useState } from "react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Badge } from '@/components/ui/badge';
+import { Separator } from '@/components/ui/separator';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Textarea } from '@/components/ui/textarea';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
+import { Car, Plane, Train, MapPin, Users, Plus, Trash2, Calendar, User } from 'lucide-react';
+import { useState } from 'react';
 
 interface TransportationEntry {
   id: string;
@@ -43,12 +66,15 @@ interface TransportationCoordinatorModalProps {
     passengerUserIds?: string[];
     notes?: string;
   }) => Promise<void>;
-  onUpdateEntry: (entryId: string, updates: {
-    description?: string;
-    driverUserId?: string;
-    passengerUserIds?: string[];
-    notes?: string;
-  }) => Promise<void>;
+  onUpdateEntry: (
+    entryId: string,
+    updates: {
+      description?: string;
+      driverUserId?: string;
+      passengerUserIds?: string[];
+      notes?: string;
+    }
+  ) => Promise<void>;
   onDeleteEntry: (entryId: string) => Promise<void>;
 }
 
@@ -61,35 +87,40 @@ export function TransportationCoordinatorModal({
   tripDays,
   onAddEntry,
   onUpdateEntry,
-  onDeleteEntry
+  onDeleteEntry,
 }: TransportationCoordinatorModalProps) {
   const [selectedDay, setSelectedDay] = useState(1);
   const [newEntry, setNewEntry] = useState({
     dayNumber: 1,
-    type: "drive",
-    description: "",
-    driverUserId: "",
+    type: 'drive',
+    description: '',
+    driverUserId: '',
     passengerUserIds: [] as string[],
-    notes: ""
+    notes: '',
   });
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editForm, setEditForm] = useState({
-    description: "",
-    driverUserId: "",
+    description: '',
+    driverUserId: '',
     passengerUserIds: [] as string[],
-    notes: ""
+    notes: '',
   });
 
   const transportTypes = [
-    { id: "drive", label: "Drive", icon: Car },
-    { id: "flight", label: "Flight", icon: Plane },
-    { id: "train", label: "Train/Bus", icon: Train },
-    { id: "rideshare", label: "Rideshare", icon: Users },
-    { id: "pickup", label: "Airport Pickup", icon: MapPin }
+    { id: 'drive', label: 'Drive', icon: Car },
+    { id: 'flight', label: 'Flight', icon: Plane },
+    { id: 'train', label: 'Train/Bus', icon: Train },
+    { id: 'rideshare', label: 'Rideshare', icon: Users },
+    { id: 'pickup', label: 'Airport Pickup', icon: MapPin },
   ];
 
   const getInitials = (name: string) => {
-    return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+    return name
+      .split(' ')
+      .map((n) => n[0])
+      .join('')
+      .toUpperCase()
+      .slice(0, 2);
   };
 
   const handleAddEntry = async () => {
@@ -100,17 +131,18 @@ export function TransportationCoordinatorModal({
       type: newEntry.type,
       description: newEntry.description,
       driverUserId: newEntry.driverUserId || undefined,
-      passengerUserIds: newEntry.passengerUserIds.length > 0 ? newEntry.passengerUserIds : undefined,
-      notes: newEntry.notes || undefined
+      passengerUserIds:
+        newEntry.passengerUserIds.length > 0 ? newEntry.passengerUserIds : undefined,
+      notes: newEntry.notes || undefined,
     });
 
     setNewEntry({
       dayNumber: selectedDay,
-      type: "drive",
-      description: "",
-      driverUserId: "",
+      type: 'drive',
+      description: '',
+      driverUserId: '',
       passengerUserIds: [],
-      notes: ""
+      notes: '',
     });
   };
 
@@ -118,9 +150,9 @@ export function TransportationCoordinatorModal({
     setEditingId(entry.id);
     setEditForm({
       description: entry.description,
-      driverUserId: entry.driverUserId || "",
+      driverUserId: entry.driverUserId || '',
       passengerUserIds: entry.passengerUserIds || [],
-      notes: entry.notes || ""
+      notes: entry.notes || '',
     });
   };
 
@@ -130,34 +162,35 @@ export function TransportationCoordinatorModal({
     await onUpdateEntry(editingId, {
       description: editForm.description,
       driverUserId: editForm.driverUserId || undefined,
-      passengerUserIds: editForm.passengerUserIds.length > 0 ? editForm.passengerUserIds : undefined,
-      notes: editForm.notes || undefined
+      passengerUserIds:
+        editForm.passengerUserIds.length > 0 ? editForm.passengerUserIds : undefined,
+      notes: editForm.notes || undefined,
     });
 
     setEditingId(null);
   };
 
   const handleTogglePassenger = (memberId: string) => {
-    setNewEntry(prev => ({
+    setNewEntry((prev) => ({
       ...prev,
       passengerUserIds: prev.passengerUserIds.includes(memberId)
-        ? prev.passengerUserIds.filter(id => id !== memberId)
-        : [...prev.passengerUserIds, memberId]
+        ? prev.passengerUserIds.filter((id) => id !== memberId)
+        : [...prev.passengerUserIds, memberId],
     }));
   };
 
   const handleTogglePassengerEdit = (memberId: string) => {
-    setEditForm(prev => ({
+    setEditForm((prev) => ({
       ...prev,
       passengerUserIds: prev.passengerUserIds.includes(memberId)
-        ? prev.passengerUserIds.filter(id => id !== memberId)
-        : [...prev.passengerUserIds, memberId]
+        ? prev.passengerUserIds.filter((id) => id !== memberId)
+        : [...prev.passengerUserIds, memberId],
     }));
   };
 
-  const dayEntries = entries.filter(e => e.dayNumber === selectedDay);
+  const dayEntries = entries.filter((e) => e.dayNumber === selectedDay);
   const getTypeIcon = (type: string) => {
-    const found = transportTypes.find(t => t.id === type);
+    const found = transportTypes.find((t) => t.id === type);
     return found ? found.icon : Car;
   };
 
@@ -169,9 +202,7 @@ export function TransportationCoordinatorModal({
             <Car className="h-5 w-5 text-primary" />
             <DialogTitle>Transportation Coordinator</DialogTitle>
           </div>
-          <DialogDescription>
-            Manage rides, drivers, and transportation logistics
-          </DialogDescription>
+          <DialogDescription>Manage rides, drivers, and transportation logistics</DialogDescription>
         </DialogHeader>
 
         <div className="space-y-6">
@@ -185,14 +216,14 @@ export function TransportationCoordinatorModal({
               <Badge variant="outline">{dayEntries.length} arrangements</Badge>
             </div>
             <div className="grid grid-cols-4 md:grid-cols-7 gap-2">
-              {Array.from({ length: tripDays }, (_, i) => i + 1).map(day => (
+              {Array.from({ length: tripDays }, (_, i) => i + 1).map((day) => (
                 <Button
                   key={day}
-                  variant={selectedDay === day ? "default" : "outline"}
+                  variant={selectedDay === day ? 'default' : 'outline'}
                   size="sm"
                   onClick={() => {
                     setSelectedDay(day);
-                    setNewEntry(prev => ({ ...prev, dayNumber: day }));
+                    setNewEntry((prev) => ({ ...prev, dayNumber: day }));
                   }}
                   className="w-full"
                 >
@@ -211,13 +242,13 @@ export function TransportationCoordinatorModal({
                   <Label>Type</Label>
                   <Select
                     value={newEntry.type}
-                    onValueChange={(value) => setNewEntry(prev => ({ ...prev, type: value }))}
+                    onValueChange={(value) => setNewEntry((prev) => ({ ...prev, type: value }))}
                   >
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      {transportTypes.map(type => {
+                      {transportTypes.map((type) => {
                         const Icon = type.icon;
                         return (
                           <SelectItem key={type.id} value={type.id}>
@@ -237,7 +268,9 @@ export function TransportationCoordinatorModal({
                   <Input
                     placeholder="e.g., Airport to hotel"
                     value={newEntry.description}
-                    onChange={(e) => setNewEntry(prev => ({ ...prev, description: e.target.value }))}
+                    onChange={(e) =>
+                      setNewEntry((prev) => ({ ...prev, description: e.target.value }))
+                    }
                   />
                 </div>
               </div>
@@ -247,14 +280,16 @@ export function TransportationCoordinatorModal({
                   <Label>Driver (Optional)</Label>
                   <Select
                     value={newEntry.driverUserId}
-                    onValueChange={(value) => setNewEntry(prev => ({ ...prev, driverUserId: value }))}
+                    onValueChange={(value) =>
+                      setNewEntry((prev) => ({ ...prev, driverUserId: value }))
+                    }
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="No driver assigned" />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="">No driver</SelectItem>
-                      {members.map(member => (
+                      {members.map((member) => (
                         <SelectItem key={member.id} value={member.id}>
                           {member.name}
                         </SelectItem>
@@ -268,7 +303,7 @@ export function TransportationCoordinatorModal({
                   <Input
                     placeholder="Departure time, meeting point"
                     value={newEntry.notes}
-                    onChange={(e) => setNewEntry(prev => ({ ...prev, notes: e.target.value }))}
+                    onChange={(e) => setNewEntry((prev) => ({ ...prev, notes: e.target.value }))}
                   />
                 </div>
               </div>
@@ -276,10 +311,12 @@ export function TransportationCoordinatorModal({
               <div className="space-y-2">
                 <Label>Passengers (Optional)</Label>
                 <div className="flex flex-wrap gap-2">
-                  {members.map(member => (
+                  {members.map((member) => (
                     <Badge
                       key={member.id}
-                      variant={newEntry.passengerUserIds.includes(member.id) ? "default" : "outline"}
+                      variant={
+                        newEntry.passengerUserIds.includes(member.id) ? 'default' : 'outline'
+                      }
                       className="cursor-pointer"
                       onClick={() => handleTogglePassenger(member.id)}
                     >
@@ -307,11 +344,13 @@ export function TransportationCoordinatorModal({
             {dayEntries.length === 0 ? (
               <Card className="p-8 text-center">
                 <Car className="h-12 w-12 mx-auto mb-3 text-muted-foreground" />
-                <p className="text-sm text-muted-foreground">No transportation planned for Day {selectedDay}</p>
+                <p className="text-sm text-muted-foreground">
+                  No transportation planned for Day {selectedDay}
+                </p>
               </Card>
             ) : (
               <div className="space-y-3">
-                {dayEntries.map(entry => {
+                {dayEntries.map((entry) => {
                   const TypeIcon = getTypeIcon(entry.type);
                   const isEditing = editingId === entry.id;
 
@@ -323,7 +362,9 @@ export function TransportationCoordinatorModal({
                             <Label>Description</Label>
                             <Input
                               value={editForm.description}
-                              onChange={(e) => setEditForm(prev => ({ ...prev, description: e.target.value }))}
+                              onChange={(e) =>
+                                setEditForm((prev) => ({ ...prev, description: e.target.value }))
+                              }
                             />
                           </div>
 
@@ -332,14 +373,16 @@ export function TransportationCoordinatorModal({
                               <Label>Driver</Label>
                               <Select
                                 value={editForm.driverUserId}
-                                onValueChange={(value) => setEditForm(prev => ({ ...prev, driverUserId: value }))}
+                                onValueChange={(value) =>
+                                  setEditForm((prev) => ({ ...prev, driverUserId: value }))
+                                }
                               >
                                 <SelectTrigger>
                                   <SelectValue placeholder="No driver" />
                                 </SelectTrigger>
                                 <SelectContent>
                                   <SelectItem value="">No driver</SelectItem>
-                                  {members.map(member => (
+                                  {members.map((member) => (
                                     <SelectItem key={member.id} value={member.id}>
                                       {member.name}
                                     </SelectItem>
@@ -352,7 +395,9 @@ export function TransportationCoordinatorModal({
                               <Label>Notes</Label>
                               <Input
                                 value={editForm.notes}
-                                onChange={(e) => setEditForm(prev => ({ ...prev, notes: e.target.value }))}
+                                onChange={(e) =>
+                                  setEditForm((prev) => ({ ...prev, notes: e.target.value }))
+                                }
                               />
                             </div>
                           </div>
@@ -360,10 +405,14 @@ export function TransportationCoordinatorModal({
                           <div className="space-y-2">
                             <Label>Passengers</Label>
                             <div className="flex flex-wrap gap-2">
-                              {members.map(member => (
+                              {members.map((member) => (
                                 <Badge
                                   key={member.id}
-                                  variant={editForm.passengerUserIds.includes(member.id) ? "default" : "outline"}
+                                  variant={
+                                    editForm.passengerUserIds.includes(member.id)
+                                      ? 'default'
+                                      : 'outline'
+                                  }
                                   className="cursor-pointer"
                                   onClick={() => handleTogglePassengerEdit(member.id)}
                                 >
@@ -374,8 +423,12 @@ export function TransportationCoordinatorModal({
                           </div>
 
                           <div className="flex gap-2">
-                            <Button size="sm" onClick={handleSaveEdit}>Save</Button>
-                            <Button size="sm" variant="outline" onClick={() => setEditingId(null)}>Cancel</Button>
+                            <Button size="sm" onClick={handleSaveEdit}>
+                              Save
+                            </Button>
+                            <Button size="sm" variant="outline" onClick={() => setEditingId(null)}>
+                              Cancel
+                            </Button>
                           </div>
                         </div>
                       ) : (
@@ -388,11 +441,15 @@ export function TransportationCoordinatorModal({
                               <div className="flex-1">
                                 <p className="font-medium">{entry.description}</p>
                                 {entry.notes && (
-                                  <p className="text-xs text-muted-foreground mt-1">{entry.notes}</p>
+                                  <p className="text-xs text-muted-foreground mt-1">
+                                    {entry.notes}
+                                  </p>
                                 )}
                               </div>
                             </div>
-                            <Badge variant="outline" className="capitalize">{entry.type}</Badge>
+                            <Badge variant="outline" className="capitalize">
+                              {entry.type}
+                            </Badge>
                           </div>
 
                           {entry.driver && (
@@ -406,13 +463,18 @@ export function TransportationCoordinatorModal({
 
                           {entry.passengerUserIds && entry.passengerUserIds.length > 0 && (
                             <div className="mb-3">
-                              <p className="text-xs text-muted-foreground mb-2">Passengers ({entry.passengerUserIds.length})</p>
+                              <p className="text-xs text-muted-foreground mb-2">
+                                Passengers ({entry.passengerUserIds.length})
+                              </p>
                               <div className="flex flex-wrap gap-2">
-                                {entry.passengerUserIds.map(passengerId => {
-                                  const passenger = members.find(m => m.id === passengerId);
+                                {entry.passengerUserIds.map((passengerId) => {
+                                  const passenger = members.find((m) => m.id === passengerId);
                                   if (!passenger) return null;
                                   return (
-                                    <div key={passengerId} className="flex items-center gap-1.5 px-2 py-1 bg-blue-100 rounded text-xs">
+                                    <div
+                                      key={passengerId}
+                                      className="flex items-center gap-1.5 px-2 py-1 bg-blue-100 rounded text-xs"
+                                    >
                                       <Avatar className="h-5 w-5">
                                         <AvatarFallback className="text-xs">
                                           {getInitials(passenger.name)}
@@ -470,7 +532,9 @@ export function TransportationCoordinatorModal({
         </div>
 
         <DialogFooter>
-          <Button variant="outline" onClick={onClose}>Close</Button>
+          <Button variant="outline" onClick={onClose}>
+            Close
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

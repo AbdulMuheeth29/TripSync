@@ -35,20 +35,20 @@ cp .env.example .env
 
 **Required for production:**
 
-| Variable       | Description |
-|----------------|-------------|
-| `NODE_ENV`    | `production` in production |
-| `DATABASE_URL`| PostgreSQL connection string, e.g. `postgresql://user:password@host:5432/tripsync` |
-| `JWT_SECRET`  | Strong random string (min 32 chars). Generate: `node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"` |
+| Variable       | Description                                                                                                               |
+| -------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| `NODE_ENV`     | `production` in production                                                                                                |
+| `DATABASE_URL` | PostgreSQL connection string, e.g. `postgresql://user:password@host:5432/tripsync`                                        |
+| `JWT_SECRET`   | Strong random string (min 32 chars). Generate: `node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"` |
 
 **Optional – AI (Anthropic now, ChatGPT/OpenAI later):**
 
-| Variable | Description |
-|----------|-------------|
-| `AI_INTEGRATIONS_ANTHROPIC_API_KEY` | Anthropic API key (itinerary generation, AI features) |
-| `AI_INTEGRATIONS_ANTHROPIC_BASE_URL` | Optional custom Anthropic base URL |
-| `OPENAI_API_KEY` | Reserved for future ChatGPT/OpenAI integration |
-| `OPENAI_BASE_URL` | Optional custom OpenAI base URL |
+| Variable                             | Description                                           |
+| ------------------------------------ | ----------------------------------------------------- |
+| `AI_INTEGRATIONS_ANTHROPIC_API_KEY`  | Anthropic API key (itinerary generation, AI features) |
+| `AI_INTEGRATIONS_ANTHROPIC_BASE_URL` | Optional custom Anthropic base URL                    |
+| `OPENAI_API_KEY`                     | Reserved for future ChatGPT/OpenAI integration        |
+| `OPENAI_BASE_URL`                    | Optional custom OpenAI base URL                       |
 
 See `.env.example` for Stripe, VAPID, Admin, SMTP, and other optional vars.
 

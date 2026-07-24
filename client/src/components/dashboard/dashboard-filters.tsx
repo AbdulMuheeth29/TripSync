@@ -1,14 +1,20 @@
-import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Search, X } from "lucide-react";
+import { Input } from '@/components/ui/input';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Search, X } from 'lucide-react';
 
 export interface DashboardFilters {
   status: string;
   role: string;
   searchQuery: string;
-  sortBy: "date-upcoming" | "date-recent" | "name-asc" | "name-desc" | "status";
+  sortBy: 'date-upcoming' | 'date-recent' | 'name-asc' | 'name-desc' | 'status';
 }
 
 interface DashboardFiltersProps {
@@ -16,26 +22,25 @@ interface DashboardFiltersProps {
   onFiltersChange: (filters: DashboardFilters) => void;
 }
 
-export function DashboardFiltersComponent({
-  filters,
-  onFiltersChange,
-}: DashboardFiltersProps) {
+export function DashboardFiltersComponent({ filters, onFiltersChange }: DashboardFiltersProps) {
   const updateFilter = (key: keyof DashboardFilters, value: any) => {
     onFiltersChange({ ...filters, [key]: value });
   };
 
   const clearAllFilters = () => {
     onFiltersChange({
-      status: "all",
-      role: "all",
-      searchQuery: "",
-      sortBy: "date-upcoming",
+      status: 'all',
+      role: 'all',
+      searchQuery: '',
+      sortBy: 'date-upcoming',
     });
   };
 
-  const hasActiveFilters = filters.status !== "all" || filters.role !== "all" || filters.searchQuery;
-  const activeFilterCount = (filters.status !== "all" ? 1 : 0) +
-    (filters.role !== "all" ? 1 : 0) +
+  const hasActiveFilters =
+    filters.status !== 'all' || filters.role !== 'all' || filters.searchQuery;
+  const activeFilterCount =
+    (filters.status !== 'all' ? 1 : 0) +
+    (filters.role !== 'all' ? 1 : 0) +
     (filters.searchQuery ? 1 : 0);
 
   return (
@@ -47,7 +52,7 @@ export function DashboardFiltersComponent({
           <Input
             placeholder="Search trips by name or destination..."
             value={filters.searchQuery}
-            onChange={(e) => updateFilter("searchQuery", e.target.value)}
+            onChange={(e) => updateFilter('searchQuery', e.target.value)}
             className="pl-9 pr-9"
           />
           {filters.searchQuery && (
@@ -55,7 +60,7 @@ export function DashboardFiltersComponent({
               variant="ghost"
               size="icon"
               className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7"
-              onClick={() => updateFilter("searchQuery", "")}
+              onClick={() => updateFilter('searchQuery', '')}
             >
               <X className="h-4 w-4" />
             </Button>
@@ -63,7 +68,7 @@ export function DashboardFiltersComponent({
         </div>
 
         {/* Status Filter */}
-        <Select value={filters.status} onValueChange={(value) => updateFilter("status", value)}>
+        <Select value={filters.status} onValueChange={(value) => updateFilter('status', value)}>
           <SelectTrigger className="w-[160px]">
             <SelectValue placeholder="Status" />
           </SelectTrigger>
@@ -78,7 +83,7 @@ export function DashboardFiltersComponent({
         </Select>
 
         {/* Role Filter */}
-        <Select value={filters.role} onValueChange={(value) => updateFilter("role", value)}>
+        <Select value={filters.role} onValueChange={(value) => updateFilter('role', value)}>
           <SelectTrigger className="w-[160px]">
             <SelectValue placeholder="Role" />
           </SelectTrigger>
@@ -90,7 +95,10 @@ export function DashboardFiltersComponent({
         </Select>
 
         {/* Sort By */}
-        <Select value={filters.sortBy} onValueChange={(value) => updateFilter("sortBy", value as DashboardFilters["sortBy"])}>
+        <Select
+          value={filters.sortBy}
+          onValueChange={(value) => updateFilter('sortBy', value as DashboardFilters['sortBy'])}
+        >
           <SelectTrigger className="w-[180px]">
             <SelectValue placeholder="Sort by" />
           </SelectTrigger>
@@ -120,22 +128,16 @@ export function DashboardFiltersComponent({
       {hasActiveFilters && (
         <div className="flex items-center gap-2 flex-wrap">
           <span className="text-sm text-muted-foreground">Active filters:</span>
-          {filters.status !== "all" && (
+          {filters.status !== 'all' && (
             <Badge variant="secondary" className="gap-1">
               Status: {filters.status}
-              <X
-                className="h-3 w-3 cursor-pointer"
-                onClick={() => updateFilter("status", "all")}
-              />
+              <X className="h-3 w-3 cursor-pointer" onClick={() => updateFilter('status', 'all')} />
             </Badge>
           )}
-          {filters.role !== "all" && (
+          {filters.role !== 'all' && (
             <Badge variant="secondary" className="gap-1">
               Role: {filters.role}
-              <X
-                className="h-3 w-3 cursor-pointer"
-                onClick={() => updateFilter("role", "all")}
-              />
+              <X className="h-3 w-3 cursor-pointer" onClick={() => updateFilter('role', 'all')} />
             </Badge>
           )}
           {filters.searchQuery && (
@@ -143,7 +145,7 @@ export function DashboardFiltersComponent({
               Search: "{filters.searchQuery}"
               <X
                 className="h-3 w-3 cursor-pointer"
-                onClick={() => updateFilter("searchQuery", "")}
+                onClick={() => updateFilter('searchQuery', '')}
               />
             </Badge>
           )}
@@ -154,34 +156,34 @@ export function DashboardFiltersComponent({
 }
 
 // Helper function to apply filters and sorting to trips
-export function applyDashboardFilters<T extends {
-  title: string | null;
-  destination: string;
-  status: string;
-  startDate: string;
-  organizerId: string;
-  members?: Array<{ userId: string; role: string }>;
-}>(
-  trips: T[],
-  filters: DashboardFilters,
-  currentUserId: string | undefined
-): T[] {
+export function applyDashboardFilters<
+  T extends {
+    title: string | null;
+    destination: string;
+    status: string;
+    startDate: string;
+    organizerId: string;
+    members?: Array<{ userId: string; role: string }>;
+  },
+>(trips: T[], filters: DashboardFilters, currentUserId: string | undefined): T[] {
   let filtered = [...trips];
 
   // Apply status filter
-  if (filters.status !== "all") {
-    filtered = filtered.filter(trip => trip.status === filters.status);
+  if (filters.status !== 'all') {
+    filtered = filtered.filter((trip) => trip.status === filters.status);
   }
 
   // Apply role filter
-  if (filters.role !== "all" && currentUserId) {
-    filtered = filtered.filter(trip => {
+  if (filters.role !== 'all' && currentUserId) {
+    filtered = filtered.filter((trip) => {
       const isOrganizer = trip.organizerId === currentUserId;
-      const isMember = trip.members?.some(m => m.userId === currentUserId && m.role !== "organizer");
+      const isMember = trip.members?.some(
+        (m) => m.userId === currentUserId && m.role !== 'organizer'
+      );
 
-      if (filters.role === "organizing") {
+      if (filters.role === 'organizing') {
         return isOrganizer;
-      } else if (filters.role === "participating") {
+      } else if (filters.role === 'participating') {
         return isMember;
       }
       return true;
@@ -191,27 +193,30 @@ export function applyDashboardFilters<T extends {
   // Apply search query
   if (filters.searchQuery) {
     const query = filters.searchQuery.toLowerCase();
-    filtered = filtered.filter(trip =>
-      (trip.title?.toLowerCase() || trip.destination.toLowerCase()).includes(query) ||
-      trip.destination.toLowerCase().includes(query)
+    filtered = filtered.filter(
+      (trip) =>
+        (trip.title?.toLowerCase() || trip.destination.toLowerCase()).includes(query) ||
+        trip.destination.toLowerCase().includes(query)
     );
   }
 
   // Apply sorting
   filtered.sort((a, b) => {
     switch (filters.sortBy) {
-      case "date-upcoming":
+      case 'date-upcoming':
         return new Date(a.startDate).getTime() - new Date(b.startDate).getTime();
-      case "date-recent":
+      case 'date-recent':
         return new Date(b.startDate).getTime() - new Date(a.startDate).getTime();
-      case "name-asc":
+      case 'name-asc':
         return (a.title || a.destination).localeCompare(b.title || b.destination);
-      case "name-desc":
+      case 'name-desc':
         return (b.title || b.destination).localeCompare(a.title || a.destination);
-      case "status":
+      case 'status':
         const statusOrder = { planning: 0, booking: 1, active: 2, completed: 3, cancelled: 4 };
-        return (statusOrder[a.status as keyof typeof statusOrder] || 99) -
-          (statusOrder[b.status as keyof typeof statusOrder] || 99);
+        return (
+          (statusOrder[a.status as keyof typeof statusOrder] || 99) -
+          (statusOrder[b.status as keyof typeof statusOrder] || 99)
+        );
       default:
         return 0;
     }

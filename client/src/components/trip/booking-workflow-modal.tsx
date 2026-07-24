@@ -1,30 +1,45 @@
-import { useState } from "react";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Badge } from "@/components/ui/badge";
-import { FileUpload } from "@/components/file-upload";
-import { useToast } from "@/hooks/use-toast";
-import { Check, Upload, Link as LinkIcon, DollarSign, User } from "lucide-react";
-import type { ItineraryItem } from "@shared/schema";
+import { useState } from 'react';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Badge } from '@/components/ui/badge';
+import { FileUpload } from '@/components/file-upload';
+import { useToast } from '@/hooks/use-toast';
+import { Check, Upload, Link as LinkIcon, DollarSign, User } from 'lucide-react';
+import type { ItineraryItem } from '@shared/schema';
 
 interface BookingWorkflowModalProps {
   item: ItineraryItem;
   tripMembers: Array<{ id: string; name: string; email: string }>;
   isOpen: boolean;
   onClose: () => void;
-  onUpdateBooking: (itemId: string, updates: {
-    bookingStatus?: string;
-    confirmationNumber?: string;
-    confirmationUrl?: string;
-    bookedByUserId?: string;
-    linkToExpense?: boolean;
-    expenseAmount?: number;
-  }) => Promise<void>;
+  onUpdateBooking: (
+    itemId: string,
+    updates: {
+      bookingStatus?: string;
+      confirmationNumber?: string;
+      confirmationUrl?: string;
+      bookedByUserId?: string;
+      linkToExpense?: boolean;
+      expenseAmount?: number;
+    }
+  ) => Promise<void>;
   onUploadConfirmation: (itemId: string, file: File) => Promise<string>;
 }
 
@@ -39,20 +54,20 @@ export function BookingWorkflowModal({
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
 
-  const [bookingStatus, setBookingStatus] = useState(item.bookingStatus || "not_started");
-  const [confirmationNumber, setConfirmationNumber] = useState(item.confirmationNumber || "");
-  const [confirmationUrl, setConfirmationUrl] = useState(item.bookingUrl || "");
+  const [bookingStatus, setBookingStatus] = useState(item.bookingStatus || 'not_started');
+  const [confirmationNumber, setConfirmationNumber] = useState(item.confirmationNumber || '');
+  const [confirmationUrl, setConfirmationUrl] = useState(item.bookingUrl || '');
   const [bookedBy, setBookedBy] = useState<string | null>(item.bookedByUserId || null);
   const [createExpense, setCreateExpense] = useState(false);
   const [expenseAmount, setExpenseAmount] = useState(item.pricePerPerson || 0);
-  const [uploadedFileUrl, setUploadedFileUrl] = useState<string>("");
+  const [uploadedFileUrl, setUploadedFileUrl] = useState<string>('');
 
   const handleFileUploadComplete = (urls: string[]) => {
     if (urls.length > 0) {
       setUploadedFileUrl(urls[0]);
       toast({
-        title: "Confirmation uploaded",
-        description: "Booking confirmation has been uploaded successfully",
+        title: 'Confirmation uploaded',
+        description: 'Booking confirmation has been uploaded successfully',
       });
     }
   };
@@ -70,18 +85,19 @@ export function BookingWorkflowModal({
       });
 
       toast({
-        title: "Booking updated",
-        description: bookingStatus === "booked"
-          ? "Item marked as booked successfully"
-          : "Booking status updated",
+        title: 'Booking updated',
+        description:
+          bookingStatus === 'booked'
+            ? 'Item marked as booked successfully'
+            : 'Booking status updated',
       });
 
       onClose();
     } catch (error) {
       toast({
-        title: "Update failed",
-        description: error instanceof Error ? error.message : "Failed to update booking",
-        variant: "destructive",
+        title: 'Update failed',
+        description: error instanceof Error ? error.message : 'Failed to update booking',
+        variant: 'destructive',
       });
     } finally {
       setLoading(false);
@@ -108,19 +124,13 @@ export function BookingWorkflowModal({
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="not_started">
-                  <span className="flex items-center gap-2">
-                    Not Started
-                  </span>
+                  <span className="flex items-center gap-2">Not Started</span>
                 </SelectItem>
                 <SelectItem value="researching">
-                  <span className="flex items-center gap-2">
-                    Researching Options
-                  </span>
+                  <span className="flex items-center gap-2">Researching Options</span>
                 </SelectItem>
                 <SelectItem value="pending">
-                  <span className="flex items-center gap-2">
-                    Pending Confirmation
-                  </span>
+                  <span className="flex items-center gap-2">Pending Confirmation</span>
                 </SelectItem>
                 <SelectItem value="booked">
                   <span className="flex items-center gap-2">
@@ -129,9 +139,7 @@ export function BookingWorkflowModal({
                   </span>
                 </SelectItem>
                 <SelectItem value="cancelled">
-                  <span className="flex items-center gap-2">
-                    Cancelled
-                  </span>
+                  <span className="flex items-center gap-2">Cancelled</span>
                 </SelectItem>
               </SelectContent>
             </Select>
@@ -140,10 +148,7 @@ export function BookingWorkflowModal({
           {/* Assign Booking Responsibility */}
           <div className="space-y-2">
             <Label htmlFor="bookedBy">Who's Handling This Booking?</Label>
-            <Select
-              value={bookedBy || ""}
-              onValueChange={(val) => setBookedBy(val || null)}
-            >
+            <Select value={bookedBy || ''} onValueChange={(val) => setBookedBy(val || null)}>
               <SelectTrigger id="bookedBy">
                 <SelectValue placeholder="Select a member" />
               </SelectTrigger>
@@ -257,15 +262,15 @@ export function BookingWorkflowModal({
             <div className="space-y-2 text-sm">
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Status:</span>
-                <Badge variant={bookingStatus === "booked" ? "default" : "secondary"}>
-                  {bookingStatus.replace("_", " ").toUpperCase()}
+                <Badge variant={bookingStatus === 'booked' ? 'default' : 'secondary'}>
+                  {bookingStatus.replace('_', ' ').toUpperCase()}
                 </Badge>
               </div>
               {bookedBy && (
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Assigned to:</span>
                   <span className="font-medium">
-                    {tripMembers.find(m => m.id === bookedBy)?.name || "Unknown"}
+                    {tripMembers.find((m) => m.id === bookedBy)?.name || 'Unknown'}
                   </span>
                 </div>
               )}
@@ -299,7 +304,7 @@ export function BookingWorkflowModal({
               Cancel
             </Button>
             <Button onClick={handleSave} disabled={loading}>
-              {loading ? "Saving..." : "Save Booking Details"}
+              {loading ? 'Saving...' : 'Save Booking Details'}
             </Button>
           </div>
         </div>

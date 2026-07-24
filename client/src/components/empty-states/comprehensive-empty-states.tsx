@@ -1,13 +1,16 @@
-import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Receipt, Calendar, Users, MessageCircle, Plus, Search, Mail } from "lucide-react";
+import { Card } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Receipt, Calendar, Users, MessageCircle, Plus, Search, Mail } from 'lucide-react';
 
 interface EmptyStateProps {
   onAction: () => void;
   actionLabel?: string;
 }
 
-export function NoExpensesEmptyState({ onAction, actionLabel = "Add First Expense" }: EmptyStateProps) {
+export function NoExpensesEmptyState({
+  onAction,
+  actionLabel = 'Add First Expense',
+}: EmptyStateProps) {
   return (
     <Card className="p-12 text-center">
       <div className="max-w-md mx-auto space-y-6">
@@ -19,7 +22,8 @@ export function NoExpensesEmptyState({ onAction, actionLabel = "Add First Expens
         <div>
           <h3 className="text-xl font-bold mb-2">No expenses yet</h3>
           <p className="text-muted-foreground">
-            Start tracking your trip expenses. Add receipts, split costs, and keep everyone on the same page.
+            Start tracking your trip expenses. Add receipts, split costs, and keep everyone on the
+            same page.
           </p>
         </div>
         <Button onClick={onAction}>
@@ -34,7 +38,10 @@ export function NoExpensesEmptyState({ onAction, actionLabel = "Add First Expens
   );
 }
 
-export function NoActivitiesEmptyState({ onAction, actionLabel = "Add Activity" }: EmptyStateProps) {
+export function NoActivitiesEmptyState({
+  onAction,
+  actionLabel = 'Add Activity',
+}: EmptyStateProps) {
   return (
     <Card className="p-12 text-center">
       <div className="max-w-md mx-auto space-y-6">
@@ -46,7 +53,8 @@ export function NoActivitiesEmptyState({ onAction, actionLabel = "Add Activity" 
         <div>
           <h3 className="text-xl font-bold mb-2">No activities planned</h3>
           <p className="text-muted-foreground">
-            Build your itinerary by adding activities, or let Atlas AI suggest personalized recommendations.
+            Build your itinerary by adding activities, or let Atlas AI suggest personalized
+            recommendations.
           </p>
         </div>
         <div className="flex flex-col sm:flex-row gap-3 justify-center">
@@ -64,7 +72,7 @@ export function NoActivitiesEmptyState({ onAction, actionLabel = "Add Activity" 
   );
 }
 
-export function NoMembersEmptyState({ onAction, actionLabel = "Invite Members" }: EmptyStateProps) {
+export function NoMembersEmptyState({ onAction, actionLabel = 'Invite Members' }: EmptyStateProps) {
   return (
     <Card className="p-12 text-center">
       <div className="max-w-md mx-auto space-y-6">
@@ -97,7 +105,10 @@ export function NoMembersEmptyState({ onAction, actionLabel = "Invite Members" }
   );
 }
 
-export function NoMessagesEmptyState({ onAction, actionLabel = "Send First Message" }: EmptyStateProps) {
+export function NoMessagesEmptyState({
+  onAction,
+  actionLabel = 'Send First Message',
+}: EmptyStateProps) {
   return (
     <Card className="p-12 text-center">
       <div className="max-w-md mx-auto space-y-6">
@@ -131,7 +142,13 @@ export function NoMessagesEmptyState({ onAction, actionLabel = "Send First Messa
   );
 }
 
-export function NoSearchResultsEmptyState({ searchTerm, onClearSearch }: { searchTerm: string; onClearSearch: () => void }) {
+export function NoSearchResultsEmptyState({
+  searchTerm,
+  onClearSearch,
+}: {
+  searchTerm: string;
+  onClearSearch: () => void;
+}) {
   return (
     <Card className="p-12 text-center">
       <div className="max-w-md mx-auto space-y-4">

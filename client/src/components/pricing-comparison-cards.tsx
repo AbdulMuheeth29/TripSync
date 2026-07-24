@@ -1,8 +1,8 @@
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Check, Sparkles } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Check, Sparkles } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 interface PricingPlan {
   name: string;
@@ -17,58 +17,58 @@ interface PricingPlan {
 
 const PRICING_PLANS: PricingPlan[] = [
   {
-    name: "Free",
+    name: 'Free',
     price: 0,
-    period: "forever",
-    description: "Perfect for trying out TripSync",
+    period: 'forever',
+    description: 'Perfect for trying out TripSync',
     features: [
-      "1 active trip",
-      "Up to 5 members per trip",
-      "1 AI itinerary generation per trip",
-      "Basic expense tracking",
-      "Group chat",
-      "500 MB file storage"
+      '1 active trip',
+      'Up to 5 members per trip',
+      '1 AI itinerary generation per trip',
+      'Basic expense tracking',
+      'Group chat',
+      '500 MB file storage',
     ],
-    buttonText: "Get Started",
+    buttonText: 'Get Started',
   },
   {
-    name: "Pro",
+    name: 'Pro',
     price: 4.99,
-    period: "month",
-    description: "For frequent travelers",
+    period: 'month',
+    description: 'For frequent travelers',
     features: [
-      "Unlimited trips",
-      "Unlimited members",
-      "Unlimited AI generations",
-      "Advanced expense tracking with OCR",
-      "Currency conversion",
-      "Map view & location sharing",
-      "Email import for bookings",
-      "5 GB file storage",
-      "Priority Atlas AI responses",
-      "Export reports (PDF, CSV)"
+      'Unlimited trips',
+      'Unlimited members',
+      'Unlimited AI generations',
+      'Advanced expense tracking with OCR',
+      'Currency conversion',
+      'Map view & location sharing',
+      'Email import for bookings',
+      '5 GB file storage',
+      'Priority Atlas AI responses',
+      'Export reports (PDF, CSV)',
     ],
     highlighted: true,
-    buttonText: "Start Free Trial",
-    badge: "Most Popular"
+    buttonText: 'Start Free Trial',
+    badge: 'Most Popular',
   },
   {
-    name: "Teams",
+    name: 'Teams',
     price: 9.99,
-    period: "month",
-    description: "For travel agencies & groups",
+    period: 'month',
+    description: 'For travel agencies & groups',
     features: [
-      "Everything in Pro",
-      "Multi-trip dashboard",
-      "Advanced analytics",
-      "Custom branding",
-      "Priority support",
-      "50 GB file storage",
-      "API access",
-      "Dedicated account manager"
+      'Everything in Pro',
+      'Multi-trip dashboard',
+      'Advanced analytics',
+      'Custom branding',
+      'Priority support',
+      '50 GB file storage',
+      'API access',
+      'Dedicated account manager',
     ],
-    buttonText: "Contact Sales",
-  }
+    buttonText: 'Contact Sales',
+  },
 ];
 
 interface PricingComparisonCardsProps {
@@ -82,8 +82,8 @@ export function PricingComparisonCards({ onSelectPlan }: PricingComparisonCardsP
         <Card
           key={plan.name}
           className={cn(
-            "p-8 flex flex-col",
-            plan.highlighted && "border-primary border-2 shadow-lg relative"
+            'p-8 flex flex-col',
+            plan.highlighted && 'border-primary border-2 shadow-lg relative'
           )}
         >
           {plan.badge && (
@@ -107,11 +107,8 @@ export function PricingComparisonCards({ onSelectPlan }: PricingComparisonCardsP
 
           <Button
             onClick={() => onSelectPlan?.(plan.name)}
-            className={cn(
-              "w-full mb-8",
-              plan.highlighted && "bg-primary hover:bg-primary/90"
-            )}
-            variant={plan.highlighted ? "default" : "outline"}
+            className={cn('w-full mb-8', plan.highlighted && 'bg-primary hover:bg-primary/90')}
+            variant={plan.highlighted ? 'default' : 'outline'}
           >
             {plan.buttonText}
           </Button>

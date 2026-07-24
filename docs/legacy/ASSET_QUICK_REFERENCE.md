@@ -3,6 +3,7 @@
 ## 🚀 Quick Start
 
 ### Add a Brand Logo
+
 ```bash
 # 1. Add file to directory
 cp my-logo.png client/public/assets/brand/logos/logo-primary-512.png
@@ -13,18 +14,15 @@ import { getLogoUrl } from '@/lib/assets';
 ```
 
 ### Use Location-Based Images
+
 ```tsx
 import { LocationImage } from '@/components/optimized-image';
 
-<LocationImage
-  location="Paris"
-  countryCode="FR"
-  width={1200}
-  className="rounded-lg"
-/>
+<LocationImage location="Paris" countryCode="FR" width={1200} className="rounded-lg" />;
 ```
 
 ### Optimize Any Image
+
 ```tsx
 import { OptimizedImage } from '@/components/optimized-image';
 
@@ -34,7 +32,7 @@ import { OptimizedImage } from '@/components/optimized-image';
   width={800}
   quality={85}
   format="webp"
-/>
+/>;
 ```
 
 ---
@@ -93,7 +91,8 @@ function MyComponent({ destination }) {
 // Add to your upload route
 import { imageOptimizationMiddleware } from './image-optimizer';
 
-router.post('/api/upload',
+router.post(
+  '/api/upload',
   upload.single('file'),
   imageOptimizationMiddleware({ quality: 85 }),
   uploadHandler
@@ -106,10 +105,7 @@ router.post('/api/upload',
 import { preloadImages } from '@/lib/assets';
 
 useEffect(() => {
-  preloadImages([
-    '/assets/brand/logos/logo.png',
-    '/assets/ui/hero-bg.jpg'
-  ]);
+  preloadImages(['/assets/brand/logos/logo.png', '/assets/ui/hero-bg.jpg']);
 }, []);
 ```
 
@@ -121,27 +117,27 @@ useEffect(() => {
 
 ```typescript
 // Asset URLs
-getAssetUrl(path)                    // Get any asset URL
-getBrandAsset(path)                  // Get brand asset
-getLogoUrl(variant, size)            // Get logo
+getAssetUrl(path); // Get any asset URL
+getBrandAsset(path); // Get brand asset
+getLogoUrl(variant, size); // Get logo
 
 // Location Images
-getLocationImage(location, country)  // Get hero image
-getLocationGallery(location)         // Get gallery array
-getCategoryImage(category)           // Get category image
+getLocationImage(location, country); // Get hero image
+getLocationGallery(location); // Get gallery array
+getCategoryImage(category); // Get category image
 
 // Optimization
-getOptimizedImageUrl(url, options)   // Optimize URL
-preloadImage(url)                    // Preload single
-preloadImages(urls)                  // Preload multiple
+getOptimizedImageUrl(url, options); // Optimize URL
+preloadImage(url); // Preload single
+preloadImages(urls); // Preload multiple
 ```
 
 ### Hooks
 
 ```typescript
-useLocationImage(location, country)  // Returns: { image, loading, error }
-useLocationGallery(location)         // Returns: { gallery, loading }
-useCategoryImage(category)           // Returns: { image, loading }
+useLocationImage(location, country); // Returns: { image, loading, error }
+useLocationGallery(location); // Returns: { gallery, loading }
+useCategoryImage(category); // Returns: { image, loading }
 ```
 
 ### Components
@@ -156,13 +152,13 @@ useCategoryImage(category)           // Returns: { image, loading }
 
 ## 📊 File Size Limits
 
-| Type | Max Size | Format |
-|------|----------|--------|
-| Logo | 50KB | PNG/SVG |
-| Hero | 500KB | WebP/JPEG |
-| Thumbnail | 50KB | WebP |
-| Video | 10MB | WebM/MP4 |
-| Upload | 25MB | Any image |
+| Type      | Max Size | Format    |
+| --------- | -------- | --------- |
+| Logo      | 50KB     | PNG/SVG   |
+| Hero      | 500KB    | WebP/JPEG |
+| Thumbnail | 50KB     | WebP      |
+| Video     | 10MB     | WebM/MP4  |
+| Upload    | 25MB     | Any image |
 
 ---
 
@@ -190,9 +186,11 @@ useCategoryImage(category)           // Returns: { image, loading }
 ## 🔧 Installation
 
 ### Required
+
 Already installed ✅
 
 ### Optional (for server optimization)
+
 ```bash
 npm install sharp
 ```
@@ -204,16 +202,19 @@ Then images will auto-optimize on upload!
 ## 🐛 Troubleshooting
 
 **Images not loading?**
+
 - Check path: `/assets/` not `/public/assets/`
 - Verify file exists
 - Check browser console
 
 **Optimization not working?**
+
 - Install Sharp: `npm install sharp`
 - Check server logs
 - Restart server
 
 **Slow loading?**
+
 - Use WebP format
 - Set proper width/height
 - Enable lazy loading
@@ -224,6 +225,7 @@ Then images will auto-optimize on upload!
 ## 📝 Examples
 
 ### Hero Section
+
 ```tsx
 <LocationImage
   location={trip.destination}
@@ -233,15 +235,17 @@ Then images will auto-optimize on upload!
 ```
 
 ### Gallery
+
 ```tsx
 const { gallery } = useLocationGallery(destination);
 
-{gallery.map(img => (
-  <OptimizedImage key={img.url} src={img.url} alt={img.alt} />
-))}
+{
+  gallery.map((img) => <OptimizedImage key={img.url} src={img.url} alt={img.alt} />);
+}
 ```
 
 ### Logo
+
 ```tsx
 <img src={getLogoUrl('white', 512)} alt="TripSync" />
 ```

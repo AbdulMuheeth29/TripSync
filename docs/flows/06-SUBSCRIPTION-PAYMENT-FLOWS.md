@@ -6,11 +6,11 @@ Complete end-to-end flows for subscription management, payment processing, and t
 
 ## Subscription Tiers Overview
 
-| Tier | Price | Trips | Members/Trip | AI Generations | Storage |
-|------|-------|-------|--------------|----------------|---------|
-| **Free** | $0/forever | 3 active | 6 | 1/trip | 5 photos/trip |
-| **Pro** | $4.99/mo | Unlimited | Unlimited | Unlimited | Unlimited |
-| **Teams** | $9.99/mo | Unlimited | Unlimited | Unlimited | Unlimited + branding |
+| Tier      | Price      | Trips     | Members/Trip | AI Generations | Storage              |
+| --------- | ---------- | --------- | ------------ | -------------- | -------------------- |
+| **Free**  | $0/forever | 3 active  | 6            | 1/trip         | 5 photos/trip        |
+| **Pro**   | $4.99/mo   | Unlimited | Unlimited    | Unlimited      | Unlimited            |
+| **Teams** | $9.99/mo   | Unlimited | Unlimited    | Unlimited      | Unlimited + branding |
 
 ---
 
@@ -742,6 +742,7 @@ END: Soft paywalls encourage upgrades without blocking core features
 ```
 
 **Paywall Strategy:**
+
 - Soft paywalls: Show preview, explain value
 - Allow dismissal: Never force upgrade
 - Clear benefits: Show what they get
@@ -852,6 +853,7 @@ END: Payment recovered or subscription cancelled
 ## All Subscription Use Cases
 
 ### 1. Plan Selection
+
 - ✅ View pricing page
 - ✅ Compare Free vs Pro vs Teams
 - ✅ See feature breakdown
@@ -859,6 +861,7 @@ END: Payment recovered or subscription cancelled
 - ✅ Contact for custom plans
 
 ### 2. Trial & Signup
+
 - ✅ Start 14-day free trial (no card)
 - ✅ Trial reminder (2 days before end)
 - ✅ Trial expiration handling
@@ -866,6 +869,7 @@ END: Payment recovered or subscription cancelled
 - ✅ Automatic transition to paid
 
 ### 3. Payment Processing
+
 - ✅ Stripe Checkout integration
 - ✅ Credit card processing
 - ✅ Payment success handling
@@ -874,6 +878,7 @@ END: Payment recovered or subscription cancelled
 - ✅ Automatic subscription cancellation after failures
 
 ### 4. Subscription Management
+
 - ✅ View current plan
 - ✅ See next billing date
 - ✅ Update payment method
@@ -882,6 +887,7 @@ END: Payment recovered or subscription cancelled
 - ✅ Manage billing email
 
 ### 5. Upgrades & Downgrades
+
 - ✅ Upgrade from Free to Pro
 - ✅ Upgrade from Pro to Teams
 - ✅ Downgrade from Teams to Pro
@@ -890,6 +896,7 @@ END: Payment recovered or subscription cancelled
 - ✅ Immediate vs end-of-period changes
 
 ### 6. Cancellation
+
 - ✅ Cancel subscription
 - ✅ Cancellation survey
 - ✅ Retention offers (discounts)
@@ -898,6 +905,7 @@ END: Payment recovered or subscription cancelled
 - ✅ Reactivation option
 
 ### 7. Feature Gating
+
 - ✅ Soft paywalls for Pro features
 - ✅ Usage limit enforcement
 - ✅ Graceful degradation
@@ -905,6 +913,7 @@ END: Payment recovered or subscription cancelled
 - ✅ Trial offers in paywalls
 
 ### 8. Billing & Invoices
+
 - ✅ Monthly billing
 - ✅ Automatic invoices
 - ✅ Receipt emails
@@ -917,6 +926,7 @@ END: Payment recovered or subscription cancelled
 ## Analytics & Tracking
 
 **Events Tracked:**
+
 1. `pricing_page_viewed` - User viewed pricing
 2. `trial_started` - Free trial initiated
 3. `trial_ended` - Trial expired
@@ -930,6 +940,7 @@ END: Payment recovered or subscription cancelled
 11. `paywall_converted` - User upgraded from paywall
 
 **Metrics Tracked:**
+
 - Trial conversion rate (trial → paid)
 - Churn rate (cancellations per month)
 - ARPU (average revenue per user)

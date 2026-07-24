@@ -1,7 +1,23 @@
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
-import { Progress } from "@/components/ui/progress";
-import { Badge } from "@/components/ui/badge";
-import { Activity, TrendingUp, TrendingDown, AlertTriangle, CheckCircle, Clock, DollarSign, Users, Vote } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from '@/components/ui/dialog';
+import { Progress } from '@/components/ui/progress';
+import { Badge } from '@/components/ui/badge';
+import {
+  Activity,
+  TrendingUp,
+  TrendingDown,
+  AlertTriangle,
+  CheckCircle,
+  Clock,
+  DollarSign,
+  Users,
+  Vote,
+} from 'lucide-react';
 
 interface TripHealthScoreModalProps {
   isOpen: boolean;
@@ -17,62 +33,73 @@ interface TripHealthScoreModalProps {
   };
 }
 
-export function TripHealthScoreModal({
-  isOpen,
-  onClose,
-  healthData
-}: TripHealthScoreModalProps) {
-  const { score, completionPercentage, budgetUsagePercentage, daysUntilTrip, stuckVotesCount, inactiveDays, issues } = healthData;
+export function TripHealthScoreModal({ isOpen, onClose, healthData }: TripHealthScoreModalProps) {
+  const {
+    score,
+    completionPercentage,
+    budgetUsagePercentage,
+    daysUntilTrip,
+    stuckVotesCount,
+    inactiveDays,
+    issues,
+  } = healthData;
 
   const getScoreColor = (score: number) => {
-    if (score >= 80) return "text-green-500";
-    if (score >= 60) return "text-yellow-500";
-    if (score >= 40) return "text-orange-500";
-    return "text-red-500";
+    if (score >= 80) return 'text-green-500';
+    if (score >= 60) return 'text-yellow-500';
+    if (score >= 40) return 'text-orange-500';
+    return 'text-red-500';
   };
 
   const getScoreBadge = (score: number) => {
-    if (score >= 80) return { label: "Excellent", variant: "default" as const };
-    if (score >= 60) return { label: "Good", variant: "secondary" as const };
-    if (score >= 40) return { label: "Needs Attention", variant: "outline" as const };
-    return { label: "Critical", variant: "destructive" as const };
+    if (score >= 80) return { label: 'Excellent', variant: 'default' as const };
+    if (score >= 60) return { label: 'Good', variant: 'secondary' as const };
+    if (score >= 40) return { label: 'Needs Attention', variant: 'outline' as const };
+    return { label: 'Critical', variant: 'destructive' as const };
   };
 
   const scoreBadge = getScoreBadge(score);
 
   const metrics = [
     {
-      label: "Itinerary Completion",
+      label: 'Itinerary Completion',
       value: completionPercentage,
       icon: Activity,
       target: 100,
-      unit: "%",
-      status: completionPercentage >= 70 ? "good" : completionPercentage >= 40 ? "warning" : "critical"
+      unit: '%',
+      status:
+        completionPercentage >= 70 ? 'good' : completionPercentage >= 40 ? 'warning' : 'critical',
     },
     {
-      label: "Budget Usage",
+      label: 'Budget Usage',
       value: budgetUsagePercentage,
       icon: DollarSign,
       target: 100,
-      unit: "%",
-      status: budgetUsagePercentage <= 100 ? "good" : budgetUsagePercentage <= 120 ? "warning" : "critical"
+      unit: '%',
+      status:
+        budgetUsagePercentage <= 100
+          ? 'good'
+          : budgetUsagePercentage <= 120
+            ? 'warning'
+            : 'critical',
     },
     {
-      label: "Days Until Trip",
+      label: 'Days Until Trip',
       value: daysUntilTrip || 0,
       icon: Clock,
       target: null,
-      unit: " days",
-      status: !daysUntilTrip || daysUntilTrip > 14 ? "good" : daysUntilTrip > 7 ? "warning" : "critical"
+      unit: ' days',
+      status:
+        !daysUntilTrip || daysUntilTrip > 14 ? 'good' : daysUntilTrip > 7 ? 'warning' : 'critical',
     },
     {
-      label: "Stuck Votes",
+      label: 'Stuck Votes',
       value: stuckVotesCount,
       icon: Vote,
       target: 0,
-      unit: "",
-      status: stuckVotesCount === 0 ? "good" : stuckVotesCount <= 2 ? "warning" : "critical"
-    }
+      unit: '',
+      status: stuckVotesCount === 0 ? 'good' : stuckVotesCount <= 2 ? 'warning' : 'critical',
+    },
   ];
 
   return (
@@ -83,24 +110,18 @@ export function TripHealthScoreModal({
             <Activity className="h-6 w-6 text-primary" />
             Trip Health Score
           </DialogTitle>
-          <DialogDescription>
-            Real-time analysis of your trip planning progress
-          </DialogDescription>
+          <DialogDescription>Real-time analysis of your trip planning progress</DialogDescription>
         </DialogHeader>
 
         <div className="space-y-6 py-4">
           {/* Overall Score */}
           <div className="text-center space-y-4 p-6 rounded-lg bg-muted/30 border border-border">
-            <div className={`text-7xl font-bold ${getScoreColor(score)}`}>
-              {score}
-            </div>
+            <div className={`text-7xl font-bold ${getScoreColor(score)}`}>{score}</div>
             <div className="space-y-2">
               <Badge variant={scoreBadge.variant} className="text-sm px-4 py-1">
                 {scoreBadge.label}
               </Badge>
-              <p className="text-sm text-muted-foreground">
-                out of 100 points
-              </p>
+              <p className="text-sm text-muted-foreground">out of 100 points</p>
             </div>
             <Progress value={score} className="h-3" />
           </div>
@@ -113,28 +134,47 @@ export function TripHealthScoreModal({
             <div className="grid gap-3">
               {metrics.map((metric) => {
                 const MetricIcon = metric.icon;
-                const statusColor = metric.status === "good" ? "text-green-500" : metric.status === "warning" ? "text-yellow-500" : "text-red-500";
+                const statusColor =
+                  metric.status === 'good'
+                    ? 'text-green-500'
+                    : metric.status === 'warning'
+                      ? 'text-yellow-500'
+                      : 'text-red-500';
 
                 return (
-                  <div key={metric.label} className="flex items-center justify-between p-4 rounded-lg bg-background border border-border">
+                  <div
+                    key={metric.label}
+                    className="flex items-center justify-between p-4 rounded-lg bg-background border border-border"
+                  >
                     <div className="flex items-center gap-3">
-                      <div className={`h-10 w-10 rounded-full bg-muted flex items-center justify-center ${statusColor}`}>
+                      <div
+                        className={`h-10 w-10 rounded-full bg-muted flex items-center justify-center ${statusColor}`}
+                      >
                         <MetricIcon className="h-5 w-5" />
                       </div>
                       <div>
                         <div className="font-medium text-sm">{metric.label}</div>
                         <div className="text-xs text-muted-foreground">
-                          {metric.target !== null ? `Target: ${metric.target}${metric.unit}` : "Informational"}
+                          {metric.target !== null
+                            ? `Target: ${metric.target}${metric.unit}`
+                            : 'Informational'}
                         </div>
                       </div>
                     </div>
                     <div className="text-right">
                       <div className={`text-2xl font-bold ${statusColor}`}>
-                        {Math.round(metric.value)}{metric.unit}
+                        {Math.round(metric.value)}
+                        {metric.unit}
                       </div>
-                      {metric.status === "good" && <CheckCircle className="h-4 w-4 text-green-500 ml-auto mt-1" />}
-                      {metric.status === "warning" && <AlertTriangle className="h-4 w-4 text-yellow-500 ml-auto mt-1" />}
-                      {metric.status === "critical" && <TrendingDown className="h-4 w-4 text-red-500 ml-auto mt-1" />}
+                      {metric.status === 'good' && (
+                        <CheckCircle className="h-4 w-4 text-green-500 ml-auto mt-1" />
+                      )}
+                      {metric.status === 'warning' && (
+                        <AlertTriangle className="h-4 w-4 text-yellow-500 ml-auto mt-1" />
+                      )}
+                      {metric.status === 'critical' && (
+                        <TrendingDown className="h-4 w-4 text-red-500 ml-auto mt-1" />
+                      )}
                     </div>
                   </div>
                 );
@@ -150,9 +190,14 @@ export function TripHealthScoreModal({
               </h3>
               <div className="space-y-2">
                 {issues.map((issue, index) => (
-                  <div key={index} className="flex items-start gap-3 p-3 rounded-lg bg-destructive/5 border border-destructive/20">
+                  <div
+                    key={index}
+                    className="flex items-start gap-3 p-3 rounded-lg bg-destructive/5 border border-destructive/20"
+                  >
                     <AlertTriangle className="h-4 w-4 text-destructive flex-shrink-0 mt-0.5" />
-                    <span className="text-sm">{issue.replace(/_/g, " ").replace(/\b\w/g, l => l.toUpperCase())}</span>
+                    <span className="text-sm">
+                      {issue.replace(/_/g, ' ').replace(/\b\w/g, (l) => l.toUpperCase())}
+                    </span>
                   </div>
                 ))}
               </div>

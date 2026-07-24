@@ -3,11 +3,11 @@
  * Access restricted via ADMIN_EMAILS env var (comma-separated).
  */
 
-import type { Express, Request, Response } from "express";
-import { storage } from "../storage";
-import { env } from "../env";
+import type { Express, Request, Response } from 'express';
+import { storage } from '../storage';
+import { env } from '../env';
 
-export type MetricsPlatform = "web" | "ios" | "android";
+export type MetricsPlatform = 'web' | 'ios' | 'android';
 
 export interface AdminMetricsResponse {
   platform: MetricsPlatform;
@@ -27,20 +27,20 @@ function isAdmin(email: string): boolean {
 }
 
 export function registerAdminRoutes(app: Express): void {
-  app.get("/api/admin/metrics", async (req: Request, res: Response) => {
+  app.get('/api/admin/metrics', async (req: Request, res: Response) => {
     try {
-      const userId = (req.query.userId as string) || (req.headers["x-user-id"] as string);
-      const platform = ((req.query.platform as string) || "web") as MetricsPlatform;
-      const validPlatforms: MetricsPlatform[] = ["web", "ios", "android"];
-      const metricsPlatform = validPlatforms.includes(platform) ? platform : "web";
+      const userId = (req.query.userId as string) || (req.headers['x-user-id'] as string);
+      const platform = ((req.query.platform as string) || 'web') as MetricsPlatform;
+      const validPlatforms: MetricsPlatform[] = ['web', 'ios', 'android'];
+      const metricsPlatform = validPlatforms.includes(platform) ? platform : 'web';
 
       if (!userId) {
-        return res.status(401).json({ error: "userId required" });
+        return res.status(401).json({ error: 'userId required' });
       }
 
       const user = await storage.getUser(userId);
       if (!user || !isAdmin(user.email)) {
-        return res.status(403).json({ error: "Access denied" });
+        return res.status(403).json({ error: 'Access denied' });
       }
 
       const counts = await storage.getAdminMetricsCounts();
@@ -55,8 +55,8 @@ export function registerAdminRoutes(app: Express): void {
 
       res.json(response);
     } catch (err) {
-      console.error("Admin metrics error:", err);
-      res.status(500).json({ error: "Failed to load metrics" });
+      console.error('Admin metrics error:', err);
+      res.status(500).json({ error: 'Failed to load metrics' });
     }
   });
 }

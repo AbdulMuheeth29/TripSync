@@ -1,14 +1,33 @@
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
-import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
-import { Share2, Copy, Check, Link2, Mail, MessageSquare, RefreshCw, Lock, Globe, Calendar, Users } from "lucide-react";
-import { useState } from "react";
-import { format, addDays } from "date-fns";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Switch } from '@/components/ui/switch';
+import { Badge } from '@/components/ui/badge';
+import { Separator } from '@/components/ui/separator';
+import {
+  Share2,
+  Copy,
+  Check,
+  Link2,
+  Mail,
+  MessageSquare,
+  RefreshCw,
+  Lock,
+  Globe,
+  Calendar,
+  Users,
+} from 'lucide-react';
+import { useState } from 'react';
+import { format, addDays } from 'date-fns';
 
 interface ShareTripLinkModalProps {
   isOpen: boolean;
@@ -33,7 +52,7 @@ export function ShareTripLinkModal({
   shareLink,
   onRegenerateLink,
   onTogglePublicAccess,
-  initialPublicAccess
+  initialPublicAccess,
 }: ShareTripLinkModalProps) {
   const [copied, setCopied] = useState(false);
   const [isRegenerating, setIsRegenerating] = useState(false);
@@ -46,7 +65,7 @@ export function ShareTripLinkModal({
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch (error) {
-      console.error("Failed to copy link:", error);
+      console.error('Failed to copy link:', error);
     }
   };
 
@@ -55,7 +74,7 @@ export function ShareTripLinkModal({
     try {
       await onRegenerateLink();
     } catch (error) {
-      console.error("Failed to regenerate link:", error);
+      console.error('Failed to regenerate link:', error);
     } finally {
       setIsRegenerating(false);
     }
@@ -67,7 +86,7 @@ export function ShareTripLinkModal({
       await onTogglePublicAccess(enabled);
       setPublicAccess(enabled);
     } catch (error) {
-      console.error("Failed to toggle public access:", error);
+      console.error('Failed to toggle public access:', error);
     } finally {
       setIsTogglingAccess(false);
     }
@@ -77,16 +96,16 @@ export function ShareTripLinkModal({
     const subject = encodeURIComponent(`Join my trip: ${trip.name}`);
     const body = encodeURIComponent(
       `I'd like to invite you to join my trip "${trip.name}"!\n\n` +
-      `Dates: ${format(trip.startDate, "MMM d")} - ${format(trip.endDate, "MMM d, yyyy")}\n\n` +
-      `Click this link to join:\n${shareLink}\n\n` +
-      `See you there!`
+        `Dates: ${format(trip.startDate, 'MMM d')} - ${format(trip.endDate, 'MMM d, yyyy')}\n\n` +
+        `Click this link to join:\n${shareLink}\n\n` +
+        `See you there!`
     );
     window.open(`mailto:?subject=${subject}&body=${body}`, '_blank');
   };
 
   const handleShareViaSMS = () => {
     const message = encodeURIComponent(
-      `Join my trip "${trip.name}" (${format(trip.startDate, "MMM d")} - ${format(trip.endDate, "MMM d")}): ${shareLink}`
+      `Join my trip "${trip.name}" (${format(trip.startDate, 'MMM d')} - ${format(trip.endDate, 'MMM d')}): ${shareLink}`
     );
     window.open(`sms:?body=${message}`, '_blank');
   };
@@ -99,9 +118,7 @@ export function ShareTripLinkModal({
             <Share2 className="h-5 w-5 text-primary" />
             <DialogTitle>Share Trip</DialogTitle>
           </div>
-          <DialogDescription>
-            Invite others to join {trip.name}
-          </DialogDescription>
+          <DialogDescription>Invite others to join {trip.name}</DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4">
@@ -110,7 +127,9 @@ export function ShareTripLinkModal({
             <div className="flex items-center gap-3 text-sm">
               <div className="flex items-center gap-1.5">
                 <Calendar className="h-4 w-4 text-muted-foreground" />
-                <span>{format(trip.startDate, "MMM d")} - {format(trip.endDate, "MMM d")}</span>
+                <span>
+                  {format(trip.startDate, 'MMM d')} - {format(trip.endDate, 'MMM d')}
+                </span>
               </div>
               <span>•</span>
               <div className="flex items-center gap-1.5">
@@ -133,15 +152,14 @@ export function ShareTripLinkModal({
                   <Label htmlFor="public-access" className="font-semibold">
                     Public Link Access
                   </Label>
-                  <Badge variant={publicAccess ? "secondary" : "outline"} className="text-xs">
-                    {publicAccess ? "Enabled" : "Disabled"}
+                  <Badge variant={publicAccess ? 'secondary' : 'outline'} className="text-xs">
+                    {publicAccess ? 'Enabled' : 'Disabled'}
                   </Badge>
                 </div>
                 <p className="text-xs text-muted-foreground">
                   {publicAccess
-                    ? "Anyone with the link can request to join this trip"
-                    : "Link sharing is disabled. Use email invites instead."
-                  }
+                    ? 'Anyone with the link can request to join this trip'
+                    : 'Link sharing is disabled. Use email invites instead.'}
                 </p>
               </div>
               <Switch
@@ -159,11 +177,7 @@ export function ShareTripLinkModal({
               <div className="space-y-2">
                 <Label>Share Link</Label>
                 <div className="flex gap-2">
-                  <Input
-                    value={shareLink}
-                    readOnly
-                    className="flex-1 font-mono text-sm"
-                  />
+                  <Input value={shareLink} readOnly className="flex-1 font-mono text-sm" />
                   <Button
                     variant="outline"
                     size="icon"
@@ -227,7 +241,7 @@ export function ShareTripLinkModal({
                     onClick={handleRegenerateLink}
                     disabled={isRegenerating}
                   >
-                    <RefreshCw className={`h-4 w-4 ${isRegenerating ? "animate-spin" : ""}`} />
+                    <RefreshCw className={`h-4 w-4 ${isRegenerating ? 'animate-spin' : ''}`} />
                   </Button>
                 </div>
               </Card>
@@ -252,7 +266,7 @@ export function ShareTripLinkModal({
               <div className="flex items-center gap-2 p-2 bg-muted rounded-lg">
                 <Link2 className="h-4 w-4 text-muted-foreground" />
                 <p className="text-xs text-muted-foreground">
-                  Link expires on {format(addDays(trip.endDate, 30), "MMM d, yyyy")}
+                  Link expires on {format(addDays(trip.endDate, 30), 'MMM d, yyyy')}
                 </p>
               </div>
             </>
@@ -279,9 +293,7 @@ export function ShareTripLinkModal({
         </div>
 
         <DialogFooter>
-          <Button onClick={onClose}>
-            {publicAccess && copied ? "Done" : "Close"}
-          </Button>
+          <Button onClick={onClose}>{publicAccess && copied ? 'Done' : 'Close'}</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

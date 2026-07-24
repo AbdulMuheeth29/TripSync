@@ -11,12 +11,12 @@
  * 5. Personalized Recommendations - AI learns and adapts to group dynamics
  */
 
-import Anthropic from "@anthropic-ai/sdk";
-import type { Trip, ItineraryItem, TripMember } from "@shared/schema";
-import { retryWithBackoff } from "./ai-retry";
-import { aiCircuitBreakers } from "./ai-circuit-breaker";
-import { recordAIOperation, calculateCost } from "./ai-metrics";
-import { getUserPreferences } from "./preference-learning";
+import Anthropic from '@anthropic-ai/sdk';
+import type { Trip, ItineraryItem, TripMember } from '@shared/schema';
+import { retryWithBackoff } from './ai-retry';
+import { aiCircuitBreakers } from './ai-circuit-breaker';
+import { recordAIOperation, calculateCost } from './ai-metrics';
+import { getUserPreferences } from './preference-learning';
 
 const anthropic = new Anthropic({
   apiKey: process.env.AI_INTEGRATIONS_ANTHROPIC_API_KEY,
@@ -65,15 +65,15 @@ export async function optimizeActivitySchedule(
   const operationStart = Date.now();
 
   try {
-    const dayItems = items.filter(i => i.dayNumber === dayNumber);
+    const dayItems = items.filter((i) => i.dayNumber === dayNumber);
 
     if (dayItems.length === 0) {
       return null; // Nothing to optimize
     }
 
-    const itemDescriptions = dayItems.map(i =>
-      `${i.time} - ${i.type}: ${i.name} at ${i.location} ($${i.pricePerPerson}/person)`
-    ).join('\n');
+    const itemDescriptions = dayItems
+      .map((i) => `${i.time} - ${i.type}: ${i.name} at ${i.location} ($${i.pricePerPerson}/person)`)
+      .join('\n');
 
     const prompt = `You are a travel optimization expert. Optimize this day's schedule for maximum efficiency and enjoyment.
 
@@ -113,11 +113,11 @@ Respond in JSON:
           const message = await anthropic.messages.create({
             model: AI_MODEL_COMPLEX,
             max_tokens: 2048,
-            messages: [{ role: "user", content: prompt }],
+            messages: [{ role: 'user', content: prompt }],
           });
 
           const content = message.content[0];
-          const text = content.type === "text" ? content.text.trim() : "";
+          const text = content.type === 'text' ? content.text.trim() : '';
 
           const jsonMatch = text.match(/\{[\s\S]*\}/);
           if (!jsonMatch) {
@@ -129,7 +129,7 @@ Respond in JSON:
           return {
             parsed,
             usage: message.usage,
-            model: AI_MODEL_COMPLEX
+            model: AI_MODEL_COMPLEX,
           };
         });
       },
@@ -140,7 +140,9 @@ Respond in JSON:
 
     // Record metrics
     const duration = Date.now() - operationStart;
-    const cost = usage ? calculateCost(AI_MODEL_COMPLEX, usage.input_tokens, usage.output_tokens) : 0;
+    const cost = usage
+      ? calculateCost(AI_MODEL_COMPLEX, usage.input_tokens, usage.output_tokens)
+      : 0;
 
     await recordAIOperation({
       operation: 'smart-scheduling',
@@ -152,7 +154,7 @@ Respond in JSON:
       costUsd: cost,
       cached: false,
       attempts: result.attempts,
-      timestamp: Date.now()
+      timestamp: Date.now(),
     });
 
     // Map response to our format
@@ -163,11 +165,11 @@ Respond in JSON:
         suggestedTime: ai.suggestedTime,
         reasoning: ai.reasoning,
         conflicts: ai.conflicts || [],
-        optimizationScore: ai.optimizationScore || 50
+        optimizationScore: ai.optimizationScore || 50,
       })),
       totalTravelTime: parsed.totalTravelTime || 0,
       efficiency: parsed.efficiency || 50,
-      warnings: parsed.warnings || []
+      warnings: parsed.warnings || [],
     };
   } catch (error: any) {
     const duration = Date.now() - operationStart;
@@ -178,7 +180,7 @@ Respond in JSON:
       success: false,
       duration,
       errorType: error?.type || 'unknown',
-      timestamp: Date.now()
+      timestamp: Date.now(),
     });
 
     console.error('Failed to optimize schedule:', error);
@@ -235,10 +237,11 @@ export async function predictTripSuccess(
     );
 
     const tripDuration = Math.ceil(
-      (new Date(trip.endDate).getTime() - new Date(trip.startDate).getTime()) / (1000 * 60 * 60 * 24)
+      (new Date(trip.endDate).getTime() - new Date(trip.startDate).getTime()) /
+        (1000 * 60 * 60 * 24)
     );
 
-    const daysWithActivities = new Set(items.map(i => i.dayNumber)).size;
+    const daysWithActivities = new Set(items.map((i) => i.dayNumber)).size;
     const completionRate = tripDuration > 0 ? (daysWithActivities / tripDuration) * 100 : 0;
 
     const totalBudget = trip.budgetPerPerson * trip.groupSize;
@@ -288,11 +291,11 @@ Respond in JSON:
           const message = await anthropic.messages.create({
             model: AI_MODEL_FAST,
             max_tokens: 1024,
-            messages: [{ role: "user", content: prompt }],
+            messages: [{ role: 'user', content: prompt }],
           });
 
           const content = message.content[0];
-          const text = content.type === "text" ? content.text.trim() : "";
+          const text = content.type === 'text' ? content.text.trim() : '';
 
           const jsonMatch = text.match(/\{[\s\S]*\}/);
           if (!jsonMatch) {
@@ -304,7 +307,7 @@ Respond in JSON:
           return {
             parsed,
             usage: message.usage,
-            model: AI_MODEL_FAST
+            model: AI_MODEL_FAST,
           };
         });
       },
@@ -327,7 +330,7 @@ Respond in JSON:
       costUsd: cost,
       cached: false,
       attempts: result.attempts,
-      timestamp: Date.now()
+      timestamp: Date.now(),
     });
 
     return {
@@ -336,10 +339,10 @@ Respond in JSON:
       factors: {
         positive: parsed.positiveFactors || [],
         negative: parsed.negativeFactors || [],
-        neutral: parsed.neutralFactors || []
+        neutral: parsed.neutralFactors || [],
       },
       recommendations: parsed.recommendations || [],
-      riskLevel: parsed.riskLevel || 'medium'
+      riskLevel: parsed.riskLevel || 'medium',
     };
   } catch (error: any) {
     const duration = Date.now() - operationStart;
@@ -350,7 +353,7 @@ Respond in JSON:
       success: false,
       duration,
       errorType: error?.type || 'unknown',
-      timestamp: Date.now()
+      timestamp: Date.now(),
     });
 
     console.error('Failed to predict trip success:', error);
@@ -427,11 +430,11 @@ Respond in JSON:
           const message = await anthropic.messages.create({
             model: AI_MODEL_FAST,
             max_tokens: 512,
-            messages: [{ role: "user", content: prompt }],
+            messages: [{ role: 'user', content: prompt }],
           });
 
           const content = message.content[0];
-          const text = content.type === "text" ? content.text.trim() : "";
+          const text = content.type === 'text' ? content.text.trim() : '';
 
           const jsonMatch = text.match(/\{[\s\S]*\}/);
           if (!jsonMatch) {
@@ -443,7 +446,7 @@ Respond in JSON:
           return {
             parsed,
             usage: message.usage,
-            model: AI_MODEL_FAST
+            model: AI_MODEL_FAST,
           };
         });
       },
@@ -466,7 +469,7 @@ Respond in JSON:
       costUsd: cost,
       cached: false,
       attempts: result.attempts,
-      timestamp: Date.now()
+      timestamp: Date.now(),
     });
 
     return {
@@ -477,7 +480,7 @@ Respond in JSON:
       bookingRecommendation: parsed.bookingRecommendation || 'monitor',
       reasoning: parsed.reasoning || 'Insufficient data',
       estimatedSavings: parsed.estimatedSavings,
-      bestTimeToBook: parsed.bestTimeToBook
+      bestTimeToBook: parsed.bestTimeToBook,
     };
   } catch (error: any) {
     const duration = Date.now() - operationStart;
@@ -488,7 +491,7 @@ Respond in JSON:
       success: false,
       duration,
       errorType: error?.type || 'unknown',
-      timestamp: Date.now()
+      timestamp: Date.now(),
     });
 
     console.error('Failed to analyze pricing:', error);
@@ -509,15 +512,17 @@ export async function generatePersonalizedRecommendations(
   trip: Trip,
   members: TripMember[],
   dayNumber: number
-): Promise<Array<{
-  type: string;
-  name: string;
-  description: string;
-  location: string;
-  pricePerPerson: number;
-  matchScore: number; // How well it matches group preferences
-  reasoning: string;
-}>> {
+): Promise<
+  Array<{
+    type: string;
+    name: string;
+    description: string;
+    location: string;
+    pricePerPerson: number;
+    matchScore: number; // How well it matches group preferences
+    reasoning: string;
+  }>
+> {
   const operationStart = Date.now();
 
   try {
@@ -525,14 +530,14 @@ export async function generatePersonalizedRecommendations(
     const memberPreferences = await Promise.all(
       members.map(async (m) => ({
         userId: m.userId,
-        preferences: await getUserPreferences(m.userId, trip.destination)
+        preferences: await getUserPreferences(m.userId, trip.destination),
       }))
     );
 
     // Build context
-    const prefContext = memberPreferences.map(mp =>
-      `User ${mp.userId}: ${JSON.stringify(mp.preferences)}`
-    ).join('\n');
+    const prefContext = memberPreferences
+      .map((mp) => `User ${mp.userId}: ${JSON.stringify(mp.preferences)}`)
+      .join('\n');
 
     const prompt = `Generate 5 personalized activity recommendations for this group on day ${dayNumber}.
 
@@ -566,11 +571,11 @@ Respond in JSON array:
           const message = await anthropic.messages.create({
             model: AI_MODEL_COMPLEX,
             max_tokens: 2048,
-            messages: [{ role: "user", content: prompt }],
+            messages: [{ role: 'user', content: prompt }],
           });
 
           const content = message.content[0];
-          const text = content.type === "text" ? content.text.trim() : "";
+          const text = content.type === 'text' ? content.text.trim() : '';
 
           const jsonMatch = text.match(/\[[\s\S]*\]/);
           if (!jsonMatch) {
@@ -582,7 +587,7 @@ Respond in JSON array:
           return {
             parsed,
             usage: message.usage,
-            model: AI_MODEL_COMPLEX
+            model: AI_MODEL_COMPLEX,
           };
         });
       },
@@ -593,7 +598,9 @@ Respond in JSON array:
 
     // Record metrics
     const duration = Date.now() - operationStart;
-    const cost = usage ? calculateCost(AI_MODEL_COMPLEX, usage.input_tokens, usage.output_tokens) : 0;
+    const cost = usage
+      ? calculateCost(AI_MODEL_COMPLEX, usage.input_tokens, usage.output_tokens)
+      : 0;
 
     await recordAIOperation({
       operation: 'personalized-recommendations',
@@ -605,7 +612,7 @@ Respond in JSON array:
       costUsd: cost,
       cached: false,
       attempts: result.attempts,
-      timestamp: Date.now()
+      timestamp: Date.now(),
     });
 
     return parsed;
@@ -618,7 +625,7 @@ Respond in JSON array:
       success: false,
       duration,
       errorType: error?.type || 'unknown',
-      timestamp: Date.now()
+      timestamp: Date.now(),
     });
 
     console.error('Failed to generate personalized recommendations:', error);

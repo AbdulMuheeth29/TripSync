@@ -1,13 +1,20 @@
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Sparkles, TrendingUp, DollarSign, AlertCircle, Lightbulb } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Sparkles, TrendingUp, DollarSign, AlertCircle, Lightbulb } from 'lucide-react';
 
 interface SpendingPatternAlertModalProps {
   isOpen: boolean;
   onClose: () => void;
-  pattern: "overspending" | "uneven_split" | "high_category" | "missing_expenses";
+  pattern: 'overspending' | 'uneven_split' | 'high_category' | 'missing_expenses';
   category?: string;
   amount?: number;
   currency: string;
@@ -25,50 +32,50 @@ export function SpendingPatternAlertModal({
   currency,
   insights,
   recommendations,
-  onViewBudget
+  onViewBudget,
 }: SpendingPatternAlertModalProps) {
   const formatCurrency = (amt: number) => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
       currency: currency,
       minimumFractionDigits: 0,
-      maximumFractionDigits: 0
+      maximumFractionDigits: 0,
     }).format(amt);
   };
 
   const getPatternInfo = () => {
     switch (pattern) {
-      case "overspending":
+      case 'overspending':
         return {
-          title: "Overspending Detected",
+          title: 'Overspending Detected',
           icon: AlertCircle,
-          color: "text-red-600",
-          bgColor: "bg-red-50",
-          borderColor: "border-red-200"
+          color: 'text-red-600',
+          bgColor: 'bg-red-50',
+          borderColor: 'border-red-200',
         };
-      case "uneven_split":
+      case 'uneven_split':
         return {
-          title: "Uneven Cost Distribution",
+          title: 'Uneven Cost Distribution',
           icon: TrendingUp,
-          color: "text-amber-600",
-          bgColor: "bg-amber-50",
-          borderColor: "border-amber-200"
+          color: 'text-amber-600',
+          bgColor: 'bg-amber-50',
+          borderColor: 'border-amber-200',
         };
-      case "high_category":
+      case 'high_category':
         return {
           title: `High ${category} Spending`,
           icon: DollarSign,
-          color: "text-orange-600",
-          bgColor: "bg-orange-50",
-          borderColor: "border-orange-200"
+          color: 'text-orange-600',
+          bgColor: 'bg-orange-50',
+          borderColor: 'border-orange-200',
         };
-      case "missing_expenses":
+      case 'missing_expenses':
         return {
-          title: "Possible Missing Expenses",
+          title: 'Possible Missing Expenses',
           icon: AlertCircle,
-          color: "text-blue-600",
-          bgColor: "bg-blue-50",
-          borderColor: "border-blue-200"
+          color: 'text-blue-600',
+          bgColor: 'bg-blue-50',
+          borderColor: 'border-blue-200',
         };
     }
   };
@@ -84,26 +91,20 @@ export function SpendingPatternAlertModal({
             <Sparkles className="h-5 w-5 text-primary" />
             <DialogTitle>Spending Pattern Alert</DialogTitle>
           </div>
-          <DialogDescription>
-            Atlas noticed an unusual spending pattern
-          </DialogDescription>
+          <DialogDescription>Atlas noticed an unusual spending pattern</DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4">
           <Card className={`p-4 ${patternInfo.bgColor} ${patternInfo.borderColor}`}>
             <div className="flex items-start gap-3">
-              <div className={`flex h-10 w-10 items-center justify-center rounded-full ${patternInfo.bgColor}`}>
+              <div
+                className={`flex h-10 w-10 items-center justify-center rounded-full ${patternInfo.bgColor}`}
+              >
                 <PatternIcon className={`h-5 w-5 ${patternInfo.color}`} />
               </div>
               <div>
-                <h4 className={`font-semibold ${patternInfo.color} mb-1`}>
-                  {patternInfo.title}
-                </h4>
-                {amount && (
-                  <p className="text-2xl font-bold mb-2">
-                    {formatCurrency(amount)}
-                  </p>
-                )}
+                <h4 className={`font-semibold ${patternInfo.color} mb-1`}>{patternInfo.title}</h4>
+                {amount && <p className="text-2xl font-bold mb-2">{formatCurrency(amount)}</p>}
               </div>
             </div>
           </Card>

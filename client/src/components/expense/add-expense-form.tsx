@@ -1,24 +1,37 @@
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Card } from "@/components/ui/card";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Calendar } from "@/components/ui/calendar";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Separator } from "@/components/ui/separator";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { CalendarIcon, Upload, X, DollarSign, Users, Receipt } from "lucide-react";
-import { format } from "date-fns";
-import { useState } from "react";
-import { SplitMethodSelector, type SplitMethod } from "./split-method-selector";
-import { PercentageSplitBreakdown } from "./percentage-split-breakdown";
-import { CustomAmountSplit } from "./custom-amount-split";
-import { TipTaxConfig } from "./tip-tax-config";
-import { CurrencySelector } from "./currency-selector";
-import { ReceiptUploadProgress } from "./receipt-upload-progress";
-import { ReceiptOCRProcessing } from "./receipt-ocr-processing";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Card } from '@/components/ui/card';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Calendar } from '@/components/ui/calendar';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Separator } from '@/components/ui/separator';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { CalendarIcon, Upload, X, DollarSign, Users, Receipt } from 'lucide-react';
+import { format } from 'date-fns';
+import { useState } from 'react';
+import { SplitMethodSelector, type SplitMethod } from './split-method-selector';
+import { PercentageSplitBreakdown } from './percentage-split-breakdown';
+import { CustomAmountSplit } from './custom-amount-split';
+import { TipTaxConfig } from './tip-tax-config';
+import { CurrencySelector } from './currency-selector';
+import { ReceiptUploadProgress } from './receipt-upload-progress';
+import { ReceiptOCRProcessing } from './receipt-ocr-processing';
 
 interface TripMember {
   id: string;
@@ -50,14 +63,14 @@ export interface ExpenseFormData {
 }
 
 const EXPENSE_CATEGORIES = [
-  "Accommodation",
-  "Transportation",
-  "Food & Dining",
-  "Activities",
-  "Shopping",
-  "Entertainment",
-  "Groceries",
-  "Other"
+  'Accommodation',
+  'Transportation',
+  'Food & Dining',
+  'Activities',
+  'Shopping',
+  'Entertainment',
+  'Groceries',
+  'Other',
 ];
 
 export function AddExpenseForm({
@@ -65,18 +78,18 @@ export function AddExpenseForm({
   onClose,
   onSubmit,
   tripMembers,
-  defaultCurrency = "USD"
+  defaultCurrency = 'USD',
 }: AddExpenseFormProps) {
-  const [title, setTitle] = useState("");
+  const [title, setTitle] = useState('');
   const [baseAmount, setBaseAmount] = useState<number>(0);
   const [totalAmount, setTotalAmount] = useState<number>(0);
   const [currency, setCurrency] = useState(defaultCurrency);
-  const [category, setCategory] = useState("");
+  const [category, setCategory] = useState('');
   const [date, setDate] = useState<Date>(new Date());
-  const [paidBy, setPaidBy] = useState(tripMembers[0]?.id || "");
-  const [splitMethod, setSplitMethod] = useState<SplitMethod>("equal");
+  const [paidBy, setPaidBy] = useState(tripMembers[0]?.id || '');
+  const [splitMethod, setSplitMethod] = useState<SplitMethod>('equal');
   const [splits, setSplits] = useState<Record<string, number>>({});
-  const [notes, setNotes] = useState("");
+  const [notes, setNotes] = useState('');
   const [receiptFile, setReceiptFile] = useState<File | null>(null);
   const [receiptUrl, setReceiptUrl] = useState<string | null>(null);
   const [isUploadingReceipt, setIsUploadingReceipt] = useState(false);
@@ -87,7 +100,12 @@ export function AddExpenseForm({
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const getInitials = (name: string) => {
-    return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+    return name
+      .split(' ')
+      .map((n) => n[0])
+      .join('')
+      .toUpperCase()
+      .slice(0, 2);
   };
 
   const handleReceiptUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -100,7 +118,7 @@ export function AddExpenseForm({
 
     // Simulate upload progress
     const uploadInterval = setInterval(() => {
-      setUploadProgress(prev => {
+      setUploadProgress((prev) => {
         if (prev >= 100) {
           clearInterval(uploadInterval);
           setIsUploadingReceipt(false);
@@ -134,7 +152,9 @@ export function AddExpenseForm({
     setTaxAmount(tax);
   };
 
-  const handleSplitChange = (newSplits: Record<string, number> | Record<string, { amount: number; note?: string }>) => {
+  const handleSplitChange = (
+    newSplits: Record<string, number> | Record<string, { amount: number; note?: string }>
+  ) => {
     // Normalize to Record<string, number> for state
     const normalized: Record<string, number> = {};
     for (const [key, value] of Object.entries(newSplits)) {
@@ -162,20 +182,20 @@ export function AddExpenseForm({
       notes: notes || undefined,
       receiptUrl: receiptUrl || undefined,
       tipAmount: tipAmount || undefined,
-      taxAmount: taxAmount || undefined
+      taxAmount: taxAmount || undefined,
     };
 
     await onSubmit(expenseData);
 
     // Reset form
-    setTitle("");
+    setTitle('');
     setBaseAmount(0);
     setTotalAmount(0);
-    setCategory("");
+    setCategory('');
     setDate(new Date());
-    setSplitMethod("equal");
+    setSplitMethod('equal');
     setSplits({});
-    setNotes("");
+    setNotes('');
     setReceiptFile(null);
     setReceiptUrl(null);
     setTipAmount(0);
@@ -188,9 +208,7 @@ export function AddExpenseForm({
       <DialogContent className="sm:max-w-3xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Add New Expense</DialogTitle>
-          <DialogDescription>
-            Record a trip expense and split it with your group
-          </DialogDescription>
+          <DialogDescription>Record a trip expense and split it with your group</DialogDescription>
         </DialogHeader>
 
         <div className="space-y-6">
@@ -235,7 +253,7 @@ export function AddExpenseForm({
                       className="w-full justify-start text-left font-normal"
                     >
                       <CalendarIcon className="mr-2 h-4 w-4" />
-                      {format(date, "PPP")}
+                      {format(date, 'PPP')}
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent className="w-auto p-0">
@@ -251,10 +269,7 @@ export function AddExpenseForm({
 
               <div className="space-y-2">
                 <Label htmlFor="currency">Currency</Label>
-                <CurrencySelector
-                  value={currency}
-                  onChange={setCurrency}
-                />
+                <CurrencySelector value={currency} onChange={setCurrency} />
               </div>
             </div>
           </div>
@@ -275,15 +290,12 @@ export function AddExpenseForm({
                 type="number"
                 placeholder="0.00"
                 step="0.01"
-                value={baseAmount || ""}
+                value={baseAmount || ''}
                 onChange={(e) => setBaseAmount(parseFloat(e.target.value) || 0)}
               />
             </div>
 
-            <TipTaxConfig
-              baseAmount={baseAmount}
-              onTotalChange={handleTotalChange}
-            />
+            <TipTaxConfig baseAmount={baseAmount} onTotalChange={handleTotalChange} />
 
             {totalAmount > 0 && (
               <Card className="p-4 bg-primary/5 border-primary">
@@ -292,7 +304,7 @@ export function AddExpenseForm({
                   <span className="text-2xl font-bold">
                     {new Intl.NumberFormat('en-US', {
                       style: 'currency',
-                      currency: currency
+                      currency: currency,
                     }).format(totalAmount)}
                   </span>
                 </div>
@@ -315,8 +327,8 @@ export function AddExpenseForm({
                   key={member.id}
                   className={`p-3 cursor-pointer transition-all ${
                     paidBy === member.id
-                      ? "border-primary border-2 bg-primary/5"
-                      : "hover:border-primary/50"
+                      ? 'border-primary border-2 bg-primary/5'
+                      : 'hover:border-primary/50'
                   }`}
                   onClick={() => setPaidBy(member.id)}
                 >
@@ -344,7 +356,7 @@ export function AddExpenseForm({
               peopleCount={tripMembers.length}
             />
 
-            {splitMethod === "percentage" && (
+            {splitMethod === 'percentage' && (
               <PercentageSplitBreakdown
                 members={tripMembers}
                 totalAmount={totalAmount}
@@ -352,7 +364,7 @@ export function AddExpenseForm({
               />
             )}
 
-            {splitMethod === "custom" && (
+            {splitMethod === 'custom' && (
               <CustomAmountSplit
                 members={tripMembers}
                 totalAmount={totalAmount}
@@ -361,25 +373,26 @@ export function AddExpenseForm({
               />
             )}
 
-            {splitMethod === "equal" && totalAmount > 0 && (
+            {splitMethod === 'equal' && totalAmount > 0 && (
               <Card className="p-4 bg-muted/50">
                 <p className="text-sm text-center">
-                  Each person pays:{" "}
+                  Each person pays:{' '}
                   <span className="font-bold text-lg">
                     {new Intl.NumberFormat('en-US', {
                       style: 'currency',
-                      currency: currency
+                      currency: currency,
                     }).format(totalAmount / tripMembers.length)}
                   </span>
                 </p>
               </Card>
             )}
 
-            {splitMethod === "self" && totalAmount > 0 && (
+            {splitMethod === 'self' && totalAmount > 0 && (
               <Card className="p-4 bg-blue-50 border-blue-200">
                 <p className="text-sm text-blue-900 text-center">
-                  This expense is for <strong>{tripMembers.find(m => m.id === paidBy)?.name}</strong> only
-                  and won't be split with the group
+                  This expense is for{' '}
+                  <strong>{tripMembers.find((m) => m.id === paidBy)?.name}</strong> only and won't
+                  be split with the group
                 </p>
               </Card>
             )}
@@ -420,7 +433,7 @@ export function AddExpenseForm({
             {isUploadingReceipt && (
               <ReceiptUploadProgress
                 isOpen={isUploadingReceipt}
-                fileName={receiptFile?.name || ""}
+                fileName={receiptFile?.name || ''}
                 progress={uploadProgress}
                 isComplete={uploadProgress === 100}
               />
@@ -429,7 +442,7 @@ export function AddExpenseForm({
             {isProcessingOcr && (
               <ReceiptOCRProcessing
                 isOpen={isProcessingOcr}
-                fileName={receiptFile?.name || "receipt"}
+                fileName={receiptFile?.name || 'receipt'}
               />
             )}
 
@@ -443,11 +456,7 @@ export function AddExpenseForm({
                       <p className="text-xs text-muted-foreground">{receiptFile?.name}</p>
                     </div>
                   </div>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={handleRemoveReceipt}
-                  >
+                  <Button variant="ghost" size="sm" onClick={handleRemoveReceipt}>
                     <X className="h-4 w-4" />
                   </Button>
                 </div>
@@ -478,7 +487,7 @@ export function AddExpenseForm({
             onClick={handleSubmit}
             disabled={!title || totalAmount <= 0 || !category || !paidBy || isSubmitting}
           >
-            {isSubmitting ? "Adding..." : "Add Expense"}
+            {isSubmitting ? 'Adding...' : 'Add Expense'}
           </Button>
         </DialogFooter>
       </DialogContent>

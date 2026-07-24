@@ -1,12 +1,30 @@
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Sparkles, Car, Train, Plane, Bus, Navigation, Clock, DollarSign, Leaf, ThumbsUp } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import {
+  Sparkles,
+  Car,
+  Train,
+  Plane,
+  Bus,
+  Navigation,
+  Clock,
+  DollarSign,
+  Leaf,
+  ThumbsUp,
+} from 'lucide-react';
 
 interface TransportOption {
   id: string;
-  type: "flight" | "train" | "bus" | "car_rental" | "rideshare" | "public_transit";
+  type: 'flight' | 'train' | 'bus' | 'car_rental' | 'rideshare' | 'public_transit';
   name: string;
   provider?: string;
   description: string;
@@ -34,7 +52,7 @@ const TRANSPORT_ICONS: Record<TransportOption['type'], typeof Car> = {
   bus: Bus,
   car_rental: Car,
   rideshare: Navigation,
-  public_transit: Bus
+  public_transit: Bus,
 };
 
 export function TransportationRecommendationsModal({
@@ -43,21 +61,22 @@ export function TransportationRecommendationsModal({
   options,
   fromLocation,
   toLocation,
-  currency = "USD",
-  onSelectOption
+  currency = 'USD',
+  onSelectOption,
 }: TransportationRecommendationsModalProps) {
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
       currency: currency,
       minimumFractionDigits: 0,
-      maximumFractionDigits: 0
+      maximumFractionDigits: 0,
     }).format(amount);
   };
 
-  const cheapestOption = options.reduce((min, option) =>
-    option.estimatedCost < min.estimatedCost ? option : min
-  , options[0]);
+  const cheapestOption = options.reduce(
+    (min, option) => (option.estimatedCost < min.estimatedCost ? option : min),
+    options[0]
+  );
 
   const fastestOption = options.reduce((fastest, option) => {
     const currentMinutes = parseDuration(option.duration);
@@ -94,9 +113,10 @@ export function TransportationRecommendationsModal({
               <div className="flex-1">
                 <p className="text-sm font-medium text-primary mb-1">Atlas Recommendation</p>
                 <p className="text-sm text-muted-foreground">
-                  Based on your budget and timeline, I recommend <strong>{cheapestOption?.name}</strong> for
-                  the best value ({formatCurrency(cheapestOption?.estimatedCost)}).
-                  If speed is priority, go with <strong>{fastestOption?.name}</strong> ({fastestOption?.duration}).
+                  Based on your budget and timeline, I recommend{' '}
+                  <strong>{cheapestOption?.name}</strong> for the best value (
+                  {formatCurrency(cheapestOption?.estimatedCost)}). If speed is priority, go with{' '}
+                  <strong>{fastestOption?.name}</strong> ({fastestOption?.duration}).
                 </p>
               </div>
             </div>
@@ -134,30 +154,20 @@ export function TransportationRecommendationsModal({
                             )}
                           </div>
                           {option.provider && (
-                            <p className="text-sm text-muted-foreground">
-                              via {option.provider}
-                            </p>
+                            <p className="text-sm text-muted-foreground">via {option.provider}</p>
                           )}
                         </div>
                       </div>
 
                       <div className="flex flex-col items-end gap-1">
                         {isCheapest && (
-                          <Badge className="bg-green-100 text-green-800">
-                            Best Value
-                          </Badge>
+                          <Badge className="bg-green-100 text-green-800">Best Value</Badge>
                         )}
-                        {isFastest && (
-                          <Badge className="bg-blue-100 text-blue-800">
-                            Fastest
-                          </Badge>
-                        )}
+                        {isFastest && <Badge className="bg-blue-100 text-blue-800">Fastest</Badge>}
                       </div>
                     </div>
 
-                    <p className="text-sm text-muted-foreground">
-                      {option.description}
-                    </p>
+                    <p className="text-sm text-muted-foreground">{option.description}</p>
 
                     {/* Key Info */}
                     <div className="flex items-center gap-6">
@@ -187,7 +197,10 @@ export function TransportationRecommendationsModal({
                         </p>
                         <ul className="space-y-1">
                           {option.pros.map((pro, index) => (
-                            <li key={index} className="text-xs text-muted-foreground flex items-start gap-1">
+                            <li
+                              key={index}
+                              className="text-xs text-muted-foreground flex items-start gap-1"
+                            >
                               <span className="text-green-600 mt-0.5">✓</span>
                               <span>{pro}</span>
                             </li>
@@ -199,7 +212,10 @@ export function TransportationRecommendationsModal({
                         <p className="text-xs font-medium text-amber-700 mb-2">Cons</p>
                         <ul className="space-y-1">
                           {option.cons.map((con, index) => (
-                            <li key={index} className="text-xs text-muted-foreground flex items-start gap-1">
+                            <li
+                              key={index}
+                              className="text-xs text-muted-foreground flex items-start gap-1"
+                            >
                               <span className="text-amber-600 mt-0.5">•</span>
                               <span>{con}</span>
                             </li>
@@ -229,13 +245,13 @@ export function TransportationRecommendationsModal({
           </div>
 
           {/* Eco Tip */}
-          {options.some(o => o.ecoFriendly) && (
+          {options.some((o) => o.ecoFriendly) && (
             <Card className="p-3 bg-green-50 border-green-200">
               <div className="flex items-start gap-2">
                 <Leaf className="h-4 w-4 text-green-600 mt-0.5" />
                 <p className="text-xs text-green-900">
-                  <strong>Eco Tip:</strong> Consider choosing eco-friendly transportation options to reduce
-                  your carbon footprint during the trip.
+                  <strong>Eco Tip:</strong> Consider choosing eco-friendly transportation options to
+                  reduce your carbon footprint during the trip.
                 </p>
               </div>
             </Card>

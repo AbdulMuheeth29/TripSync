@@ -93,9 +93,11 @@ export async function optimizeImage(
 
     const originalSize = buffer.length;
     const optimizedSize = optimized.length;
-    const savings = ((originalSize - optimizedSize) / originalSize * 100).toFixed(1);
+    const savings = (((originalSize - optimizedSize) / originalSize) * 100).toFixed(1);
 
-    console.log(`[Image Optimizer] Optimized: ${(originalSize / 1024).toFixed(1)}KB → ${(optimizedSize / 1024).toFixed(1)}KB (${savings}% savings)`);
+    console.log(
+      `[Image Optimizer] Optimized: ${(originalSize / 1024).toFixed(1)}KB → ${(optimizedSize / 1024).toFixed(1)}KB (${savings}% savings)`
+    );
 
     return optimized;
   } catch (error) {
@@ -157,9 +159,7 @@ export async function generateThumbnail(
 /**
  * Express middleware to optimize uploaded images
  */
-export function imageOptimizationMiddleware(
-  options: ImageOptimizationOptions = {}
-) {
+export function imageOptimizationMiddleware(options: ImageOptimizationOptions = {}) {
   return async (req: Request, res: Response, next: NextFunction) => {
     if (!req.file || !req.file.buffer) {
       return next();

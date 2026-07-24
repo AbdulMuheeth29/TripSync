@@ -28,13 +28,13 @@ router.get('/destination/:destination', async (req, res) => {
       success: true,
       destination,
       images,
-      count: images.length
+      count: images.length,
     });
   } catch (error: any) {
     console.error('Failed to fetch destination images:', error);
     res.status(500).json({
       error: 'Failed to fetch images',
-      message: error?.message
+      message: error?.message,
     });
   }
 });
@@ -61,13 +61,13 @@ router.get('/activity/:type', async (req, res) => {
       success: true,
       type,
       destination: destination || null,
-      image
+      image,
     });
   } catch (error: any) {
     console.error('Failed to fetch activity image:', error);
     res.status(500).json({
       error: 'Failed to fetch image',
-      message: error?.message
+      message: error?.message,
     });
   }
 });
@@ -86,22 +86,19 @@ router.get('/trip-cover/:destination', async (req, res) => {
     }
 
     const vibesArray = vibes ? vibes.split(',') : undefined;
-    const image = await getTripCoverImage(
-      decodeURIComponent(destination),
-      vibesArray
-    );
+    const image = await getTripCoverImage(decodeURIComponent(destination), vibesArray);
 
     res.json({
       success: true,
       destination,
       vibes: vibesArray,
-      image
+      image,
     });
   } catch (error: any) {
     console.error('Failed to fetch trip cover image:', error);
     res.status(500).json({
       error: 'Failed to fetch image',
-      message: error?.message
+      message: error?.message,
     });
   }
 });

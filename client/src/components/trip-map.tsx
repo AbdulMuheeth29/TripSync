@@ -1,12 +1,12 @@
-import { useEffect, useState } from "react";
-import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
-import L from "leaflet";
-import "leaflet/dist/leaflet.css";
+import { useEffect, useState } from 'react';
+import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
 
 const defaultIcon = L.icon({
-  iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
-  iconRetinaUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
-  shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
+  iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
+  iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
+  shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
   iconSize: [25, 41],
   iconAnchor: [12, 41],
 });
@@ -14,7 +14,7 @@ const defaultIcon = L.icon({
 async function geocode(query: string): Promise<{ lat: number; lng: number } | null> {
   const res = await fetch(
     `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json&limit=1`,
-    { headers: { Accept: "application/json" } }
+    { headers: { Accept: 'application/json' } }
   );
   const data = (await res.json()) as { lat: string; lon: string }[];
   if (!data?.[0]) return null;
@@ -36,7 +36,9 @@ interface TripMapProps {
 
 export function TripMap({ destination, items }: TripMapProps) {
   const [center, setCenter] = useState<{ lat: number; lng: number } | null>(null);
-  const [pins, setPins] = useState<{ lat: number; lng: number; name: string; dayNumber: number }[]>([]);
+  const [pins, setPins] = useState<{ lat: number; lng: number; name: string; dayNumber: number }[]>(
+    []
+  );
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -46,7 +48,9 @@ export function TripMap({ destination, items }: TripMapProps) {
       if (!cancelled && c) setCenter(c);
       setLoading(false);
     })();
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, [destination]);
 
   useEffect(() => {
@@ -64,13 +68,15 @@ export function TripMap({ destination, items }: TripMapProps) {
       }
       if (!cancelled) setPins(results);
     })();
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, [items]);
 
   if (loading || !center) {
     return (
       <div className="rounded-xl border bg-muted/30 aspect-video max-h-[400px] flex items-center justify-center text-muted-foreground">
-        {loading ? "Loading map…" : "Could not find location for this destination."}
+        {loading ? 'Loading map…' : 'Could not find location for this destination.'}
       </div>
     );
   }
@@ -93,7 +99,9 @@ export function TripMap({ destination, items }: TripMapProps) {
         </Marker>
         {pins.map((p, i) => (
           <Marker key={i} position={[p.lat, p.lng]} icon={defaultIcon}>
-            <Popup>Day {p.dayNumber}: {p.name}</Popup>
+            <Popup>
+              Day {p.dayNumber}: {p.name}
+            </Popup>
           </Marker>
         ))}
       </MapContainer>

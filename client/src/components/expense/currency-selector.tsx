@@ -1,30 +1,36 @@
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Label } from "@/components/ui/label";
-import { DollarSign } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Label } from '@/components/ui/label';
+import { DollarSign } from 'lucide-react';
 
 const POPULAR_CURRENCIES = [
-  { code: "USD", symbol: "$", name: "US Dollar" },
-  { code: "EUR", symbol: "€", name: "Euro" },
-  { code: "GBP", symbol: "£", name: "British Pound" },
-  { code: "JPY", symbol: "¥", name: "Japanese Yen" },
-  { code: "CNY", symbol: "¥", name: "Chinese Yuan" },
-  { code: "INR", symbol: "₹", name: "Indian Rupee" },
-  { code: "AUD", symbol: "A$", name: "Australian Dollar" },
-  { code: "CAD", symbol: "C$", name: "Canadian Dollar" },
-  { code: "CHF", symbol: "CHF", name: "Swiss Franc" },
-  { code: "SEK", symbol: "kr", name: "Swedish Krona" },
-  { code: "NZD", symbol: "NZ$", name: "New Zealand Dollar" },
-  { code: "MXN", symbol: "MX$", name: "Mexican Peso" },
-  { code: "SGD", symbol: "S$", name: "Singapore Dollar" },
-  { code: "HKD", symbol: "HK$", name: "Hong Kong Dollar" },
-  { code: "NOK", symbol: "kr", name: "Norwegian Krone" },
-  { code: "KRW", symbol: "₩", name: "South Korean Won" },
-  { code: "TRY", symbol: "₺", name: "Turkish Lira" },
-  { code: "RUB", symbol: "₽", name: "Russian Ruble" },
-  { code: "BRL", symbol: "R$", name: "Brazilian Real" },
-  { code: "ZAR", symbol: "R", name: "South African Rand" },
-  { code: "THB", symbol: "฿", name: "Thai Baht" },
-  { code: "IDR", symbol: "Rp", name: "Indonesian Rupiah" },
+  { code: 'USD', symbol: '$', name: 'US Dollar' },
+  { code: 'EUR', symbol: '€', name: 'Euro' },
+  { code: 'GBP', symbol: '£', name: 'British Pound' },
+  { code: 'JPY', symbol: '¥', name: 'Japanese Yen' },
+  { code: 'CNY', symbol: '¥', name: 'Chinese Yuan' },
+  { code: 'INR', symbol: '₹', name: 'Indian Rupee' },
+  { code: 'AUD', symbol: 'A$', name: 'Australian Dollar' },
+  { code: 'CAD', symbol: 'C$', name: 'Canadian Dollar' },
+  { code: 'CHF', symbol: 'CHF', name: 'Swiss Franc' },
+  { code: 'SEK', symbol: 'kr', name: 'Swedish Krona' },
+  { code: 'NZD', symbol: 'NZ$', name: 'New Zealand Dollar' },
+  { code: 'MXN', symbol: 'MX$', name: 'Mexican Peso' },
+  { code: 'SGD', symbol: 'S$', name: 'Singapore Dollar' },
+  { code: 'HKD', symbol: 'HK$', name: 'Hong Kong Dollar' },
+  { code: 'NOK', symbol: 'kr', name: 'Norwegian Krone' },
+  { code: 'KRW', symbol: '₩', name: 'South Korean Won' },
+  { code: 'TRY', symbol: '₺', name: 'Turkish Lira' },
+  { code: 'RUB', symbol: '₽', name: 'Russian Ruble' },
+  { code: 'BRL', symbol: 'R$', name: 'Brazilian Real' },
+  { code: 'ZAR', symbol: 'R', name: 'South African Rand' },
+  { code: 'THB', symbol: '฿', name: 'Thai Baht' },
+  { code: 'IDR', symbol: 'Rp', name: 'Indonesian Rupiah' },
 ];
 
 interface CurrencySelectorProps {
@@ -39,12 +45,12 @@ interface CurrencySelectorProps {
 export function CurrencySelector({
   value,
   onChange,
-  label = "Currency",
+  label = 'Currency',
   showConversion = false,
   baseCurrency,
-  exchangeRate
+  exchangeRate,
 }: CurrencySelectorProps) {
-  const selectedCurrency = POPULAR_CURRENCIES.find(c => c.code === value);
+  const selectedCurrency = POPULAR_CURRENCIES.find((c) => c.code === value);
 
   return (
     <div className="space-y-2">
@@ -59,7 +65,9 @@ export function CurrencySelector({
               <span>
                 {selectedCurrency.symbol} {selectedCurrency.code} - {selectedCurrency.name}
               </span>
-            ) : "Select currency"}
+            ) : (
+              'Select currency'
+            )}
           </SelectValue>
         </SelectTrigger>
         <SelectContent className="max-h-[300px]">

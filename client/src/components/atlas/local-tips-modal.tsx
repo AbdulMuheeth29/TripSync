@@ -1,16 +1,33 @@
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Sparkles, Lightbulb, MapPin, Coffee, Utensils, AlertCircle, Shield, Train, DollarSign } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import {
+  Sparkles,
+  Lightbulb,
+  MapPin,
+  Coffee,
+  Utensils,
+  AlertCircle,
+  Shield,
+  Train,
+  DollarSign,
+} from 'lucide-react';
 
 interface LocalTip {
   id: string;
-  category: "food" | "transportation" | "safety" | "money" | "culture" | "hidden_gem";
+  category: 'food' | 'transportation' | 'safety' | 'money' | 'culture' | 'hidden_gem';
   title: string;
   description: string;
-  priority: "essential" | "recommended" | "nice_to_know";
+  priority: 'essential' | 'recommended' | 'nice_to_know';
 }
 
 interface LocalTipsModalProps {
@@ -21,19 +38,25 @@ interface LocalTipsModalProps {
   onSaveTip?: (tipId: string) => void;
 }
 
-const TIP_CATEGORIES: Record<LocalTip['category'], { icon: typeof Coffee; label: string; color: string }> = {
-  food: { icon: Utensils, label: "Food & Dining", color: "bg-orange-100 text-orange-800" },
-  transportation: { icon: Train, label: "Getting Around", color: "bg-blue-100 text-blue-800" },
-  safety: { icon: Shield, label: "Safety", color: "bg-red-100 text-red-800" },
-  money: { icon: DollarSign, label: "Money Tips", color: "bg-green-100 text-green-800" },
-  culture: { icon: MapPin, label: "Culture & Customs", color: "bg-purple-100 text-purple-800" },
-  hidden_gem: { icon: Lightbulb, label: "Hidden Gems", color: "bg-amber-100 text-amber-800" }
+const TIP_CATEGORIES: Record<
+  LocalTip['category'],
+  { icon: typeof Coffee; label: string; color: string }
+> = {
+  food: { icon: Utensils, label: 'Food & Dining', color: 'bg-orange-100 text-orange-800' },
+  transportation: { icon: Train, label: 'Getting Around', color: 'bg-blue-100 text-blue-800' },
+  safety: { icon: Shield, label: 'Safety', color: 'bg-red-100 text-red-800' },
+  money: { icon: DollarSign, label: 'Money Tips', color: 'bg-green-100 text-green-800' },
+  culture: { icon: MapPin, label: 'Culture & Customs', color: 'bg-purple-100 text-purple-800' },
+  hidden_gem: { icon: Lightbulb, label: 'Hidden Gems', color: 'bg-amber-100 text-amber-800' },
 };
 
-const PRIORITY_BADGES: Record<LocalTip['priority'], { label: string; variant: "default" | "secondary" | "outline" }> = {
-  essential: { label: "Essential", variant: "default" },
-  recommended: { label: "Recommended", variant: "secondary" },
-  nice_to_know: { label: "Nice to Know", variant: "outline" }
+const PRIORITY_BADGES: Record<
+  LocalTip['priority'],
+  { label: string; variant: 'default' | 'secondary' | 'outline' }
+> = {
+  essential: { label: 'Essential', variant: 'default' },
+  recommended: { label: 'Recommended', variant: 'secondary' },
+  nice_to_know: { label: 'Nice to Know', variant: 'outline' },
 };
 
 export function LocalTipsModal({
@@ -41,16 +64,19 @@ export function LocalTipsModal({
   onClose,
   destination,
   tips,
-  onSaveTip
+  onSaveTip,
 }: LocalTipsModalProps) {
-  const essentialTips = tips.filter(t => t.priority === "essential");
-  const groupedTips = tips.reduce((acc, tip) => {
-    if (!acc[tip.category]) {
-      acc[tip.category] = [];
-    }
-    acc[tip.category].push(tip);
-    return acc;
-  }, {} as Record<LocalTip['category'], LocalTip[]>);
+  const essentialTips = tips.filter((t) => t.priority === 'essential');
+  const groupedTips = tips.reduce(
+    (acc, tip) => {
+      if (!acc[tip.category]) {
+        acc[tip.category] = [];
+      }
+      acc[tip.category].push(tip);
+      return acc;
+    },
+    {} as Record<LocalTip['category'], LocalTip[]>
+  );
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -75,8 +101,8 @@ export function LocalTipsModal({
               <div>
                 <p className="text-sm font-medium text-primary mb-1">Atlas Local Guide</p>
                 <p className="text-sm text-muted-foreground">
-                  I've gathered insider tips from locals and experienced travelers to help you make the most
-                  of your trip to {destination}. Pay special attention to essential tips!
+                  I've gathered insider tips from locals and experienced travelers to help you make
+                  the most of your trip to {destination}. Pay special attention to essential tips!
                 </p>
               </div>
             </div>
@@ -135,9 +161,7 @@ export function LocalTipsModal({
                               </Badge>
                             </div>
 
-                            <p className="text-sm text-muted-foreground mb-3">
-                              {tip.description}
-                            </p>
+                            <p className="text-sm text-muted-foreground mb-3">{tip.description}</p>
 
                             <div className="flex items-center gap-2">
                               <Badge className={`${categoryInfo.color} text-xs`}>

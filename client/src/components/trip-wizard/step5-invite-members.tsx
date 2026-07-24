@@ -1,11 +1,11 @@
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Mail, Copy, MessageSquare, CheckCircle2, X, Share2 } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
+import { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Card } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Mail, Copy, MessageSquare, CheckCircle2, X, Share2 } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 
 interface Step5InviteMembersProps {
   onSubmit: (invites: string[], skipInvites: boolean) => void;
@@ -14,10 +14,15 @@ interface Step5InviteMembersProps {
   shareLink?: string;
 }
 
-export function Step5InviteMembers({ onSubmit, onBack, defaultInvites = [], shareLink }: Step5InviteMembersProps) {
+export function Step5InviteMembers({
+  onSubmit,
+  onBack,
+  defaultInvites = [],
+  shareLink,
+}: Step5InviteMembersProps) {
   const [emails, setEmails] = useState<string[]>(defaultInvites);
-  const [currentEmail, setCurrentEmail] = useState("");
-  const [emailError, setEmailError] = useState("");
+  const [currentEmail, setCurrentEmail] = useState('');
+  const [emailError, setEmailError] = useState('');
   const { toast } = useToast();
 
   const validateEmail = (email: string): boolean => {
@@ -29,31 +34,31 @@ export function Step5InviteMembers({ onSubmit, onBack, defaultInvites = [], shar
     const trimmedEmail = currentEmail.trim().toLowerCase();
 
     if (!trimmedEmail) {
-      setEmailError("Please enter an email address");
+      setEmailError('Please enter an email address');
       return;
     }
 
     if (!validateEmail(trimmedEmail)) {
-      setEmailError("Please enter a valid email address");
+      setEmailError('Please enter a valid email address');
       return;
     }
 
     if (emails.includes(trimmedEmail)) {
-      setEmailError("This email has already been added");
+      setEmailError('This email has already been added');
       return;
     }
 
     setEmails([...emails, trimmedEmail]);
-    setCurrentEmail("");
-    setEmailError("");
+    setCurrentEmail('');
+    setEmailError('');
   };
 
   const handleRemoveEmail = (email: string) => {
-    setEmails(emails.filter(e => e !== email));
+    setEmails(emails.filter((e) => e !== email));
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter") {
+    if (e.key === 'Enter') {
       e.preventDefault();
       handleAddEmail();
     }
@@ -63,8 +68,8 @@ export function Step5InviteMembers({ onSubmit, onBack, defaultInvites = [], shar
     if (shareLink) {
       navigator.clipboard.writeText(shareLink);
       toast({
-        title: "Link copied!",
-        description: "Share link has been copied to clipboard",
+        title: 'Link copied!',
+        description: 'Share link has been copied to clipboard',
       });
     }
   };
@@ -104,18 +109,16 @@ export function Step5InviteMembers({ onSubmit, onBack, defaultInvites = [], shar
                 value={currentEmail}
                 onChange={(e) => {
                   setCurrentEmail(e.target.value);
-                  setEmailError("");
+                  setEmailError('');
                 }}
                 onKeyDown={handleKeyDown}
-                className={emailError ? "border-red-500" : ""}
+                className={emailError ? 'border-red-500' : ''}
               />
               <Button type="button" onClick={handleAddEmail}>
                 Add
               </Button>
             </div>
-            {emailError && (
-              <p className="text-sm text-red-500">{emailError}</p>
-            )}
+            {emailError && <p className="text-sm text-red-500">{emailError}</p>}
           </div>
 
           {/* Email List */}
@@ -153,11 +156,7 @@ export function Step5InviteMembers({ onSubmit, onBack, defaultInvites = [], shar
 
             <div className="space-y-3">
               <div className="flex gap-2">
-                <Input
-                  value={shareLink}
-                  readOnly
-                  className="bg-muted"
-                />
+                <Input value={shareLink} readOnly className="bg-muted" />
                 <Button type="button" variant="outline" onClick={handleCopyLink}>
                   <Copy className="h-4 w-4" />
                 </Button>
@@ -182,9 +181,9 @@ export function Step5InviteMembers({ onSubmit, onBack, defaultInvites = [], shar
                   onClick={() => {
                     if (navigator.share) {
                       navigator.share({
-                        title: "Join my trip on TripSync",
-                        text: "Join our trip!",
-                        url: shareLink
+                        title: 'Join my trip on TripSync',
+                        text: 'Join our trip!',
+                        url: shareLink,
                       });
                     }
                   }}
@@ -205,7 +204,7 @@ export function Step5InviteMembers({ onSubmit, onBack, defaultInvites = [], shar
             <CheckCircle2 className="h-5 w-5 text-green-600 mt-0.5" />
             <div>
               <p className="text-sm font-medium text-green-900">
-                Ready to send {emails.length} {emails.length === 1 ? "invitation" : "invitations"}
+                Ready to send {emails.length} {emails.length === 1 ? 'invitation' : 'invitations'}
               </p>
               <p className="text-sm text-green-700 mt-1">
                 Your friends will receive an email invitation to join your trip
@@ -220,21 +219,11 @@ export function Step5InviteMembers({ onSubmit, onBack, defaultInvites = [], shar
         <Button type="button" variant="outline" onClick={onBack} className="flex-1">
           Back
         </Button>
-        <Button
-          type="button"
-          variant="outline"
-          onClick={handleSkip}
-          className="flex-1"
-        >
+        <Button type="button" variant="outline" onClick={handleSkip} className="flex-1">
           Skip for Now
         </Button>
-        <Button
-          type="button"
-          onClick={handleSubmitInvites}
-          className="flex-1"
-          size="lg"
-        >
-          {emails.length > 0 ? `Send ${emails.length} Invites & Create Trip` : "Create Trip"}
+        <Button type="button" onClick={handleSubmitInvites} className="flex-1" size="lg">
+          {emails.length > 0 ? `Send ${emails.length} Invites & Create Trip` : 'Create Trip'}
         </Button>
       </div>
     </div>

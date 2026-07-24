@@ -5,6 +5,7 @@ Sentry provides real-time error tracking and performance monitoring for TripSync
 ## Why Sentry?
 
 **Without Sentry:**
+
 - ❌ Errors only visible in logs
 - ❌ No proactive error detection
 - ❌ Limited debugging context
@@ -12,6 +13,7 @@ Sentry provides real-time error tracking and performance monitoring for TripSync
 - ❌ Manual log searching
 
 **With Sentry:**
+
 - ✅ Real-time error alerts
 - ✅ Full stack traces with context
 - ✅ Performance monitoring
@@ -42,7 +44,7 @@ After creating the project, you'll see:
 
 ```javascript
 Sentry.init({
-  dsn: "https://abc123...@o123456.ingest.sentry.io/1234567"
+  dsn: 'https://abc123...@o123456.ingest.sentry.io/1234567',
 });
 ```
 
@@ -63,6 +65,7 @@ That's it! Sentry is now configured.
 ## What Sentry Captures
 
 ### 1. Server Errors
+
 - Unhandled exceptions
 - Database errors
 - API failures
@@ -70,13 +73,16 @@ That's it! Sentry is now configured.
 - File upload errors
 
 ### 2. Performance Monitoring
+
 - API endpoint response times
 - Database query performance
 - External API calls (Stripe, Anthropic)
 - PostgreSQL operations
 
 ### 3. User Context
+
 When errors occur, Sentry includes:
+
 - User ID and email
 - Request path and method
 - Request headers (filtered for security)
@@ -86,6 +92,7 @@ When errors occur, Sentry includes:
 ### 4. Security Filtering
 
 Sensitive data is **automatically filtered**:
+
 - Passwords
 - JWT tokens
 - API keys
@@ -125,11 +132,7 @@ Sentry.init({
   },
 
   // Ignore expected errors
-  ignoreErrors: [
-    'AUTH_REQUIRED',
-    'INVALID_CREDENTIALS',
-    'NetworkError',
-  ],
+  ignoreErrors: ['AUTH_REQUIRED', 'INVALID_CREDENTIALS', 'NetworkError'],
 });
 ```
 
@@ -138,6 +141,7 @@ Sentry.init({
 ## Testing Sentry
 
 ### Test Configuration
+
 ```bash
 npm run test:services
 ```
@@ -149,6 +153,7 @@ curl http://localhost:3000/api/test-error
 ```
 
 Or in your app code temporarily:
+
 ```javascript
 throw new Error('Test error for Sentry');
 ```
@@ -160,6 +165,7 @@ Check Sentry dashboard - you should see the error within seconds!
 ## Sentry Dashboard
 
 ### Issues View
+
 - **Real-time errors** - See errors as they happen
 - **Frequency** - How often each error occurs
 - **Impact** - How many users affected
@@ -167,12 +173,14 @@ Check Sentry dashboard - you should see the error within seconds!
 - **Stack trace** - Full debugging context
 
 ### Performance View
+
 - **Transaction list** - API endpoint performance
 - **Slow queries** - Database bottlenecks
 - **External calls** - Third-party API latency
 - **Trends** - Performance over time
 
 ### Releases
+
 - Track which version introduced bugs
 - Compare error rates between releases
 - Deploy notifications
@@ -182,7 +190,9 @@ Check Sentry dashboard - you should see the error within seconds!
 ## Alert Configuration
 
 ### Email Alerts (Default)
+
 Sentry sends email for:
+
 - New issues
 - Issue reopened
 - Spike in error rate
@@ -199,6 +209,7 @@ Sentry sends email for:
 ### Alert Rules
 
 Create custom rules:
+
 1. **Project Settings** → **Alerts** → **Create Alert Rule**
 2. Examples:
    - Alert when error rate >10/min
@@ -270,22 +281,26 @@ try {
 ## Pricing
 
 ### Free Tier (Recommended to Start)
+
 - 5,000 errors/month
 - 10,000 performance units/month
 - 30-day error retention
 - **Perfect for launching**
 
 ### Developer Plan ($29/month)
+
 - 50,000 errors/month
 - 100,000 performance units/month
 - 90-day retention
 
 ### Team Plan ($80/month)
+
 - 100,000 errors/month
 - 100,000 performance units/month
 - Unlimited team members
 
 ### What Counts as an "Error"?
+
 - Unique stack trace = 1 error
 - Same error 1000x = still 1 error (until resolved)
 - Most apps use <500 errors/month
@@ -295,18 +310,21 @@ try {
 ## Monitoring in Production
 
 ### Daily Health Check
+
 1. Check Sentry dashboard
 2. Review new issues
 3. Check error trends
 4. Monitor performance metrics
 
 ### Weekly Review
+
 1. Top 10 errors by frequency
 2. Top 10 errors by user impact
 3. Performance bottlenecks
 4. Release comparison
 
 ### Monthly Analysis
+
 1. Error rate trends
 2. Most affected users
 3. Browser/device breakdown
@@ -319,12 +337,14 @@ try {
 ### No Events Appearing
 
 **Check:**
+
 1. DSN is correct in `.env.production`
 2. App is running in production mode: `NODE_ENV=production`
 3. No firewall blocking sentry.io
 4. Test with: `curl https://sentry.io`
 
 **Debug:**
+
 ```typescript
 // Enable Sentry debug logging
 Sentry.init({
@@ -336,11 +356,13 @@ Sentry.init({
 ### Too Many Events
 
 **Solution 1: Adjust sample rate**
+
 ```typescript
 tracesSampleRate: 0.01, // 1% instead of 10%
 ```
 
 **Solution 2: Ignore noisy errors**
+
 ```typescript
 ignoreErrors: [
   'AUTH_REQUIRED',
@@ -350,6 +372,7 @@ ignoreErrors: [
 ```
 
 **Solution 3: Rate limiting**
+
 ```typescript
 beforeSend(event) {
   // Implement custom rate limiting
@@ -360,11 +383,13 @@ beforeSend(event) {
 ### Sensitive Data Leaking
 
 **Check:**
+
 1. Review `beforeSend` in `server/sentry.ts`
 2. Add more patterns to filter
 3. Test with sample error
 
 **Never Log:**
+
 - Passwords
 - Credit cards
 - Social Security Numbers
@@ -379,6 +404,7 @@ beforeSend(event) {
 
 1. Install Sentry GitHub integration
 2. Include Sentry issue ID in commit:
+
 ```bash
 git commit -m "Fix payment error (Fixes TRIPSYNC-123)"
 ```
@@ -395,6 +421,7 @@ sentry-cli releases deploys $SENTRY_RELEASE new -e production
 ### Source Maps (Future Enhancement)
 
 For better stack traces, upload source maps:
+
 ```bash
 npm install @sentry/webpack-plugin
 ```
@@ -404,6 +431,7 @@ npm install @sentry/webpack-plugin
 ## Example: Catching Critical Errors
 
 ### Database Errors
+
 ```typescript
 try {
   await db.insert(trips).values(tripData);
@@ -421,6 +449,7 @@ try {
 ```
 
 ### API Errors
+
 ```typescript
 try {
   const response = await stripe.charges.create(...);
@@ -435,6 +464,7 @@ try {
 ```
 
 ### AI Errors
+
 ```typescript
 try {
   const itinerary = await anthropic.messages.create(...);
@@ -476,13 +506,13 @@ try {
 
 ## Alternatives (Not Recommended)
 
-| Service | Pros | Cons |
-|---------|------|------|
-| **Sentry** ⭐ | Best features, free tier | - |
-| Rollbar | Good UI | Expensive |
-| Bugsnag | Simple | Limited free tier |
-| LogRocket | Session replay | Very expensive |
-| Custom logging | Free | No real-time, manual |
+| Service        | Pros                     | Cons                 |
+| -------------- | ------------------------ | -------------------- |
+| **Sentry** ⭐  | Best features, free tier | -                    |
+| Rollbar        | Good UI                  | Expensive            |
+| Bugsnag        | Simple                   | Limited free tier    |
+| LogRocket      | Session replay           | Very expensive       |
+| Custom logging | Free                     | No real-time, manual |
 
 ---
 

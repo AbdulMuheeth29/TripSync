@@ -43,8 +43,8 @@ import {
   type InsertTripSatisfaction,
   type LocationSharing,
   type InsertLocationSharing,
-} from "@shared/schema";
-import { randomUUID } from "crypto";
+} from '@shared/schema';
+import { randomUUID } from 'crypto';
 
 export interface IStorage {
   // Users
@@ -72,7 +72,10 @@ export interface IStorage {
   // Itinerary Items
   getItineraryItems(tripId: string): Promise<ItineraryItem[]>;
   createItineraryItem(item: InsertItineraryItem): Promise<ItineraryItem>;
-  updateItineraryItem(id: string, updates: Partial<ItineraryItem>): Promise<ItineraryItem | undefined>;
+  updateItineraryItem(
+    id: string,
+    updates: Partial<ItineraryItem>
+  ): Promise<ItineraryItem | undefined>;
   deleteItineraryItem(id: string): Promise<void>;
   deleteItineraryItemsByTripId(tripId: string): Promise<void>;
 
@@ -98,7 +101,10 @@ export interface IStorage {
   getInvitesByTrip(tripId: string): Promise<TripInvite[]>;
   getInviteById(id: string): Promise<TripInvite | undefined>;
   createInvite(invite: InsertTripInvite): Promise<TripInvite>;
-  updateInvite(id: string, updates: Partial<Pick<TripInvite, "status">>): Promise<TripInvite | undefined>;
+  updateInvite(
+    id: string,
+    updates: Partial<Pick<TripInvite, 'status'>>
+  ): Promise<TripInvite | undefined>;
 
   // Member preferences
   getPreferencesByTrip(tripId: string): Promise<(MemberPreference & { user: User })[]>;
@@ -130,12 +136,19 @@ export interface IStorage {
   // Transportation
   getTransportationByTrip(tripId: string): Promise<(TransportationEntry & { driver?: User })[]>;
   createTransportationEntry(entry: InsertTransportationEntry): Promise<TransportationEntry>;
-  updateTransportationEntry(id: string, updates: Partial<TransportationEntry>): Promise<TransportationEntry | undefined>;
+  updateTransportationEntry(
+    id: string,
+    updates: Partial<TransportationEntry>
+  ): Promise<TransportationEntry | undefined>;
   deleteTransportationEntry(id: string): Promise<void>;
 
   // Group availability
   getGroupAvailabilityByTrip(tripId: string): Promise<(GroupAvailability & { user: User })[]>;
-  setUserAvailability(tripId: string, userId: string, availableDates: string[]): Promise<GroupAvailability>;
+  setUserAvailability(
+    tripId: string,
+    userId: string,
+    availableDates: string[]
+  ): Promise<GroupAvailability>;
 
   // Trip documents
   getDocumentsByTrip(tripId: string): Promise<(TripDocument & { uploadedBy?: User })[]>;
@@ -146,7 +159,10 @@ export interface IStorage {
   // Emergency contacts
   getEmergencyContactsByTrip(tripId: string): Promise<EmergencyContact[]>;
   createEmergencyContact(contact: InsertEmergencyContact): Promise<EmergencyContact>;
-  updateEmergencyContact(id: string, updates: Partial<EmergencyContact>): Promise<EmergencyContact | undefined>;
+  updateEmergencyContact(
+    id: string,
+    updates: Partial<EmergencyContact>
+  ): Promise<EmergencyContact | undefined>;
   deleteEmergencyContact(id: string): Promise<void>;
 
   // Mood board
@@ -156,7 +172,9 @@ export interface IStorage {
 
   // User learned preferences (preference learning)
   getUserLearnedPreferences(userId: string): Promise<UserLearnedPreferences | undefined>;
-  createOrUpdateUserLearnedPreferences(pref: InsertUserLearnedPreferences): Promise<UserLearnedPreferences>;
+  createOrUpdateUserLearnedPreferences(
+    pref: InsertUserLearnedPreferences
+  ): Promise<UserLearnedPreferences>;
 
   // Trip satisfaction (analytics)
   getSatisfactionByTrip(tripId: string): Promise<(TripSatisfaction & { user: User })[]>;
@@ -164,7 +182,12 @@ export interface IStorage {
 
   // Location sharing
   getLocationSharingByTrip(tripId: string): Promise<(LocationSharing & { user: User })[]>;
-  setUserLocation(tripId: string, userId: string, lat: string, lng: string): Promise<LocationSharing>;
+  setUserLocation(
+    tripId: string,
+    userId: string,
+    lat: string,
+    lng: string
+  ): Promise<LocationSharing>;
 
   // Admin metrics (used only by admin dashboard)
   getAdminMetricsCounts(): Promise<{
@@ -207,11 +230,11 @@ export class MemStorage implements IStorage {
   private seedDemoData() {
     // Create demo user
     const demoUser: User = {
-      id: "demo-user-1",
-      email: "demo@tripsync.com",
-      name: "Demo User",
-      passwordHash: "",
-      subscriptionTier: "free",
+      id: 'demo-user-1',
+      email: 'demo@tripsync.com',
+      name: 'Demo User',
+      passwordHash: '',
+      subscriptionTier: 'free',
       subscriptionExpiresAt: null,
       stripeCustomerId: null,
       createdAt: new Date(),
@@ -220,23 +243,23 @@ export class MemStorage implements IStorage {
 
     // Miami Bachelorette Party
     const miamiTrip: Trip = {
-      id: "trip-miami-1",
+      id: 'trip-miami-1',
       organizerId: demoUser.id,
       title: null,
-      destination: "Miami, FL",
-      startDate: "2026-05-15",
-      endDate: "2026-05-18",
+      destination: 'Miami, FL',
+      startDate: '2026-05-15',
+      endDate: '2026-05-18',
       budgetPerPerson: 1500,
       groupSize: 6,
-      vibes: ["nightlife", "relaxing"],
-      accommodationPref: "hotel",
-      diningPref: "mix",
+      vibes: ['nightlife', 'relaxing'],
+      accommodationPref: 'hotel',
+      diningPref: 'mix',
       tripType: null,
-      status: "planning",
+      status: 'planning',
       isLocked: false,
       voteDeadline: null,
       timezone: null,
-      shareCode: "MIAMI2026",
+      shareCode: 'MIAMI2026',
       coverImageUrl: null,
       recapText: null,
       createdAt: new Date(),
@@ -248,8 +271,8 @@ export class MemStorage implements IStorage {
       id: randomUUID(),
       tripId: miamiTrip.id,
       userId: demoUser.id,
-      role: "organizer",
-      rsvpStatus: "accepted",
+      role: 'organizer',
+      rsvpStatus: 'accepted',
       joinedAt: new Date(),
     };
     this.tripMembers.set(miamiMember.id, miamiMember);
@@ -260,133 +283,133 @@ export class MemStorage implements IStorage {
         id: randomUUID(),
         tripId: miamiTrip.id,
         dayNumber: 1,
-        type: "flight",
-        time: "08:00",
-        name: "Flight to Miami",
-        description: "Direct flight from your home city to Miami International Airport",
-        location: "Miami International Airport",
+        type: 'flight',
+        time: '08:00',
+        name: 'Flight to Miami',
+        description: 'Direct flight from your home city to Miami International Airport',
+        location: 'Miami International Airport',
         pricePerPerson: 250,
-        bookingUrlHint: "Google Flights",
+        bookingUrlHint: 'Google Flights',
       },
       {
         id: randomUUID(),
         tripId: miamiTrip.id,
         dayNumber: 1,
-        type: "hotel",
-        time: "14:00",
-        name: "Check-in at Fontainebleau Miami Beach",
-        description: "Iconic beachfront resort with stunning ocean views, pools, and spa",
-        location: "4441 Collins Ave, Miami Beach",
+        type: 'hotel',
+        time: '14:00',
+        name: 'Check-in at Fontainebleau Miami Beach',
+        description: 'Iconic beachfront resort with stunning ocean views, pools, and spa',
+        location: '4441 Collins Ave, Miami Beach',
         pricePerPerson: 200,
-        bookingUrlHint: "Booking.com",
+        bookingUrlHint: 'Booking.com',
       },
       {
         id: randomUUID(),
         tripId: miamiTrip.id,
         dayNumber: 1,
-        type: "dining",
-        time: "19:00",
-        name: "Dinner at Juvia",
-        description: "Rooftop restaurant with stunning views, French-Japanese-Peruvian fusion",
-        location: "1111 Lincoln Rd, Miami Beach",
+        type: 'dining',
+        time: '19:00',
+        name: 'Dinner at Juvia',
+        description: 'Rooftop restaurant with stunning views, French-Japanese-Peruvian fusion',
+        location: '1111 Lincoln Rd, Miami Beach',
         pricePerPerson: 85,
-        bookingUrlHint: "OpenTable",
+        bookingUrlHint: 'OpenTable',
       },
       {
         id: randomUUID(),
         tripId: miamiTrip.id,
         dayNumber: 1,
-        type: "activity",
-        time: "22:00",
-        name: "LIV Nightclub",
-        description: "World-famous nightclub at Fontainebleau, premier nightlife experience",
-        location: "Fontainebleau Miami Beach",
+        type: 'activity',
+        time: '22:00',
+        name: 'LIV Nightclub',
+        description: 'World-famous nightclub at Fontainebleau, premier nightlife experience',
+        location: 'Fontainebleau Miami Beach',
         pricePerPerson: 100,
-        bookingUrlHint: "LIV Miami website",
+        bookingUrlHint: 'LIV Miami website',
       },
       {
         id: randomUUID(),
         tripId: miamiTrip.id,
         dayNumber: 2,
-        type: "activity",
-        time: "10:00",
-        name: "Pool Day & Cabana",
-        description: "Relax by the pool with a reserved cabana and bottle service",
-        location: "Fontainebleau Pool",
+        type: 'activity',
+        time: '10:00',
+        name: 'Pool Day & Cabana',
+        description: 'Relax by the pool with a reserved cabana and bottle service',
+        location: 'Fontainebleau Pool',
         pricePerPerson: 75,
-        bookingUrlHint: "Hotel concierge",
+        bookingUrlHint: 'Hotel concierge',
       },
       {
         id: randomUUID(),
         tripId: miamiTrip.id,
         dayNumber: 2,
-        type: "dining",
-        time: "13:00",
-        name: "Brunch at Nikki Beach",
-        description: "Famous beach club brunch with DJ and champagne",
-        location: "1 Ocean Dr, Miami Beach",
+        type: 'dining',
+        time: '13:00',
+        name: 'Brunch at Nikki Beach',
+        description: 'Famous beach club brunch with DJ and champagne',
+        location: '1 Ocean Dr, Miami Beach',
         pricePerPerson: 95,
-        bookingUrlHint: "Nikki Beach website",
+        bookingUrlHint: 'Nikki Beach website',
       },
       {
         id: randomUUID(),
         tripId: miamiTrip.id,
         dayNumber: 2,
-        type: "activity",
-        time: "16:00",
-        name: "Spa Treatment",
-        description: "Group spa day with massages and facials",
-        location: "Lapis Spa at Fontainebleau",
+        type: 'activity',
+        time: '16:00',
+        name: 'Spa Treatment',
+        description: 'Group spa day with massages and facials',
+        location: 'Lapis Spa at Fontainebleau',
         pricePerPerson: 150,
-        bookingUrlHint: "Hotel spa",
+        bookingUrlHint: 'Hotel spa',
       },
       {
         id: randomUUID(),
         tripId: miamiTrip.id,
         dayNumber: 2,
-        type: "dining",
-        time: "20:00",
-        name: "Dinner at Komodo",
-        description: "Celebrity hotspot with Asian-inspired cuisine",
-        location: "801 Brickell Ave, Miami",
+        type: 'dining',
+        time: '20:00',
+        name: 'Dinner at Komodo',
+        description: 'Celebrity hotspot with Asian-inspired cuisine',
+        location: '801 Brickell Ave, Miami',
         pricePerPerson: 110,
-        bookingUrlHint: "OpenTable",
+        bookingUrlHint: 'OpenTable',
       },
       {
         id: randomUUID(),
         tripId: miamiTrip.id,
         dayNumber: 3,
-        type: "activity",
-        time: "11:00",
-        name: "Yacht Charter",
-        description: "Private yacht cruise around Miami with champagne and snacks",
-        location: "Miami Marina",
+        type: 'activity',
+        time: '11:00',
+        name: 'Yacht Charter',
+        description: 'Private yacht cruise around Miami with champagne and snacks',
+        location: 'Miami Marina',
         pricePerPerson: 200,
-        bookingUrlHint: "GetMyBoat",
+        bookingUrlHint: 'GetMyBoat',
       },
       {
         id: randomUUID(),
         tripId: miamiTrip.id,
         dayNumber: 3,
-        type: "dining",
-        time: "14:00",
-        name: "Lunch at The Surf Club",
-        description: "Elegant seaside dining at this historic venue",
-        location: "9011 Collins Ave, Surfside",
+        type: 'dining',
+        time: '14:00',
+        name: 'Lunch at The Surf Club',
+        description: 'Elegant seaside dining at this historic venue',
+        location: '9011 Collins Ave, Surfside',
         pricePerPerson: 75,
-        bookingUrlHint: "Resy",
+        bookingUrlHint: 'Resy',
       },
       {
         id: randomUUID(),
         tripId: miamiTrip.id,
         dayNumber: 3,
-        type: "flight",
-        time: "19:00",
-        name: "Flight Home",
-        description: "Return flight from Miami International Airport",
-        location: "Miami International Airport",
+        type: 'flight',
+        time: '19:00',
+        name: 'Flight Home',
+        description: 'Return flight from Miami International Airport',
+        location: 'Miami International Airport',
         pricePerPerson: 250,
-        bookingUrlHint: "Google Flights",
+        bookingUrlHint: 'Google Flights',
       },
     ];
 
@@ -399,7 +422,7 @@ export class MemStorage implements IStorage {
         endTime: item.endTime ?? null,
         confirmationNumber: item.confirmationNumber ?? null,
         confirmationImageUrl: item.confirmationImageUrl ?? null,
-        bookingStatus: "suggested",
+        bookingStatus: 'suggested',
         locked: null,
         sortOrder: null,
         aiConfidenceScore: null,
@@ -414,23 +437,23 @@ export class MemStorage implements IStorage {
 
     // Austin Food Weekend
     const austinTrip: Trip = {
-      id: "trip-austin-1",
+      id: 'trip-austin-1',
       organizerId: demoUser.id,
       title: null,
-      destination: "Austin, TX",
-      startDate: "2026-06-08",
-      endDate: "2026-06-10",
+      destination: 'Austin, TX',
+      startDate: '2026-06-08',
+      endDate: '2026-06-10',
       budgetPerPerson: 800,
       groupSize: 4,
-      vibes: ["foodie", "adventure"],
-      accommodationPref: "airbnb",
-      diningPref: "casual",
+      vibes: ['foodie', 'adventure'],
+      accommodationPref: 'airbnb',
+      diningPref: 'casual',
       tripType: null,
-      status: "planning",
+      status: 'planning',
       isLocked: false,
       voteDeadline: null,
       timezone: null,
-      shareCode: "AUSTIN2026",
+      shareCode: 'AUSTIN2026',
       coverImageUrl: null,
       recapText: null,
       createdAt: new Date(),
@@ -442,8 +465,8 @@ export class MemStorage implements IStorage {
       id: randomUUID(),
       tripId: austinTrip.id,
       userId: demoUser.id,
-      role: "organizer",
-      rsvpStatus: "accepted",
+      role: 'organizer',
+      rsvpStatus: 'accepted',
       joinedAt: new Date(),
     };
     this.tripMembers.set(austinMember.id, austinMember);
@@ -454,145 +477,145 @@ export class MemStorage implements IStorage {
         id: randomUUID(),
         tripId: austinTrip.id,
         dayNumber: 1,
-        type: "flight",
-        time: "09:00",
-        name: "Flight to Austin",
-        description: "Direct flight to Austin-Bergstrom International Airport",
-        location: "Austin-Bergstrom International Airport",
+        type: 'flight',
+        time: '09:00',
+        name: 'Flight to Austin',
+        description: 'Direct flight to Austin-Bergstrom International Airport',
+        location: 'Austin-Bergstrom International Airport',
         pricePerPerson: 180,
-        bookingUrlHint: "Google Flights",
+        bookingUrlHint: 'Google Flights',
       },
       {
         id: randomUUID(),
         tripId: austinTrip.id,
         dayNumber: 1,
-        type: "hotel",
-        time: "12:00",
-        name: "Check-in at Downtown Loft",
-        description: "Modern 3-bedroom loft in the heart of downtown Austin",
-        location: "Downtown Austin",
+        type: 'hotel',
+        time: '12:00',
+        name: 'Check-in at Downtown Loft',
+        description: 'Modern 3-bedroom loft in the heart of downtown Austin',
+        location: 'Downtown Austin',
         pricePerPerson: 100,
-        bookingUrlHint: "Airbnb",
+        bookingUrlHint: 'Airbnb',
       },
       {
         id: randomUUID(),
         tripId: austinTrip.id,
         dayNumber: 1,
-        type: "dining",
-        time: "13:00",
-        name: "Lunch at Franklin Barbecue",
-        description: "World-famous Texas BBQ - get there early!",
-        location: "900 E 11th St, Austin",
+        type: 'dining',
+        time: '13:00',
+        name: 'Lunch at Franklin Barbecue',
+        description: 'World-famous Texas BBQ - get there early!',
+        location: '900 E 11th St, Austin',
         pricePerPerson: 35,
-        bookingUrlHint: "Walk-in (arrive by 11am)",
+        bookingUrlHint: 'Walk-in (arrive by 11am)',
       },
       {
         id: randomUUID(),
         tripId: austinTrip.id,
         dayNumber: 1,
-        type: "activity",
-        time: "16:00",
-        name: "East Austin Food Tour",
+        type: 'activity',
+        time: '16:00',
+        name: 'East Austin Food Tour',
         description: "Walking tour of East Austin's best tacos and craft breweries",
-        location: "East Austin",
+        location: 'East Austin',
         pricePerPerson: 60,
-        bookingUrlHint: "Viator",
+        bookingUrlHint: 'Viator',
       },
       {
         id: randomUUID(),
         tripId: austinTrip.id,
         dayNumber: 1,
-        type: "dining",
-        time: "20:00",
-        name: "Dinner at Uchi",
+        type: 'dining',
+        time: '20:00',
+        name: 'Dinner at Uchi',
         description: "Award-winning Japanese restaurant from Top Chef's Tyson Cole",
-        location: "801 S Lamar Blvd, Austin",
+        location: '801 S Lamar Blvd, Austin',
         pricePerPerson: 85,
-        bookingUrlHint: "Resy",
+        bookingUrlHint: 'Resy',
       },
       {
         id: randomUUID(),
         tripId: austinTrip.id,
         dayNumber: 2,
-        type: "dining",
-        time: "09:00",
-        name: "Breakfast at Loro",
-        description: "Asian smokehouse brunch with incredible flavors",
-        location: "2115 S Lamar Blvd, Austin",
+        type: 'dining',
+        time: '09:00',
+        name: 'Breakfast at Loro',
+        description: 'Asian smokehouse brunch with incredible flavors',
+        location: '2115 S Lamar Blvd, Austin',
         pricePerPerson: 25,
-        bookingUrlHint: "Walk-in",
+        bookingUrlHint: 'Walk-in',
       },
       {
         id: randomUUID(),
         tripId: austinTrip.id,
         dayNumber: 2,
-        type: "activity",
-        time: "11:00",
-        name: "Kayaking on Lady Bird Lake",
+        type: 'activity',
+        time: '11:00',
+        name: 'Kayaking on Lady Bird Lake',
         description: "Paddle through downtown Austin's scenic waterway",
-        location: "Lady Bird Lake",
+        location: 'Lady Bird Lake',
         pricePerPerson: 40,
-        bookingUrlHint: "Rowing Dock",
+        bookingUrlHint: 'Rowing Dock',
       },
       {
         id: randomUUID(),
         tripId: austinTrip.id,
         dayNumber: 2,
-        type: "dining",
-        time: "14:00",
-        name: "Tacos at Veracruz All Natural",
-        description: "Best migas tacos in Austin",
-        location: "1704 E Cesar Chavez St, Austin",
+        type: 'dining',
+        time: '14:00',
+        name: 'Tacos at Veracruz All Natural',
+        description: 'Best migas tacos in Austin',
+        location: '1704 E Cesar Chavez St, Austin',
         pricePerPerson: 15,
-        bookingUrlHint: "Walk-in",
+        bookingUrlHint: 'Walk-in',
       },
       {
         id: randomUUID(),
         tripId: austinTrip.id,
         dayNumber: 2,
-        type: "activity",
-        time: "17:00",
-        name: "South Congress Stroll",
+        type: 'activity',
+        time: '17:00',
+        name: 'South Congress Stroll',
         description: "Shop and explore Austin's iconic SoCo district",
-        location: "South Congress Ave",
+        location: 'South Congress Ave',
         pricePerPerson: 0,
-        bookingUrlHint: "Self-guided",
+        bookingUrlHint: 'Self-guided',
       },
       {
         id: randomUUID(),
         tripId: austinTrip.id,
         dayNumber: 2,
-        type: "dining",
-        time: "19:30",
-        name: "Dinner at Odd Duck",
-        description: "Farm-to-table small plates from local ingredients",
-        location: "1201 S Lamar Blvd, Austin",
+        type: 'dining',
+        time: '19:30',
+        name: 'Dinner at Odd Duck',
+        description: 'Farm-to-table small plates from local ingredients',
+        location: '1201 S Lamar Blvd, Austin',
         pricePerPerson: 70,
-        bookingUrlHint: "Resy",
+        bookingUrlHint: 'Resy',
       },
       {
         id: randomUUID(),
         tripId: austinTrip.id,
         dayNumber: 3,
-        type: "dining",
-        time: "10:00",
+        type: 'dining',
+        time: '10:00',
         name: "Brunch at Jacoby's",
-        description: "Ranch-to-table brunch with outdoor seating",
-        location: "3235 E Cesar Chavez St, Austin",
+        description: 'Ranch-to-table brunch with outdoor seating',
+        location: '3235 E Cesar Chavez St, Austin',
         pricePerPerson: 30,
-        bookingUrlHint: "Resy",
+        bookingUrlHint: 'Resy',
       },
       {
         id: randomUUID(),
         tripId: austinTrip.id,
         dayNumber: 3,
-        type: "flight",
-        time: "15:00",
-        name: "Flight Home",
-        description: "Return flight from Austin-Bergstrom",
-        location: "Austin-Bergstrom International Airport",
+        type: 'flight',
+        time: '15:00',
+        name: 'Flight Home',
+        description: 'Return flight from Austin-Bergstrom',
+        location: 'Austin-Bergstrom International Airport',
         pricePerPerson: 180,
-        bookingUrlHint: "Google Flights",
+        bookingUrlHint: 'Google Flights',
       },
     ];
 
@@ -605,7 +628,7 @@ export class MemStorage implements IStorage {
         endTime: item.endTime ?? null,
         confirmationNumber: item.confirmationNumber ?? null,
         confirmationImageUrl: item.confirmationImageUrl ?? null,
-        bookingStatus: "suggested",
+        bookingStatus: 'suggested',
         locked: null,
         sortOrder: null,
         aiConfidenceScore: null,
@@ -635,7 +658,7 @@ export class MemStorage implements IStorage {
   async createUser(user: InsertUser): Promise<User> {
     const newUser: User = {
       ...user,
-      subscriptionTier: (user as Partial<User>).subscriptionTier ?? "free",
+      subscriptionTier: (user as Partial<User>).subscriptionTier ?? 'free',
       subscriptionExpiresAt: (user as Partial<User>).subscriptionExpiresAt ?? null,
       createdAt: new Date(),
     } as User;
@@ -666,7 +689,7 @@ export class MemStorage implements IStorage {
         .filter((m) => m.userId === userId)
         .map((m) => m.tripId)
     );
-    
+
     return Array.from(this.trips.values()).filter(
       (t) => t.organizerId === userId || memberTripIds.has(t.id)
     );
@@ -682,7 +705,7 @@ export class MemStorage implements IStorage {
       timezone: trip.timezone ?? null,
       coverImageUrl: null,
       recapText: trip.recapText ?? null,
-      status: "planning",
+      status: 'planning',
       isLocked: false,
       shareCode,
       createdAt: new Date(),
@@ -694,8 +717,8 @@ export class MemStorage implements IStorage {
       id: randomUUID(),
       tripId: trip.id,
       userId: trip.organizerId,
-      role: "organizer",
-      rsvpStatus: "accepted",
+      role: 'organizer',
+      rsvpStatus: 'accepted',
       joinedAt: new Date(),
     };
     this.tripMembers.set(member.id, member);
@@ -706,7 +729,7 @@ export class MemStorage implements IStorage {
   async updateTrip(id: string, updates: Partial<Trip>): Promise<Trip | undefined> {
     const trip = this.trips.get(id);
     if (!trip) return undefined;
-    
+
     const updated = { ...trip, ...updates };
     this.trips.set(id, updated);
     return updated;
@@ -714,21 +737,21 @@ export class MemStorage implements IStorage {
 
   // Trip Members
   async getTripMembers(tripId: string): Promise<(TripMember & { user: User })[]> {
-    const members = Array.from(this.tripMembers.values()).filter(
-      (m) => m.tripId === tripId
-    );
-    
-    return members.map((m) => ({
-      ...m,
-      user: this.users.get(m.userId)!,
-    })).filter((m) => m.user);
+    const members = Array.from(this.tripMembers.values()).filter((m) => m.tripId === tripId);
+
+    return members
+      .map((m) => ({
+        ...m,
+        user: this.users.get(m.userId)!,
+      }))
+      .filter((m) => m.user);
   }
 
   async addTripMember(member: InsertTripMember): Promise<TripMember> {
     const newMember: TripMember = {
       ...member,
-      role: member.role ?? "member",
-      rsvpStatus: "accepted",
+      role: member.role ?? 'member',
+      rsvpStatus: 'accepted',
       joinedAt: new Date(),
     };
     this.tripMembers.set(member.id, newMember);
@@ -739,7 +762,10 @@ export class MemStorage implements IStorage {
     return this.tripMembers.get(id);
   }
 
-  async updateTripMember(id: string, updates: Partial<TripMember>): Promise<TripMember | undefined> {
+  async updateTripMember(
+    id: string,
+    updates: Partial<TripMember>
+  ): Promise<TripMember | undefined> {
     const m = this.tripMembers.get(id);
     if (!m) return undefined;
     const updated = { ...m, ...updates };
@@ -759,9 +785,7 @@ export class MemStorage implements IStorage {
 
   // Itinerary Items
   async getItineraryItems(tripId: string): Promise<ItineraryItem[]> {
-    return Array.from(this.itineraryItems.values()).filter(
-      (i) => i.tripId === tripId
-    );
+    return Array.from(this.itineraryItems.values()).filter((i) => i.tripId === tripId);
   }
 
   async createItineraryItem(item: InsertItineraryItem): Promise<ItineraryItem> {
@@ -773,7 +797,7 @@ export class MemStorage implements IStorage {
       endTime: item.endTime ?? null,
       confirmationNumber: item.confirmationNumber ?? null,
       confirmationImageUrl: item.confirmationImageUrl ?? null,
-      bookingStatus: "not_started",
+      bookingStatus: 'not_started',
       locked: null,
       sortOrder: null,
       aiConfidenceScore: item.aiConfidenceScore ?? null,
@@ -787,10 +811,13 @@ export class MemStorage implements IStorage {
     return newItem;
   }
 
-  async updateItineraryItem(id: string, updates: Partial<ItineraryItem>): Promise<ItineraryItem | undefined> {
+  async updateItineraryItem(
+    id: string,
+    updates: Partial<ItineraryItem>
+  ): Promise<ItineraryItem | undefined> {
     const item = this.itineraryItems.get(id);
     if (!item) return undefined;
-    
+
     const updated = { ...item, ...updates };
     this.itineraryItems.set(id, updated);
     return updated;
@@ -817,9 +844,7 @@ export class MemStorage implements IStorage {
 
   // Comments
   async getCommentsByItem(itemId: string): Promise<Comment[]> {
-    return Array.from(this.comments.values()).filter(
-      (c) => c.itemId === itemId
-    );
+    return Array.from(this.comments.values()).filter((c) => c.itemId === itemId);
   }
 
   async getCommentsByTrip(tripId: string): Promise<Comment[]> {
@@ -828,10 +853,8 @@ export class MemStorage implements IStorage {
         .filter((i) => i.tripId === tripId)
         .map((i) => i.id)
     );
-    
-    return Array.from(this.comments.values()).filter(
-      (c) => itemIds.has(c.itemId)
-    );
+
+    return Array.from(this.comments.values()).filter((c) => itemIds.has(c.itemId));
   }
 
   async createComment(comment: InsertComment): Promise<Comment> {
@@ -853,9 +876,7 @@ export class MemStorage implements IStorage {
 
   // Votes
   async getVotesByItem(itemId: string): Promise<Vote[]> {
-    return Array.from(this.votes.values()).filter(
-      (v) => v.itemId === itemId
-    );
+    return Array.from(this.votes.values()).filter((v) => v.itemId === itemId);
   }
 
   async getVotesByTrip(tripId: string): Promise<Vote[]> {
@@ -864,10 +885,8 @@ export class MemStorage implements IStorage {
         .filter((i) => i.tripId === tripId)
         .map((i) => i.id)
     );
-    
-    return Array.from(this.votes.values()).filter(
-      (v) => itemIds.has(v.itemId)
-    );
+
+    return Array.from(this.votes.values()).filter((v) => itemIds.has(v.itemId));
   }
 
   async createOrUpdateVote(vote: InsertVote): Promise<Vote> {
@@ -875,13 +894,13 @@ export class MemStorage implements IStorage {
     const existing = Array.from(this.votes.values()).find(
       (v) => v.itemId === vote.itemId && v.userId === vote.userId
     );
-    
+
     if (existing) {
       const updated: Vote = { ...existing, voteType: vote.voteType };
       this.votes.set(existing.id, updated);
       return updated;
     }
-    
+
     const newVote: Vote = {
       ...vote,
       createdAt: new Date(),
@@ -892,9 +911,7 @@ export class MemStorage implements IStorage {
 
   // Expenses
   async getExpensesByTrip(tripId: string): Promise<Expense[]> {
-    return Array.from(this.expenses.values()).filter(
-      (e) => e.tripId === tripId
-    );
+    return Array.from(this.expenses.values()).filter((e) => e.tripId === tripId);
   }
 
   async createExpense(expense: InsertExpense): Promise<Expense> {
@@ -903,7 +920,7 @@ export class MemStorage implements IStorage {
       location: expense.location ?? null,
       itemId: expense.itemId ?? null,
       receiptImageUrl: expense.receiptImageUrl ?? null,
-      currency: "USD",
+      currency: 'USD',
       isSettled: false,
       createdAt: new Date(),
     };
@@ -914,7 +931,7 @@ export class MemStorage implements IStorage {
   async updateExpense(id: string, updates: Partial<Expense>): Promise<Expense | undefined> {
     const expense = this.expenses.get(id);
     if (!expense) return undefined;
-    
+
     const updated = { ...expense, ...updates };
     this.expenses.set(id, updated);
     return updated;
@@ -933,7 +950,10 @@ export class MemStorage implements IStorage {
     return this.tripInvites.get(id);
   }
 
-  async updateInvite(id: string, updates: Partial<Pick<TripInvite, "status">>): Promise<TripInvite | undefined> {
+  async updateInvite(
+    id: string,
+    updates: Partial<Pick<TripInvite, 'status'>>
+  ): Promise<TripInvite | undefined> {
     const invite = this.tripInvites.get(id);
     if (!invite) return undefined;
     const updated = { ...invite, ...updates };
@@ -944,7 +964,7 @@ export class MemStorage implements IStorage {
   async createInvite(invite: InsertTripInvite): Promise<TripInvite> {
     const newInvite: TripInvite = {
       ...invite,
-      status: invite.status ?? "pending",
+      status: invite.status ?? 'pending',
       createdAt: new Date(),
     };
     this.tripInvites.set(invite.id, newInvite);
@@ -1037,14 +1057,16 @@ export class MemStorage implements IStorage {
 
   async getPollsByTrip(tripId: string): Promise<(Poll & { createdBy: User })[]> {
     const list = Array.from(this.polls.values()).filter((p) => p.tripId === tripId);
-    return list.map((p) => ({ ...p, createdBy: this.users.get(p.createdByUserId)! })).filter((p) => p.createdBy);
+    return list
+      .map((p) => ({ ...p, createdBy: this.users.get(p.createdByUserId)! }))
+      .filter((p) => p.createdBy);
   }
 
   async createPoll(poll: InsertPoll): Promise<Poll> {
     const newPoll: Poll = {
       ...poll,
       deadline: poll.deadline ?? null,
-      status: "open",
+      status: 'open',
       createdAt: new Date(),
     };
     this.polls.set(poll.id, newPoll);
@@ -1064,7 +1086,9 @@ export class MemStorage implements IStorage {
   }
 
   async createOrUpdatePollVote(vote: InsertPollVote): Promise<PollVote> {
-    const existing = Array.from(this.pollVotes.values()).find((v) => v.pollId === vote.pollId && v.userId === vote.userId);
+    const existing = Array.from(this.pollVotes.values()).find(
+      (v) => v.pollId === vote.pollId && v.userId === vote.userId
+    );
     if (existing) {
       const updated = { ...existing, optionIndex: vote.optionIndex };
       this.pollVotes.set(existing.id, updated);
@@ -1077,7 +1101,10 @@ export class MemStorage implements IStorage {
 
   async getPackingByTrip(tripId: string): Promise<(PackingItem & { assignedTo?: User })[]> {
     const list = Array.from(this.packingItems.values()).filter((p) => p.tripId === tripId);
-    return list.map((p) => ({ ...p, assignedTo: p.assignedToUserId ? this.users.get(p.assignedToUserId) : undefined }));
+    return list.map((p) => ({
+      ...p,
+      assignedTo: p.assignedToUserId ? this.users.get(p.assignedToUserId) : undefined,
+    }));
   }
 
   async createPackingItem(item: InsertPackingItem): Promise<PackingItem> {
@@ -1092,7 +1119,10 @@ export class MemStorage implements IStorage {
     return newItem;
   }
 
-  async updatePackingItem(id: string, updates: Partial<PackingItem>): Promise<PackingItem | undefined> {
+  async updatePackingItem(
+    id: string,
+    updates: Partial<PackingItem>
+  ): Promise<PackingItem | undefined> {
     const item = this.packingItems.get(id);
     if (!item) return undefined;
     const updated = { ...item, ...updates };
@@ -1104,9 +1134,14 @@ export class MemStorage implements IStorage {
     this.packingItems.delete(id);
   }
 
-  async getTransportationByTrip(tripId: string): Promise<(TransportationEntry & { driver?: User })[]> {
+  async getTransportationByTrip(
+    tripId: string
+  ): Promise<(TransportationEntry & { driver?: User })[]> {
     const list = Array.from(this.transportationEntries.values()).filter((t) => t.tripId === tripId);
-    return list.map((t) => ({ ...t, driver: t.driverUserId ? this.users.get(t.driverUserId) : undefined }));
+    return list.map((t) => ({
+      ...t,
+      driver: t.driverUserId ? this.users.get(t.driverUserId) : undefined,
+    }));
   }
 
   async createTransportationEntry(entry: InsertTransportationEntry): Promise<TransportationEntry> {
@@ -1121,7 +1156,10 @@ export class MemStorage implements IStorage {
     return newEntry;
   }
 
-  async updateTransportationEntry(id: string, updates: Partial<TransportationEntry>): Promise<TransportationEntry | undefined> {
+  async updateTransportationEntry(
+    id: string,
+    updates: Partial<TransportationEntry>
+  ): Promise<TransportationEntry | undefined> {
     const entry = this.transportationEntries.get(id);
     if (!entry) return undefined;
     const updated = { ...entry, ...updates };
@@ -1133,20 +1171,34 @@ export class MemStorage implements IStorage {
     this.transportationEntries.delete(id);
   }
 
-  async getGroupAvailabilityByTrip(tripId: string): Promise<(GroupAvailability & { user: User })[]> {
+  async getGroupAvailabilityByTrip(
+    tripId: string
+  ): Promise<(GroupAvailability & { user: User })[]> {
     const list = Array.from(this.groupAvailability.values()).filter((a) => a.tripId === tripId);
     return list.map((a) => ({ ...a, user: this.users.get(a.userId)! })).filter((a) => a.user);
   }
 
-  async setUserAvailability(tripId: string, userId: string, availableDates: string[]): Promise<GroupAvailability> {
-    const existing = Array.from(this.groupAvailability.values()).find((a) => a.tripId === tripId && a.userId === userId);
+  async setUserAvailability(
+    tripId: string,
+    userId: string,
+    availableDates: string[]
+  ): Promise<GroupAvailability> {
+    const existing = Array.from(this.groupAvailability.values()).find(
+      (a) => a.tripId === tripId && a.userId === userId
+    );
     if (existing) {
       const updated = { ...existing, availableDates };
       this.groupAvailability.set(existing.id, updated);
       return updated;
     }
     const id = randomUUID();
-    const newAvail: GroupAvailability = { id, tripId, userId, availableDates, createdAt: new Date() };
+    const newAvail: GroupAvailability = {
+      id,
+      tripId,
+      userId,
+      availableDates,
+      createdAt: new Date(),
+    };
     this.groupAvailability.set(id, newAvail);
     return newAvail;
   }
@@ -1169,7 +1221,10 @@ export class MemStorage implements IStorage {
     return newDoc;
   }
 
-  async updateTripDocument(id: string, updates: Partial<TripDocument>): Promise<TripDocument | undefined> {
+  async updateTripDocument(
+    id: string,
+    updates: Partial<TripDocument>
+  ): Promise<TripDocument | undefined> {
     const doc = this.tripDocuments.get(id);
     if (!doc) return undefined;
     const updated = { ...doc, ...updates };
@@ -1199,7 +1254,10 @@ export class MemStorage implements IStorage {
     return newContact;
   }
 
-  async updateEmergencyContact(id: string, updates: Partial<EmergencyContact>): Promise<EmergencyContact | undefined> {
+  async updateEmergencyContact(
+    id: string,
+    updates: Partial<EmergencyContact>
+  ): Promise<EmergencyContact | undefined> {
     const existing = this.emergencyContacts.get(id);
     if (!existing) return undefined;
     const updated = { ...existing, ...updates };
@@ -1235,8 +1293,12 @@ export class MemStorage implements IStorage {
     return Array.from(this.userLearnedPreferences.values()).find((p) => p.userId === userId);
   }
 
-  async createOrUpdateUserLearnedPreferences(pref: InsertUserLearnedPreferences): Promise<UserLearnedPreferences> {
-    const existing = Array.from(this.userLearnedPreferences.values()).find((p) => p.userId === pref.userId);
+  async createOrUpdateUserLearnedPreferences(
+    pref: InsertUserLearnedPreferences
+  ): Promise<UserLearnedPreferences> {
+    const existing = Array.from(this.userLearnedPreferences.values()).find(
+      (p) => p.userId === pref.userId
+    );
     const id = existing?.id ?? pref.id ?? randomUUID();
     const updated: UserLearnedPreferences = {
       ...(existing ?? { id, userId: pref.userId, updatedAt: new Date() }),
@@ -1258,7 +1320,9 @@ export class MemStorage implements IStorage {
   }
 
   async createOrUpdateTripSatisfaction(entry: InsertTripSatisfaction): Promise<TripSatisfaction> {
-    const existing = Array.from(this.tripSatisfaction.values()).find((s) => s.tripId === entry.tripId && s.userId === entry.userId);
+    const existing = Array.from(this.tripSatisfaction.values()).find(
+      (s) => s.tripId === entry.tripId && s.userId === entry.userId
+    );
     const id = existing?.id ?? entry.id ?? randomUUID();
     const newEntry: TripSatisfaction = {
       ...entry,
@@ -1275,8 +1339,15 @@ export class MemStorage implements IStorage {
     return list.map((l) => ({ ...l, user: this.users.get(l.userId)! })).filter((l) => l.user);
   }
 
-  async setUserLocation(tripId: string, userId: string, lat: string, lng: string): Promise<LocationSharing> {
-    const existing = Array.from(this.locationSharing.values()).find((l) => l.tripId === tripId && l.userId === userId);
+  async setUserLocation(
+    tripId: string,
+    userId: string,
+    lat: string,
+    lng: string
+  ): Promise<LocationSharing> {
+    const existing = Array.from(this.locationSharing.values()).find(
+      (l) => l.tripId === tripId && l.userId === userId
+    );
     const id = existing?.id ?? randomUUID();
     const updated: LocationSharing = { id, tripId, userId, lat, lng, updatedAt: new Date() };
     this.locationSharing.set(id, updated);
@@ -1294,8 +1365,8 @@ export class MemStorage implements IStorage {
   }
 }
 
-import { getDb } from "./db";
-import { createPgStorage } from "./storage-pg";
+import { getDb } from './db';
+import { createPgStorage } from './storage-pg';
 
 export const storage: IStorage = process.env.DATABASE_URL
   ? createPgStorage(getDb())

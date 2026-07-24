@@ -43,9 +43,7 @@ export function OptimizedImage({
 
   return (
     <div className={cn('relative overflow-hidden', className)}>
-      {isLoading && showLoader && (
-        <div className="absolute inset-0 bg-muted animate-pulse" />
-      )}
+      {isLoading && showLoader && <div className="absolute inset-0 bg-muted animate-pulse" />}
 
       <img
         src={error ? fallbackSrc : optimizedSrc}
@@ -97,13 +95,7 @@ export function LocationImage({
     return <div className={cn('bg-muted animate-pulse', props.className)} />;
   }
 
-  return (
-    <OptimizedImage
-      src={imageData.url}
-      alt={imageData.alt}
-      {...props}
-    />
-  );
+  return <OptimizedImage src={imageData.url} alt={imageData.alt} {...props} />;
 }
 
 interface ResponsiveImageProps extends Omit<OptimizedImageProps, 'srcSet'> {
@@ -118,12 +110,7 @@ interface ResponsiveImageProps extends Omit<OptimizedImageProps, 'srcSet'> {
 /**
  * Responsive image component with srcset support
  */
-export function ResponsiveImage({
-  src,
-  srcSet,
-  alt,
-  ...props
-}: ResponsiveImageProps) {
+export function ResponsiveImage({ src, srcSet, alt, ...props }: ResponsiveImageProps) {
   const generateSrcSet = () => {
     if (!srcSet) return undefined;
 

@@ -9,6 +9,7 @@
 **Before:** Generic travel images that didn't match the destination where users were planning trips.
 
 **After:** Beautiful, destination-specific images for:
+
 - ✅ **Trip cover photos** (Paris shows Eiffel Tower, Tokyo shows temples, etc.)
 - ✅ **Itinerary item images** (hotels, restaurants, activities get relevant photos)
 - ✅ **Trip destination hero** (rotating hero images specific to the destination)
@@ -24,6 +25,7 @@
 Complete image fetching service with:
 
 **Features:**
+
 - Search by destination (city, country, landmark)
 - Search by activity type (restaurant, hotel, museum, hiking)
 - Batch fetching for multiple activities
@@ -32,28 +34,30 @@ Complete image fetching service with:
 - Image optimization with size/quality parameters
 
 **API Functions:**
+
 ```typescript
 // Get images for a destination
-getDestinationImages('Paris, France', 3)
+getDestinationImages('Paris, France', 3);
 // Returns: ['url1', 'url2', 'url3']
 
 // Get image for an activity
-getActivityImage('restaurant', 'Tokyo')
+getActivityImage('restaurant', 'Tokyo');
 // Returns: 'url'
 
 // Batch fetch for itinerary
 getBatchActivityImages([
   { type: 'hotel', name: 'Grand Hotel', destination: 'Paris' },
-  { type: 'restaurant', name: 'Le Jules Verne', destination: 'Paris' }
-])
+  { type: 'restaurant', name: 'Le Jules Verne', destination: 'Paris' },
+]);
 // Returns: ['hotel-url', 'restaurant-url']
 
 // Get trip cover image
-getTripCoverImage('Bali, Indonesia', ['beach', 'relaxation'])
+getTripCoverImage('Bali, Indonesia', ['beach', 'relaxation']);
 // Returns: 'cover-url'
 ```
 
 **Caching:**
+
 - All images cached in Redis for 7 days
 - Cache keys: `unsplash:destination:{destination}:{count}`
 - Minimizes API calls (Unsplash free tier: 50 requests/hour)
@@ -65,6 +69,7 @@ getTripCoverImage('Bali, Indonesia', ['beach', 'relaxation'])
 **Automatic image fetching during trip creation:**
 
 When AI generates an itinerary:
+
 1. ✅ Fetches cover image for the trip (based on destination + vibes)
 2. ✅ Batch fetches images for ALL itinerary items (hotels, restaurants, activities)
 3. ✅ Saves `coverImageUrl` to trips table
@@ -72,6 +77,7 @@ When AI generates an itinerary:
 5. ✅ All happens in parallel for speed
 
 **Example:**
+
 ```
 Creating trip to "Tokyo, Japan"...
 🖼️  Fetching images for Tokyo, Japan...
@@ -94,11 +100,13 @@ GET /api/images/trip-cover/:destination?vibes=beach,relaxation
 ```
 
 **Use cases:**
+
 - Frontend can fetch images for international destinations
 - Dashboard can fetch cover images for trips
 - User can manually refresh images
 
 **Examples:**
+
 ```bash
 # Get 5 images of Paris
 GET /api/images/destination/Paris,%20France?count=5
@@ -117,11 +125,13 @@ GET /api/images/trip-cover/Bali,%20Indonesia?vibes=beach,relaxation
 **Enhanced to support worldwide destinations:**
 
 **Before:**
+
 - Only US destinations (hardcoded Unsplash URLs)
 - 100+ US cities, states, landmarks
 - Instant loading
 
 **After:**
+
 - ✅ Still has hardcoded images for US (instant loading)
 - ✅ **Plus** dynamic fetching for international destinations
 - ✅ Automatically detects if destination is not in hardcoded list
@@ -129,6 +139,7 @@ GET /api/images/trip-cover/Bali,%20Indonesia?vibes=beach,relaxation
 - ✅ Seamless fallback to default images
 
 **How it works:**
+
 1. User creates trip to "Paris, France"
 2. Hero checks hardcoded list → Not found (Paris is not in US list)
 3. Hero calls `/api/images/destination/Paris,%20France?count=3`
@@ -150,6 +161,7 @@ GET /api/images/trip-cover/Bali,%20Indonesia?vibes=beach,relaxation
 ### International Destinations (Dynamic API)
 
 **Automatically supported via Unsplash API:**
+
 - ✅ Paris, France
 - ✅ Tokyo, Japan
 - ✅ London, England
@@ -168,12 +180,14 @@ GET /api/images/trip-cover/Bali,%20Indonesia?vibes=beach,relaxation
 ### 1. Get Unsplash API Key (Free)
 
 **Steps:**
+
 1. Go to https://unsplash.com/developers
 2. Click "Register as a developer"
 3. Create a new application
 4. Copy your "Access Key"
 
 **Limits (Free Tier):**
+
 - 50 requests per hour
 - Unlimited for non-commercial use
 - Commercial use requires Unsplash+
@@ -254,6 +268,7 @@ https://images.unsplash.com/photo-xxx?w=1600&q=80&fit=crop&crop=entropy
 ```
 
 **Parameters:**
+
 - `w=1600` - Width in pixels (high quality for hero images)
 - `q=80` - Quality (balance between quality and file size)
 - `fit=crop` - Crop to exact dimensions
@@ -263,18 +278,19 @@ https://images.unsplash.com/photo-xxx?w=1600&q=80&fit=crop&crop=entropy
 
 ```typescript
 // Hero images (full width)
-url + '&w=1600&q=80'
+url + '&w=1600&q=80';
 
 // Activity images (cards)
-url + '&w=1200&q=80'
+url + '&w=1200&q=80';
 
 // Thumbnails
-url + '&w=400&q=75'
+url + '&w=400&q=75';
 ```
 
 ### Responsive Images
 
 Unsplash CDN automatically serves:
+
 - WebP format for modern browsers
 - JPEG fallback for older browsers
 - Optimized for device pixel ratio
@@ -286,21 +302,25 @@ Unsplash CDN automatically serves:
 ### Unsplash API (Free Tier)
 
 **Limits:**
+
 - 50 requests/hour
 - ~1,200 requests/day
 - Unlimited for non-commercial
 
 **Typical Usage:**
+
 - Trip creation: 1 request (cover) + 1 request (batch activities) = **2 requests**
 - Destination hero (international): 1 request = **1 request**
 - **Total per trip:** 2-3 requests
 
 **With caching (7 days):**
+
 - Popular destinations cached immediately
 - Same destination = 0 API calls (cache hit)
 - Expected cache hit rate: **80-90%**
 
 **Capacity:**
+
 - 50 requests/hour = ~25 new trips/hour (with 2 req/trip)
 - With 90% cache hit rate = ~250 trips/hour
 - **More than enough for production!**
@@ -308,6 +328,7 @@ Unsplash CDN automatically serves:
 ### Upgrade to Unsplash+ (If Needed)
 
 **Pricing:** $9/month
+
 - Unlimited requests
 - Higher rate limits
 - Commercial use allowed
@@ -319,12 +340,14 @@ Unsplash CDN automatically serves:
 **When Unsplash API is unavailable:**
 
 1. **No API Key Set**
+
    ```
    → Use DEFAULT_TRAVEL_IMAGES (generic but beautiful travel photos)
    → App still works perfectly, just less personalized
    ```
 
 2. **API Rate Limit Hit**
+
    ```
    → Return cached images if available
    → Fall back to DEFAULT_TRAVEL_IMAGES
@@ -355,11 +378,13 @@ Unsplash CDN automatically serves:
 ### Runtime Performance
 
 **Image fetching:**
+
 - Parallel fetching for all activities (simultaneous requests)
 - Total time: ~500ms for 20 activities
 - Cached responses: <10ms
 
 **Trip creation timeline:**
+
 ```
 AI itinerary generation: 30-60s
 Image fetching: +0.5s (parallel)
@@ -368,6 +393,7 @@ Total: 31-61s (images add minimal overhead)
 ```
 
 **Page load:**
+
 ```
 US destination hero: Instant (hardcoded images)
 International hero: +200-500ms (API fetch, then cached)
@@ -381,6 +407,7 @@ Itinerary items: Instant (URLs from database)
 ### Manual Test Steps
 
 **1. Test US Destination (Instant)**
+
 ```
 1. Create trip to "Austin, Texas"
 2. Check hero shows Austin skyline, Congress Bridge
@@ -389,6 +416,7 @@ Itinerary items: Instant (URLs from database)
 ```
 
 **2. Test International Destination (API)**
+
 ```
 1. Create trip to "Paris, France"
 2. Check hero shows Eiffel Tower, Louvre, etc.
@@ -399,6 +427,7 @@ Itinerary items: Instant (URLs from database)
 ```
 
 **3. Test Without API Key**
+
 ```
 1. Remove UNSPLASH_ACCESS_KEY from env
 2. Create trip to any destination
@@ -426,6 +455,7 @@ curl "http://localhost:3000/api/images/trip-cover/Bali,%20Indonesia?vibes=beach"
 ### Before & After
 
 **Before:**
+
 ```
 Trip to Paris:
   Hero: Generic mountain photo
@@ -435,6 +465,7 @@ Trip to Paris:
 ```
 
 **After:**
+
 ```
 Trip to Paris:
   Hero: Eiffel Tower, Louvre, Arc de Triomphe (rotating)
@@ -460,10 +491,12 @@ Trip to Paris:
 ### Files Created/Modified
 
 **New Files:**
+
 - `server/unsplash-service.ts` - Image fetching service
 - `server/image-routes.ts` - Image API endpoints
 
 **Modified Files:**
+
 - `server/ai-service.ts` - Added image fetching to itinerary generation
 - `server/env.ts` - Added `UNSPLASH_ACCESS_KEY` config
 - `server/routes.ts` - Registered image routes
@@ -495,11 +528,13 @@ UNSPLASH_ACCESS_KEY=your-key-here
    - Copy access key
 
 2. **Add to environment**
+
    ```bash
    UNSPLASH_ACCESS_KEY=your-key-here
    ```
 
 3. **Restart server**
+
    ```bash
    npm run build && npm start
    ```
@@ -542,6 +577,7 @@ UNSPLASH_ACCESS_KEY=your-key-here
 ✅ **Production-ready** with zero breaking changes
 
 **Users will see:**
+
 - Paris trips with Eiffel Tower photos
 - Tokyo trips with temple and neon photos
 - Bali trips with beach and rice terrace photos

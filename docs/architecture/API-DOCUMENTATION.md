@@ -46,6 +46,7 @@ Register a new user account.
 **Rate Limit**: 5 requests per 15 minutes per IP
 
 **Request Body:**
+
 ```json
 {
   "email": "user@example.com",
@@ -55,6 +56,7 @@ Register a new user account.
 ```
 
 **Response 201:**
+
 ```json
 {
   "user": {
@@ -69,6 +71,7 @@ Register a new user account.
 ```
 
 **Errors:**
+
 - `400`: Missing required fields or invalid format
 - `409`: Email already registered
 - `429`: Rate limit exceeded
@@ -82,6 +85,7 @@ Log in to an existing account.
 **Rate Limit**: 10 requests per 15 minutes per IP
 
 **Request Body:**
+
 ```json
 {
   "email": "user@example.com",
@@ -90,14 +94,18 @@ Log in to an existing account.
 ```
 
 **Response 200:**
+
 ```json
 {
-  "user": { /* user object */ },
+  "user": {
+    /* user object */
+  },
   "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
 }
 ```
 
 **Errors:**
+
 - `400`: Missing credentials
 - `401`: Invalid credentials
 - `429`: Rate limit exceeded
@@ -111,6 +119,7 @@ Log in to an existing account.
 Log out and blacklist current token.
 
 **Response 200:**
+
 ```json
 {
   "message": "Logged out successfully"
@@ -126,6 +135,7 @@ Log out and blacklist current token.
 Invalidate all tokens for the user (logout everywhere).
 
 **Response 200:**
+
 ```json
 {
   "message": "All sessions revoked"
@@ -141,6 +151,7 @@ Invalidate all tokens for the user (logout everywhere).
 Get current user profile.
 
 **Response 200:**
+
 ```json
 {
   "id": "uuid",
@@ -161,6 +172,7 @@ Request a password reset email.
 **Rate Limit**: 5 requests per hour per IP
 
 **Request Body:**
+
 ```json
 {
   "email": "user@example.com"
@@ -168,6 +180,7 @@ Request a password reset email.
 ```
 
 **Response 200:**
+
 ```json
 {
   "message": "Password reset email sent"
@@ -185,6 +198,7 @@ Reset password using token from email.
 **Rate Limit**: 5 requests per 15 minutes per IP
 
 **Request Body:**
+
 ```json
 {
   "token": "reset-token-from-email",
@@ -193,6 +207,7 @@ Reset password using token from email.
 ```
 
 **Response 200:**
+
 ```json
 {
   "message": "Password reset successful"
@@ -200,6 +215,7 @@ Reset password using token from email.
 ```
 
 **Errors:**
+
 - `400`: Invalid or expired token
 - `429`: Rate limit exceeded
 
@@ -210,6 +226,7 @@ Reset password using token from email.
 Validate a password reset token before showing reset form.
 
 **Response 200:**
+
 ```json
 {
   "valid": true
@@ -217,6 +234,7 @@ Validate a password reset token before showing reset form.
 ```
 
 **Response 400:**
+
 ```json
 {
   "valid": false,
@@ -233,9 +251,11 @@ Validate a password reset token before showing reset form.
 Public health check endpoint.
 
 **Query Parameters:**
+
 - `detailed` (optional): Set to `true` for detailed service status
 
 **Response 200 (Basic):**
+
 ```json
 {
   "ok": true,
@@ -244,6 +264,7 @@ Public health check endpoint.
 ```
 
 **Response 200 (Detailed):**
+
 ```json
 {
   "ok": true,
@@ -273,6 +294,7 @@ Public health check endpoint.
 Get current user's subscription details.
 
 **Response 200:**
+
 ```json
 {
   "tier": "pro",
@@ -294,6 +316,7 @@ Get current user's subscription details.
 Get AI-powered travel insights for a user.
 
 **Response 200:**
+
 ```json
 {
   "totalTrips": 12,
@@ -317,11 +340,13 @@ Get AI-powered travel insights for a user.
 List all trips for the current user.
 
 **Query Parameters:**
+
 - `status` (optional): `upcoming` | `ongoing` | `past` | `all` (default: `all`)
 - `limit` (optional): Max results (default: 50)
 - `offset` (optional): Pagination offset (default: 0)
 
 **Response 200:**
+
 ```json
 {
   "trips": [
@@ -354,6 +379,7 @@ Create a new trip.
 **Rate Limit**: 10 AI generations per hour (if using AI)
 
 **Request Body:**
+
 ```json
 {
   "destination": "Paris, France",
@@ -367,6 +393,7 @@ Create a new trip.
 ```
 
 **Response 201:**
+
 ```json
 {
   "trip": {
@@ -388,6 +415,7 @@ Create a new trip.
 ```
 
 **Errors:**
+
 - `400`: Invalid dates or missing required fields
 - `402`: Subscription limits exceeded
 - `429`: Rate limit exceeded
@@ -402,6 +430,7 @@ Create a new trip.
 Get detailed trip information.
 
 **Response 200:**
+
 ```json
 {
   "trip": {
@@ -471,6 +500,7 @@ Get detailed trip information.
 Update trip details.
 
 **Request Body** (all fields optional):
+
 ```json
 {
   "destination": "Updated destination",
@@ -483,9 +513,12 @@ Update trip details.
 ```
 
 **Response 200:**
+
 ```json
 {
-  "trip": { /* updated trip object */ }
+  "trip": {
+    /* updated trip object */
+  }
 }
 ```
 
@@ -498,6 +531,7 @@ Update trip details.
 Delete a trip permanently.
 
 **Response 200:**
+
 ```json
 {
   "message": "Trip deleted successfully"
@@ -513,6 +547,7 @@ Delete a trip permanently.
 Cancel a trip (keeps data but marks as cancelled).
 
 **Response 200:**
+
 ```json
 {
   "trip": {
@@ -532,6 +567,7 @@ Cancel a trip (keeps data but marks as cancelled).
 Regenerate the trip itinerary using AI.
 
 **Request Body:**
+
 ```json
 {
   "preferences": {
@@ -543,6 +579,7 @@ Regenerate the trip itinerary using AI.
 ```
 
 **Response 200:**
+
 ```json
 {
   "itinerary": [
@@ -558,6 +595,7 @@ Regenerate the trip itinerary using AI.
 Public endpoint to get trip information before joining.
 
 **Response 200:**
+
 ```json
 {
   "trip": {
@@ -573,6 +611,7 @@ Public endpoint to get trip information before joining.
 ```
 
 **Errors:**
+
 - `404`: Invalid or expired join code
 
 ---
@@ -584,14 +623,20 @@ Public endpoint to get trip information before joining.
 Join a trip using a share code.
 
 **Response 200:**
+
 ```json
 {
-  "trip": { /* full trip object */ },
-  "member": { /* new member object */ }
+  "trip": {
+    /* full trip object */
+  },
+  "member": {
+    /* new member object */
+  }
 }
 ```
 
 **Errors:**
+
 - `404`: Invalid join code
 - `409`: Already a member
 - `402`: Trip is full
@@ -603,10 +648,15 @@ Join a trip using a share code.
 Public endpoint to view trip details (read-only).
 
 **Response 200:**
+
 ```json
 {
-  "trip": { /* public trip info */ },
-  "itinerary": [ /* itinerary items */ ]
+  "trip": {
+    /* public trip info */
+  },
+  "itinerary": [
+    /* itinerary items */
+  ]
 }
 ```
 
@@ -621,6 +671,7 @@ Public endpoint to view trip details (read-only).
 Add an item to the itinerary.
 
 **Request Body:**
+
 ```json
 {
   "title": "Visit Louvre Museum",
@@ -637,9 +688,12 @@ Add an item to the itinerary.
 ```
 
 **Response 201:**
+
 ```json
 {
-  "item": { /* new itinerary item */ }
+  "item": {
+    /* new itinerary item */
+  }
 }
 ```
 
@@ -652,6 +706,7 @@ Add an item to the itinerary.
 Update an itinerary item.
 
 **Request Body** (all fields optional):
+
 ```json
 {
   "title": "Updated title",
@@ -661,9 +716,12 @@ Update an itinerary item.
 ```
 
 **Response 200:**
+
 ```json
 {
-  "item": { /* updated item */ }
+  "item": {
+    /* updated item */
+  }
 }
 ```
 
@@ -676,6 +734,7 @@ Update an itinerary item.
 Delete an itinerary item.
 
 **Response 200:**
+
 ```json
 {
   "message": "Item deleted successfully"
@@ -691,6 +750,7 @@ Delete an itinerary item.
 Reorder itinerary items.
 
 **Request Body:**
+
 ```json
 {
   "itemIds": ["item-1-uuid", "item-2-uuid", "item-3-uuid"]
@@ -698,6 +758,7 @@ Reorder itinerary items.
 ```
 
 **Response 200:**
+
 ```json
 {
   "message": "Itinerary reordered successfully"
@@ -713,13 +774,15 @@ Reorder itinerary items.
 Vote on an itinerary item.
 
 **Request Body:**
+
 ```json
 {
-  "vote": "up"  // or "down"
+  "vote": "up" // or "down"
 }
 ```
 
 **Response 200:**
+
 ```json
 {
   "votes": 5,
@@ -736,6 +799,7 @@ Vote on an itinerary item.
 Add a comment to an itinerary item.
 
 **Request Body:**
+
 ```json
 {
   "content": "This looks great! Let's definitely do this."
@@ -743,6 +807,7 @@ Add a comment to an itinerary item.
 ```
 
 **Response 201:**
+
 ```json
 {
   "comment": {
@@ -764,6 +829,7 @@ Add a comment to an itinerary item.
 Delete a comment (only comment author or trip organizer).
 
 **Response 200:**
+
 ```json
 {
   "message": "Comment deleted"
@@ -781,6 +847,7 @@ Delete a comment (only comment author or trip organizer).
 Add an expense to the trip.
 
 **Request Body:**
+
 ```json
 {
   "description": "Restaurant dinner",
@@ -792,14 +859,17 @@ Add an expense to the trip.
   "category": "food",
   "location": "Le Jules Verne",
   "receiptImageUrl": "https://...",
-  "itemId": "itinerary-item-uuid"  // optional: link to itinerary item
+  "itemId": "itinerary-item-uuid" // optional: link to itinerary item
 }
 ```
 
 **Response 201:**
+
 ```json
 {
-  "expense": { /* new expense object */ }
+  "expense": {
+    /* new expense object */
+  }
 }
 ```
 
@@ -812,6 +882,7 @@ Add an expense to the trip.
 Update an expense.
 
 **Request Body** (all fields optional):
+
 ```json
 {
   "amount": 130,
@@ -820,9 +891,12 @@ Update an expense.
 ```
 
 **Response 200:**
+
 ```json
 {
-  "expense": { /* updated expense */ }
+  "expense": {
+    /* updated expense */
+  }
 }
 ```
 
@@ -835,6 +909,7 @@ Update an expense.
 Delete an expense (only creator or organizer).
 
 **Response 200:**
+
 ```json
 {
   "message": "Expense deleted"
@@ -852,6 +927,7 @@ Delete an expense (only creator or organizer).
 Get AI-powered budget optimization suggestions.
 
 **Response 200:**
+
 ```json
 {
   "currentSpending": 2500,
@@ -878,6 +954,7 @@ Get AI-powered budget optimization suggestions.
 List all pending invites for a trip.
 
 **Response 200:**
+
 ```json
 {
   "invites": [
@@ -902,22 +979,27 @@ List all pending invites for a trip.
 Invite someone to the trip via email.
 
 **Request Body:**
+
 ```json
 {
   "email": "friend@example.com",
-  "role": "member",  // or "planner"
-  "message": "Join me for Paris!"  // optional
+  "role": "member", // or "planner"
+  "message": "Join me for Paris!" // optional
 }
 ```
 
 **Response 201:**
+
 ```json
 {
-  "invite": { /* invite object */ }
+  "invite": {
+    /* invite object */
+  }
 }
 ```
 
 **Errors:**
+
 - `400`: Invalid email or already a member
 - `402`: Trip member limit reached
 
@@ -928,6 +1010,7 @@ Invite someone to the trip via email.
 Get invite details (public, no auth required).
 
 **Response 200:**
+
 ```json
 {
   "invite": {
@@ -947,22 +1030,29 @@ Get invite details (public, no auth required).
 Accept or decline a trip invitation.
 
 **Request Body:**
+
 ```json
 {
-  "accept": true,  // or false to decline
-  "userId": "user-uuid"  // required if logged in
+  "accept": true, // or false to decline
+  "userId": "user-uuid" // required if logged in
 }
 ```
 
 **Response 200 (accepted):**
+
 ```json
 {
-  "trip": { /* trip object */ },
-  "member": { /* new member object */ }
+  "trip": {
+    /* trip object */
+  },
+  "member": {
+    /* new member object */
+  }
 }
 ```
 
 **Response 200 (declined):**
+
 ```json
 {
   "message": "Invitation declined"
@@ -978,6 +1068,7 @@ Accept or decline a trip invitation.
 Update member preferences or role.
 
 **Request Body:**
+
 ```json
 {
   "preferences": {
@@ -988,9 +1079,12 @@ Update member preferences or role.
 ```
 
 **Response 200:**
+
 ```json
 {
-  "member": { /* updated member */ }
+  "member": {
+    /* updated member */
+  }
 }
 ```
 
@@ -1003,16 +1097,20 @@ Update member preferences or role.
 Change a member's role.
 
 **Request Body:**
+
 ```json
 {
-  "role": "planner"  // or "member"
+  "role": "planner" // or "member"
 }
 ```
 
 **Response 200:**
+
 ```json
 {
-  "member": { /* updated member */ }
+  "member": {
+    /* updated member */
+  }
 }
 ```
 
@@ -1025,6 +1123,7 @@ Change a member's role.
 Remove a member from the trip.
 
 **Response 200:**
+
 ```json
 {
   "message": "Member removed"
@@ -1042,10 +1141,12 @@ Remove a member from the trip.
 Get chat messages for a trip.
 
 **Query Parameters:**
+
 - `limit` (optional): Max messages (default: 100)
 - `before` (optional): Get messages before this ID (pagination)
 
 **Response 200:**
+
 ```json
 {
   "messages": [
@@ -1071,6 +1172,7 @@ Get chat messages for a trip.
 Send a chat message.
 
 **Request Body:**
+
 ```json
 {
   "content": "Let's meet at 10am at the tower entrance"
@@ -1078,9 +1180,12 @@ Send a chat message.
 ```
 
 **Response 201:**
+
 ```json
 {
-  "message": { /* new message object */ }
+  "message": {
+    /* new message object */
+  }
 }
 ```
 
@@ -1095,6 +1200,7 @@ Send a chat message.
 List all photos for a trip.
 
 **Response 200:**
+
 ```json
 {
   "photos": [
@@ -1120,6 +1226,7 @@ List all photos for a trip.
 Add a photo to the trip.
 
 **Request Body:**
+
 ```json
 {
   "url": "https://storage.../photo.jpg",
@@ -1129,9 +1236,12 @@ Add a photo to the trip.
 ```
 
 **Response 201:**
+
 ```json
 {
-  "photo": { /* new photo object */ }
+  "photo": {
+    /* new photo object */
+  }
 }
 ```
 
@@ -1146,6 +1256,7 @@ Add a photo to the trip.
 Delete a photo (only uploader or organizer).
 
 **Response 200:**
+
 ```json
 {
   "message": "Photo deleted"
@@ -1163,6 +1274,7 @@ Delete a photo (only uploader or organizer).
 Create a poll for group decisions.
 
 **Request Body:**
+
 ```json
 {
   "question": "Where should we have dinner on Day 2?",
@@ -1173,6 +1285,7 @@ Create a poll for group decisions.
 ```
 
 **Response 201:**
+
 ```json
 {
   "poll": {
@@ -1199,16 +1312,20 @@ Create a poll for group decisions.
 Vote on a poll.
 
 **Request Body:**
+
 ```json
 {
-  "optionIds": ["option-1"]  // array to support multiple choice
+  "optionIds": ["option-1"] // array to support multiple choice
 }
 ```
 
 **Response 200:**
+
 ```json
 {
-  "poll": { /* updated poll with vote counts */ }
+  "poll": {
+    /* updated poll with vote counts */
+  }
 }
 ```
 
@@ -1221,6 +1338,7 @@ Vote on a poll.
 Delete a poll (only creator or organizer).
 
 **Response 200:**
+
 ```json
 {
   "message": "Poll deleted"
@@ -1238,16 +1356,18 @@ Delete a poll (only creator or organizer).
 Add an item to the packing list.
 
 **Request Body:**
+
 ```json
 {
   "name": "Passport",
   "quantity": 1,
   "packed": false,
-  "assignedTo": "user-uuid"  // optional
+  "assignedTo": "user-uuid" // optional
 }
 ```
 
 **Response 201:**
+
 ```json
 {
   "item": {
@@ -1270,6 +1390,7 @@ Add an item to the packing list.
 Update a packing list item (typically to mark as packed).
 
 **Request Body:**
+
 ```json
 {
   "packed": true
@@ -1277,9 +1398,12 @@ Update a packing list item (typically to mark as packed).
 ```
 
 **Response 200:**
+
 ```json
 {
-  "item": { /* updated packing item */ }
+  "item": {
+    /* updated packing item */
+  }
 }
 ```
 
@@ -1292,6 +1416,7 @@ Update a packing list item (typically to mark as packed).
 Delete a packing list item.
 
 **Response 200:**
+
 ```json
 {
   "message": "Packing item deleted"
@@ -1309,6 +1434,7 @@ Delete a packing list item.
 Generate a packing list using AI based on trip details.
 
 **Request Body** (optional):
+
 ```json
 {
   "preferences": {
@@ -1320,6 +1446,7 @@ Generate a packing list using AI based on trip details.
 ```
 
 **Response 200:**
+
 ```json
 {
   "items": [
@@ -1341,6 +1468,7 @@ Generate a packing list using AI based on trip details.
 Add transportation details (flights, trains, etc.).
 
 **Request Body:**
+
 ```json
 {
   "type": "flight",
@@ -1361,9 +1489,12 @@ Add transportation details (flights, trains, etc.).
 ```
 
 **Response 201:**
+
 ```json
 {
-  "entry": { /* transportation entry */ }
+  "entry": {
+    /* transportation entry */
+  }
 }
 ```
 
@@ -1376,9 +1507,12 @@ Add transportation details (flights, trains, etc.).
 Update transportation details.
 
 **Response 200:**
+
 ```json
 {
-  "entry": { /* updated entry */ }
+  "entry": {
+    /* updated entry */
+  }
 }
 ```
 
@@ -1391,6 +1525,7 @@ Update transportation details.
 Delete transportation entry.
 
 **Response 200:**
+
 ```json
 {
   "message": "Transportation entry deleted"
@@ -1408,6 +1543,7 @@ Delete transportation entry.
 List all documents for a trip.
 
 **Response 200:**
+
 ```json
 {
   "documents": [
@@ -1434,6 +1570,7 @@ List all documents for a trip.
 Add a document to the trip.
 
 **Request Body:**
+
 ```json
 {
   "name": "Hotel Confirmation",
@@ -1443,9 +1580,12 @@ Add a document to the trip.
 ```
 
 **Response 201:**
+
 ```json
 {
-  "document": { /* new document */ }
+  "document": {
+    /* new document */
+  }
 }
 ```
 
@@ -1456,9 +1596,12 @@ Add a document to the trip.
 Update document metadata.
 
 **Response 200:**
+
 ```json
 {
-  "document": { /* updated document */ }
+  "document": {
+    /* updated document */
+  }
 }
 ```
 
@@ -1469,6 +1612,7 @@ Update document metadata.
 Delete a document.
 
 **Response 200:**
+
 ```json
 {
   "message": "Document deleted"
@@ -1486,6 +1630,7 @@ Delete a document.
 List emergency contacts for the trip.
 
 **Response 200:**
+
 ```json
 {
   "contacts": [
@@ -1508,6 +1653,7 @@ List emergency contacts for the trip.
 Add an emergency contact.
 
 **Request Body:**
+
 ```json
 {
   "name": "John's Mom",
@@ -1518,9 +1664,12 @@ Add an emergency contact.
 ```
 
 **Response 201:**
+
 ```json
 {
-  "contact": { /* new contact */ }
+  "contact": {
+    /* new contact */
+  }
 }
 ```
 
@@ -1531,9 +1680,12 @@ Add an emergency contact.
 Update emergency contact.
 
 **Response 200:**
+
 ```json
 {
-  "contact": { /* updated contact */ }
+  "contact": {
+    /* updated contact */
+  }
 }
 ```
 
@@ -1544,6 +1696,7 @@ Update emergency contact.
 Delete emergency contact.
 
 **Response 200:**
+
 ```json
 {
   "message": "Contact deleted"
@@ -1561,6 +1714,7 @@ Delete emergency contact.
 Add inspiration items to trip mood board.
 
 **Request Body:**
+
 ```json
 {
   "type": "image",
@@ -1571,9 +1725,12 @@ Add inspiration items to trip mood board.
 ```
 
 **Response 201:**
+
 ```json
 {
-  "item": { /* mood board item */ }
+  "item": {
+    /* mood board item */
+  }
 }
 ```
 
@@ -1584,6 +1741,7 @@ Add inspiration items to trip mood board.
 Delete mood board item.
 
 **Response 200:**
+
 ```json
 {
   "message": "Mood board item deleted"
@@ -1603,14 +1761,12 @@ Delete mood board item.
 Generate an AI trip recap/summary.
 
 **Response 200:**
+
 ```json
 {
   "recap": {
     "summary": "You spent 7 amazing days in Paris...",
-    "highlights": [
-      "Eiffel Tower visit",
-      "Louvre Museum tour"
-    ],
+    "highlights": ["Eiffel Tower visit", "Louvre Museum tour"],
     "statistics": {
       "totalCost": 2500,
       "activitiesCompleted": 15,
@@ -1631,6 +1787,7 @@ Generate an AI trip recap/summary.
 Chat with Atlas AI about trip planning.
 
 **Request Body:**
+
 ```json
 {
   "message": "What's the best way to get from hotel to Eiffel Tower?"
@@ -1638,6 +1795,7 @@ Chat with Atlas AI about trip planning.
 ```
 
 **Response 200:**
+
 ```json
 {
   "response": "The best way to get from your hotel to the Eiffel Tower is by taking Metro Line 6...",
@@ -1662,6 +1820,7 @@ Chat with Atlas AI about trip planning.
 Start or continue an Atlas AI conversation.
 
 **Request Body:**
+
 ```json
 {
   "message": "Help me plan activities for Day 3"
@@ -1669,6 +1828,7 @@ Start or continue an Atlas AI conversation.
 ```
 
 **Response 200:**
+
 ```json
 {
   "response": "For Day 3, I recommend...",
@@ -1683,6 +1843,7 @@ Start or continue an Atlas AI conversation.
 Get Atlas AI conversation history.
 
 **Response 200:**
+
 ```json
 {
   "messages": [
@@ -1711,6 +1872,7 @@ Get Atlas AI conversation history.
 Get AI suggestions for trip improvements.
 
 **Response 200:**
+
 ```json
 {
   "suggestions": [
@@ -1720,7 +1882,9 @@ Get AI suggestions for trip improvements.
       "title": "Add museum day pass",
       "description": "Save 40% with Paris Museum Pass",
       "action": "add_item",
-      "data": { /* suggested item */ }
+      "data": {
+        /* suggested item */
+      }
     }
   ]
 }
@@ -1737,6 +1901,7 @@ Get AI suggestions for trip improvements.
 Get AI help for resolving conflicts or disagreements.
 
 **Request Body:**
+
 ```json
 {
   "issue": "Half the group wants to visit museums, half wants shopping"
@@ -1744,6 +1909,7 @@ Get AI help for resolving conflicts or disagreements.
 ```
 
 **Response 200:**
+
 ```json
 {
   "suggestions": [
@@ -1764,6 +1930,7 @@ Get AI help for resolving conflicts or disagreements.
 Parse booking confirmation email and extract details.
 
 **Request Body:**
+
 ```json
 {
   "emailContent": "Your booking is confirmed...[full email text]"
@@ -1771,6 +1938,7 @@ Parse booking confirmation email and extract details.
 ```
 
 **Response 200:**
+
 ```json
 {
   "type": "hotel_booking",
@@ -1785,7 +1953,9 @@ Parse booking confirmation email and extract details.
   "suggestedActions": [
     {
       "type": "add_to_itinerary",
-      "data": { /* suggested itinerary item */ }
+      "data": {
+        /* suggested itinerary item */
+      }
     }
   ]
 }
@@ -1800,6 +1970,7 @@ Parse booking confirmation email and extract details.
 Get public VAPID key for push notifications.
 
 **Response 200:**
+
 ```json
 {
   "publicKey": "BME1A2B3C4D5..."
@@ -1815,6 +1986,7 @@ Get public VAPID key for push notifications.
 Subscribe to push notifications for a trip.
 
 **Request Body:**
+
 ```json
 {
   "subscription": {
@@ -1828,6 +2000,7 @@ Subscribe to push notifications for a trip.
 ```
 
 **Response 200:**
+
 ```json
 {
   "message": "Subscribed to push notifications"
@@ -1845,6 +2018,7 @@ Subscribe to push notifications for a trip.
 Get trip analytics and statistics.
 
 **Response 200:**
+
 ```json
 {
   "summary": {
@@ -1880,14 +2054,16 @@ Get trip analytics and statistics.
 Create a Stripe checkout session for subscription upgrade.
 
 **Request Body:**
+
 ```json
 {
-  "tier": "pro",  // or "teams"
+  "tier": "pro", // or "teams"
   "isAnnual": true
 }
 ```
 
 **Response 200:**
+
 ```json
 {
   "sessionUrl": "https://checkout.stripe.com/..."
@@ -1903,6 +2079,7 @@ Create a Stripe checkout session for subscription upgrade.
 Create a Stripe billing portal session for managing subscription.
 
 **Response 200:**
+
 ```json
 {
   "portalUrl": "https://billing.stripe.com/..."
@@ -1924,29 +2101,32 @@ Create a Stripe billing portal session for managing subscription.
 All API endpoints follow standard HTTP status codes and return errors in this format:
 
 **Error Response:**
+
 ```json
 {
   "error": "Human-readable error message",
   "code": "ERROR_CODE_IDENTIFIER",
-  "details": { /* optional additional context */ }
+  "details": {
+    /* optional additional context */
+  }
 }
 ```
 
 ### Common Status Codes
 
-| Status | Meaning | Example |
-|--------|---------|---------|
-| 200 | OK | Success |
-| 201 | Created | Resource created |
-| 400 | Bad Request | Invalid input |
-| 401 | Unauthorized | Missing or invalid token |
-| 402 | Payment Required | Subscription limit reached |
-| 403 | Forbidden | No permission for resource |
-| 404 | Not Found | Resource doesn't exist |
-| 409 | Conflict | Resource already exists |
-| 429 | Too Many Requests | Rate limit exceeded |
-| 500 | Internal Server Error | Server error |
-| 503 | Service Unavailable | External service down |
+| Status | Meaning               | Example                    |
+| ------ | --------------------- | -------------------------- |
+| 200    | OK                    | Success                    |
+| 201    | Created               | Resource created           |
+| 400    | Bad Request           | Invalid input              |
+| 401    | Unauthorized          | Missing or invalid token   |
+| 402    | Payment Required      | Subscription limit reached |
+| 403    | Forbidden             | No permission for resource |
+| 404    | Not Found             | Resource doesn't exist     |
+| 409    | Conflict              | Resource already exists    |
+| 429    | Too Many Requests     | Rate limit exceeded        |
+| 500    | Internal Server Error | Server error               |
+| 503    | Service Unavailable   | External service down      |
 
 ### Common Error Codes
 
@@ -1964,16 +2144,17 @@ All API endpoints follow standard HTTP status codes and return errors in this fo
 
 ## Rate Limits
 
-| Endpoint Pattern | Limit | Window |
-|-----------------|-------|--------|
-| `/auth/register` | 5 requests | 15 minutes |
-| `/auth/login` | 10 requests | 15 minutes |
-| `/auth/forgot-password` | 5 requests | 1 hour |
-| `/auth/reset-password` | 5 requests | 15 minutes |
-| AI endpoints | 10 requests | 1 hour |
-| All other endpoints | 100 requests | 15 minutes |
+| Endpoint Pattern        | Limit        | Window     |
+| ----------------------- | ------------ | ---------- |
+| `/auth/register`        | 5 requests   | 15 minutes |
+| `/auth/login`           | 10 requests  | 15 minutes |
+| `/auth/forgot-password` | 5 requests   | 1 hour     |
+| `/auth/reset-password`  | 5 requests   | 15 minutes |
+| AI endpoints            | 10 requests  | 1 hour     |
+| All other endpoints     | 100 requests | 15 minutes |
 
 Rate limit headers are included in responses:
+
 ```
 X-RateLimit-Limit: 100
 X-RateLimit-Remaining: 95
@@ -1987,13 +2168,17 @@ X-RateLimit-Reset: 1620000000
 Endpoints that return lists support pagination:
 
 **Query Parameters:**
+
 - `limit`: Max items per page (default: 50, max: 100)
 - `offset`: Number of items to skip (default: 0)
 
 **Response includes:**
+
 ```json
 {
-  "data": [ /* items */ ],
+  "data": [
+    /* items */
+  ],
   "total": 250,
   "limit": 50,
   "offset": 0,

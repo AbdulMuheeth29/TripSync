@@ -1,15 +1,15 @@
-import { useState } from "react";
-import { Link } from "wouter";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { useToast } from "@/hooks/use-toast";
-import { AppLogo } from "@/components/app-logo";
-import { ArrowLeft } from "lucide-react";
+import { useState } from 'react';
+import { Link } from 'wouter';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { useToast } from '@/hooks/use-toast';
+import { AppLogo } from '@/components/app-logo';
+import { ArrowLeft } from 'lucide-react';
 
 export default function ForgotPasswordPage() {
-  const [email, setEmail] = useState("");
+  const [email, setEmail] = useState('');
   const [sent, setSent] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
@@ -17,25 +17,32 @@ export default function ForgotPasswordPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email) {
-      toast({ title: "Email required", variant: "destructive" });
+      toast({ title: 'Email required', variant: 'destructive' });
       return;
     }
     setIsLoading(true);
     try {
-      const res = await fetch("/api/auth/forgot-password", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+      const res = await fetch('/api/auth/forgot-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email }),
       });
       const data = await res.json();
       if (res.ok) {
         setSent(true);
-        toast({ title: "Check your email", description: data.message || "If an account exists, we sent reset instructions." });
+        toast({
+          title: 'Check your email',
+          description: data.message || 'If an account exists, we sent reset instructions.',
+        });
       } else {
-        toast({ title: data.error || "Failed", variant: "destructive" });
+        toast({ title: data.error || 'Failed', variant: 'destructive' });
       }
     } catch {
-      toast({ title: "Password reset not configured", description: "Please contact us or register a new account.", variant: "destructive" });
+      toast({
+        title: 'Password reset not configured',
+        description: 'Please contact us or register a new account.',
+        variant: 'destructive',
+      });
     } finally {
       setIsLoading(false);
     }
@@ -49,7 +56,10 @@ export default function ForgotPasswordPage() {
           Back
         </Button>
       </Link>
-      <Link href="/" className="flex items-center gap-2 mb-8 no-underline text-foreground hover:opacity-90 transition-opacity">
+      <Link
+        href="/"
+        className="flex items-center gap-2 mb-8 no-underline text-foreground hover:opacity-90 transition-opacity"
+      >
         <AppLogo className="h-10 w-10 object-contain" />
         <span className="text-2xl font-bold">TripSync</span>
       </Link>
@@ -64,7 +74,8 @@ export default function ForgotPasswordPage() {
           {sent ? (
             <div className="text-center space-y-4">
               <p className="text-sm text-muted-foreground">
-                If an account exists for {email}, you&apos;ll receive password reset instructions shortly.
+                If an account exists for {email}, you&apos;ll receive password reset instructions
+                shortly.
               </p>
               <Link href="/login">
                 <Button variant="outline">Back to login</Button>
@@ -83,10 +94,15 @@ export default function ForgotPasswordPage() {
                 />
               </div>
               <Button type="submit" className="w-full" disabled={isLoading}>
-                {isLoading ? "Sending..." : "Send reset link"}
+                {isLoading ? 'Sending...' : 'Send reset link'}
               </Button>
               <p className="text-xs text-muted-foreground text-center">
-                Password reset requires email service to be configured. If you don&apos;t receive an email, <Link href="/contact"><a className="text-primary hover:underline">contact us</a></Link>.
+                Password reset requires email service to be configured. If you don&apos;t receive an
+                email,{' '}
+                <Link href="/contact">
+                  <a className="text-primary hover:underline">contact us</a>
+                </Link>
+                .
               </p>
             </form>
           )}

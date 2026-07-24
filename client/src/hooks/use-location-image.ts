@@ -69,7 +69,9 @@ export function useLocationGallery(location: string) {
 /**
  * Hook to get category-based image
  */
-export function useCategoryImage(category: 'beach' | 'mountain' | 'city' | 'nature' | 'adventure' | 'culture') {
+export function useCategoryImage(
+  category: 'beach' | 'mountain' | 'city' | 'nature' | 'adventure' | 'culture'
+) {
   const [image, setImage] = useState<LocationImage | null>(null);
   const [loading, setLoading] = useState(true);
 

@@ -11,6 +11,7 @@ Authorization: Bearer <token>
 ```
 
 **Why JWT?**
+
 - Stateless (no server-side session storage required)
 - Scales horizontally across multiple servers
 - 7-day expiration reduces token compromise risk
@@ -38,22 +39,26 @@ Authorization: Bearer <token>
 ### Security Measures Implemented
 
 #### ✅ Authentication Security
+
 - **Password hashing**: bcrypt with 12 salt rounds
 - **Password requirements**: Minimum 8 characters
 - **Token expiration**: 7 days
 - **Email normalization**: Lowercase for consistency
 
 #### ✅ Authorization
+
 - **Role-based access control**: Organizer, Planner, Member roles
 - **Trip-level access control**: `requireTripAccess` middleware
 - **Resource ownership**: Verified before modifications
 
 #### ✅ Input Validation
+
 - **Zod schemas**: All request bodies validated
 - **SQL injection prevention**: Drizzle ORM with parameterized queries
 - **File upload validation**: MIME type and size limits (25MB images, 10MB docs)
 
 #### ✅ Security Headers
+
 - `X-Content-Type-Options: nosniff`
 - `X-Frame-Options: DENY`
 - `X-XSS-Protection: 1; mode=block`
@@ -61,14 +66,17 @@ Authorization: Bearer <token>
 - Helmet middleware for additional headers
 
 #### ✅ Rate Limiting
+
 - **Production**: 200 requests per 15 minutes per IP
 - **AI generation**: 10 requests per hour per user (in-memory)
 
 #### ✅ Error Tracking
+
 - **Sentry**: Production error monitoring
 - **Sensitive data filtering**: Passwords, tokens, API keys redacted
 
 #### ✅ Structured Logging
+
 - **Pino**: JSON structured logs
 - **Request correlation IDs**: Track requests across services
 - **Sensitive field redaction**: Authorization headers, cookies removed
@@ -76,9 +84,11 @@ Authorization: Bearer <token>
 ### Known Limitations
 
 #### ✅ Session Revocation (IMPLEMENTED)
+
 **Solution**: Token blacklist for logout and security
 
 **Features**:
+
 - ✅ Logout invalidates JWT immediately
 - ✅ Revoke all sessions for security incidents
 - ✅ Redis-backed blacklist (with in-memory fallback)
@@ -87,6 +97,7 @@ Authorization: Bearer <token>
 - ✅ Revoked-before timestamp for bulk revocation
 
 **Usage**:
+
 ```bash
 # Logout (single session)
 POST /api/auth/logout
@@ -98,6 +109,7 @@ POST /api/auth/revoke-all-sessions
 **Implementation**: Uses Redis when available (via `REDIS_URL` env var), falls back to in-memory storage for development. Production deployments should configure Redis for proper session management across multiple servers.
 
 #### ⚠️ Password Reset
+
 **Issue**: Password reset not implemented
 
 **Risk**: Users cannot recover lost passwords
@@ -107,6 +119,7 @@ POST /api/auth/revoke-all-sessions
 **Priority**: HIGH
 
 #### ⚠️ Content Security Policy
+
 **Issue**: CSP disabled to avoid breaking SPA
 
 **Status**: `helmet({ contentSecurityPolicy: false })`
@@ -120,22 +133,26 @@ POST /api/auth/revoke-all-sessions
 #### When Adding New Endpoints
 
 1. **Always use authentication middleware**
+
    ```typescript
    app.post('/api/trips', requireAuth, async (req, res) => { ... });
    ```
 
 2. **Validate all input**
+
    ```typescript
    const schema = z.object({ name: z.string(), ... });
    const data = schema.parse(req.body);
    ```
 
 3. **Check authorization**
+
    ```typescript
    app.put('/api/trips/:id', requireAuth, requireTripAccess, requireOrganizer, ...);
    ```
 
 4. **Never log sensitive data**
+
    ```typescript
    // ❌ Bad
    logger.info('User login', { password: user.password });
@@ -145,6 +162,7 @@ POST /api/auth/revoke-all-sessions
    ```
 
 5. **Use parameterized queries** (Drizzle does this automatically)
+
    ```typescript
    // ✅ Safe (Drizzle ORM)
    await db.select().from(users).where(eq(users.id, userId));

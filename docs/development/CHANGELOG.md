@@ -11,6 +11,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### 🎉 Initial Release
 
 **Features:**
+
 - AI-powered trip itinerary generation with Claude Sonnet 4.5
 - Collaborative trip planning with role-based permissions (Organizer, Planner, Member)
 - Democratic voting on activities and destinations
@@ -29,6 +30,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Stripe billing integration (Pro and Teams tiers)
 
 **Tech Stack:**
+
 - React 19 + TypeScript + Vite
 - Node.js + Express
 - PostgreSQL + Drizzle ORM
@@ -38,6 +40,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Docker deployment
 
 **Known Limitations:**
+
 - Chat is in-memory (will be migrated to database in v1.1)
 - AI features require API key configuration
 - File uploads require S3/R2 setup
@@ -50,6 +53,7 @@ See KNOWN-ISSUES.md for complete list.
 ## [Unreleased]
 
 ### Planned for v1.1
+
 - Chat database migration
 - Flight price tracking
 - Hotel booking integration

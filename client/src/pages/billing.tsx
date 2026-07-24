@@ -1,46 +1,48 @@
-import { useState } from "react";
-import { Link } from "wouter";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { useAuth } from "@/lib/auth-context";
-import { AppLogo } from "@/components/app-logo";
-import { AppHero } from "@/components/app-hero";
-import { ArrowLeft, CreditCard, Sparkles, Loader2 } from "lucide-react";
+import { useState } from 'react';
+import { Link } from 'wouter';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { useAuth } from '@/lib/auth-context';
+import { AppLogo } from '@/components/app-logo';
+import { AppHero } from '@/components/app-hero';
+import { ArrowLeft, CreditCard, Sparkles, Loader2 } from 'lucide-react';
 
 export default function BillingPage() {
   const { user, subscriptionTier, refreshUser } = useAuth();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const planLabel = subscriptionTier === "teams" ? "Teams" : subscriptionTier === "pro" ? "Pro" : "Free";
-  const isPaid = subscriptionTier === "pro" || subscriptionTier === "teams";
+  const planLabel =
+    subscriptionTier === 'teams' ? 'Teams' : subscriptionTier === 'pro' ? 'Pro' : 'Free';
+  const isPaid = subscriptionTier === 'pro' || subscriptionTier === 'teams';
 
   const openPortal = async () => {
     setLoading(true);
     setError(null);
     try {
-      const token = localStorage.getItem("tripsync_token") || sessionStorage.getItem("tripsync_token");
-      const res = await fetch("/api/stripe/portal", {
-        method: "POST",
+      const token =
+        localStorage.getItem('tripsync_token') || sessionStorage.getItem('tripsync_token');
+      const res = await fetch('/api/stripe/portal', {
+        method: 'POST',
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
           ...(token ? { Authorization: `Bearer ${token}` } : {}),
         },
-        credentials: "include",
+        credentials: 'include',
         body: JSON.stringify({ returnUrl: `${window.location.origin}/dashboard` }),
       });
       const data = await res.json();
       if (!res.ok) {
-        setError(data?.error || "Could not open billing portal");
+        setError(data?.error || 'Could not open billing portal');
         return;
       }
       if (data?.url) {
         window.location.href = data.url;
         return;
       }
-      setError("No portal URL returned");
+      setError('No portal URL returned');
     } catch (e) {
-      setError("Network error. Please try again.");
+      setError('Network error. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -56,7 +58,10 @@ export default function BillingPage() {
               Back to Dashboard
             </a>
           </Link>
-          <Link href="/" className="flex items-center gap-2 no-underline text-foreground hover:opacity-90 transition-opacity">
+          <Link
+            href="/"
+            className="flex items-center gap-2 no-underline text-foreground hover:opacity-90 transition-opacity"
+          >
             <AppLogo className="h-8 w-8" />
             <span className="font-semibold">TripSync</span>
           </Link>
@@ -84,22 +89,16 @@ export default function BillingPage() {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            {error && (
-              <p className="text-sm text-destructive">{error}</p>
-            )}
+            {error && <p className="text-sm text-destructive">{error}</p>}
             {isPaid ? (
-              <Button
-                onClick={openPortal}
-                disabled={loading}
-                className="w-full sm:w-auto"
-              >
+              <Button onClick={openPortal} disabled={loading} className="w-full sm:w-auto">
                 {loading ? (
                   <>
                     <Loader2 className="h-4 w-4 animate-spin mr-2" />
                     Opening…
                   </>
                 ) : (
-                  "Manage subscription"
+                  'Manage subscription'
                 )}
               </Button>
             ) : (

@@ -47,7 +47,7 @@ export async function retryWithBackoff<T>(
       'ETIMEDOUT',
       'ENOTFOUND',
       'fetch failed',
-    ]
+    ],
   } = options;
 
   const startTime = Date.now();
@@ -58,19 +58,21 @@ export async function retryWithBackoff<T>(
       const data = await operation();
       const totalDuration = Date.now() - startTime;
 
-      console.log(`✅ AI operation succeeded on attempt ${attempt + 1}/${maxRetries} (${totalDuration}ms)`);
+      console.log(
+        `✅ AI operation succeeded on attempt ${attempt + 1}/${maxRetries} (${totalDuration}ms)`
+      );
 
       return {
         data,
         attempts: attempt + 1,
-        totalDuration
+        totalDuration,
       };
     } catch (error: any) {
       lastError = error;
 
       // Check if error is retryable
       const isRetryable = retryableErrors.some(
-        retryableError =>
+        (retryableError) =>
           error?.message?.includes(retryableError) ||
           error?.type?.includes(retryableError) ||
           error?.code?.includes(retryableError)
@@ -83,7 +85,7 @@ export async function retryWithBackoff<T>(
           attempt: attempt + 1,
           maxRetries,
           error: error?.message || String(error),
-          isRetryable
+          isRetryable,
         });
         throw error;
       }
@@ -91,10 +93,13 @@ export async function retryWithBackoff<T>(
       // Calculate delay with exponential backoff
       const delay = Math.min(baseDelay * Math.pow(2, attempt), maxDelay);
 
-      console.warn(`⚠️  AI operation failed (attempt ${attempt + 1}/${maxRetries}), retrying in ${delay}ms:`, {
-        error: error?.message || String(error),
-        nextAttempt: attempt + 2
-      });
+      console.warn(
+        `⚠️  AI operation failed (attempt ${attempt + 1}/${maxRetries}), retrying in ${delay}ms:`,
+        {
+          error: error?.message || String(error),
+          nextAttempt: attempt + 2,
+        }
+      );
 
       // Wait before retrying
       await sleep(delay);
@@ -109,7 +114,7 @@ export async function retryWithBackoff<T>(
  * Sleep for a specified duration
  */
 function sleep(ms: number): Promise<void> {
-  return new Promise(resolve => setTimeout(resolve, ms));
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 /**
@@ -125,9 +130,7 @@ export async function retryBatch<T>(
   operations: (() => Promise<T>)[],
   options: RetryOptions = {}
 ): Promise<RetryResult<T>[]> {
-  return Promise.all(
-    operations.map(op => retryWithBackoff(op, options))
-  );
+  return Promise.all(operations.map((op) => retryWithBackoff(op, options)));
 }
 
 /**
@@ -156,7 +159,7 @@ export class RetryMetrics {
       averageAttempts: this.successCount > 0 ? this.totalAttempts / this.successCount : 0,
       averageDuration: this.successCount > 0 ? this.totalDuration / this.successCount : 0,
       totalSuccesses: this.successCount,
-      totalFailures: this.failureCount
+      totalFailures: this.failureCount,
     };
   }
 

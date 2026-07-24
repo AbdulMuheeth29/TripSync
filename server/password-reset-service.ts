@@ -54,12 +54,7 @@ export async function requestPasswordReset(email: string): Promise<boolean> {
     await db
       .update(passwordResetTokens)
       .set({ used: true })
-      .where(
-        and(
-          eq(passwordResetTokens.userId, user.id),
-          eq(passwordResetTokens.used, false)
-        )
-      );
+      .where(and(eq(passwordResetTokens.userId, user.id), eq(passwordResetTokens.used, false)));
 
     // Create new reset token
     const tokenId = randomUUID();
@@ -148,10 +143,7 @@ export async function resetPassword(token: string, newPassword: string): Promise
     const passwordHash = await hashPassword(newPassword);
 
     // Update user password
-    await db
-      .update(users)
-      .set({ passwordHash })
-      .where(eq(users.id, userId));
+    await db.update(users).set({ passwordHash }).where(eq(users.id, userId));
 
     // Mark token as used
     await db
@@ -183,15 +175,13 @@ export async function cleanupExpiredTokens(): Promise<number> {
     const now = new Date();
 
     // Delete expired tokens
-    const result = await db
-      .delete(passwordResetTokens)
-      .where(
-        and(
-          eq(passwordResetTokens.used, true),
-          // Delete used tokens older than 7 days or expired tokens
-          lt(passwordResetTokens.expiresAt, now)
-        )
-      );
+    const result = await db.delete(passwordResetTokens).where(
+      and(
+        eq(passwordResetTokens.used, true),
+        // Delete used tokens older than 7 days or expired tokens
+        lt(passwordResetTokens.expiresAt, now)
+      )
+    );
 
     const deletedCount = result.rowCount || 0;
 

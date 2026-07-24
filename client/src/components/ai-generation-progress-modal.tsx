@@ -1,7 +1,13 @@
-import { useEffect, useState } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
-import { Progress } from "@/components/ui/progress";
-import { Loader2, Sparkles, MapPin, Hotel, Utensils, Activity, Check } from "lucide-react";
+import { useEffect, useState } from 'react';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from '@/components/ui/dialog';
+import { Progress } from '@/components/ui/progress';
+import { Loader2, Sparkles, MapPin, Hotel, Utensils, Activity, Check } from 'lucide-react';
 
 interface AIGenerationProgressModalProps {
   isOpen: boolean;
@@ -17,18 +23,23 @@ interface GenerationStep {
 }
 
 const GENERATION_STEPS: GenerationStep[] = [
-  { id: "analyzing", label: "Analyzing preferences", icon: Sparkles, duration: 5000 },
-  { id: "researching", label: "Researching activities in destination", icon: MapPin, duration: 12000 },
-  { id: "hotels", label: "Finding accommodation options", icon: Hotel, duration: 8000 },
-  { id: "dining", label: "Curating dining experiences", icon: Utensils, duration: 10000 },
-  { id: "activities", label: "Planning daily activities", icon: Activity, duration: 15000 },
-  { id: "optimizing", label: "Optimizing itinerary", icon: Sparkles, duration: 8000 },
+  { id: 'analyzing', label: 'Analyzing preferences', icon: Sparkles, duration: 5000 },
+  {
+    id: 'researching',
+    label: 'Researching activities in destination',
+    icon: MapPin,
+    duration: 12000,
+  },
+  { id: 'hotels', label: 'Finding accommodation options', icon: Hotel, duration: 8000 },
+  { id: 'dining', label: 'Curating dining experiences', icon: Utensils, duration: 10000 },
+  { id: 'activities', label: 'Planning daily activities', icon: Activity, duration: 15000 },
+  { id: 'optimizing', label: 'Optimizing itinerary', icon: Sparkles, duration: 8000 },
 ];
 
 export function AIGenerationProgressModal({
   isOpen,
   destination,
-  onComplete
+  onComplete,
 }: AIGenerationProgressModalProps) {
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const [progress, setProgress] = useState(0);
@@ -60,7 +71,7 @@ export function AIGenerationProgressModal({
           setCurrentStepIndex(i);
           break;
         } else {
-          setCompletedSteps(prev => new Set([...prev, GENERATION_STEPS[i].id]));
+          setCompletedSteps((prev) => new Set([...prev, GENERATION_STEPS[i].id]));
         }
       }
 
@@ -68,7 +79,7 @@ export function AIGenerationProgressModal({
         timeoutId = setTimeout(updateProgress, 100);
       } else {
         // Mark all steps complete
-        setCompletedSteps(new Set(GENERATION_STEPS.map(s => s.id)));
+        setCompletedSteps(new Set(GENERATION_STEPS.map((s) => s.id)));
         setCurrentStepIndex(GENERATION_STEPS.length - 1);
         setProgress(100);
 
@@ -123,19 +134,21 @@ export function AIGenerationProgressModal({
                   key={step.id}
                   className={`flex items-center gap-3 p-3 rounded-lg transition-all ${
                     isCurrent
-                      ? "bg-primary/10 border border-primary/20"
+                      ? 'bg-primary/10 border border-primary/20'
                       : isComplete
-                      ? "bg-muted/50"
-                      : "opacity-50"
+                        ? 'bg-muted/50'
+                        : 'opacity-50'
                   }`}
                 >
-                  <div className={`flex h-8 w-8 items-center justify-center rounded-full ${
-                    isComplete
-                      ? "bg-primary text-primary-foreground"
-                      : isCurrent
-                      ? "bg-primary/20"
-                      : "bg-muted"
-                  }`}>
+                  <div
+                    className={`flex h-8 w-8 items-center justify-center rounded-full ${
+                      isComplete
+                        ? 'bg-primary text-primary-foreground'
+                        : isCurrent
+                          ? 'bg-primary/20'
+                          : 'bg-muted'
+                    }`}
+                  >
                     {isComplete ? (
                       <Check className="h-4 w-4" />
                     ) : isCurrent ? (
@@ -144,11 +157,7 @@ export function AIGenerationProgressModal({
                       <StepIcon className="h-4 w-4 text-muted-foreground" />
                     )}
                   </div>
-                  <span className={`text-sm ${
-                    isCurrent ? "font-medium" : ""
-                  }`}>
-                    {step.label}
-                  </span>
+                  <span className={`text-sm ${isCurrent ? 'font-medium' : ''}`}>{step.label}</span>
                 </div>
               );
             })}
@@ -157,8 +166,8 @@ export function AIGenerationProgressModal({
           {/* Fun Fact */}
           <div className="rounded-lg bg-muted/50 p-4 border border-border">
             <p className="text-sm text-muted-foreground italic">
-              💡 Did you know? Our AI analyzes thousands of travel recommendations
-              to create a personalized itinerary just for your group.
+              💡 Did you know? Our AI analyzes thousands of travel recommendations to create a
+              personalized itinerary just for your group.
             </p>
           </div>
         </div>

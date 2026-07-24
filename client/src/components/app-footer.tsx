@@ -1,13 +1,13 @@
-import { Link } from "wouter";
-import { AppLogo } from "@/components/app-logo";
+import { Link } from 'wouter';
+import { AppLogo } from '@/components/app-logo';
 
 const footerLinks = [
-  { label: "Features", href: "/#features" },
-  { label: "Pricing", href: "/pricing" },
-  { label: "Contact", href: "/contact" },
-  { label: "Log in", href: "/login" },
-  { label: "Privacy", href: "/privacy" },
-  { label: "Terms", href: "/terms" },
+  { label: 'Features', href: '/#features' },
+  { label: 'Pricing', href: '/pricing' },
+  { label: 'Contact', href: '/contact' },
+  { label: 'Log in', href: '/login' },
+  { label: 'Privacy', href: '/privacy' },
+  { label: 'Terms', href: '/terms' },
 ];
 
 export function AppFooter() {

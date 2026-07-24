@@ -1,13 +1,29 @@
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Download, FileJson, FileSpreadsheet, Shield, Clock, CheckCircle2, AlertCircle, Loader2 } from "lucide-react";
-import { useState } from "react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+import { Label } from '@/components/ui/label';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Badge } from '@/components/ui/badge';
+import { Progress } from '@/components/ui/progress';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import {
+  Download,
+  FileJson,
+  FileSpreadsheet,
+  Shield,
+  Clock,
+  CheckCircle2,
+  AlertCircle,
+  Loader2,
+} from 'lucide-react';
+import { useState } from 'react';
 
 interface DataCategory {
   id: string;
@@ -20,81 +36,81 @@ interface DataCategory {
 interface DataExportRequestModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onRequestExport: (format: "json" | "csv", categories: string[]) => Promise<void>;
+  onRequestExport: (format: 'json' | 'csv', categories: string[]) => Promise<void>;
 }
 
 export function DataExportRequestModal({
   isOpen,
   onClose,
-  onRequestExport
+  onRequestExport,
 }: DataExportRequestModalProps) {
-  const [format, setFormat] = useState<"json" | "csv">("json");
+  const [format, setFormat] = useState<'json' | 'csv'>('json');
   const [selectedCategories, setSelectedCategories] = useState<string[]>([
-    "profile",
-    "trips",
-    "expenses",
-    "activities",
-    "messages"
+    'profile',
+    'trips',
+    'expenses',
+    'activities',
+    'messages',
   ]);
   const [isRequesting, setIsRequesting] = useState(false);
-  const [requestStatus, setRequestStatus] = useState<"idle" | "processing" | "success" | "error">("idle");
+  const [requestStatus, setRequestStatus] = useState<'idle' | 'processing' | 'success' | 'error'>(
+    'idle'
+  );
   const [progress, setProgress] = useState(0);
 
   const dataCategories: DataCategory[] = [
     {
-      id: "profile",
-      label: "Profile Information",
-      description: "Personal details, email, preferences",
-      icon: "👤",
-      estimatedSize: "< 1 MB"
+      id: 'profile',
+      label: 'Profile Information',
+      description: 'Personal details, email, preferences',
+      icon: '👤',
+      estimatedSize: '< 1 MB',
     },
     {
-      id: "trips",
-      label: "Trip Data",
+      id: 'trips',
+      label: 'Trip Data',
       description: "All trips you've created or joined",
-      icon: "✈️",
-      estimatedSize: "2-5 MB"
+      icon: '✈️',
+      estimatedSize: '2-5 MB',
     },
     {
-      id: "expenses",
-      label: "Expense Records",
-      description: "All expenses and settlements",
-      icon: "💰",
-      estimatedSize: "1-3 MB"
+      id: 'expenses',
+      label: 'Expense Records',
+      description: 'All expenses and settlements',
+      icon: '💰',
+      estimatedSize: '1-3 MB',
     },
     {
-      id: "activities",
-      label: "Activities & Itineraries",
-      description: "All planned activities and votes",
-      icon: "📅",
-      estimatedSize: "1-2 MB"
+      id: 'activities',
+      label: 'Activities & Itineraries',
+      description: 'All planned activities and votes',
+      icon: '📅',
+      estimatedSize: '1-2 MB',
     },
     {
-      id: "messages",
-      label: "Messages & Chat",
-      description: "All trip messages and comments",
-      icon: "💬",
-      estimatedSize: "2-10 MB"
+      id: 'messages',
+      label: 'Messages & Chat',
+      description: 'All trip messages and comments',
+      icon: '💬',
+      estimatedSize: '2-10 MB',
     },
     {
-      id: "media",
-      label: "Media Files",
-      description: "Photos, receipts, and attachments",
-      icon: "🖼️",
-      estimatedSize: "10-100 MB"
-    }
+      id: 'media',
+      label: 'Media Files',
+      description: 'Photos, receipts, and attachments',
+      icon: '🖼️',
+      estimatedSize: '10-100 MB',
+    },
   ];
 
   const handleToggleCategory = (categoryId: string) => {
-    setSelectedCategories(prev =>
-      prev.includes(categoryId)
-        ? prev.filter(id => id !== categoryId)
-        : [...prev, categoryId]
+    setSelectedCategories((prev) =>
+      prev.includes(categoryId) ? prev.filter((id) => id !== categoryId) : [...prev, categoryId]
     );
   };
 
   const handleSelectAll = () => {
-    setSelectedCategories(dataCategories.map(c => c.id));
+    setSelectedCategories(dataCategories.map((c) => c.id));
   };
 
   const handleDeselectAll = () => {
@@ -105,13 +121,13 @@ export function DataExportRequestModal({
     if (selectedCategories.length === 0) return;
 
     setIsRequesting(true);
-    setRequestStatus("processing");
+    setRequestStatus('processing');
     setProgress(0);
 
     try {
       // Simulate progress
       const progressInterval = setInterval(() => {
-        setProgress(prev => {
+        setProgress((prev) => {
           if (prev >= 90) {
             clearInterval(progressInterval);
             return 90;
@@ -124,25 +140,25 @@ export function DataExportRequestModal({
 
       clearInterval(progressInterval);
       setProgress(100);
-      setRequestStatus("success");
+      setRequestStatus('success');
 
       // Auto-close after success
       setTimeout(() => {
         onClose();
       }, 2000);
     } catch (error) {
-      console.error("Failed to request export:", error);
-      setRequestStatus("error");
+      console.error('Failed to request export:', error);
+      setRequestStatus('error');
     } finally {
       setIsRequesting(false);
     }
   };
 
   const getTotalEstimatedSize = () => {
-    const selected = dataCategories.filter(c => selectedCategories.includes(c.id));
-    if (selected.length === 0) return "0 MB";
-    if (selected.some(c => c.id === "media")) return "10-100 MB";
-    return "5-20 MB";
+    const selected = dataCategories.filter((c) => selectedCategories.includes(c.id));
+    if (selected.length === 0) return '0 MB';
+    if (selected.some((c) => c.id === 'media')) return '10-100 MB';
+    return '5-20 MB';
   };
 
   return (
@@ -153,9 +169,7 @@ export function DataExportRequestModal({
             <Download className="h-5 w-5 text-primary" />
             <DialogTitle>Export Your Data</DialogTitle>
           </div>
-          <DialogDescription>
-            Download a copy of your TripSync data
-          </DialogDescription>
+          <DialogDescription>Download a copy of your TripSync data</DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4">
@@ -163,37 +177,42 @@ export function DataExportRequestModal({
           <Alert>
             <Shield className="h-4 w-4" />
             <AlertDescription className="text-sm">
-              You have the right to access your personal data. We'll prepare a complete export of your selected data.
+              You have the right to access your personal data. We'll prepare a complete export of
+              your selected data.
             </AlertDescription>
           </Alert>
 
           {/* Format Selection */}
-          {requestStatus === "idle" && (
+          {requestStatus === 'idle' && (
             <>
               <Card className="p-4">
                 <Label className="text-sm font-semibold mb-3 block">Export Format</Label>
                 <div className="grid grid-cols-2 gap-3">
                   <button
-                    onClick={() => setFormat("json")}
+                    onClick={() => setFormat('json')}
                     className={`p-4 rounded-lg border-2 transition-all ${
-                      format === "json"
-                        ? "border-primary bg-primary/5"
-                        : "border-muted hover:border-primary/50"
+                      format === 'json'
+                        ? 'border-primary bg-primary/5'
+                        : 'border-muted hover:border-primary/50'
                     }`}
                   >
-                    <FileJson className={`h-6 w-6 mx-auto mb-2 ${format === "json" ? "text-primary" : "text-muted-foreground"}`} />
+                    <FileJson
+                      className={`h-6 w-6 mx-auto mb-2 ${format === 'json' ? 'text-primary' : 'text-muted-foreground'}`}
+                    />
                     <p className="text-sm font-medium">JSON</p>
                     <p className="text-xs text-muted-foreground mt-1">Machine-readable</p>
                   </button>
                   <button
-                    onClick={() => setFormat("csv")}
+                    onClick={() => setFormat('csv')}
                     className={`p-4 rounded-lg border-2 transition-all ${
-                      format === "csv"
-                        ? "border-primary bg-primary/5"
-                        : "border-muted hover:border-primary/50"
+                      format === 'csv'
+                        ? 'border-primary bg-primary/5'
+                        : 'border-muted hover:border-primary/50'
                     }`}
                   >
-                    <FileSpreadsheet className={`h-6 w-6 mx-auto mb-2 ${format === "csv" ? "text-primary" : "text-muted-foreground"}`} />
+                    <FileSpreadsheet
+                      className={`h-6 w-6 mx-auto mb-2 ${format === 'csv' ? 'text-primary' : 'text-muted-foreground'}`}
+                    />
                     <p className="text-sm font-medium">CSV</p>
                     <p className="text-xs text-muted-foreground mt-1">Spreadsheet-friendly</p>
                   </button>
@@ -230,8 +249,8 @@ export function DataExportRequestModal({
                       key={category.id}
                       className={`flex items-start gap-3 p-3 rounded-lg border-2 transition-all cursor-pointer ${
                         selectedCategories.includes(category.id)
-                          ? "border-primary bg-primary/5"
-                          : "border-muted hover:border-primary/30"
+                          ? 'border-primary bg-primary/5'
+                          : 'border-muted hover:border-primary/30'
                       }`}
                       onClick={() => handleToggleCategory(category.id)}
                     >
@@ -248,9 +267,7 @@ export function DataExportRequestModal({
                             {category.estimatedSize}
                           </Badge>
                         </div>
-                        <p className="text-xs text-muted-foreground">
-                          {category.description}
-                        </p>
+                        <p className="text-xs text-muted-foreground">{category.description}</p>
                       </div>
                     </div>
                   ))}
@@ -277,15 +294,13 @@ export function DataExportRequestModal({
           )}
 
           {/* Processing State */}
-          {requestStatus === "processing" && (
+          {requestStatus === 'processing' && (
             <Card className="p-6">
               <div className="flex flex-col items-center text-center space-y-4">
                 <Loader2 className="h-12 w-12 animate-spin text-primary" />
                 <div>
                   <h4 className="font-semibold mb-1">Preparing Your Export</h4>
-                  <p className="text-sm text-muted-foreground">
-                    This may take a few moments...
-                  </p>
+                  <p className="text-sm text-muted-foreground">This may take a few moments...</p>
                 </div>
                 <div className="w-full space-y-2">
                   <Progress value={progress} className="h-2" />
@@ -296,7 +311,7 @@ export function DataExportRequestModal({
           )}
 
           {/* Success State */}
-          {requestStatus === "success" && (
+          {requestStatus === 'success' && (
             <Card className="p-6 bg-green-50 border-green-200">
               <div className="flex flex-col items-center text-center space-y-3">
                 <CheckCircle2 className="h-12 w-12 text-green-600" />
@@ -311,17 +326,18 @@ export function DataExportRequestModal({
           )}
 
           {/* Error State */}
-          {requestStatus === "error" && (
+          {requestStatus === 'error' && (
             <Alert variant="destructive">
               <AlertCircle className="h-4 w-4" />
               <AlertDescription className="text-sm">
-                Failed to prepare export. Please try again or contact support if the problem persists.
+                Failed to prepare export. Please try again or contact support if the problem
+                persists.
               </AlertDescription>
             </Alert>
           )}
 
           {/* Info */}
-          {requestStatus === "idle" && (
+          {requestStatus === 'idle' && (
             <Card className="p-3 bg-muted">
               <div className="flex items-start gap-2">
                 <Clock className="h-4 w-4 text-muted-foreground mt-0.5 flex-shrink-0" />
@@ -340,7 +356,7 @@ export function DataExportRequestModal({
         </div>
 
         <DialogFooter>
-          {requestStatus === "idle" ? (
+          {requestStatus === 'idle' ? (
             <>
               <Button variant="outline" onClick={onClose}>
                 Cancel
@@ -353,11 +369,11 @@ export function DataExportRequestModal({
                 Request Export
               </Button>
             </>
-          ) : requestStatus === "success" ? (
+          ) : requestStatus === 'success' ? (
             <Button onClick={onClose}>Close</Button>
-          ) : requestStatus === "error" ? (
+          ) : requestStatus === 'error' ? (
             <>
-              <Button variant="outline" onClick={() => setRequestStatus("idle")}>
+              <Button variant="outline" onClick={() => setRequestStatus('idle')}>
                 Try Again
               </Button>
               <Button onClick={onClose}>Close</Button>

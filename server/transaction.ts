@@ -34,10 +34,9 @@ export async function withTransaction<T>(callback: TransactionCallback<T>): Prom
       return result;
     });
   } catch (error) {
-    appLogger.error(
-      error instanceof Error ? error : new Error(String(error)),
-      { context: 'transaction_rollback' }
-    );
+    appLogger.error(error instanceof Error ? error : new Error(String(error)), {
+      context: 'transaction_rollback',
+    });
     throw error; // Re-throw after logging
   }
 }
@@ -49,10 +48,7 @@ export async function withTransaction<T>(callback: TransactionCallback<T>): Prom
 /**
  * Create a trip with members atomically
  */
-export async function createTripWithMembers(
-  tripData: any,
-  memberData: any[]
-): Promise<string> {
+export async function createTripWithMembers(tripData: any, memberData: any[]): Promise<string> {
   return withTransaction(async (tx) => {
     // Import tables inside transaction to avoid circular dependencies
     const { trips, tripMembers } = await import('../shared/schema');
@@ -211,10 +207,7 @@ export async function moveExpenseToTrip(
     const { eq } = await import('drizzle-orm');
 
     // Update expense trip
-    await tx
-      .update(expenses)
-      .set({ tripId: toTripId })
-      .where(eq(expenses.id, expenseId));
+    await tx.update(expenses).set({ tripId: toTripId }).where(eq(expenses.id, expenseId));
 
     // Note: expenseShares table doesn't exist yet
     // Uncomment this when expenseShares table is added:

@@ -1,12 +1,25 @@
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Card } from "@/components/ui/card";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { CreditCard, Lock, AlertCircle } from "lucide-react";
-import { useState } from "react";
-import { z } from "zod";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Card } from '@/components/ui/card';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { CreditCard, Lock, AlertCircle } from 'lucide-react';
+import { useState } from 'react';
+import { z } from 'zod';
 
 interface UpdatePaymentMethodModalProps {
   isOpen: boolean;
@@ -29,22 +42,22 @@ export interface PaymentMethodData {
   billingZip: string;
 }
 
-const cardNumberSchema = z.string().regex(/^\d{16}$/, "Card number must be 16 digits");
-const cvvSchema = z.string().regex(/^\d{3,4}$/, "CVV must be 3 or 4 digits");
-const zipSchema = z.string().regex(/^\d{5}$/, "ZIP code must be 5 digits");
+const cardNumberSchema = z.string().regex(/^\d{16}$/, 'Card number must be 16 digits');
+const cvvSchema = z.string().regex(/^\d{3,4}$/, 'CVV must be 3 or 4 digits');
+const zipSchema = z.string().regex(/^\d{5}$/, 'ZIP code must be 5 digits');
 
 export function UpdatePaymentMethodModal({
   isOpen,
   onClose,
   onUpdate,
-  currentCard
+  currentCard,
 }: UpdatePaymentMethodModalProps) {
-  const [cardNumber, setCardNumber] = useState("");
-  const [cardholderName, setCardholderName] = useState("");
-  const [expiryMonth, setExpiryMonth] = useState("");
-  const [expiryYear, setExpiryYear] = useState("");
-  const [cvv, setCvv] = useState("");
-  const [billingZip, setBillingZip] = useState("");
+  const [cardNumber, setCardNumber] = useState('');
+  const [cardholderName, setCardholderName] = useState('');
+  const [expiryMonth, setExpiryMonth] = useState('');
+  const [expiryYear, setExpiryYear] = useState('');
+  const [cvv, setCvv] = useState('');
+  const [billingZip, setBillingZip] = useState('');
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -60,7 +73,7 @@ export function UpdatePaymentMethodModal({
 
     // Clear error when user types
     if (errors.cardNumber) {
-      setErrors(prev => ({ ...prev, cardNumber: '' }));
+      setErrors((prev) => ({ ...prev, cardNumber: '' }));
     }
   };
 
@@ -69,7 +82,7 @@ export function UpdatePaymentMethodModal({
     setCvv(digits);
 
     if (errors.cvv) {
-      setErrors(prev => ({ ...prev, cvv: '' }));
+      setErrors((prev) => ({ ...prev, cvv: '' }));
     }
   };
 
@@ -78,7 +91,7 @@ export function UpdatePaymentMethodModal({
     setBillingZip(digits);
 
     if (errors.billingZip) {
-      setErrors(prev => ({ ...prev, billingZip: '' }));
+      setErrors((prev) => ({ ...prev, billingZip: '' }));
     }
   };
 
@@ -86,7 +99,7 @@ export function UpdatePaymentMethodModal({
     const newErrors: Record<string, string> = {};
 
     if (!cardholderName.trim()) {
-      newErrors.cardholderName = "Cardholder name is required";
+      newErrors.cardholderName = 'Cardholder name is required';
     }
 
     const cardNumberResult = cardNumberSchema.safeParse(cardNumber);
@@ -95,11 +108,11 @@ export function UpdatePaymentMethodModal({
     }
 
     if (!expiryMonth) {
-      newErrors.expiryMonth = "Expiry month is required";
+      newErrors.expiryMonth = 'Expiry month is required';
     }
 
     if (!expiryYear) {
-      newErrors.expiryYear = "Expiry year is required";
+      newErrors.expiryYear = 'Expiry year is required';
     }
 
     // Check if card is expired
@@ -107,7 +120,7 @@ export function UpdatePaymentMethodModal({
       const now = new Date();
       const expiry = new Date(parseInt(expiryYear), parseInt(expiryMonth) - 1);
       if (expiry < now) {
-        newErrors.expiryYear = "Card has expired";
+        newErrors.expiryYear = 'Card has expired';
       }
     }
 
@@ -136,18 +149,18 @@ export function UpdatePaymentMethodModal({
       expiryMonth,
       expiryYear,
       cvv,
-      billingZip
+      billingZip,
     };
 
     await onUpdate(paymentData);
 
     // Reset form
-    setCardNumber("");
-    setCardholderName("");
-    setExpiryMonth("");
-    setExpiryYear("");
-    setCvv("");
-    setBillingZip("");
+    setCardNumber('');
+    setCardholderName('');
+    setExpiryMonth('');
+    setExpiryYear('');
+    setCvv('');
+    setBillingZip('');
     setErrors({});
     setIsSubmitting(false);
   };
@@ -174,7 +187,7 @@ export function UpdatePaymentMethodModal({
           <DialogDescription>
             {currentCard
               ? `Replace your ${currentCard.brand} ending in ${currentCard.last4}`
-              : "Add a new payment method for your subscription"}
+              : 'Add a new payment method for your subscription'}
           </DialogDescription>
         </DialogHeader>
 
@@ -190,7 +203,8 @@ export function UpdatePaymentMethodModal({
                   </span>
                 </div>
                 <span className="text-xs text-muted-foreground">
-                  Expires {currentCard.expiryMonth.toString().padStart(2, '0')}/{currentCard.expiryYear}
+                  Expires {currentCard.expiryMonth.toString().padStart(2, '0')}/
+                  {currentCard.expiryYear}
                 </span>
               </div>
             </Card>
@@ -205,11 +219,9 @@ export function UpdatePaymentMethodModal({
               placeholder="1234 5678 9012 3456"
               value={formatCardNumber(cardNumber)}
               onChange={(e) => handleCardNumberChange(e.target.value)}
-              className={errors.cardNumber ? "border-red-500" : ""}
+              className={errors.cardNumber ? 'border-red-500' : ''}
             />
-            {errors.cardNumber && (
-              <p className="text-xs text-red-600">{errors.cardNumber}</p>
-            )}
+            {errors.cardNumber && <p className="text-xs text-red-600">{errors.cardNumber}</p>}
           </div>
 
           {/* Cardholder Name */}
@@ -221,7 +233,7 @@ export function UpdatePaymentMethodModal({
               placeholder="John Doe"
               value={cardholderName}
               onChange={(e) => setCardholderName(e.target.value)}
-              className={errors.cardholderName ? "border-red-500" : ""}
+              className={errors.cardholderName ? 'border-red-500' : ''}
             />
             {errors.cardholderName && (
               <p className="text-xs text-red-600">{errors.cardholderName}</p>
@@ -233,39 +245,41 @@ export function UpdatePaymentMethodModal({
             <div className="space-y-2">
               <Label htmlFor="expiryMonth">Month *</Label>
               <Select value={expiryMonth} onValueChange={setExpiryMonth}>
-                <SelectTrigger id="expiryMonth" className={errors.expiryMonth ? "border-red-500" : ""}>
+                <SelectTrigger
+                  id="expiryMonth"
+                  className={errors.expiryMonth ? 'border-red-500' : ''}
+                >
                   <SelectValue placeholder="MM" />
                 </SelectTrigger>
                 <SelectContent>
-                  {months.map(month => (
+                  {months.map((month) => (
                     <SelectItem key={month.value} value={month.value}>
                       {month.label}
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
-              {errors.expiryMonth && (
-                <p className="text-xs text-red-600">{errors.expiryMonth}</p>
-              )}
+              {errors.expiryMonth && <p className="text-xs text-red-600">{errors.expiryMonth}</p>}
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="expiryYear">Year *</Label>
               <Select value={expiryYear} onValueChange={setExpiryYear}>
-                <SelectTrigger id="expiryYear" className={errors.expiryYear ? "border-red-500" : ""}>
+                <SelectTrigger
+                  id="expiryYear"
+                  className={errors.expiryYear ? 'border-red-500' : ''}
+                >
                   <SelectValue placeholder="YYYY" />
                 </SelectTrigger>
                 <SelectContent>
-                  {years.map(year => (
+                  {years.map((year) => (
                     <SelectItem key={year.value} value={year.value}>
                       {year.label}
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
-              {errors.expiryYear && (
-                <p className="text-xs text-red-600">{errors.expiryYear}</p>
-              )}
+              {errors.expiryYear && <p className="text-xs text-red-600">{errors.expiryYear}</p>}
             </div>
 
             <div className="space-y-2">
@@ -276,11 +290,9 @@ export function UpdatePaymentMethodModal({
                 placeholder="123"
                 value={cvv}
                 onChange={(e) => handleCvvChange(e.target.value)}
-                className={errors.cvv ? "border-red-500" : ""}
+                className={errors.cvv ? 'border-red-500' : ''}
               />
-              {errors.cvv && (
-                <p className="text-xs text-red-600">{errors.cvv}</p>
-              )}
+              {errors.cvv && <p className="text-xs text-red-600">{errors.cvv}</p>}
             </div>
           </div>
 
@@ -293,11 +305,9 @@ export function UpdatePaymentMethodModal({
               placeholder="12345"
               value={billingZip}
               onChange={(e) => handleZipChange(e.target.value)}
-              className={errors.billingZip ? "border-red-500" : ""}
+              className={errors.billingZip ? 'border-red-500' : ''}
             />
-            {errors.billingZip && (
-              <p className="text-xs text-red-600">{errors.billingZip}</p>
-            )}
+            {errors.billingZip && <p className="text-xs text-red-600">{errors.billingZip}</p>}
           </div>
 
           {/* Security Notice */}
@@ -306,7 +316,8 @@ export function UpdatePaymentMethodModal({
               <Lock className="h-4 w-4 text-green-600 mt-0.5" />
               <div>
                 <p className="text-xs text-green-900">
-                  <strong>Secure Payment:</strong> Your payment information is encrypted and secure. We never store your full card details.
+                  <strong>Secure Payment:</strong> Your payment information is encrypted and secure.
+                  We never store your full card details.
                 </p>
               </div>
             </div>
@@ -328,7 +339,7 @@ export function UpdatePaymentMethodModal({
             Cancel
           </Button>
           <Button onClick={handleSubmit} disabled={isSubmitting}>
-            {isSubmitting ? "Updating..." : "Update Payment Method"}
+            {isSubmitting ? 'Updating...' : 'Update Payment Method'}
           </Button>
         </DialogFooter>
       </DialogContent>

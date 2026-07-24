@@ -450,16 +450,19 @@ curl https://api.tripsync.app/health
 ## Backup Storage Recommendations
 
 ### Local Development
+
 - **Storage**: `./backups/` directory
 - **Retention**: 7 days
 - **Tool**: Manual script
 
 ### Staging
+
 - **Storage**: S3 bucket `tripsync-backups-staging`
 - **Retention**: 14 days
 - **Tool**: Cron job + AWS CLI
 
 ### Production
+
 - **Storage**: S3 bucket `tripsync-backups-production`
 - **Retention**: 30 days rolling + 12 monthly snapshots
 - **Redundancy**: Enable cross-region replication

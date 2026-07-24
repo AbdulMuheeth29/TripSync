@@ -1,6 +1,6 @@
-import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { MapPin, Plus, Sparkles } from "lucide-react";
+import { Card } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { MapPin, Plus, Sparkles } from 'lucide-react';
 
 interface NoTripsEmptyStateProps {
   onCreateTrip: () => void;
@@ -24,10 +24,11 @@ export function NoTripsEmptyState({ onCreateTrip, userName }: NoTripsEmptyStateP
 
         <div>
           <h3 className="text-2xl font-bold mb-2">
-            {userName ? `${userName}, your adventure awaits!` : "No trips yet"}
+            {userName ? `${userName}, your adventure awaits!` : 'No trips yet'}
           </h3>
           <p className="text-muted-foreground">
-            Start planning your first trip and experience seamless group travel planning with AI-powered recommendations.
+            Start planning your first trip and experience seamless group travel planning with
+            AI-powered recommendations.
           </p>
         </div>
 

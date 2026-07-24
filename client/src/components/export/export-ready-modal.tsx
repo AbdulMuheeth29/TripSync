@@ -1,10 +1,17 @@
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { CheckCircle2, Download, Mail, FileText, Calendar, Users } from "lucide-react";
-import { format } from "date-fns";
-import type { ExportFormat } from "./export-format-selector";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { CheckCircle2, Download, Mail, FileText, Calendar, Users } from 'lucide-react';
+import { format } from 'date-fns';
+import type { ExportFormat } from './export-format-selector';
 
 interface ExportReadyModalProps {
   isOpen: boolean;
@@ -21,20 +28,20 @@ interface ExportReadyModalProps {
 
 const FORMAT_INFO: Record<ExportFormat, { icon: string; color: string; description: string }> = {
   pdf: {
-    icon: "📄",
-    color: "bg-red-100 text-red-800 border-red-200",
-    description: "Professional PDF document ready to share or print"
+    icon: '📄',
+    color: 'bg-red-100 text-red-800 border-red-200',
+    description: 'Professional PDF document ready to share or print',
   },
   csv: {
-    icon: "📊",
-    color: "bg-green-100 text-green-800 border-green-200",
-    description: "Spreadsheet file ready to import into Excel or Google Sheets"
+    icon: '📊',
+    color: 'bg-green-100 text-green-800 border-green-200',
+    description: 'Spreadsheet file ready to import into Excel or Google Sheets',
   },
   json: {
-    icon: "📋",
-    color: "bg-blue-100 text-blue-800 border-blue-200",
-    description: "JSON data file ready for processing or integration"
-  }
+    icon: '📋',
+    color: 'bg-blue-100 text-blue-800 border-blue-200',
+    description: 'JSON data file ready for processing or integration',
+  },
 };
 
 export function ExportReadyModal({
@@ -47,7 +54,7 @@ export function ExportReadyModal({
   fileSize,
   exportDate,
   numberOfExpenses,
-  numberOfMembers
+  numberOfMembers,
 }: ExportReadyModalProps) {
   const formatInfo = FORMAT_INFO[exportFormat];
   const fileName = `${tripName.replace(/\s+/g, '_')}_expenses_${format(exportDate, 'yyyy-MM-dd')}.${exportFormat}`;
@@ -59,9 +66,7 @@ export function ExportReadyModal({
           <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-green-100 animate-bounce">
             <CheckCircle2 className="h-6 w-6 text-green-600" />
           </div>
-          <DialogTitle className="text-center">
-            Export Ready!
-          </DialogTitle>
+          <DialogTitle className="text-center">Export Ready!</DialogTitle>
           <DialogDescription className="text-center">
             Your expense report has been generated successfully
           </DialogDescription>
@@ -104,9 +109,7 @@ export function ExportReadyModal({
                   <Calendar className="h-4 w-4" />
                   <span>Generated</span>
                 </div>
-                <span className="font-medium">
-                  {format(exportDate, "MMM d, yyyy 'at' h:mm a")}
-                </span>
+                <span className="font-medium">{format(exportDate, "MMM d, yyyy 'at' h:mm a")}</span>
               </div>
 
               <div className="flex items-center justify-between text-sm">
@@ -130,36 +133,25 @@ export function ExportReadyModal({
           {/* Actions Info */}
           <Card className="p-3 bg-blue-50 border-blue-200">
             <p className="text-xs text-blue-800">
-              <strong>Tip:</strong> You can download the file now or email it to yourself and your group members
+              <strong>Tip:</strong> You can download the file now or email it to yourself and your
+              group members
             </p>
           </Card>
         </div>
 
         <DialogFooter className="flex-col sm:flex-row gap-2">
-          <Button
-            variant="outline"
-            onClick={onEmailSend}
-            className="flex-1"
-          >
+          <Button variant="outline" onClick={onEmailSend} className="flex-1">
             <Mail className="h-4 w-4 mr-2" />
             Email to Group
           </Button>
-          <Button
-            onClick={onDownload}
-            className="flex-1"
-          >
+          <Button onClick={onDownload} className="flex-1">
             <Download className="h-4 w-4 mr-2" />
             Download File
           </Button>
         </DialogFooter>
 
         <div className="flex justify-center">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={onClose}
-            className="text-muted-foreground"
-          >
+          <Button variant="ghost" size="sm" onClick={onClose} className="text-muted-foreground">
             Close
           </Button>
         </div>

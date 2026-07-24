@@ -1,10 +1,10 @@
-import { Link, useLocation } from "wouter";
-import { Button } from "@/components/ui/button";
-import { ThemeToggle } from "@/components/theme-toggle";
-import { AppLogo } from "@/components/app-logo";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { spacing } from "@/lib/spacing-tokens";
-import { useAuth } from "@/lib/auth-context";
+import { Link, useLocation } from 'wouter';
+import { Button } from '@/components/ui/button';
+import { ThemeToggle } from '@/components/theme-toggle';
+import { AppLogo } from '@/components/app-logo';
+import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
+import { spacing } from '@/lib/spacing-tokens';
+import { useAuth } from '@/lib/auth-context';
 import {
   Users,
   Sparkles,
@@ -15,46 +15,68 @@ import {
   MapPin,
   ChevronDown,
   Check,
-} from "lucide-react";
+} from 'lucide-react';
 
 const features = [
   {
     icon: Sparkles,
-    title: "AI-Powered Itineraries",
-    description: "Generate complete trip plans in minutes. Our AI considers your budget, travel style, and group preferences to create the perfect itinerary.",
+    title: 'AI-Powered Itineraries',
+    description:
+      'Generate complete trip plans in minutes. Our AI considers your budget, travel style, and group preferences to create the perfect itinerary.',
   },
   {
     icon: Users,
-    title: "Real-Time Collaboration",
-    description: "Make decisions together with built-in voting, comments, and chat. End the endless group text threads and keep everyone on the same page.",
+    title: 'Real-Time Collaboration',
+    description:
+      'Make decisions together with built-in voting, comments, and chat. End the endless group text threads and keep everyone on the same page.',
   },
   {
     icon: Calendar,
-    title: "Intelligent Scheduling",
-    description: "Optimize your itinerary with realistic travel times and built-in reminders. Never miss a reservation or overbook your day again.",
+    title: 'Intelligent Scheduling',
+    description:
+      'Optimize your itinerary with realistic travel times and built-in reminders. Never miss a reservation or overbook your day again.',
   },
   {
     icon: CreditCard,
-    title: "Fair Expense Splitting",
-    description: "Track shared costs and split expenses fairly. See exactly who owes what at a glance, then settle up after your trip.",
+    title: 'Fair Expense Splitting',
+    description:
+      'Track shared costs and split expenses fairly. See exactly who owes what at a glance, then settle up after your trip.',
   },
   {
     icon: MessageSquare,
-    title: "Instant Synchronization",
-    description: "Every change syncs instantly across all devices. Your entire group stays updated in real-time, no matter where they are.",
+    title: 'Instant Synchronization',
+    description:
+      'Every change syncs instantly across all devices. Your entire group stays updated in real-time, no matter where they are.',
   },
   {
     icon: MapPin,
-    title: "Seamless Booking Links",
-    description: "Book flights, hotels, and reservations directly from your itinerary with integrated booking links. No more switching between apps.",
+    title: 'Seamless Booking Links',
+    description:
+      'Book flights, hotels, and reservations directly from your itinerary with integrated booking links. No more switching between apps.',
   },
 ];
 
 const steps = [
-  { step: 1, title: "Set Your Trip Details", desc: "Destination, dates, group size, and budget in under a minute" },
-  { step: 2, title: "Invite Your Group", desc: "Send email invites and collect everyone's preferences with our quick survey" },
-  { step: 3, title: "Get AI Recommendations", desc: "Receive a customized itinerary that matches your group's interests and budget" },
-  { step: 4, title: "Collaborate & Book", desc: "Vote on activities, discuss in group chat, split expenses, and book everything in one place" },
+  {
+    step: 1,
+    title: 'Set Your Trip Details',
+    desc: 'Destination, dates, group size, and budget in under a minute',
+  },
+  {
+    step: 2,
+    title: 'Invite Your Group',
+    desc: "Send email invites and collect everyone's preferences with our quick survey",
+  },
+  {
+    step: 3,
+    title: 'Get AI Recommendations',
+    desc: "Receive a customized itinerary that matches your group's interests and budget",
+  },
+  {
+    step: 4,
+    title: 'Collaborate & Book',
+    desc: 'Vote on activities, discuss in group chat, split expenses, and book everything in one place',
+  },
 ];
 
 export default function LandingPage() {
@@ -71,7 +93,10 @@ export default function LandingPage() {
           }}
           aria-hidden
         />
-        <div className="absolute top-0 right-0 w-[85%] md:w-[55%] h-full pointer-events-none" aria-hidden>
+        <div
+          className="absolute top-0 right-0 w-[85%] md:w-[55%] h-full pointer-events-none"
+          aria-hidden
+        >
           <div className="absolute inset-0 bg-gradient-to-l from-amber-500/12 via-amber-400/5 to-transparent" />
           <div className="absolute top-1/3 right-0 w-full h-1/2 bg-gradient-to-l from-amber-400/8 to-transparent blur-3xl" />
         </div>
@@ -82,16 +107,24 @@ export default function LandingPage() {
             <span className="text-lg font-semibold text-white tracking-tight">TripSync</span>
           </Link>
           <nav className="hidden md:flex items-center gap-8">
-            <a href="#features" className="text-sm text-white/70 hover:text-white transition-colors duration-200">
+            <a
+              href="#features"
+              className="text-sm text-white/70 hover:text-white transition-colors duration-200"
+            >
               Features
             </a>
-            <a href="#how-it-works" className="text-sm text-white/70 hover:text-white transition-colors duration-200">
+            <a
+              href="#how-it-works"
+              className="text-sm text-white/70 hover:text-white transition-colors duration-200"
+            >
               How it works
             </a>
             <Link href="/pricing">
               <a
                 className={`text-sm transition-colors duration-200 ${
-                  pathname === "/pricing" ? "text-white font-medium" : "text-white/70 hover:text-white"
+                  pathname === '/pricing'
+                    ? 'text-white font-medium'
+                    : 'text-white/70 hover:text-white'
                 }`}
               >
                 Pricing
@@ -100,7 +133,9 @@ export default function LandingPage() {
             <Link href="/contact">
               <a
                 className={`text-sm transition-colors duration-200 ${
-                  pathname === "/contact" ? "text-white font-medium" : "text-white/70 hover:text-white"
+                  pathname === '/contact'
+                    ? 'text-white font-medium'
+                    : 'text-white/70 hover:text-white'
                 }`}
               >
                 Contact
@@ -121,16 +156,24 @@ export default function LandingPage() {
               </SheetTrigger>
               <SheetContent side="right" className="w-64 sm:w-80">
                 <nav className="mt-10 flex flex-col gap-4 text-sm">
-                  <a href="#features" className="text-muted-foreground hover:text-foreground transition-colors">
+                  <a
+                    href="#features"
+                    className="text-muted-foreground hover:text-foreground transition-colors"
+                  >
                     Features
                   </a>
-                  <a href="#how-it-works" className="text-muted-foreground hover:text-foreground transition-colors">
+                  <a
+                    href="#how-it-works"
+                    className="text-muted-foreground hover:text-foreground transition-colors"
+                  >
                     How it works
                   </a>
                   <Link href="/pricing">
                     <a
                       className={`hover:text-foreground transition-colors ${
-                        pathname === "/pricing" ? "text-foreground font-medium" : "text-muted-foreground"
+                        pathname === '/pricing'
+                          ? 'text-foreground font-medium'
+                          : 'text-muted-foreground'
                       }`}
                     >
                       Pricing
@@ -139,7 +182,9 @@ export default function LandingPage() {
                   <Link href="/contact">
                     <a
                       className={`hover:text-foreground transition-colors ${
-                        pathname === "/contact" ? "text-foreground font-medium" : "text-muted-foreground"
+                        pathname === '/contact'
+                          ? 'text-foreground font-medium'
+                          : 'text-muted-foreground'
                       }`}
                     >
                       Contact
@@ -148,7 +193,9 @@ export default function LandingPage() {
                   <Link href="/login">
                     <a
                       className={`hover:text-foreground transition-colors ${
-                        pathname === "/login" ? "text-foreground font-medium" : "text-muted-foreground"
+                        pathname === '/login'
+                          ? 'text-foreground font-medium'
+                          : 'text-muted-foreground'
                       }`}
                     >
                       Log In
@@ -197,7 +244,7 @@ export default function LandingPage() {
           >
             <span
               className="text-[clamp(6rem,20vw,14rem)] font-bold tracking-tighter text-white/[0.03]"
-              style={{ fontFamily: "var(--font-serif)" }}
+              style={{ fontFamily: 'var(--font-serif)' }}
             >
               TripSync
             </span>
@@ -208,13 +255,14 @@ export default function LandingPage() {
           </p>
           <h1
             className="relative text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold tracking-tight text-white mb-6 max-w-4xl mx-auto leading-[1.08]"
-            style={{ fontFamily: "var(--font-serif)" }}
+            style={{ fontFamily: 'var(--font-serif)' }}
           >
-            Plan unforgettable group trips in{" "}
-            <span className="text-amber-400">minutes</span>, not hours
+            Plan unforgettable group trips in <span className="text-amber-400">minutes</span>, not
+            hours
           </h1>
           <p className="relative text-lg md:text-xl text-white/55 mb-10 max-w-xl leading-relaxed">
-            The all-in-one platform for group travel. AI-powered itineraries, real-time collaboration, shared expenses, and unanimous decisions—all in one place.
+            The all-in-one platform for group travel. AI-powered itineraries, real-time
+            collaboration, shared expenses, and unanimous decisions—all in one place.
           </p>
 
           <div className="relative flex flex-col sm:flex-row items-center gap-4 mb-14">
@@ -264,12 +312,13 @@ export default function LandingPage() {
             </p>
             <h2
               className="font-heading text-3xl md:text-4xl lg:text-5xl font-bold text-foreground mb-4 max-w-2xl mx-auto tracking-tight"
-              style={{ fontFamily: "var(--font-serif)" }}
+              style={{ fontFamily: 'var(--font-serif)' }}
             >
               Everything you need for seamless group travel
             </h2>
             <p className="text-muted-foreground max-w-xl mx-auto leading-relaxed text-lg">
-              From AI-powered itineraries to fair expense splitting, we handle the logistics so you can focus on creating memories.
+              From AI-powered itineraries to fair expense splitting, we handle the logistics so you
+              can focus on creating memories.
             </p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8 max-w-6xl mx-auto">
@@ -281,12 +330,13 @@ export default function LandingPage() {
                 <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 text-primary mb-6 group-hover:bg-primary/15 transition-colors duration-300">
                   <feature.icon className="h-7 w-7" />
                 </div>
-                <h3 className="font-heading text-xl font-semibold text-foreground mb-3 tracking-tight" style={{ fontFamily: "var(--font-serif)" }}>
+                <h3
+                  className="font-heading text-xl font-semibold text-foreground mb-3 tracking-tight"
+                  style={{ fontFamily: 'var(--font-serif)' }}
+                >
                   {feature.title}
                 </h3>
-                <p className="text-muted-foreground leading-relaxed">
-                  {feature.description}
-                </p>
+                <p className="text-muted-foreground leading-relaxed">{feature.description}</p>
               </div>
             ))}
           </div>
@@ -294,7 +344,10 @@ export default function LandingPage() {
       </section>
 
       {/* How it works */}
-      <section id="how-it-works" className={`border-t border-border/60 bg-muted/20 ${spacing.section.lg} scroll-mt-16`}>
+      <section
+        id="how-it-works"
+        className={`border-t border-border/60 bg-muted/20 ${spacing.section.lg} scroll-mt-16`}
+      >
         <div className="container mx-auto px-4 md:px-8">
           <div className="text-center mb-16 md:mb-20">
             <p className="text-xs font-medium text-muted-foreground tracking-[0.2em] uppercase mb-4">
@@ -302,7 +355,7 @@ export default function LandingPage() {
             </p>
             <h2
               className="font-heading text-3xl md:text-4xl lg:text-5xl font-bold text-foreground tracking-tight"
-              style={{ fontFamily: "var(--font-serif)" }}
+              style={{ fontFamily: 'var(--font-serif)' }}
             >
               Idea to itinerary in 4 steps
             </h2>
@@ -311,17 +364,21 @@ export default function LandingPage() {
             {steps.map((item, i) => (
               <div key={item.step} className="relative text-center md:text-left">
                 {i < steps.length - 1 && (
-                  <div className="hidden md:block absolute top-6 left-[calc(50%+1.5rem)] w-[calc(100%-3rem)] h-px bg-gradient-to-r from-border to-transparent" aria-hidden />
+                  <div
+                    className="hidden md:block absolute top-6 left-[calc(50%+1.5rem)] w-[calc(100%-3rem)] h-px bg-gradient-to-r from-border to-transparent"
+                    aria-hidden
+                  />
                 )}
                 <div className="inline-flex h-14 w-14 items-center justify-center rounded-2xl border-2 border-primary/20 bg-background text-foreground font-bold text-lg mb-5 shadow-sm">
                   {item.step}
                 </div>
-                <h3 className="font-heading font-semibold text-foreground mb-2 text-lg" style={{ fontFamily: "var(--font-serif)" }}>
+                <h3
+                  className="font-heading font-semibold text-foreground mb-2 text-lg"
+                  style={{ fontFamily: 'var(--font-serif)' }}
+                >
                   {item.title}
                 </h3>
-                <p className="text-muted-foreground leading-relaxed text-sm">
-                  {item.desc}
-                </p>
+                <p className="text-muted-foreground leading-relaxed text-sm">{item.desc}</p>
               </div>
             ))}
           </div>
@@ -334,12 +391,13 @@ export default function LandingPage() {
           <div className="max-w-3xl mx-auto rounded-3xl border border-border/60 bg-gradient-to-b from-muted/50 to-muted/30 backdrop-blur-sm p-12 md:p-16 text-center shadow-xl shadow-primary/5">
             <h2
               className="font-heading text-3xl md:text-4xl lg:text-5xl font-bold text-foreground mb-4 tracking-tight"
-              style={{ fontFamily: "var(--font-serif)" }}
+              style={{ fontFamily: 'var(--font-serif)' }}
             >
               Start planning smarter group trips today
             </h2>
             <p className="text-muted-foreground mb-10 max-w-md mx-auto leading-relaxed text-lg">
-              Join thousands of travelers who've transformed their group trip planning. Free forever, no credit card required.
+              Join thousands of travelers who've transformed their group trip planning. Free
+              forever, no credit card required.
             </p>
             <Link href="/login">
               <Button

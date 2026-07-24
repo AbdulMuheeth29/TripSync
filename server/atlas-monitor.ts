@@ -10,15 +10,15 @@
  * Runs every 15 minutes for active trips.
  */
 
-import Anthropic from "@anthropic-ai/sdk";
-import { storage } from "./storage";
-import type { Trip, TripMember, ItineraryItem, Expense, Vote } from "@shared/schema";
-import { retryWithBackoff } from "./ai-retry";
-import { aiCircuitBreakers } from "./ai-circuit-breaker";
-import { recordAIOperation, calculateCost } from "./ai-metrics";
-import { getDb } from "./db";
-import { atlasMonitoringState, atlasInterventions, trips } from "@shared/schema";
-import { eq, lt, and, isNull } from "drizzle-orm";
+import Anthropic from '@anthropic-ai/sdk';
+import { storage } from './storage';
+import type { Trip, TripMember, ItineraryItem, Expense, Vote } from '@shared/schema';
+import { retryWithBackoff } from './ai-retry';
+import { aiCircuitBreakers } from './ai-circuit-breaker';
+import { recordAIOperation, calculateCost } from './ai-metrics';
+import { getDb } from './db';
+import { atlasMonitoringState, atlasInterventions, trips } from '@shared/schema';
+import { eq, lt, and, isNull } from 'drizzle-orm';
 
 const anthropic = new Anthropic({
   apiKey: process.env.AI_INTEGRATIONS_ANTHROPIC_API_KEY,
@@ -46,7 +46,12 @@ interface TripHealth {
  * Atlas intervention recommendation
  */
 interface AtlasIntervention {
-  type: 'budget_alert' | 'deadline_warning' | 'vote_deadlock' | 'inactivity_nudge' | 'completion_check';
+  type:
+    | 'budget_alert'
+    | 'deadline_warning'
+    | 'vote_deadlock'
+    | 'inactivity_nudge'
+    | 'completion_check';
   severity: 'info' | 'warning' | 'urgent';
   message: string;
   suggestedActions: Array<{
@@ -76,7 +81,8 @@ async function calculateTripHealth(tripId: string): Promise<TripHealth | null> {
 
     // Calculate completion (% of days with activities)
     const tripDuration = Math.ceil(
-      (new Date(trip.endDate).getTime() - new Date(trip.startDate).getTime()) / (1000 * 60 * 60 * 24)
+      (new Date(trip.endDate).getTime() - new Date(trip.startDate).getTime()) /
+        (1000 * 60 * 60 * 24)
     );
     const daysWithActivities = new Set(items.map((i: any) => i.dayNumber)).size;
     const completion = tripDuration > 0 ? (daysWithActivities / tripDuration) * 100 : 0;
@@ -185,11 +191,11 @@ Respond in JSON format:
           const message = await anthropic.messages.create({
             model: AI_MODEL,
             max_tokens: 512,
-            messages: [{ role: "user", content: prompt }],
+            messages: [{ role: 'user', content: prompt }],
           });
 
           const content = message.content[0];
-          const text = content.type === "text" ? content.text.trim() : "";
+          const text = content.type === 'text' ? content.text.trim() : '';
 
           // Extract JSON
           const jsonMatch = text.match(/\{[\s\S]*\}/);
@@ -202,7 +208,7 @@ Respond in JSON format:
           return {
             parsed,
             usage: message.usage,
-            model: AI_MODEL
+            model: AI_MODEL,
           };
         });
       },
@@ -225,16 +231,16 @@ Respond in JSON format:
       costUsd: cost,
       cached: false,
       attempts: result.attempts,
-      timestamp: Date.now()
+      timestamp: Date.now(),
     });
 
     // Map intervention type from issue
     const interventionTypeMap: Record<string, AtlasIntervention['type']> = {
-      'budget_overrun': 'budget_alert',
-      'deadline_incomplete': 'deadline_warning',
-      'vote_deadlock': 'vote_deadlock',
-      'inactivity': 'inactivity_nudge',
-      'no_itinerary': 'completion_check',
+      budget_overrun: 'budget_alert',
+      deadline_incomplete: 'deadline_warning',
+      vote_deadlock: 'vote_deadlock',
+      inactivity: 'inactivity_nudge',
+      no_itinerary: 'completion_check',
     };
 
     return {
@@ -244,7 +250,7 @@ Respond in JSON format:
       suggestedActions: parsed.actions.map((a: any) => ({
         action: a.action,
         description: a.description,
-        priority: a.priority
+        priority: a.priority,
       })),
       triggerCondition: primaryIssue,
     };
@@ -257,7 +263,7 @@ Respond in JSON format:
       success: false,
       duration,
       errorType: error?.type || 'unknown',
-      timestamp: Date.now()
+      timestamp: Date.now(),
     });
 
     console.error('Failed to generate Atlas intervention:', error);
@@ -276,7 +282,8 @@ function shouldIntervene(health: TripHealth, lastInterventionAt: Date | null): b
 
   // Don't intervene too frequently (min 4 hours between interventions)
   if (lastInterventionAt) {
-    const hoursSinceLastIntervention = (Date.now() - lastInterventionAt.getTime()) / (1000 * 60 * 60);
+    const hoursSinceLastIntervention =
+      (Date.now() - lastInterventionAt.getTime()) / (1000 * 60 * 60);
     if (hoursSinceLastIntervention < 4) {
       return false;
     }
@@ -318,27 +325,31 @@ export async function monitorTrip(tripId: string): Promise<boolean> {
 
     if (!monitoringState) {
       // Create initial monitoring state
-      const [newState] = await db.insert(atlasMonitoringState).values({
-        tripId,
-        lastCheckedAt: new Date(),
-        nextCheckAt: new Date(Date.now() + 15 * 60 * 1000),
-        completionPercentage: health.completion.toString(),
-        budgetUsagePercentage: health.budgetUsage.toString(),
-        daysUntilTrip: health.daysUntilTrip,
-        stuckVotesCount: health.stuckVotes,
-        inactiveDays: health.inactiveDays,
-        healthScore: calculateHealthScore(health),
-        issues: health.issues,
-        lastInterventionAt: null,
-        interventionCount: 0,
-      }).returning();
+      const [newState] = await db
+        .insert(atlasMonitoringState)
+        .values({
+          tripId,
+          lastCheckedAt: new Date(),
+          nextCheckAt: new Date(Date.now() + 15 * 60 * 1000),
+          completionPercentage: health.completion.toString(),
+          budgetUsagePercentage: health.budgetUsage.toString(),
+          daysUntilTrip: health.daysUntilTrip,
+          stuckVotesCount: health.stuckVotes,
+          inactiveDays: health.inactiveDays,
+          healthScore: calculateHealthScore(health),
+          issues: health.issues,
+          lastInterventionAt: null,
+          interventionCount: 0,
+        })
+        .returning();
       monitoringState = newState;
     }
 
     // Should we intervene?
     if (!shouldIntervene(health, monitoringState.lastInterventionAt)) {
       // Update monitoring state
-      await db.update(atlasMonitoringState)
+      await db
+        .update(atlasMonitoringState)
         .set({
           lastCheckedAt: new Date(),
           nextCheckAt: new Date(Date.now() + 15 * 60 * 1000),
@@ -364,7 +375,9 @@ export async function monitorTrip(tripId: string): Promise<boolean> {
       return false;
     }
 
-    console.log(`🔔 Atlas intervention for trip ${tripId}: ${intervention.type} (${intervention.severity})`);
+    console.log(
+      `🔔 Atlas intervention for trip ${tripId}: ${intervention.type} (${intervention.severity})`
+    );
     console.log(`   Message: ${intervention.message}`);
 
     // Store intervention in database
@@ -380,7 +393,8 @@ export async function monitorTrip(tripId: string): Promise<boolean> {
     });
 
     // Update monitoring state
-    await db.update(atlasMonitoringState)
+    await db
+      .update(atlasMonitoringState)
       .set({
         lastCheckedAt: new Date(),
         nextCheckAt: new Date(Date.now() + 15 * 60 * 1000),
@@ -454,28 +468,30 @@ export async function monitorAllTrips(): Promise<void> {
     const now = new Date();
 
     // Get trips with status='planning' that need checking
-    const planningTrips = await db.select({
-      id: trips.id,
-    })
-    .from(trips)
-    .where(eq(trips.status, 'planning'));
+    const planningTrips = await db
+      .select({
+        id: trips.id,
+      })
+      .from(trips)
+      .where(eq(trips.status, 'planning'));
 
     // Also check if we need to run based on nextCheckAt from monitoring state
-    const dueForCheck = await db.select({
-      tripId: atlasMonitoringState.tripId,
-    })
-    .from(atlasMonitoringState)
-    .where(
-      and(
-        lt(atlasMonitoringState.nextCheckAt, now),
-        isNull(atlasMonitoringState.suppressedUntil) // Not suppressed
-      )
-    );
+    const dueForCheck = await db
+      .select({
+        tripId: atlasMonitoringState.tripId,
+      })
+      .from(atlasMonitoringState)
+      .where(
+        and(
+          lt(atlasMonitoringState.nextCheckAt, now),
+          isNull(atlasMonitoringState.suppressedUntil) // Not suppressed
+        )
+      );
 
     // Combine both lists (unique trip IDs)
     const allTripIds = new Set([
-      ...planningTrips.map(t => t.id),
-      ...dueForCheck.map(t => t.tripId),
+      ...planningTrips.map((t) => t.id),
+      ...dueForCheck.map((t) => t.tripId),
     ]);
 
     const planningTripIds = Array.from(allTripIds);
@@ -488,12 +504,10 @@ export async function monitorAllTrips(): Promise<void> {
     console.log(`📊 Monitoring ${planningTripIds.length} trips...`);
 
     // Monitor all trips (limit concurrency to avoid overload)
-    const results = await Promise.allSettled(
-      planningTripIds.map(id => monitorTrip(id))
-    );
+    const results = await Promise.allSettled(planningTripIds.map((id) => monitorTrip(id)));
 
-    const successful = results.filter(r => r.status === 'fulfilled' && r.value).length;
-    const failed = results.filter(r => r.status === 'rejected' || !r.value).length;
+    const successful = results.filter((r) => r.status === 'fulfilled' && r.value).length;
+    const failed = results.filter((r) => r.status === 'rejected' || !r.value).length;
 
     console.log(`✅ Atlas monitoring complete: ${successful} successful, ${failed} failed`);
   } catch (error) {
@@ -511,9 +525,12 @@ export function startAtlasScheduler(): NodeJS.Timeout {
   monitorAllTrips();
 
   // Then run every 15 minutes
-  return setInterval(() => {
-    monitorAllTrips();
-  }, 15 * 60 * 1000); // 15 minutes
+  return setInterval(
+    () => {
+      monitorAllTrips();
+    },
+    15 * 60 * 1000
+  ); // 15 minutes
 }
 
 /**

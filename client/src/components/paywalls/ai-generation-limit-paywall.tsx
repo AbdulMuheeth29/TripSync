@@ -1,9 +1,16 @@
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
-import { Lock, Sparkles, Zap, Check, Infinity } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Progress } from '@/components/ui/progress';
+import { Lock, Sparkles, Zap, Check, Infinity } from 'lucide-react';
 
 interface AIGenerationLimitPaywallProps {
   isOpen: boolean;
@@ -14,12 +21,12 @@ interface AIGenerationLimitPaywallProps {
 }
 
 const UNLIMITED_FEATURES = [
-  "Unlimited AI itinerary generations",
-  "Regenerate itineraries as many times as you want",
-  "AI-powered activity recommendations",
-  "Smart budget optimization",
-  "Atlas AI priority responses",
-  "Advanced trip personalization"
+  'Unlimited AI itinerary generations',
+  'Regenerate itineraries as many times as you want',
+  'AI-powered activity recommendations',
+  'Smart budget optimization',
+  'Atlas AI priority responses',
+  'Advanced trip personalization',
 ];
 
 export function AIGenerationLimitPaywall({
@@ -27,7 +34,7 @@ export function AIGenerationLimitPaywall({
   onClose,
   onUpgrade,
   currentUsage,
-  limit
+  limit,
 }: AIGenerationLimitPaywallProps) {
   const percentageUsed = Math.min((currentUsage / limit) * 100, 100);
 
@@ -39,9 +46,7 @@ export function AIGenerationLimitPaywall({
             <Zap className="h-8 w-8 text-white" />
           </div>
           <div className="flex items-center justify-center gap-2 mb-2">
-            <DialogTitle className="text-center text-2xl">
-              AI Generation Limit Reached
-            </DialogTitle>
+            <DialogTitle className="text-center text-2xl">AI Generation Limit Reached</DialogTitle>
           </div>
           <DialogDescription className="text-center">
             You've used all {limit} free AI generation{limit > 1 ? 's' : ''} for this trip
@@ -54,11 +59,14 @@ export function AIGenerationLimitPaywall({
             <div className="space-y-3">
               <div className="flex items-center justify-between">
                 <span className="text-sm font-medium">Free Plan Usage</span>
-                <span className="text-sm font-bold">{currentUsage} / {limit}</span>
+                <span className="text-sm font-bold">
+                  {currentUsage} / {limit}
+                </span>
               </div>
               <Progress value={percentageUsed} className="h-2" />
               <p className="text-xs text-amber-800">
-                Free plan includes {limit} AI generation{limit > 1 ? 's' : ''} per trip. Upgrade for unlimited!
+                Free plan includes {limit} AI generation{limit > 1 ? 's' : ''} per trip. Upgrade for
+                unlimited!
               </p>
             </div>
           </Card>
@@ -105,9 +113,7 @@ export function AIGenerationLimitPaywall({
               <p className="text-3xl font-bold text-primary mb-1">
                 $4.99<span className="text-base font-normal text-muted-foreground">/month</span>
               </p>
-              <p className="text-xs text-muted-foreground">
-                14-day free trial • Cancel anytime
-              </p>
+              <p className="text-xs text-muted-foreground">14-day free trial • Cancel anytime</p>
             </div>
           </Card>
         </div>

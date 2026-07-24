@@ -5,12 +5,14 @@ Cloud storage enables users to upload photos and documents to their trips. TripS
 ## Why Cloud Storage?
 
 **Without Storage:**
+
 - ❌ Photo uploads disabled
 - ❌ Document uploads disabled
 - ❌ Confirmation images disabled
 - ❌ Mood board images disabled
 
 **With Storage:**
+
 - ✅ Unlimited photo uploads
 - ✅ Document management (PDFs, images)
 - ✅ Booking confirmations
@@ -20,14 +22,14 @@ Cloud storage enables users to upload photos and documents to their trips. TripS
 
 ## Cloudflare R2 vs AWS S3
 
-| Feature | Cloudflare R2 | AWS S3 |
-|---------|--------------|--------|
-| **Free Tier** | 10 GB storage | 5 GB storage |
-| **Storage Cost** | $0.015/GB | $0.023/GB |
-| **Egress Cost** | **FREE** ⭐ | $0.09/GB |
-| **API Calls** | $4.50/million | $5.00/million |
-| **Best For** | Public files, high traffic | AWS ecosystem |
-| **Setup Time** | 5 minutes | 10 minutes |
+| Feature          | Cloudflare R2              | AWS S3        |
+| ---------------- | -------------------------- | ------------- |
+| **Free Tier**    | 10 GB storage              | 5 GB storage  |
+| **Storage Cost** | $0.015/GB                  | $0.023/GB     |
+| **Egress Cost**  | **FREE** ⭐                | $0.09/GB      |
+| **API Calls**    | $4.50/million              | $5.00/million |
+| **Best For**     | Public files, high traffic | AWS ecosystem |
+| **Setup Time**   | 5 minutes                  | 10 minutes    |
 
 **Recommendation:** Use R2 for significant cost savings on egress fees.
 
@@ -36,10 +38,12 @@ Cloud storage enables users to upload photos and documents to their trips. TripS
 ## Option 1: Cloudflare R2 (Recommended)
 
 ### Step 1: Create Cloudflare Account
+
 1. Go to [dash.cloudflare.com](https://dash.cloudflare.com/)
 2. Sign up (free account)
 
 ### Step 2: Create R2 Bucket
+
 1. Navigate to **R2 Object Storage** in sidebar
 2. Click **Create Bucket**
 3. Enter bucket name: `tripsync-uploads`
@@ -47,6 +51,7 @@ Cloud storage enables users to upload photos and documents to their trips. TripS
 5. Click **Create Bucket**
 
 ### Step 3: Generate API Token
+
 1. Click **Manage R2 API Tokens**
 2. Click **Create API Token**
 3. Token name: `TripSync Production`
@@ -58,6 +63,7 @@ Cloud storage enables users to upload photos and documents to their trips. TripS
    - Secret Access Key
 
 ### Step 4: Get Account ID
+
 1. Go to R2 overview page
 2. Copy your **Account ID** (shown at top)
 
@@ -88,6 +94,7 @@ R2_PUBLIC_URL=https://uploads.yourdomain.com
 ```
 
 ### Cost Example (R2)
+
 - 50 GB storage: $0.75/month
 - 500 GB transfers: **$0** (no egress fees!)
 - 1M API calls: $4.50/month
@@ -119,10 +126,7 @@ R2_PUBLIC_URL=https://uploads.yourdomain.com
   {
     "AllowedHeaders": ["*"],
     "AllowedMethods": ["GET", "PUT", "POST", "DELETE", "HEAD"],
-    "AllowedOrigins": [
-      "https://yourdomain.com",
-      "http://localhost:3000"
-    ],
+    "AllowedOrigins": ["https://yourdomain.com", "http://localhost:3000"],
     "ExposeHeaders": ["ETag", "Content-Length"],
     "MaxAgeSeconds": 3000
   }
@@ -142,12 +146,14 @@ R2_PUBLIC_URL=https://uploads.yourdomain.com
 ### Step 4: Attach Policy
 
 Option A: Use AWS Managed Policy (Simple)
+
 1. Select **Attach policies directly**
 2. Search for `AmazonS3FullAccess`
 3. Check the box
 4. Click **Next** → **Create User**
 
 Option B: Custom Policy (More Secure)
+
 1. Select **Attach policies directly**
 2. Click **Create Policy**
 3. Choose JSON and paste:
@@ -158,12 +164,7 @@ Option B: Custom Policy (More Secure)
   "Statement": [
     {
       "Effect": "Allow",
-      "Action": [
-        "s3:PutObject",
-        "s3:GetObject",
-        "s3:DeleteObject",
-        "s3:ListBucket"
-      ],
+      "Action": ["s3:PutObject", "s3:GetObject", "s3:DeleteObject", "s3:ListBucket"],
       "Resource": [
         "arn:aws:s3:::tripsync-uploads-production",
         "arn:aws:s3:::tripsync-uploads-production/*"
@@ -200,6 +201,7 @@ AWS_REGION=us-east-1
 ```
 
 ### Cost Example (S3)
+
 - 50 GB storage: $1.15/month
 - 500 GB transfers: **$45/month** (expensive!)
 - 1M API calls: $5/month
@@ -219,12 +221,14 @@ MAX_DOCUMENT_SIZE = 10MB   // PDFs, documents
 ### Allowed File Types
 
 **Images:**
+
 - JPEG/JPG
 - PNG
 - HEIC (iPhone photos)
 - WebP
 
 **Documents:**
+
 - PDF
 - JPEG/JPG/PNG
 
@@ -240,6 +244,7 @@ MAX_DOCUMENT_SIZE = 10MB   // PDFs, documents
 ## Testing Your Setup
 
 ### Test with Script
+
 ```bash
 npm run test:services
 ```
@@ -268,10 +273,12 @@ Should return a temporary signed URL.
 ### Check Storage Usage
 
 **R2:**
+
 1. Go to R2 dashboard
 2. View storage metrics
 
 **S3:**
+
 ```bash
 aws s3 ls s3://tripsync-uploads-production --summarize --human-readable --recursive
 ```
@@ -279,6 +286,7 @@ aws s3 ls s3://tripsync-uploads-production --summarize --human-readable --recurs
 ### Check Upload Errors
 
 Errors are logged in your application logs:
+
 ```bash
 docker-compose -f docker-compose.prod.yml logs app | grep "upload"
 ```
@@ -288,6 +296,7 @@ docker-compose -f docker-compose.prod.yml logs app | grep "upload"
 Create a lifecycle policy to delete old test files:
 
 **S3 Lifecycle Rule:**
+
 1. Go to bucket → **Management** → **Lifecycle rules**
 2. Create rule to delete objects older than 90 days with prefix `test-`
 
@@ -303,9 +312,11 @@ Currently no automatic lifecycle rules - clean manually or via script.
 **Cause:** Invalid credentials or insufficient permissions
 
 **Fix:**
+
 1. Verify credentials in `.env.production`
 2. Check IAM policy includes `s3:PutObject`
 3. Test credentials:
+
 ```bash
 aws s3 ls s3://your-bucket --profile tripsync
 ```
@@ -315,6 +326,7 @@ aws s3 ls s3://your-bucket --profile tripsync
 **Cause:** CORS not configured correctly
 
 **Fix:**
+
 1. Add your domain to `AllowedOrigins`
 2. Include `http://localhost:3000` for testing
 3. Wait 5 minutes for changes to propagate
@@ -324,6 +336,7 @@ aws s3 ls s3://your-bucket --profile tripsync
 **Cause:** Missing signed URL or incorrect permissions
 
 **Fix:**
+
 1. Check signed URL generation in logs
 2. Verify `s3:GetObject` permission
 3. Test signed URL directly in browser
@@ -333,6 +346,7 @@ aws s3 ls s3://your-bucket --profile tripsync
 **Cause:** Region mismatch or large files
 
 **Fix:**
+
 1. Choose region closest to users
 2. Implement client-side compression
 3. Use multipart upload for files >100MB
@@ -344,6 +358,7 @@ aws s3 ls s3://your-bucket --profile tripsync
 ### R2 to S3 (or vice versa)
 
 1. Use `rclone` to sync buckets:
+
 ```bash
 rclone sync r2:tripsync-uploads s3:tripsync-uploads
 ```
@@ -365,6 +380,7 @@ For better performance, put CloudFlare in front of your storage:
 4. Update `R2_PUBLIC_URL` or add CDN URL
 
 **Benefits:**
+
 - Faster global access
 - Lower bandwidth costs
 - DDoS protection

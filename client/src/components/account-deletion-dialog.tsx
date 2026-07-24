@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState } from 'react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -8,10 +8,10 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { AlertTriangle } from "lucide-react";
+} from '@/components/ui/alert-dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { AlertTriangle } from 'lucide-react';
 
 interface AccountDeletionDialogProps {
   isOpen: boolean;
@@ -24,20 +24,20 @@ export function AccountDeletionDialog({
   isOpen,
   onClose,
   onConfirm,
-  isDeleting = false
+  isDeleting = false,
 }: AccountDeletionDialogProps) {
-  const [confirmText, setConfirmText] = useState("");
-  const isConfirmed = confirmText === "DELETE";
+  const [confirmText, setConfirmText] = useState('');
+  const isConfirmed = confirmText === 'DELETE';
 
   const handleConfirm = async () => {
     if (isConfirmed) {
       await onConfirm();
-      setConfirmText("");
+      setConfirmText('');
     }
   };
 
   const handleClose = () => {
-    setConfirmText("");
+    setConfirmText('');
     onClose();
   };
 
@@ -48,19 +48,16 @@ export function AccountDeletionDialog({
           <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-red-100">
             <AlertTriangle className="h-6 w-6 text-red-600" />
           </div>
-          <AlertDialogTitle className="text-center">
-            Delete Account Permanently?
-          </AlertDialogTitle>
+          <AlertDialogTitle className="text-center">Delete Account Permanently?</AlertDialogTitle>
           <AlertDialogDescription className="text-center">
-            This action cannot be undone. This will permanently delete your account and remove all your data from our servers.
+            This action cannot be undone. This will permanently delete your account and remove all
+            your data from our servers.
           </AlertDialogDescription>
         </AlertDialogHeader>
 
         <div className="space-y-4">
           <div className="rounded-lg border border-red-200 bg-red-50 p-4">
-            <p className="text-sm font-medium text-red-900 mb-2">
-              This will permanently delete:
-            </p>
+            <p className="text-sm font-medium text-red-900 mb-2">This will permanently delete:</p>
             <ul className="text-sm text-red-800 space-y-1 list-disc list-inside">
               <li>All your trips and itineraries</li>
               <li>All expenses and settlements</li>
@@ -93,7 +90,7 @@ export function AccountDeletionDialog({
             disabled={!isConfirmed || isDeleting}
             className="bg-red-600 hover:bg-red-700"
           >
-            {isDeleting ? "Deleting..." : "Delete Account"}
+            {isDeleting ? 'Deleting...' : 'Delete Account'}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

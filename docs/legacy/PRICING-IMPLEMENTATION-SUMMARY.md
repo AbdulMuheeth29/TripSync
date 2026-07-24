@@ -3,6 +3,7 @@
 ## ✅ Completed
 
 ### 1. Research & Analysis
+
 - **Competitor Analysis**: Analyzed Wanderlog ($39.99/year), TripIt Pro ($49/year), Plan Harmony ($9.99/trip), Splitwise Pro ($3/month)
 - **Market Research**: Reviewed 2025 SaaS pricing trends, freemium vs subscription models
 - **Strategy Document**: Created comprehensive `PRICING-STRATEGY.md` with pricing psychology, feature allocation, implementation roadmap
@@ -12,11 +13,13 @@
 **Recommended Model**: Freemium + Subscription
 
 **Pricing Tiers**:
+
 - **Free**: $0 - 3 active trips, 6 members, basic features
 - **Pro**: $4.99/month or $39/year (34% savings) - Unlimited trips, premium features
 - **Teams**: $9.99/month or $89/year - Custom branding, analytics, API access
 
 **Key Differentiators**:
+
 - Lower than TripIt Pro ($49) - competitive advantage
 - Same as Wanderlog Pro ($39.99) - market parity
 - 34% annual discount encourages commitment
@@ -27,6 +30,7 @@
 **Created**: `client/src/pages/pricing.tsx`
 
 **Sections**:
+
 - ✅ Hero with annual/monthly toggle
 - ✅ Three pricing cards (Free, Pro, Teams) with feature lists
 - ✅ "Most Popular" badge on Pro plan
@@ -37,6 +41,7 @@
 - ✅ Responsive design matching TripSync luxury aesthetic
 
 **Features**:
+
 - Glassmorphism effects
 - Smooth animations
 - Annual/monthly pricing toggle
@@ -47,6 +52,7 @@
 ### 4. Routing Updated
 
 **Changes**:
+
 - ✅ Added `/pricing` route in `App.tsx`
 - ✅ Imported `PricingPage` component
 - ✅ Added "Pricing" link to landing page navigation
@@ -58,6 +64,7 @@
 ### Phase 1: Backend Setup (Week 1)
 
 #### 1. Database Schema
+
 ```sql
 -- Add to users table
 ALTER TABLE users ADD COLUMN subscription_tier VARCHAR(20) DEFAULT 'free';
@@ -79,11 +86,13 @@ CREATE TABLE subscriptions (
 ```
 
 #### 2. Stripe Integration
+
 ```bash
 npm install stripe @stripe/stripe-js
 ```
 
 **Environment Variables**:
+
 ```bash
 STRIPE_SECRET_KEY=sk_live_...
 STRIPE_PUBLISHABLE_KEY=pk_live_...
@@ -91,6 +100,7 @@ STRIPE_WEBHOOK_SECRET=whsec_...
 ```
 
 **Create Products in Stripe Dashboard**:
+
 - TripSync Pro Monthly: $4.99/month
 - TripSync Pro Annual: $39/year
 - TripSync Teams Monthly: $9.99/month
@@ -99,6 +109,7 @@ STRIPE_WEBHOOK_SECRET=whsec_...
 #### 3. API Endpoints
 
 **Create**:
+
 - `POST /api/stripe/checkout` - Create checkout session
 - `POST /api/stripe/webhook` - Handle Stripe webhooks
 - `POST /api/stripe/portal` - Customer billing portal
@@ -107,26 +118,28 @@ STRIPE_WEBHOOK_SECRET=whsec_...
 #### 4. Feature Gates
 
 **Implement Usage Limits**:
+
 ```typescript
 // Example: Trip creation limit
 if (user.subscriptionTier === 'free') {
   const activeTripCount = await db.trip.count({
     where: {
       organizerId: user.id,
-      status: { in: ['planning', 'booked', 'active'] }
-    }
+      status: { in: ['planning', 'booked', 'active'] },
+    },
   });
 
   if (activeTripCount >= 3) {
     return res.status(403).json({
       error: 'Free plan limited to 3 active trips',
-      upgradeUrl: '/pricing'
+      upgradeUrl: '/pricing',
     });
   }
 }
 ```
 
 **Free Tier Limits**:
+
 - 3 active trips max
 - 6 members per trip max
 - 1 AI generation per trip
@@ -135,6 +148,7 @@ if (user.subscriptionTier === 'free') {
 - No offline mode
 
 **Pro Tier Access**:
+
 - Unlimited everything
 - All premium features unlocked
 
@@ -145,6 +159,7 @@ if (user.subscriptionTier === 'free') {
 #### 1. Upgrade CTAs
 
 Add throughout the app:
+
 ```tsx
 // When user hits limit
 <UpgradePrompt>
@@ -157,6 +172,7 @@ Add throughout the app:
 ```
 
 **Locations**:
+
 - Dashboard (when hitting 3 trips)
 - Trip detail (when hitting member limit)
 - Photo upload (when hitting 5 photos)
@@ -166,6 +182,7 @@ Add throughout the app:
 #### 2. Subscription Management
 
 **Create** `/settings/billing` page:
+
 - Current plan display
 - Upgrade/downgrade buttons
 - Cancel subscription
@@ -175,12 +192,14 @@ Add throughout the app:
 #### 3. Success/Cancel Flows
 
 **After Checkout**:
+
 - Redirect to `/dashboard?upgrade=success`
 - Show success toast
 - Confetti animation
 - Email confirmation
 
 **After Cancel**:
+
 - Redirect to `/pricing?upgrade=canceled`
 - Show "Try again" message
 
@@ -191,18 +210,21 @@ Add throughout the app:
 Implement Pro-only features identified in strategy:
 
 **High Priority** (Week 3-4):
+
 - [ ] Interactive map view (Pro only)
 - [ ] Offline mode / PWA (Pro only)
 - [ ] Calendar export (Pro only)
 - [ ] Email import (Pro only)
 
 **Medium Priority** (Week 5-6):
+
 - [ ] Place discovery (Pro only)
 - [ ] Receipt OCR (Pro only)
 - [ ] Currency conversion (Pro only)
 - [ ] Route optimization (Pro only)
 
 **Nice to Have** (Week 7-8):
+
 - [ ] AI Trip Concierge chat (Pro only)
 - [ ] Unlimited photos (Pro only)
 - [ ] Priority support
@@ -213,12 +235,14 @@ Implement Pro-only features identified in strategy:
 ## 📊 Launch Strategy
 
 ### Soft Launch (Week 1)
+
 1. Enable pricing page (already done!)
 2. Add "Pricing" link to navigation (already done!)
 3. Start collecting feedback
 4. Build waitlist for Pro
 
 ### Pro Launch (Week 2-3)
+
 1. Complete Stripe integration
 2. Enable payment processing
 3. Launch announcement:
@@ -227,12 +251,15 @@ Implement Pro-only features identified in strategy:
    - Product Hunt launch
 
 ### Early Bird Offer
+
 **Limited Time**: First 1,000 users get **$29/year** (instead of $39)
+
 - Creates urgency
 - Drives early adoption
 - Builds loyalty
 
 ### Marketing Messages
+
 - "Save 15 hours per trip with AI-powered planning"
 - "Pro users save $200 on average through budget optimization"
 - "Join 10,000+ travelers planning amazing trips"
@@ -243,6 +270,7 @@ Implement Pro-only features identified in strategy:
 ## 💰 Revenue Projections
 
 ### Conservative Scenario (Year 1)
+
 - 5,000 total users
   - 70% free (3,500 users) = $0
   - 25% pro (1,250 users @ $39/year) = $48,750
@@ -250,6 +278,7 @@ Implement Pro-only features identified in strategy:
 - **Total ARR**: $71,000
 
 ### Moderate Scenario (Year 1)
+
 - 10,000 total users
   - 65% free (6,500 users) = $0
   - 30% pro (3,000 users @ $39/year) = $117,000
@@ -257,6 +286,7 @@ Implement Pro-only features identified in strategy:
 - **Total ARR**: $161,500
 
 ### Optimistic Scenario (Year 1)
+
 - 20,000 total users
   - 60% free (12,000 users) = $0
   - 35% pro (7,000 users @ $39/year) = $273,000
@@ -270,6 +300,7 @@ Implement Pro-only features identified in strategy:
 ### Pricing Page Features
 
 **Visual Elements**:
+
 - Clean, modern layout matching TripSync's luxury aesthetic
 - Glassmorphism effects on cards
 - Check/X icons for feature lists
@@ -278,6 +309,7 @@ Implement Pro-only features identified in strategy:
 - Responsive grid layout
 
 **Psychology Elements**:
+
 - Annual toggle with "Save 34%" badge
 - Savings amount displayed ($20.88 saved)
 - Social proof (10,000+ trips, trusted worldwide)
@@ -286,6 +318,7 @@ Implement Pro-only features identified in strategy:
 - Multiple CTAs (Get Started Free, Start Pro Trial)
 
 **Accessibility**:
+
 - Keyboard navigation
 - Screen reader optimized
 - High contrast mode support
@@ -297,6 +330,7 @@ Implement Pro-only features identified in strategy:
 ## 📋 Checklist: Making Pricing Live
 
 ### Backend Tasks
+
 - [ ] Run database migrations (add subscription columns)
 - [ ] Set up Stripe account
 - [ ] Create Stripe products and prices
@@ -307,6 +341,7 @@ Implement Pro-only features identified in strategy:
 - [ ] Add subscription status to user context
 
 ### Frontend Tasks
+
 - [x] Create pricing page component ✅
 - [x] Add pricing route to App.tsx ✅
 - [x] Add pricing link to navigation ✅
@@ -318,6 +353,7 @@ Implement Pro-only features identified in strategy:
 - [ ] Show feature locks for free users
 
 ### Testing
+
 - [ ] Test free tier limits (3 trips, 6 members, 5 photos)
 - [ ] Test upgrade flow (free → pro)
 - [ ] Test annual vs monthly pricing
@@ -327,6 +363,7 @@ Implement Pro-only features identified in strategy:
 - [ ] Test edge cases (expired subscription, payment failure)
 
 ### Marketing & Launch
+
 - [ ] Write launch announcement
 - [ ] Create email campaign for existing users
 - [ ] Design social media graphics
@@ -336,6 +373,7 @@ Implement Pro-only features identified in strategy:
 - [ ] Write help docs for billing
 
 ### Monitoring
+
 - [ ] Set up conversion tracking
 - [ ] Monitor MRR/ARR
 - [ ] Track churn rate
@@ -350,6 +388,7 @@ Implement Pro-only features identified in strategy:
 ### 1. Stripe Checkout Flow
 
 **Client-side (Pricing Page)**:
+
 ```typescript
 async function handleUpgrade(tier: 'pro' | 'teams', isAnnual: boolean) {
   const response = await fetch('/api/stripe/checkout', {
@@ -365,6 +404,7 @@ async function handleUpgrade(tier: 'pro' | 'teams', isAnnual: boolean) {
 ```
 
 **Server-side**:
+
 ```typescript
 // POST /api/stripe/checkout
 app.post('/api/stripe/checkout', async (req, res) => {
@@ -372,8 +412,12 @@ app.post('/api/stripe/checkout', async (req, res) => {
   const user = req.user;
 
   const priceId = isAnnual
-    ? (tier === 'pro' ? STRIPE_PRICE_PRO_ANNUAL : STRIPE_PRICE_TEAMS_ANNUAL)
-    : (tier === 'pro' ? STRIPE_PRICE_PRO_MONTHLY : STRIPE_PRICE_TEAMS_MONTHLY);
+    ? tier === 'pro'
+      ? STRIPE_PRICE_PRO_ANNUAL
+      : STRIPE_PRICE_TEAMS_ANNUAL
+    : tier === 'pro'
+      ? STRIPE_PRICE_PRO_MONTHLY
+      : STRIPE_PRICE_TEAMS_MONTHLY;
 
   const session = await stripe.checkout.sessions.create({
     customer_email: user.email,
@@ -403,15 +447,15 @@ app.post('/api/stripe/webhook', async (req, res) => {
         where: { id: session.metadata.userId },
         data: {
           subscriptionTier: session.metadata.tier,
-          subscriptionExpiresAt: new Date(session.current_period_end * 1000)
-        }
+          subscriptionExpiresAt: new Date(session.current_period_end * 1000),
+        },
       });
       break;
 
     case 'customer.subscription.deleted':
       await db.user.update({
         where: { email: event.data.object.customer_email },
-        data: { subscriptionTier: 'free', subscriptionExpiresAt: null }
+        data: { subscriptionTier: 'free', subscriptionExpiresAt: null },
       });
       break;
   }
@@ -427,7 +471,7 @@ export function requirePro(req, res, next) {
   if (req.user.subscriptionTier === 'free') {
     return res.status(403).json({
       error: 'This feature requires TripSync Pro',
-      upgradeUrl: '/pricing'
+      upgradeUrl: '/pricing',
     });
   }
   next();
@@ -446,12 +490,14 @@ app.get('/api/trips/:id/map', requirePro, async (req, res) => {
 ### Key Performance Indicators (KPIs)
 
 **Conversion Metrics**:
+
 - Landing page → Sign up: **Target 5-10%**
 - Free user → Pro trial: **Target 15-20%**
 - Pro trial → Paid: **Target 40-50%**
 - Overall free → paid: **Target 6-10%**
 
 **Revenue Metrics**:
+
 - MRR (Monthly Recurring Revenue): Track monthly
 - ARR (Annual Recurring Revenue): Track yearly
 - ARPU (Average Revenue Per User): Target $15-25
@@ -460,6 +506,7 @@ app.get('/api/trips/:id/map', requirePro, async (req, res) => {
 - LTV:CAC Ratio: Target 3:1 or higher
 
 **Engagement Metrics**:
+
 - Free users creating 2nd trip: **60%+**
 - Free users hitting limits: **30%+** (shows upgrade intent)
 - Pro users creating 5+ trips: **70%+**
@@ -467,6 +514,7 @@ app.get('/api/trips/:id/map', requirePro, async (req, res) => {
 - Annual churn rate: **<20%**
 
 **Feature Usage (Pro only)**:
+
 - Map view usage: 80%+ of Pro users
 - Offline access: 40%+ of Pro users
 - AI generations: 3+ per trip average
@@ -477,19 +525,23 @@ app.get('/api/trips/:id/map', requirePro, async (req, res) => {
 ## 🎁 Growth Tactics
 
 ### 1. Referral Program (Future)
+
 "Give $10, Get $10" - Both referrer and friend get $10 credit
 
 ### 2. Annual Discounts
+
 - Black Friday: 50% off ($19.50/year)
 - Launch special: $29/year (limited time)
 - Student discount: 20% off with .edu email
 
 ### 3. Content Marketing
+
 - "How to Plan a Group Trip in 10 Minutes"
 - "The Ultimate Bachelorette Planning Guide"
 - "Budget Travel Hacks for Groups"
 
 ### 4. Partnerships
+
 - Travel bloggers (affiliate program, 20% commission)
 - Wedding planners (Teams plan discount)
 - Corporate travel (Enterprise tier)
@@ -499,11 +551,13 @@ app.get('/api/trips/:id/map', requirePro, async (req, res) => {
 ## 📞 Support & Resources
 
 ### Customer Support
+
 - Free tier: Community forum, email (48h response)
 - Pro tier: Priority email (24h response)
 - Teams tier: Dedicated support, Slack/phone
 
 ### Documentation
+
 - Billing FAQ
 - How to upgrade/downgrade
 - Refund policy
@@ -511,6 +565,7 @@ app.get('/api/trips/:id/map', requirePro, async (req, res) => {
 - API documentation (Teams tier)
 
 ### Legal
+
 - Terms of Service update (subscription terms)
 - Privacy Policy (payment data)
 - Refund Policy (14-day money-back guarantee)
@@ -522,6 +577,7 @@ app.get('/api/trips/:id/map', requirePro, async (req, res) => {
 **Status**: Pricing page is READY and LIVE! ✅
 
 **Next Immediate Actions**:
+
 1. Test the pricing page (`/pricing`)
 2. Set up Stripe account
 3. Implement backend subscription handling
@@ -529,6 +585,7 @@ app.get('/api/trips/:id/map', requirePro, async (req, res) => {
 5. Launch with early bird pricing
 
 **Timeline to Revenue**: 2-3 weeks
+
 - Week 1: Backend setup (Stripe, database)
 - Week 2: Feature gates, testing
 - Week 3: Launch! 🚀

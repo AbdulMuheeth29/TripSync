@@ -65,6 +65,7 @@
 **Technology**: React 19 + TypeScript + Vite
 
 **Key Components:**
+
 - `App.tsx` - Main application router
 - `pages/` - Route pages (Landing, Dashboard, Trip Detail, etc.)
 - `components/` - Reusable UI components (Radix UI)
@@ -72,6 +73,7 @@
 - `hooks/` - Custom React hooks
 
 **Features:**
+
 - Progressive Web App (PWA) with offline support
 - Service Worker for caching
 - Push notifications
@@ -79,6 +81,7 @@
 - Mobile-first responsive design
 
 **State Management:**
+
 - TanStack Query for server state
 - React Context for auth
 - Local state with hooks
@@ -92,6 +95,7 @@
 #### 2.1 **API Routes** (`server/routes.ts`)
 
 **Endpoints**:
+
 - `/api/auth/*` - Authentication (register, login, logout, password reset)
 - `/api/trips/*` - Trip CRUD, itinerary, expenses
 - `/api/upload/*` - File uploads
@@ -99,6 +103,7 @@
 - `/api/atlas/*` - AI assistant
 
 **Middleware**:
+
 - `requireAuth` - JWT verification
 - `requireTripAccess` - Trip permission checking
 - `requireRole` - Role-based access (organizer, planner, member)
@@ -108,12 +113,14 @@
 #### 2.2 **Auth Service** (`server/auth.ts`)
 
 **Features**:
+
 - JWT token generation and verification
 - Password hashing (bcrypt)
 - Token blacklist (Redis-backed)
 - Session management
 
 **Flow**:
+
 ```
 User → Register/Login → JWT Token → Store in localStorage
                                    → Include in Authorization header
@@ -125,6 +132,7 @@ User → Register/Login → JWT Token → Store in localStorage
 **Integration**: Anthropic Claude Sonnet 4.5
 
 **Capabilities**:
+
 - Trip itinerary generation
 - Atlas AI assistant (conversational)
 - Packing list generation
@@ -139,16 +147,19 @@ User → Register/Login → JWT Token → Store in localStorage
 **Interface**: `IStorage` (abstract)
 
 **Implementations**:
+
 1. **PostgreSQL** (`server/storage-pg.ts`) - Production
 2. **In-Memory** (`server/storage.ts`) - Development/Testing
 
 **Methods**: ~50+ CRUD operations
+
 - Users, Trips, Members, Itinerary
 - Expenses, Votes, Comments
 - Photos, Documents, Polls
 - Preferences, Analytics
 
 **Caching**: Redis-backed with key patterns
+
 - `user:{userId}`
 - `trip:{tripId}`
 - `trip:{tripId}:members`
@@ -159,15 +170,18 @@ User → Register/Login → JWT Token → Store in localStorage
 #### 2.5 **File Upload** (`server/upload-routes.ts`, `server/cloud-storage.ts`)
 
 **Support**:
+
 - AWS S3
 - Cloudflare R2 (S3-compatible)
 
 **File Types**:
+
 - Photos: JPG, PNG, HEIC, WebP (max 25MB)
 - Documents: PDF, JPG, PNG (max 10MB)
 - Receipts: JPG, PNG (max 10MB)
 
 **Storage Structure**:
+
 ```
 bucket/
 ├── photos/
@@ -183,6 +197,7 @@ bucket/
 **Provider**: Configurable SMTP (Gmail, SendGrid, AWS SES)
 
 **Email Types**:
+
 - Welcome email (registration)
 - Password reset
 - Trip invitation
@@ -198,6 +213,7 @@ bucket/
 **Primary Database**: PostgreSQL 16
 
 **Schema** (`shared/schema.ts`):
+
 - `users` - User accounts
 - `trips` - Trip metadata
 - `trip_members` - User-trip relationships
@@ -217,12 +233,14 @@ bucket/
 - `subscriptions` - Billing data
 
 **ORM**: Drizzle ORM
+
 - Type-safe queries
 - Schema-first approach
 - Migration generation
 - Connection pooling (pg)
 
 **Migrations**: `migrations/` folder
+
 - Version controlled
 - Run with `npm run db:migrate`
 - Rollback support
@@ -234,6 +252,7 @@ bucket/
 **Technology**: Redis 7
 
 **Usage**:
+
 - Session storage
 - Token blacklist
 - API response caching
@@ -243,6 +262,7 @@ bucket/
 **Fallback**: In-memory if Redis unavailable
 
 **TTLs**:
+
 - User sessions: 7 days
 - API cache: 5 minutes
 - Token blacklist: Until expiry
@@ -255,15 +275,18 @@ bucket/
 **Provider**: Anthropic Claude API
 
 **Models**:
+
 - Claude Sonnet 4.5 (primary)
 - Configurable model selection
 
 **Prompt Engineering**:
+
 - System prompts for consistency
 - Context window: 200K tokens
 - Streaming responses (for chat)
 
 **Safety**:
+
 - Input validation
 - Output sanitization
 - Rate limiting
@@ -274,10 +297,12 @@ bucket/
 ### 6. **Storage Layer** (Files)
 
 **Providers**:
+
 - AWS S3
 - Cloudflare R2 (recommended - cheaper)
 
 **Features**:
+
 - Pre-signed URLs (secure access)
 - Public URLs (optional)
 - Multipart upload (large files)
@@ -290,21 +315,25 @@ bucket/
 ### 7. **External Services**
 
 #### Stripe (Optional)
+
 - Checkout sessions
 - Subscription webhooks
 - Customer portal
 
 #### Web Push (Optional)
+
 - VAPID keys
 - Push subscriptions per user
 - Notification triggers
 
 #### Sentry (Optional)
+
 - Error tracking
 - Performance monitoring
 - Release tracking
 
 #### Analytics (Optional)
+
 - PostHog (recommended)
 - Google Analytics (fallback)
 
@@ -528,6 +557,7 @@ User Roles (per trip):
 ## Performance Optimization
 
 ### Frontend
+
 - Code splitting (React.lazy)
 - Image optimization (WebP, lazy loading)
 - Service Worker caching
@@ -535,6 +565,7 @@ User Roles (per trip):
 - Debounced search/filters
 
 ### Backend
+
 - Redis caching (5 min TTL)
 - Database connection pooling
 - Query optimization (indexes)
@@ -542,6 +573,7 @@ User Roles (per trip):
 - Gzip compression
 
 ### Database
+
 - Indexes on foreign keys
 - Composite indexes for common queries
 - VACUUM and ANALYZE (weekly)
@@ -552,6 +584,7 @@ User Roles (per trip):
 ## Scalability Considerations
 
 ### Current Limits (Single Server)
+
 - ~500 concurrent users
 - ~1000 trips
 - ~10,000 itinerary items
@@ -560,16 +593,19 @@ User Roles (per trip):
 ### Scaling Strategies (Future)
 
 **Horizontal Scaling**:
+
 - Multiple app instances behind load balancer
 - Session stored in Redis (not in-memory)
 - Database read replicas
 
 **Vertical Scaling**:
+
 - Increase server resources
 - Optimize queries
 - Add database indexes
 
 **Service Separation**:
+
 - Separate AI service (dedicated instance)
 - Separate file upload service
 - Background job queue (Bull + Redis)
@@ -579,6 +615,7 @@ User Roles (per trip):
 ## Disaster Recovery
 
 **Backups**:
+
 - Database: Daily automated backups
 - Files: S3/R2 versioning enabled
 - Code: GitHub (version controlled)
@@ -587,6 +624,7 @@ User Roles (per trip):
 **Recovery Point Objective (RPO)**: 24 hours
 
 **Procedure**:
+
 1. Restore database from backup
 2. Redeploy app from git
 3. Verify health check
@@ -597,16 +635,19 @@ User Roles (per trip):
 ## Monitoring & Observability
 
 **Application**:
+
 - Sentry (errors, performance)
 - Health endpoint (/api/health?detailed=true)
 - Docker stats (CPU, memory)
 
 **Database**:
+
 - Query performance (pg_stat_statements)
 - Connection count
 - Disk usage
 
 **Business**:
+
 - PostHog/GA (user behavior)
 - Sign-ups, DAU, retention
 - Feature usage
@@ -616,32 +657,38 @@ User Roles (per trip):
 ## Technology Decisions & Rationale
 
 ### Why React 19?
+
 - Latest version with improved performance
 - Better TypeScript support
 - Server Components (future use)
 
 ### Why PostgreSQL?
+
 - Robust, ACID-compliant
 - Excellent JSON support
 - Strong ecosystem
 
 ### Why Drizzle ORM?
+
 - Type-safe (better than Prisma for TS)
 - Lightweight
 - SQL-like syntax
 
 ### Why Redis?
+
 - Fast in-memory cache
 - Pub/sub for real-time (future)
 - Widely supported
 
 ### Why Anthropic Claude?
+
 - Best reasoning for complex itineraries
 - 200K context window
 - Strong safety features
 - Cheaper than GPT-4
 
 ### Why Docker?
+
 - Consistent environments
 - Easy deployment
 - Scales horizontally
@@ -651,16 +698,19 @@ User Roles (per trip):
 ## Future Architecture Changes
 
 **v1.1**:
+
 - Migrate chat to PostgreSQL
 - Add WebSocket for real-time chat
 - Background job queue (email sending, AI generation)
 
 **v1.2**:
+
 - Separate microservices (AI, Upload)
 - Kubernetes deployment
 - CDN for static assets
 
 **v2.0**:
+
 - GraphQL API (alongside REST)
 - Mobile apps (React Native)
 - Multi-tenancy support

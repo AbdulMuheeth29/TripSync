@@ -1,13 +1,20 @@
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Label } from "@/components/ui/label";
-import { Separator } from "@/components/ui/separator";
-import { Badge } from "@/components/ui/badge";
-import { Receipt, Users, DollarSign, TrendingUp, FileImage, Calendar, Info } from "lucide-react";
-import { useState } from "react";
-import type { ExportFormat } from "./export-format-selector";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Label } from '@/components/ui/label';
+import { Separator } from '@/components/ui/separator';
+import { Badge } from '@/components/ui/badge';
+import { Receipt, Users, DollarSign, TrendingUp, FileImage, Calendar, Info } from 'lucide-react';
+import { useState } from 'react';
+import type { ExportFormat } from './export-format-selector';
 
 interface ExportOption {
   id: string;
@@ -40,64 +47,64 @@ export interface ExportOptions {
 
 const EXPORT_OPTIONS: ExportOption[] = [
   {
-    id: "includeExpenses",
-    label: "All Expenses",
-    description: "Complete list of all expenses with amounts and categories",
+    id: 'includeExpenses',
+    label: 'All Expenses',
+    description: 'Complete list of all expenses with amounts and categories',
     icon: Receipt,
     defaultChecked: true,
-    recommended: true
+    recommended: true,
   },
   {
-    id: "includeSplitDetails",
-    label: "Split Details",
-    description: "How each expense was divided among group members",
+    id: 'includeSplitDetails',
+    label: 'Split Details',
+    description: 'How each expense was divided among group members',
     icon: Users,
     defaultChecked: true,
-    recommended: true
+    recommended: true,
   },
   {
-    id: "includeSettlements",
-    label: "Settlement Summary",
-    description: "Who owes whom and payment status",
+    id: 'includeSettlements',
+    label: 'Settlement Summary',
+    description: 'Who owes whom and payment status',
     icon: DollarSign,
     defaultChecked: true,
-    recommended: true
+    recommended: true,
   },
   {
-    id: "includeBudgetOverview",
-    label: "Budget Overview",
-    description: "Total budget vs. actual spending comparison",
+    id: 'includeBudgetOverview',
+    label: 'Budget Overview',
+    description: 'Total budget vs. actual spending comparison',
     icon: TrendingUp,
-    defaultChecked: true
+    defaultChecked: true,
   },
   {
-    id: "includeReceipts",
-    label: "Receipt Images",
-    description: "Attached receipt photos (PDF only, increases file size)",
+    id: 'includeReceipts',
+    label: 'Receipt Images',
+    description: 'Attached receipt photos (PDF only, increases file size)',
     icon: FileImage,
-    defaultChecked: false
+    defaultChecked: false,
   },
   {
-    id: "includeDateRange",
-    label: "Date Range & Trip Info",
-    description: "Trip dates, destination, and timeline",
+    id: 'includeDateRange',
+    label: 'Date Range & Trip Info',
+    description: 'Trip dates, destination, and timeline',
     icon: Calendar,
-    defaultChecked: true
+    defaultChecked: true,
   },
   {
-    id: "includeParticipants",
-    label: "Participant List",
-    description: "Names and emails of all trip members",
+    id: 'includeParticipants',
+    label: 'Participant List',
+    description: 'Names and emails of all trip members',
     icon: Users,
-    defaultChecked: true
+    defaultChecked: true,
   },
   {
-    id: "includeCharts",
-    label: "Visual Charts",
-    description: "Spending breakdown and category charts (PDF only)",
+    id: 'includeCharts',
+    label: 'Visual Charts',
+    description: 'Spending breakdown and category charts (PDF only)',
     icon: TrendingUp,
-    defaultChecked: true
-  }
+    defaultChecked: true,
+  },
 ];
 
 export function ExportOptionsSelector({
@@ -106,35 +113,44 @@ export function ExportOptionsSelector({
   onBack,
   onExport,
   format,
-  tripName
+  tripName,
 }: ExportOptionsSelectorProps) {
   const [options, setOptions] = useState<ExportOptions>(
-    EXPORT_OPTIONS.reduce((acc, option) => ({
-      ...acc,
-      [option.id]: option.defaultChecked
-    }), {} as ExportOptions)
+    EXPORT_OPTIONS.reduce(
+      (acc, option) => ({
+        ...acc,
+        [option.id]: option.defaultChecked,
+      }),
+      {} as ExportOptions
+    )
   );
 
   const handleToggle = (optionId: keyof ExportOptions) => {
-    setOptions(prev => ({
+    setOptions((prev) => ({
       ...prev,
-      [optionId]: !prev[optionId]
+      [optionId]: !prev[optionId],
     }));
   };
 
   const handleSelectAll = () => {
-    const allSelected = EXPORT_OPTIONS.reduce((acc, option) => ({
-      ...acc,
-      [option.id]: true
-    }), {} as ExportOptions);
+    const allSelected = EXPORT_OPTIONS.reduce(
+      (acc, option) => ({
+        ...acc,
+        [option.id]: true,
+      }),
+      {} as ExportOptions
+    );
     setOptions(allSelected);
   };
 
   const handleSelectNone = () => {
-    const noneSelected = EXPORT_OPTIONS.reduce((acc, option) => ({
-      ...acc,
-      [option.id]: false
-    }), {} as ExportOptions);
+    const noneSelected = EXPORT_OPTIONS.reduce(
+      (acc, option) => ({
+        ...acc,
+        [option.id]: false,
+      }),
+      {} as ExportOptions
+    );
     setOptions(noneSelected);
   };
 
@@ -143,7 +159,7 @@ export function ExportOptionsSelector({
   };
 
   const selectedCount = Object.values(options).filter(Boolean).length;
-  const isPdfFormat = format === "pdf";
+  const isPdfFormat = format === 'pdf';
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -151,7 +167,8 @@ export function ExportOptionsSelector({
         <DialogHeader>
           <DialogTitle>Customize Your Export</DialogTitle>
           <DialogDescription>
-            Select what to include in your {format.toUpperCase()} export for <strong>{tripName}</strong>
+            Select what to include in your {format.toUpperCase()} export for{' '}
+            <strong>{tripName}</strong>
           </DialogDescription>
         </DialogHeader>
 
@@ -162,18 +179,10 @@ export function ExportOptionsSelector({
               {selectedCount} of {EXPORT_OPTIONS.length} options selected
             </p>
             <div className="flex gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleSelectAll}
-              >
+              <Button variant="outline" size="sm" onClick={handleSelectAll}>
                 Select All
               </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleSelectNone}
-              >
+              <Button variant="outline" size="sm" onClick={handleSelectNone}>
                 Clear All
               </Button>
             </div>
@@ -189,18 +198,18 @@ export function ExportOptionsSelector({
 
               // Disable certain options for non-PDF formats
               const isDisabled =
-                (option.id === "includeReceipts" && !isPdfFormat) ||
-                (option.id === "includeCharts" && !isPdfFormat);
+                (option.id === 'includeReceipts' && !isPdfFormat) ||
+                (option.id === 'includeCharts' && !isPdfFormat);
 
               return (
                 <Card
                   key={option.id}
                   className={`p-4 transition-all ${
                     isDisabled
-                      ? "opacity-50 cursor-not-allowed"
+                      ? 'opacity-50 cursor-not-allowed'
                       : isChecked
-                      ? "border-primary bg-primary/5"
-                      : "cursor-pointer hover:border-primary/50"
+                        ? 'border-primary bg-primary/5'
+                        : 'cursor-pointer hover:border-primary/50'
                   }`}
                   onClick={() => !isDisabled && handleToggle(option.id as keyof ExportOptions)}
                 >
@@ -212,9 +221,11 @@ export function ExportOptionsSelector({
                       className="mt-1"
                     />
 
-                    <div className={`flex h-10 w-10 items-center justify-center rounded-lg ${
-                      isChecked ? "bg-primary text-primary-foreground" : "bg-muted"
-                    }`}>
+                    <div
+                      className={`flex h-10 w-10 items-center justify-center rounded-lg ${
+                        isChecked ? 'bg-primary text-primary-foreground' : 'bg-muted'
+                      }`}
+                    >
                       <Icon className="h-5 w-5" />
                     </div>
 
@@ -222,7 +233,7 @@ export function ExportOptionsSelector({
                       <div className="flex items-center gap-2 mb-1">
                         <Label
                           htmlFor={option.id}
-                          className={`font-semibold ${isDisabled ? "text-muted-foreground" : ""}`}
+                          className={`font-semibold ${isDisabled ? 'text-muted-foreground' : ''}`}
                         >
                           {option.label}
                         </Label>
@@ -237,9 +248,7 @@ export function ExportOptionsSelector({
                           </Badge>
                         )}
                       </div>
-                      <p className="text-sm text-muted-foreground">
-                        {option.description}
-                      </p>
+                      <p className="text-sm text-muted-foreground">{option.description}</p>
                     </div>
                   </div>
                 </Card>
@@ -254,7 +263,8 @@ export function ExportOptionsSelector({
                 <Info className="h-4 w-4 text-blue-600 mt-0.5" />
                 <div>
                   <p className="text-sm text-blue-900 mb-1">
-                    <strong>Note:</strong> Receipt images and charts are only available in PDF exports
+                    <strong>Note:</strong> Receipt images and charts are only available in PDF
+                    exports
                   </p>
                   <p className="text-xs text-blue-700">
                     Switch to PDF format if you need visual elements in your export
@@ -267,7 +277,8 @@ export function ExportOptionsSelector({
           {options.includeReceipts && (
             <Card className="p-3 bg-amber-50 border-amber-200">
               <p className="text-xs text-amber-800">
-                <strong>Large file size:</strong> Including receipt images will significantly increase the export file size
+                <strong>Large file size:</strong> Including receipt images will significantly
+                increase the export file size
               </p>
             </Card>
           )}
@@ -277,11 +288,8 @@ export function ExportOptionsSelector({
           <Button variant="outline" onClick={onBack}>
             Back
           </Button>
-          <Button
-            onClick={handleExport}
-            disabled={selectedCount === 0}
-          >
-            {selectedCount === 0 ? "Select at least one option" : `Export ${format.toUpperCase()}`}
+          <Button onClick={handleExport} disabled={selectedCount === 0}>
+            {selectedCount === 0 ? 'Select at least one option' : `Export ${format.toUpperCase()}`}
           </Button>
         </DialogFooter>
       </DialogContent>

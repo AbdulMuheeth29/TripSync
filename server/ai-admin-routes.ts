@@ -33,7 +33,7 @@ router.get('/dashboard', async (req, res) => {
       costProjection,
       alerts,
       retryStats,
-      preferenceAnalytics
+      preferenceAnalytics,
     ] = await Promise.all([
       getSystemMetrics(7), // Last 7 days
       getAllCircuitBreakerStatus(),
@@ -42,7 +42,7 @@ router.get('/dashboard', async (req, res) => {
       projectMonthlyCost(),
       checkAlerts(),
       Promise.resolve(RetryMetrics.getStats()),
-      getPreferenceAnalytics()
+      getPreferenceAnalytics(),
     ]);
 
     res.json({
@@ -88,13 +88,13 @@ router.get('/dashboard', async (req, res) => {
 
         // Operations breakdown
         operations: systemMetrics.costByOperation,
-      }
+      },
     });
   } catch (error) {
     console.error('Failed to get AI dashboard:', error);
     res.status(500).json({
       success: false,
-      error: 'Failed to load AI dashboard'
+      error: 'Failed to load AI dashboard',
     });
   }
 });
@@ -114,14 +114,14 @@ router.get('/metrics/:operation', async (req, res) => {
       success: true,
       data: {
         operation,
-        ...metrics
-      }
+        ...metrics,
+      },
     });
   } catch (error) {
     console.error('Failed to get operation metrics:', error);
     res.status(500).json({
       success: false,
-      error: 'Failed to load metrics'
+      error: 'Failed to load metrics',
     });
   }
 });
@@ -136,13 +136,13 @@ router.get('/circuit-breakers', async (req, res) => {
 
     res.json({
       success: true,
-      data: status
+      data: status,
     });
   } catch (error) {
     console.error('Failed to get circuit breaker status:', error);
     res.status(500).json({
       success: false,
-      error: 'Failed to load circuit breaker status'
+      error: 'Failed to load circuit breaker status',
     });
   }
 });
@@ -161,15 +161,15 @@ router.post('/circuit-breakers/:name/reset', async (req, res) => {
     // Find the breaker
     const breakerMap: Record<string, any> = {
       'itinerary-generation': aiCircuitBreakers.itineraryGeneration,
-      'suggestions': aiCircuitBreakers.suggestions,
-      'extraction': aiCircuitBreakers.extraction,
+      suggestions: aiCircuitBreakers.suggestions,
+      extraction: aiCircuitBreakers.extraction,
     };
 
     const breaker = breakerMap[name];
     if (!breaker) {
       return res.status(404).json({
         success: false,
-        error: 'Circuit breaker not found'
+        error: 'Circuit breaker not found',
       });
     }
 
@@ -177,13 +177,13 @@ router.post('/circuit-breakers/:name/reset', async (req, res) => {
 
     res.json({
       success: true,
-      message: `Circuit breaker "${name}" reset successfully`
+      message: `Circuit breaker "${name}" reset successfully`,
     });
   } catch (error) {
     console.error('Failed to reset circuit breaker:', error);
     res.status(500).json({
       success: false,
-      error: 'Failed to reset circuit breaker'
+      error: 'Failed to reset circuit breaker',
     });
   }
 });
@@ -198,13 +198,13 @@ router.get('/cache', async (req, res) => {
 
     res.json({
       success: true,
-      data: metrics
+      data: metrics,
     });
   } catch (error) {
     console.error('Failed to get cache metrics:', error);
     res.status(500).json({
       success: false,
-      error: 'Failed to load cache metrics'
+      error: 'Failed to load cache metrics',
     });
   }
 });
@@ -230,13 +230,13 @@ router.get('/costs', async (req, res) => {
           byOperation: projection.breakdown,
         },
         breakdown: systemMetrics.costByOperation,
-      }
+      },
     });
   } catch (error) {
     console.error('Failed to get cost data:', error);
     res.status(500).json({
       success: false,
-      error: 'Failed to load cost data'
+      error: 'Failed to load cost data',
     });
   }
 });
@@ -251,13 +251,13 @@ router.get('/alerts', async (req, res) => {
 
     res.json({
       success: true,
-      data: alerts
+      data: alerts,
     });
   } catch (error) {
     console.error('Failed to get alerts:', error);
     res.status(500).json({
       success: false,
-      error: 'Failed to load alerts'
+      error: 'Failed to load alerts',
     });
   }
 });
@@ -272,13 +272,13 @@ router.get('/learning', async (req, res) => {
 
     res.json({
       success: true,
-      data: analytics
+      data: analytics,
     });
   } catch (error) {
     console.error('Failed to get learning analytics:', error);
     res.status(500).json({
       success: false,
-      error: 'Failed to load learning analytics'
+      error: 'Failed to load learning analytics',
     });
   }
 });
@@ -300,14 +300,14 @@ router.get('/sla', async (req, res) => {
           successRate: metrics.overallSuccessRate,
           totalCalls: metrics.totalCalls,
           cacheHitRate: metrics.overallCacheHitRate,
-        }
-      }
+        },
+      },
     });
   } catch (error) {
     console.error('Failed to get SLA status:', error);
     res.status(500).json({
       success: false,
-      error: 'Failed to load SLA status'
+      error: 'Failed to load SLA status',
     });
   }
 });

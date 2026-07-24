@@ -14,9 +14,9 @@ interface PerformanceMetrics {
   // Custom metrics
   timeToInteractive?: number;
   bundleSize?: number;
-  deviceType?: "mobile" | "tablet" | "desktop";
-  platform?: "ios" | "android" | "web";
-  networkSpeed?: "slow-2g" | "2g" | "3g" | "4g" | "5g" | "offline";
+  deviceType?: 'mobile' | 'tablet' | 'desktop';
+  platform?: 'ios' | 'android' | 'web';
+  networkSpeed?: 'slow-2g' | '2g' | '3g' | '4g' | '5g' | 'offline';
 }
 
 class PerformanceMonitor {
@@ -24,7 +24,7 @@ class PerformanceMonitor {
   private observers: PerformanceObserver[] = [];
 
   constructor() {
-    if (typeof window === "undefined") return;
+    if (typeof window === 'undefined') return;
 
     this.detectDevice();
     this.detectNetworkSpeed();
@@ -35,34 +35,35 @@ class PerformanceMonitor {
     const width = window.innerWidth;
 
     if (width < 768) {
-      this.metrics.deviceType = "mobile";
+      this.metrics.deviceType = 'mobile';
     } else if (width < 1024) {
-      this.metrics.deviceType = "tablet";
+      this.metrics.deviceType = 'tablet';
     } else {
-      this.metrics.deviceType = "desktop";
+      this.metrics.deviceType = 'desktop';
     }
 
     // Detect platform
     const userAgent = navigator.userAgent.toLowerCase();
     if (/iphone|ipad|ipod/.test(userAgent)) {
-      this.metrics.platform = "ios";
+      this.metrics.platform = 'ios';
     } else if (/android/.test(userAgent)) {
-      this.metrics.platform = "android";
+      this.metrics.platform = 'android';
     } else {
-      this.metrics.platform = "web";
+      this.metrics.platform = 'web';
     }
   }
 
   private detectNetworkSpeed() {
-    const connection = (navigator as any).connection ||
-                      (navigator as any).mozConnection ||
-                      (navigator as any).webkitConnection;
+    const connection =
+      (navigator as any).connection ||
+      (navigator as any).mozConnection ||
+      (navigator as any).webkitConnection;
 
     if (connection) {
-      this.metrics.networkSpeed = connection.effectiveType || "4g";
+      this.metrics.networkSpeed = connection.effectiveType || '4g';
 
       // Monitor network changes
-      connection.addEventListener("change", () => {
+      connection.addEventListener('change', () => {
         this.metrics.networkSpeed = connection.effectiveType;
         this.reportMetrics();
       });
@@ -70,18 +71,18 @@ class PerformanceMonitor {
   }
 
   private observePerformance() {
-    if (!("PerformanceObserver" in window)) return;
+    if (!('PerformanceObserver' in window)) return;
 
     try {
       // Observe First Contentful Paint
       const fcpObserver = new PerformanceObserver((list) => {
         for (const entry of list.getEntries()) {
-          if (entry.name === "first-contentful-paint") {
+          if (entry.name === 'first-contentful-paint') {
             this.metrics.FCP = entry.startTime;
           }
         }
       });
-      fcpObserver.observe({ entryTypes: ["paint"] });
+      fcpObserver.observe({ entryTypes: ['paint'] });
       this.observers.push(fcpObserver);
 
       // Observe Largest Contentful Paint
@@ -90,7 +91,7 @@ class PerformanceMonitor {
         const lastEntry = entries[entries.length - 1] as any;
         this.metrics.LCP = lastEntry.renderTime || lastEntry.loadTime;
       });
-      lcpObserver.observe({ entryTypes: ["largest-contentful-paint"] });
+      lcpObserver.observe({ entryTypes: ['largest-contentful-paint'] });
       this.observers.push(lcpObserver);
 
       // Observe First Input Delay
@@ -99,7 +100,7 @@ class PerformanceMonitor {
           this.metrics.FID = (entry as any).processingStart - entry.startTime;
         }
       });
-      fidObserver.observe({ entryTypes: ["first-input"] });
+      fidObserver.observe({ entryTypes: ['first-input'] });
       this.observers.push(fidObserver);
 
       // Observe Cumulative Layout Shift
@@ -112,10 +113,10 @@ class PerformanceMonitor {
         }
         this.metrics.CLS = clsValue;
       });
-      clsObserver.observe({ entryTypes: ["layout-shift"] });
+      clsObserver.observe({ entryTypes: ['layout-shift'] });
       this.observers.push(clsObserver);
     } catch (error) {
-      console.warn("Performance observer setup failed:", error);
+      console.warn('Performance observer setup failed:', error);
     }
 
     // Measure TTFB
@@ -125,17 +126,17 @@ class PerformanceMonitor {
     }
 
     // Report metrics after page load
-    window.addEventListener("load", () => {
+    window.addEventListener('load', () => {
       setTimeout(() => this.reportMetrics(), 1000);
     });
   }
 
   private reportMetrics() {
-    console.log("[Performance]", this.metrics);
+    console.log('[Performance]', this.metrics);
 
     // Send to analytics (if configured)
     if ((window as any).analytics) {
-      (window as any).analytics.track("Performance Metrics", this.metrics);
+      (window as any).analytics.track('Performance Metrics', this.metrics);
     }
   }
 
@@ -152,24 +153,20 @@ class PerformanceMonitor {
   public measureFeature(name: string, startMark: string, endMark?: string) {
     if (window.performance && window.performance.measure) {
       try {
-        window.performance.measure(
-          name,
-          startMark,
-          endMark || undefined
-        );
+        window.performance.measure(name, startMark, endMark || undefined);
 
         const measures = window.performance.getEntriesByName(name);
         if (measures.length > 0) {
-          console.log(`[Performance] ${name}:`, measures[0].duration.toFixed(2), "ms");
+          console.log(`[Performance] ${name}:`, measures[0].duration.toFixed(2), 'ms');
         }
       } catch (error) {
-        console.warn("Performance measurement failed:", error);
+        console.warn('Performance measurement failed:', error);
       }
     }
   }
 
   public disconnect() {
-    this.observers.forEach(observer => observer.disconnect());
+    this.observers.forEach((observer) => observer.disconnect());
     this.observers = [];
   }
 }
@@ -190,6 +187,6 @@ export function usePerformanceMonitoring(componentName: string) {
       performanceMonitor.markFeature(endMark);
       performanceMonitor.measureFeature(componentName, startMark, endMark);
     },
-    getMetrics: () => performanceMonitor.getMetrics()
+    getMetrics: () => performanceMonitor.getMetrics(),
   };
 }

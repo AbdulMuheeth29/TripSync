@@ -1,6 +1,6 @@
-import { eq, and } from "drizzle-orm";
-import { getDb } from "./db";
-import { expenses, tripMembers } from "@shared/schema";
+import { eq, and } from 'drizzle-orm';
+import { getDb } from './db';
+import { expenses, tripMembers } from '@shared/schema';
 
 /**
  * Settlement calculation service using greedy debt simplification algorithm.
@@ -13,17 +13,17 @@ import { expenses, tripMembers } from "@shared/schema";
  */
 
 export interface Settlement {
-  from: string;        // User ID who owes
-  to: string;          // User ID who is owed
-  amount: number;      // Amount in cents
-  fromName: string;    // User display name
-  toName: string;      // User display name
+  from: string; // User ID who owes
+  to: string; // User ID who is owed
+  amount: number; // Amount in cents
+  fromName: string; // User display name
+  toName: string; // User display name
 }
 
 export interface UserBalance {
   userId: string;
   userName: string;
-  netBalance: number;  // Positive = owed money, Negative = owes money
+  netBalance: number; // Positive = owed money, Negative = owes money
   totalPaid: number;
   totalOwed: number;
 }
@@ -42,17 +42,14 @@ export async function calculateSettlements(tripId: string): Promise<{
   const tripExpenses = await db
     .select()
     .from(expenses)
-    .where(and(
-      eq(expenses.tripId, tripId),
-      eq(expenses.isSettled, false)
-    ));
+    .where(and(eq(expenses.tripId, tripId), eq(expenses.isSettled, false)));
 
   // Get all trip members with user details
   const members = await db.query.tripMembers.findMany({
     where: eq(tripMembers.tripId, tripId),
     with: {
-      user: true
-    }
+      user: true,
+    },
   });
 
   // Build a map of userId -> userName for easy lookup
@@ -67,13 +64,13 @@ export async function calculateSettlements(tripId: string): Promise<{
   const balanceMap = new Map<string, UserBalance>();
 
   // Initialize all members with zero balance
-  members.forEach(member => {
+  members.forEach((member) => {
     balanceMap.set(member.userId, {
       userId: member.userId,
-      userName: userMap.get(member.userId) || "Unknown User",
+      userName: userMap.get(member.userId) || 'Unknown User',
       netBalance: 0,
       totalPaid: 0,
-      totalOwed: 0
+      totalOwed: 0,
     });
   });
 
@@ -90,7 +87,7 @@ export async function calculateSettlements(tripId: string): Promise<{
     const amountPerPerson = Math.floor(totalAmount / numPeople);
 
     // Handle remainder (distribute to first person to avoid floating point issues)
-    const remainder = totalAmount - (amountPerPerson * numPeople);
+    const remainder = totalAmount - amountPerPerson * numPeople;
 
     // Payer paid the total amount
     const payerBalance = balanceMap.get(payer);
@@ -113,8 +110,12 @@ export async function calculateSettlements(tripId: string): Promise<{
 
   // Convert to array and separate creditors from debtors
   const balances = Array.from(balanceMap.values());
-  const creditors = balances.filter(b => b.netBalance > 0).sort((a, b) => b.netBalance - a.netBalance);
-  const debtors = balances.filter(b => b.netBalance < 0).sort((a, b) => a.netBalance - b.netBalance);
+  const creditors = balances
+    .filter((b) => b.netBalance > 0)
+    .sort((a, b) => b.netBalance - a.netBalance);
+  const debtors = balances
+    .filter((b) => b.netBalance < 0)
+    .sort((a, b) => a.netBalance - b.netBalance);
 
   // Greedy debt simplification algorithm
   const settlements: Settlement[] = [];
@@ -136,7 +137,7 @@ export async function calculateSettlements(tripId: string): Promise<{
       to: creditor.userId,
       amount: transferAmount,
       fromName: debtor.userName,
-      toName: creditor.userName
+      toName: creditor.userName,
     });
 
     // Update balances
@@ -156,7 +157,7 @@ export async function calculateSettlements(tripId: string): Promise<{
 
   return {
     settlements,
-    balances
+    balances,
   };
 }
 
@@ -165,10 +166,7 @@ export async function calculateSettlements(tripId: string): Promise<{
  */
 export async function markExpenseSettled(expenseId: string): Promise<void> {
   const db = getDb();
-  await db
-    .update(expenses)
-    .set({ isSettled: true })
-    .where(eq(expenses.id, expenseId));
+  await db.update(expenses).set({ isSettled: true }).where(eq(expenses.id, expenseId));
 }
 
 /**
@@ -179,10 +177,7 @@ export async function markAllExpensesSettled(tripId: string): Promise<void> {
   await db
     .update(expenses)
     .set({ isSettled: true })
-    .where(and(
-      eq(expenses.tripId, tripId),
-      eq(expenses.isSettled, false)
-    ));
+    .where(and(eq(expenses.tripId, tripId), eq(expenses.isSettled, false)));
 }
 
 /**
@@ -203,7 +198,7 @@ export async function getUserPairBalance(
   let user1OwesUser2 = 0;
   let user2OwesUser1 = 0;
 
-  settlements.forEach(s => {
+  settlements.forEach((s) => {
     if (s.from === userId1 && s.to === userId2) {
       user1OwesUser2 += s.amount;
     } else if (s.from === userId2 && s.to === userId1) {
@@ -226,6 +221,6 @@ export async function getUserPairBalance(
     user1OwesUser2,
     user2OwesUser1,
     netAmount,
-    netDirection
+    netDirection,
   };
 }

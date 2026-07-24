@@ -1,4 +1,4 @@
-import { useHapticFeedback } from "./use-haptic-feedback";
+import { useHapticFeedback } from './use-haptic-feedback';
 
 interface ShareData {
   title?: string;
@@ -10,12 +10,13 @@ interface ShareData {
 export function useNativeShare() {
   const { notification } = useHapticFeedback();
 
-  const isSupported = typeof navigator !== "undefined" && "share" in navigator;
-  const canShareFiles = typeof navigator !== "undefined" && navigator.canShare?.({ files: [] as File[] });
+  const isSupported = typeof navigator !== 'undefined' && 'share' in navigator;
+  const canShareFiles =
+    typeof navigator !== 'undefined' && navigator.canShare?.({ files: [] as File[] });
 
   const share = async (data: ShareData): Promise<boolean> => {
     if (!isSupported) {
-      console.warn("Web Share API not supported");
+      console.warn('Web Share API not supported');
       return false;
     }
 
@@ -34,24 +35,24 @@ export function useNativeShare() {
 
       // Check if data can be shared
       if (navigator.canShare && !navigator.canShare(shareData)) {
-        console.warn("Cannot share provided data");
+        console.warn('Cannot share provided data');
         return false;
       }
 
       await navigator.share(shareData);
 
       // Success haptic
-      notification("success");
+      notification('success');
       return true;
     } catch (error: any) {
       // User canceled or error occurred
-      if (error.name === "AbortError") {
+      if (error.name === 'AbortError') {
         // User canceled - not an error
         return false;
       }
 
-      console.error("Share failed:", error);
-      notification("error");
+      console.error('Share failed:', error);
+      notification('error');
       return false;
     }
   };
@@ -61,7 +62,7 @@ export function useNativeShare() {
     return share({
       title: `Join my trip: ${tripName}`,
       text: `Check out our group trip to ${tripName} on TripSync!`,
-      url
+      url,
     });
   };
 
@@ -69,20 +70,20 @@ export function useNativeShare() {
     return share({
       title: `Join our trip to ${tripName}`,
       text: `You're invited to join our group trip! Use this link to join:`,
-      url: inviteUrl
+      url: inviteUrl,
     });
   };
 
   const shareReceipt = async (file: File, description: string) => {
     if (!canShareFiles) {
-      console.warn("File sharing not supported");
+      console.warn('File sharing not supported');
       return false;
     }
 
     return share({
-      title: "Receipt",
+      title: 'Receipt',
       text: description,
-      files: [file]
+      files: [file],
     });
   };
 
@@ -92,6 +93,6 @@ export function useNativeShare() {
     shareInvite,
     shareReceipt,
     isSupported,
-    canShareFiles
+    canShareFiles,
   };
 }

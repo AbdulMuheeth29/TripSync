@@ -1,10 +1,10 @@
-import bcrypt from "bcryptjs";
-import jwt from "jsonwebtoken";
-import type { Request, Response, NextFunction } from "express";
+import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
+import type { Request, Response, NextFunction } from 'express';
 
 // JWT configuration
-const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key-change-this-in-production";
-const JWT_EXPIRES_IN = "7d"; // 7 days
+const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-this-in-production';
+const JWT_EXPIRES_IN = '7d'; // 7 days
 
 export interface JWTPayload {
   userId: string;
@@ -24,10 +24,7 @@ export async function hashPassword(password: string): Promise<string> {
 /**
  * Compare a plaintext password with a hash
  */
-export async function comparePassword(
-  password: string,
-  hash: string
-): Promise<boolean> {
+export async function comparePassword(password: string, hash: string): Promise<boolean> {
   return bcrypt.compare(password, hash);
 }
 
@@ -55,10 +52,10 @@ export function verifyToken(token: string): JWTPayload | null {
 export function requireAuth(req: Request, res: Response, next: NextFunction) {
   const authHeader = req.headers.authorization;
 
-  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
     return res.status(401).json({
-      error: "Authentication required",
-      code: "AUTH_REQUIRED"
+      error: 'Authentication required',
+      code: 'AUTH_REQUIRED',
     });
   }
 
@@ -67,8 +64,8 @@ export function requireAuth(req: Request, res: Response, next: NextFunction) {
 
   if (!payload) {
     return res.status(401).json({
-      error: "Invalid or expired token",
-      code: "INVALID_TOKEN"
+      error: 'Invalid or expired token',
+      code: 'INVALID_TOKEN',
     });
   }
 
@@ -85,7 +82,7 @@ export function requireAuth(req: Request, res: Response, next: NextFunction) {
 export function optionalAuth(req: Request, res: Response, next: NextFunction) {
   const authHeader = req.headers.authorization;
 
-  if (authHeader && authHeader.startsWith("Bearer ")) {
+  if (authHeader && authHeader.startsWith('Bearer ')) {
     const token = authHeader.substring(7);
     const payload = verifyToken(token);
 

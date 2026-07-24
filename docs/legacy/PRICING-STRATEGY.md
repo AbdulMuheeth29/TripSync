@@ -26,14 +26,15 @@ Based on competitor analysis and 2025 SaaS pricing trends, this document outline
 
 ### Direct Competitors
 
-| App | Model | Price | Key Pro Features |
-|-----|-------|-------|-----------------|
-| **Wanderlog** | Freemium + Subscription | $39.99/year | Offline maps, route optimization, Gmail import, flight alerts |
-| **TripIt** | Freemium + Subscription | $49/year | Real-time flight alerts, refund monitoring, 25 docs/trip, rewards tracking |
-| **Plan Harmony** | Freemium + Per-Trip | $9.99/trip | Advanced features per trip (no recurring subscription) |
-| **Splitwise** | Freemium + Subscription | $3/month (~$36/year) | Receipt OCR, currency conversion, unlimited expenses, charts |
+| App              | Model                   | Price                | Key Pro Features                                                           |
+| ---------------- | ----------------------- | -------------------- | -------------------------------------------------------------------------- |
+| **Wanderlog**    | Freemium + Subscription | $39.99/year          | Offline maps, route optimization, Gmail import, flight alerts              |
+| **TripIt**       | Freemium + Subscription | $49/year             | Real-time flight alerts, refund monitoring, 25 docs/trip, rewards tracking |
+| **Plan Harmony** | Freemium + Per-Trip     | $9.99/trip           | Advanced features per trip (no recurring subscription)                     |
+| **Splitwise**    | Freemium + Subscription | $3/month (~$36/year) | Receipt OCR, currency conversion, unlimited expenses, charts               |
 
 **Sources:**
+
 - [Wanderlog Pricing](https://wanderlog.com/pro)
 - [TripIt Pro Pricing](https://www.tripit.com/web/pro/pricing)
 - [Plan Harmony Pricing](https://www.planharmony.com/)
@@ -44,6 +45,7 @@ Based on competitor analysis and 2025 SaaS pricing trends, this document outline
 Based on [SaaS subscription pricing research](https://atozdebug.com/freemium-vs-subscription/) and [travel app monetization strategies](https://moldstud.com/articles/p-the-future-of-travel-apps-understanding-subscription-based-monetization-strategies):
 
 **Key Insights:**
+
 - Freemium models have **25% higher annual retention** vs all-paid models
 - Monthly retention is **12.8% vs 9.3%** for hard paywall vs freemium
 - Travel apps with subscriptions see **25% increase in retention** vs one-time purchases
@@ -51,6 +53,7 @@ Based on [SaaS subscription pricing research](https://atozdebug.com/freemium-vs-
 - Hybrid models (freemium + premium tiers) report highest satisfaction
 
 **Sweet Spot for Travel Apps:**
+
 - **Monthly**: $3-7
 - **Annual**: $35-49 (with 15-25% discount vs monthly)
 - **Per-Trip**: $7-15 per trip
@@ -62,11 +65,13 @@ Based on [SaaS subscription pricing research](https://atozdebug.com/freemium-vs-
 ### Recommended Model: **Freemium + Dual Pricing**
 
 #### Option A: Traditional Subscription (Recommended)
+
 - **Free Plan**: Core features, limited trips (3 active trips)
 - **Pro Plan**: $4.99/month or $39/year (34% savings)
 - **Teams Plan** (Future): $9.99/month for unlimited trips + admin features
 
 #### Option B: Hybrid Model (Alternative)
+
 - **Free Plan**: Unlimited trips, core features
 - **Pay-Per-Trip**: $7.99/trip for premium features on that specific trip
 - **Pro Unlimited**: $39/year for unlimited premium trips
@@ -74,6 +79,7 @@ Based on [SaaS subscription pricing research](https://atozdebug.com/freemium-vs-
 ### Why This Pricing?
 
 **$4.99/month ($39/year)**
+
 - ✅ Lower than TripIt Pro ($49/year) - competitive advantage
 - ✅ Same as Wanderlog Pro ($39.99/year) - market parity
 - ✅ Higher perceived value than Splitwise ($3/month) - positions as premium
@@ -81,6 +87,7 @@ Based on [SaaS subscription pricing research](https://atozdebug.com/freemium-vs-
 - ✅ 34% annual discount encourages yearly commitment
 
 **$7.99 per-trip**
+
 - ✅ Lower than Plan Harmony ($9.99/trip)
 - ✅ Appeals to occasional travelers (1-2 trips/year)
 - ✅ Breaks even at 5 trips/year vs annual plan
@@ -89,12 +96,14 @@ Based on [SaaS subscription pricing research](https://atozdebug.com/freemium-vs-
 ### Target Personas
 
 **Free Users (60-70% of user base)**
+
 - 1-2 trips per year
 - Small groups (2-4 people)
 - Price-sensitive, budget travelers
 - Students, young professionals
 
 **Pro Subscribers (20-30%)**
+
 - 3+ trips per year
 - Frequent travelers
 - Larger groups (5-10 people)
@@ -102,6 +111,7 @@ Based on [SaaS subscription pricing research](https://atozdebug.com/freemium-vs-
 - Professional trip planners, travel influencers
 
 **Per-Trip Users (10%)**
+
 - 1-2 special trips per year (honeymoon, big vacation)
 - Wants premium features without commitment
 - One-off events (bachelorette, reunion)
@@ -115,6 +125,7 @@ Based on [SaaS subscription pricing research](https://atozdebug.com/freemium-vs-
 **Goal**: Provide enough value to create habit, create FOMO for premium
 
 #### Included Features ✅
+
 - Create **3 active trips** (unlimited archived trips)
 - Basic AI itinerary generation (1 per trip)
 - Voting on itinerary items
@@ -127,6 +138,7 @@ Based on [SaaS subscription pricing research](https://atozdebug.com/freemium-vs-
 - Real-time collaboration
 
 #### Limitations ⚠️
+
 - AI generations: 1 per trip
 - Trip members: Max 6 people per trip
 - Photo uploads: 5 photos per trip
@@ -146,6 +158,7 @@ Based on [SaaS subscription pricing research](https://atozdebug.com/freemium-vs-
 #### All Free Features + ✨
 
 **Planning & Discovery**
+
 - ✅ **Unlimited active trips**
 - ✅ **Unlimited AI generations** (re-plan as many times as you want)
 - ✅ **Interactive map view** with routes & distances
@@ -156,6 +169,7 @@ Based on [SaaS subscription pricing research](https://atozdebug.com/freemium-vs-
 - ✅ **Calendar export** (.ics for Google/Apple/Outlook)
 
 **Collaboration**
+
 - ✅ **Unlimited group size** (no 6-person limit)
 - ✅ **Advanced voting** (polls, ranked choice)
 - ✅ **Priority notifications** (push + email + SMS)
@@ -163,6 +177,7 @@ Based on [SaaS subscription pricing research](https://atozdebug.com/freemium-vs-
 - ✅ **Video chat integration** (Zoom/Meet links)
 
 **Expenses**
+
 - ✅ **Receipt OCR** (photo → auto-extract amount)
 - ✅ **Currency conversion** (real-time rates)
 - ✅ **Budget optimizer** (AI suggestions to save money)
@@ -170,12 +185,14 @@ Based on [SaaS subscription pricing research](https://atozdebug.com/freemium-vs-
 - ✅ **Expense categories & charts**
 
 **Mobile & Offline**
+
 - ✅ **Offline mode** (full itinerary access without internet)
 - ✅ **PWA install** (add to home screen)
 - ✅ **Unlimited photo uploads**
 - ✅ **High-res photo storage** (S3/Cloudflare R2)
 
 **Premium Features**
+
 - ✅ **Trip recap generator** (auto-summary with photos)
 - ✅ **Packing list assistant** (AI-generated checklists)
 - ✅ **Travel documents hub** (passport, visa storage)
@@ -183,6 +200,7 @@ Based on [SaaS subscription pricing research](https://atozdebug.com/freemium-vs-
 - ✅ **Early access** (beta features, new releases)
 
 **Business/Team Features (Future)**
+
 - ✅ **Custom branding** (white-label for travel agents)
 - ✅ **Analytics dashboard** (trip insights, member engagement)
 - ✅ **Admin controls** (permissions, approvals)
@@ -191,26 +209,26 @@ Based on [SaaS subscription pricing research](https://atozdebug.com/freemium-vs-
 
 ### Comparison Table
 
-| Feature | Free | Pro | Teams |
-|---------|------|-----|-------|
-| **Active trips** | 3 | Unlimited | Unlimited |
-| **Group size** | 6 people | Unlimited | Unlimited |
-| **AI generations** | 1 per trip | Unlimited | Unlimited |
-| **Map view** | ❌ | ✅ | ✅ |
-| **Offline access** | ❌ | ✅ | ✅ |
-| **Calendar export** | ❌ | ✅ | ✅ |
-| **Email import** | ❌ | ✅ | ✅ |
-| **Place discovery** | ❌ | ✅ | ✅ |
-| **Receipt OCR** | ❌ | ✅ | ✅ |
-| **Currency conversion** | ❌ | ✅ | ✅ |
-| **Photo uploads** | 5 per trip | Unlimited | Unlimited |
-| **AI Trip Concierge** | ❌ | ✅ | ✅ |
-| **Route optimization** | ❌ | ✅ | ✅ |
-| **Priority support** | ❌ | ✅ | ✅ |
-| **Custom branding** | ❌ | ❌ | ✅ |
-| **Analytics** | ❌ | ❌ | ✅ |
-| **Price** | **Free** | **$4.99/mo** | **$9.99/mo** |
-| | | **$39/year** | **$89/year** |
+| Feature                 | Free       | Pro          | Teams        |
+| ----------------------- | ---------- | ------------ | ------------ |
+| **Active trips**        | 3          | Unlimited    | Unlimited    |
+| **Group size**          | 6 people   | Unlimited    | Unlimited    |
+| **AI generations**      | 1 per trip | Unlimited    | Unlimited    |
+| **Map view**            | ❌         | ✅           | ✅           |
+| **Offline access**      | ❌         | ✅           | ✅           |
+| **Calendar export**     | ❌         | ✅           | ✅           |
+| **Email import**        | ❌         | ✅           | ✅           |
+| **Place discovery**     | ❌         | ✅           | ✅           |
+| **Receipt OCR**         | ❌         | ✅           | ✅           |
+| **Currency conversion** | ❌         | ✅           | ✅           |
+| **Photo uploads**       | 5 per trip | Unlimited    | Unlimited    |
+| **AI Trip Concierge**   | ❌         | ✅           | ✅           |
+| **Route optimization**  | ❌         | ✅           | ✅           |
+| **Priority support**    | ❌         | ✅           | ✅           |
+| **Custom branding**     | ❌         | ❌           | ✅           |
+| **Analytics**           | ❌         | ❌           | ✅           |
+| **Price**               | **Free**   | **$4.99/mo** | **$9.99/mo** |
+|                         |            | **$39/year** | **$89/year** |
 
 ---
 
@@ -247,6 +265,7 @@ Don't just list features - show **value**:
 ### 4. **Social Proof**
 
 Add on pricing page:
+
 - "Join 10,000+ travelers planning amazing trips"
 - "Trusted by groups in 50+ countries"
 - Testimonials from Pro users
@@ -258,6 +277,7 @@ Add on pricing page:
 ### 6. **Urgency & Scarcity**
 
 Launch offers:
+
 - "Early bird: Get Pro for $29/year (limited time)"
 - "First 1,000 users get lifetime 50% off"
 - "Upgrade today and get 3 months free"
@@ -275,6 +295,7 @@ Quantify savings:
 ### Phase 1: Foundation (Week 1-2)
 
 **Backend**
+
 - [ ] Add `subscriptionTier` field to User model (`free`, `pro`, `teams`)
 - [ ] Add `subscriptionExpiresAt` field (nullable date)
 - [ ] Add `tripsCreatedCount` field (for free tier limit)
@@ -282,12 +303,14 @@ Quantify savings:
 - [ ] Middleware to check subscription status on protected routes
 
 **Frontend**
+
 - [ ] Add pricing page route (`/pricing`)
 - [ ] Create PricingCard component
 - [ ] Create feature comparison table
 - [ ] Add "Upgrade to Pro" CTAs in app
 
 **Payment Integration**
+
 - [ ] Set up Stripe account
 - [ ] Install Stripe SDK (`npm install stripe @stripe/stripe-js`)
 - [ ] Create Stripe products & prices
@@ -298,6 +321,7 @@ Quantify savings:
 ### Phase 2: Feature Gates (Week 3)
 
 **Implement Usage Limits**
+
 - [ ] Free users: 3 active trips max
 - [ ] Free users: 1 AI generation per trip
 - [ ] Free users: 6 members max per trip
@@ -305,6 +329,7 @@ Quantify savings:
 - [ ] Show "Upgrade to Pro" when limits hit
 
 **Example Implementation**:
+
 ```typescript
 // Middleware to check trip creation limit
 async function canCreateTrip(userId: string) {
@@ -315,8 +340,8 @@ async function canCreateTrip(userId: string) {
   const activeTripCount = await db.trip.count({
     where: {
       organizerId: userId,
-      status: { in: ['planning', 'booked', 'active'] }
-    }
+      status: { in: ['planning', 'booked', 'active'] },
+    },
   });
 
   return activeTripCount < 3; // Free limit
@@ -328,6 +353,7 @@ async function canCreateTrip(userId: string) {
 ### Phase 3: Payment Flow (Week 4)
 
 **Stripe Checkout**
+
 - [ ] Create Stripe checkout session
 - [ ] Redirect to Stripe hosted page
 - [ ] Handle successful payment webhook
@@ -335,6 +361,7 @@ async function canCreateTrip(userId: string) {
 - [ ] Send confirmation email
 
 **Billing Portal**
+
 - [ ] Stripe customer portal for managing subscription
 - [ ] Cancel subscription
 - [ ] Update payment method
@@ -345,6 +372,7 @@ async function canCreateTrip(userId: string) {
 ### Phase 4: Premium Features (Week 5-8)
 
 Implement Pro-only features:
+
 - [ ] Map view (Pro only)
 - [ ] Offline mode (Pro only)
 - [ ] Email import (Pro only)
@@ -361,18 +389,16 @@ Implement Pro-only features:
 ```tsx
 <section className="min-h-[60vh] flex items-center justify-center bg-gradient-to-b from-neutral-950 to-neutral-900">
   <div className="text-center max-w-3xl px-4">
-    <h1 className="text-5xl md:text-6xl font-bold text-white mb-6">
-      Simple, transparent pricing
-    </h1>
+    <h1 className="text-5xl md:text-6xl font-bold text-white mb-6">Simple, transparent pricing</h1>
     <p className="text-xl text-white/70 mb-8">
       Start free, upgrade when you need more. Cancel anytime.
     </p>
 
     {/* Annual/Monthly Toggle */}
     <div className="flex items-center justify-center gap-4 mb-8">
-      <span className={monthly ? "text-white" : "text-white/50"}>Monthly</span>
+      <span className={monthly ? 'text-white' : 'text-white/50'}>Monthly</span>
       <Switch checked={!monthly} onChange={() => setMonthly(!monthly)} />
-      <span className={!monthly ? "text-white" : "text-white/50"}>
+      <span className={!monthly ? 'text-white' : 'text-white/50'}>
         Annual <Badge variant="success">Save 34%</Badge>
       </span>
     </div>
@@ -386,7 +412,6 @@ Implement Pro-only features:
 <section className="py-20">
   <div className="container mx-auto px-4">
     <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-
       {/* Free Plan */}
       <PricingCard
         name="Free"
@@ -394,12 +419,12 @@ Implement Pro-only features:
         period="forever"
         description="Perfect for trying out TripSync"
         features={[
-          "3 active trips",
-          "Up to 6 members per trip",
-          "Basic AI itinerary (1 per trip)",
-          "Voting & chat",
-          "Expense tracking",
-          "5 photos per trip"
+          '3 active trips',
+          'Up to 6 members per trip',
+          'Basic AI itinerary (1 per trip)',
+          'Voting & chat',
+          'Expense tracking',
+          '5 photos per trip',
         ]}
         cta="Get Started"
         ctaVariant="outline"
@@ -408,23 +433,23 @@ Implement Pro-only features:
       {/* Pro Plan - HIGHLIGHTED */}
       <PricingCard
         name="Pro"
-        price={monthly ? "$4.99" : "$39"}
-        period={monthly ? "per month" : "per year"}
+        price={monthly ? '$4.99' : '$39'}
+        period={monthly ? 'per month' : 'per year'}
         popular={true}
         description="For frequent travelers & groups"
         features={[
-          "Everything in Free, plus:",
-          "Unlimited trips & members",
-          "Unlimited AI generations",
-          "Interactive map view",
-          "Offline access & PWA",
-          "Calendar export (.ics)",
-          "Email import",
-          "Place discovery",
-          "Receipt OCR",
-          "Currency conversion",
-          "AI Trip Concierge",
-          "Priority support"
+          'Everything in Free, plus:',
+          'Unlimited trips & members',
+          'Unlimited AI generations',
+          'Interactive map view',
+          'Offline access & PWA',
+          'Calendar export (.ics)',
+          'Email import',
+          'Place discovery',
+          'Receipt OCR',
+          'Currency conversion',
+          'AI Trip Concierge',
+          'Priority support',
         ]}
         cta="Start Free Trial"
         ctaVariant="default"
@@ -434,21 +459,20 @@ Implement Pro-only features:
       {/* Teams Plan */}
       <PricingCard
         name="Teams"
-        price={monthly ? "$9.99" : "$89"}
-        period={monthly ? "per month" : "per year"}
+        price={monthly ? '$9.99' : '$89'}
+        period={monthly ? 'per month' : 'per year'}
         description="For travel agents & professionals"
         features={[
-          "Everything in Pro, plus:",
-          "Custom branding",
-          "Analytics dashboard",
-          "Admin controls",
-          "API access",
-          "Dedicated support"
+          'Everything in Pro, plus:',
+          'Custom branding',
+          'Analytics dashboard',
+          'Admin controls',
+          'API access',
+          'Dedicated support',
         ]}
         cta="Contact Sales"
         ctaVariant="outline"
       />
-
     </div>
   </div>
 </section>
@@ -463,9 +487,7 @@ Full feature-by-feature comparison (see HTML mockup in next section)
 ```tsx
 <section className="py-20 bg-muted/30">
   <div className="container mx-auto px-4 max-w-3xl">
-    <h2 className="text-3xl font-bold text-center mb-12">
-      Frequently Asked Questions
-    </h2>
+    <h2 className="text-3xl font-bold text-center mb-12">Frequently Asked Questions</h2>
 
     <Accordion>
       <AccordionItem value="trial">
@@ -492,7 +514,8 @@ Full feature-by-feature comparison (see HTML mockup in next section)
       <AccordionItem value="upgrade">
         <AccordionTrigger>Can I upgrade or downgrade later?</AccordionTrigger>
         <AccordionContent>
-          Yes! Upgrade anytime to unlock premium features. Downgrade at the end of your billing cycle.
+          Yes! Upgrade anytime to unlock premium features. Downgrade at the end of your billing
+          cycle.
         </AccordionContent>
       </AccordionItem>
 
@@ -512,9 +535,7 @@ Full feature-by-feature comparison (see HTML mockup in next section)
 ```tsx
 <section className="py-16 border-t">
   <div className="container mx-auto px-4 text-center">
-    <p className="text-muted-foreground mb-8">
-      Trusted by travelers worldwide
-    </p>
+    <p className="text-muted-foreground mb-8">Trusted by travelers worldwide</p>
     <div className="flex flex-wrap justify-center gap-8 items-center opacity-60">
       {/* Logo cloud or stats */}
       <Stat value="10,000+" label="Trips Planned" />
@@ -559,11 +580,13 @@ CREATE INDEX idx_subscriptions_stripe_customer ON subscriptions(stripe_customer_
 ### Stripe Integration
 
 **Install dependencies:**
+
 ```bash
 npm install stripe @stripe/stripe-js
 ```
 
 **Server-side (server/stripe.ts):**
+
 ```typescript
 import Stripe from 'stripe';
 
@@ -572,18 +595,28 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
 });
 
 // Create checkout session
-export async function createCheckoutSession(userId: string, tier: 'pro' | 'teams', isAnnual: boolean) {
+export async function createCheckoutSession(
+  userId: string,
+  tier: 'pro' | 'teams',
+  isAnnual: boolean
+) {
   const priceId = isAnnual
-    ? (tier === 'pro' ? 'price_pro_annual' : 'price_teams_annual')
-    : (tier === 'pro' ? 'price_pro_monthly' : 'price_teams_monthly');
+    ? tier === 'pro'
+      ? 'price_pro_annual'
+      : 'price_teams_annual'
+    : tier === 'pro'
+      ? 'price_pro_monthly'
+      : 'price_teams_monthly';
 
   const session = await stripe.checkout.sessions.create({
     customer_email: user.email,
     mode: 'subscription',
-    line_items: [{
-      price: priceId,
-      quantity: 1,
-    }],
+    line_items: [
+      {
+        price: priceId,
+        quantity: 1,
+      },
+    ],
     success_url: `${process.env.APP_URL}/dashboard?upgrade=success`,
     cancel_url: `${process.env.APP_URL}/pricing?upgrade=canceled`,
     metadata: {
@@ -612,6 +645,7 @@ export async function handleStripeWebhook(event: Stripe.Event) {
 ```
 
 **Client-side (client/src/pages/pricing.tsx):**
+
 ```typescript
 import { loadStripe } from '@stripe/stripe-js';
 
@@ -633,6 +667,7 @@ async function handleUpgrade(tier: 'pro' | 'teams', isAnnual: boolean) {
 ### Feature Gates
 
 **Middleware (server/middleware/subscription.ts):**
+
 ```typescript
 export function requirePro(req: Request, res: Response, next: NextFunction) {
   const user = req.user;
@@ -644,7 +679,7 @@ export function requirePro(req: Request, res: Response, next: NextFunction) {
   if (user.subscriptionTier === 'free') {
     return res.status(403).json({
       error: 'This feature requires TripSync Pro',
-      upgradeUrl: '/pricing'
+      upgradeUrl: '/pricing',
     });
   }
 
@@ -652,7 +687,7 @@ export function requirePro(req: Request, res: Response, next: NextFunction) {
   if (user.subscriptionExpiresAt && new Date(user.subscriptionExpiresAt) < new Date()) {
     return res.status(403).json({
       error: 'Your subscription has expired',
-      renewUrl: '/billing'
+      renewUrl: '/billing',
     });
   }
 
@@ -661,6 +696,7 @@ export function requirePro(req: Request, res: Response, next: NextFunction) {
 ```
 
 **Usage:**
+
 ```typescript
 // Pro-only route
 app.post('/api/trips/:id/map', requirePro, async (req, res) => {
@@ -675,14 +711,14 @@ app.post('/api/trips', async (req, res) => {
     const activeTripCount = await db.trip.count({
       where: {
         organizerId: user.id,
-        status: { in: ['planning', 'booked', 'active'] }
-      }
+        status: { in: ['planning', 'booked', 'active'] },
+      },
     });
 
     if (activeTripCount >= 3) {
       return res.status(403).json({
         error: 'Free plan limited to 3 active trips',
-        upgradeUrl: '/pricing'
+        upgradeUrl: '/pricing',
       });
     }
   }
@@ -711,24 +747,28 @@ STRIPE_PRICE_TEAMS_ANNUAL=price_...
 ## Launch Strategy
 
 ### Phase 1: Soft Launch (Week 1-2)
+
 - Free tier only
 - Collect email waitlist for Pro
 - Beta test with 50-100 users
 - Gather feedback on pricing willingness
 
 ### Phase 2: Pro Launch (Week 3-4)
+
 - Enable Pro tier
 - Launch offer: **$29/year (limited time)**
 - Email waitlist with exclusive offer
 - Social media announcement
 
 ### Phase 3: Optimization (Month 2-3)
+
 - A/B test pricing ($39 vs $49)
 - Test annual vs monthly conversion
 - Add per-trip option if demand exists
 - Monitor conversion rates, churn
 
 ### Phase 4: Upsell & Expansion (Month 4+)
+
 - Launch Teams tier
 - Add enterprise features
 - Affiliate program (travel bloggers)
@@ -739,12 +779,14 @@ STRIPE_PRICE_TEAMS_ANNUAL=price_...
 ## Key Metrics to Track
 
 **Conversion Funnel:**
+
 1. Landing page → Sign up: Target 5-10%
 2. Free user → Pro trial: Target 15-20%
 3. Pro trial → Paid: Target 40-50%
 4. Overall free → paid: Target 6-10%
 
 **Revenue Metrics:**
+
 - MRR (Monthly Recurring Revenue)
 - ARR (Annual Recurring Revenue)
 - ARPU (Average Revenue Per User)
@@ -753,6 +795,7 @@ STRIPE_PRICE_TEAMS_ANNUAL=price_...
 - LTV:CAC ratio (target 3:1)
 
 **Engagement Metrics:**
+
 - Free users creating 2nd trip: 60%+
 - Free users hitting limits: 30%+
 - Pro users creating 5+ trips: 70%+
@@ -773,6 +816,7 @@ STRIPE_PRICE_TEAMS_ANNUAL=price_...
 7. **Add per-trip option** if users request flexibility
 
 **Expected Outcome:**
+
 - 70% free users (strong top-of-funnel)
 - 25% pro users (healthy conversion)
 - 5% teams users (high-value accounts)

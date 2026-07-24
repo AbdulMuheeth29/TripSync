@@ -8,9 +8,9 @@ import {
   PutObjectCommand,
   DeleteObjectCommand,
   GetObjectCommand,
-} from "@aws-sdk/client-s3";
-import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
-import { randomUUID } from "crypto";
+} from '@aws-sdk/client-s3';
+import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
+import { randomUUID } from 'crypto';
 
 export interface UploadOptions {
   folder?: string;
@@ -31,21 +31,14 @@ class CloudStorageService {
 
   constructor() {
     const accountId = process.env.R2_ACCOUNT_ID;
-    const accessKeyId =
-      process.env.R2_ACCESS_KEY_ID || process.env.AWS_ACCESS_KEY_ID;
-    const secretAccessKey =
-      process.env.R2_SECRET_ACCESS_KEY || process.env.AWS_SECRET_ACCESS_KEY;
-    const region = process.env.AWS_REGION || "auto";
+    const accessKeyId = process.env.R2_ACCESS_KEY_ID || process.env.AWS_ACCESS_KEY_ID;
+    const secretAccessKey = process.env.R2_SECRET_ACCESS_KEY || process.env.AWS_SECRET_ACCESS_KEY;
+    const region = process.env.AWS_REGION || 'auto';
 
-    this.bucket =
-      process.env.R2_BUCKET_NAME ||
-      process.env.AWS_S3_BUCKET ||
-      "tripsync-uploads";
+    this.bucket = process.env.R2_BUCKET_NAME || process.env.AWS_S3_BUCKET || 'tripsync-uploads';
 
     // Cloudflare R2 endpoint
-    const endpoint = accountId
-      ? `https://${accountId}.r2.cloudflarestorage.com`
-      : undefined;
+    const endpoint = accountId ? `https://${accountId}.r2.cloudflarestorage.com` : undefined;
 
     // Optional: Public URL for R2 custom domain
     this.publicBaseUrl = process.env.R2_PUBLIC_URL;
@@ -59,11 +52,9 @@ class CloudStorageService {
           secretAccessKey,
         },
       });
-      console.log("✓ Cloud storage initialized");
+      console.log('✓ Cloud storage initialized');
     } else {
-      console.warn(
-        "⚠ Cloud storage not configured. File uploads will be disabled."
-      );
+      console.warn('⚠ Cloud storage not configured. File uploads will be disabled.');
     }
   }
 
@@ -77,16 +68,11 @@ class CloudStorageService {
   /**
    * Generate a unique file key
    */
-  private generateKey(
-    originalFilename: string,
-    folder: string = "uploads"
-  ): string {
+  private generateKey(originalFilename: string, folder: string = 'uploads'): string {
     const timestamp = Date.now();
     const uuid = randomUUID().substring(0, 8);
-    const ext = originalFilename.split(".").pop();
-    const sanitizedFilename = originalFilename
-      .replace(/[^a-zA-Z0-9.-]/g, "_")
-      .substring(0, 50);
+    const ext = originalFilename.split('.').pop();
+    const sanitizedFilename = originalFilename.replace(/[^a-zA-Z0-9.-]/g, '_').substring(0, 50);
     return `${folder}/${timestamp}-${uuid}-${sanitizedFilename}`;
   }
 
@@ -99,16 +85,14 @@ class CloudStorageService {
     options: UploadOptions = {}
   ): Promise<UploadResult> {
     if (!this.client) {
-      throw new Error("Cloud storage not configured");
+      throw new Error('Cloud storage not configured');
     }
 
-    const { folder = "uploads", contentType = "application/octet-stream", maxSizeBytes } = options;
+    const { folder = 'uploads', contentType = 'application/octet-stream', maxSizeBytes } = options;
 
     // Validate file size
     if (maxSizeBytes && buffer.length > maxSizeBytes) {
-      throw new Error(
-        `File too large. Maximum size: ${maxSizeBytes / 1024 / 1024}MB`
-      );
+      throw new Error(`File too large. Maximum size: ${maxSizeBytes / 1024 / 1024}MB`);
     }
 
     const key = this.generateKey(originalFilename, folder);
@@ -130,9 +114,7 @@ class CloudStorageService {
     const url = await this.getSignedUrl(key, 3600);
 
     // Return public URL if configured (for R2 custom domains)
-    const publicUrl = this.publicBaseUrl
-      ? `${this.publicBaseUrl}/${key}`
-      : undefined;
+    const publicUrl = this.publicBaseUrl ? `${this.publicBaseUrl}/${key}` : undefined;
 
     return {
       key,
@@ -146,7 +128,7 @@ class CloudStorageService {
    */
   async getSignedUrl(key: string, expiresIn: number = 3600): Promise<string> {
     if (!this.client) {
-      throw new Error("Cloud storage not configured");
+      throw new Error('Cloud storage not configured');
     }
 
     const command = new GetObjectCommand({
@@ -162,7 +144,7 @@ class CloudStorageService {
    */
   async deleteFile(key: string): Promise<void> {
     if (!this.client) {
-      throw new Error("Cloud storage not configured");
+      throw new Error('Cloud storage not configured');
     }
 
     const command = new DeleteObjectCommand({
@@ -180,9 +162,7 @@ class CloudStorageService {
     files: Array<{ buffer: Buffer; filename: string }>,
     options: UploadOptions = {}
   ): Promise<UploadResult[]> {
-    return Promise.all(
-      files.map((file) => this.uploadFile(file.buffer, file.filename, options))
-    );
+    return Promise.all(files.map((file) => this.uploadFile(file.buffer, file.filename, options)));
   }
 }
 

@@ -1,19 +1,26 @@
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Label } from "@/components/ui/label";
-import { AlertTriangle, X, Check, Info, Crown, Users } from "lucide-react";
-import { useState } from "react";
-import { format } from "date-fns";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Label } from '@/components/ui/label';
+import { AlertTriangle, X, Check, Info, Crown, Users } from 'lucide-react';
+import { useState } from 'react';
+import { format } from 'date-fns';
 
 interface DowngradeConfirmationModalProps {
   isOpen: boolean;
   onClose: () => void;
   onConfirmDowngrade: (acknowledgedLoss: boolean) => void | Promise<void>;
-  currentPlan: "Pro" | "Teams";
-  targetPlan: "Free" | "Pro";
+  currentPlan: 'Pro' | 'Teams';
+  targetPlan: 'Free' | 'Pro';
   currentPeriodEnd: Date;
   featuresYoullLose: string[];
   currentUsage: {
@@ -37,7 +44,7 @@ export function DowngradeConfirmationModal({
   currentPeriodEnd,
   featuresYoullLose,
   currentUsage,
-  limits
+  limits,
 }: DowngradeConfirmationModalProps) {
   const [acknowledged, setAcknowledged] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -63,7 +70,8 @@ export function DowngradeConfirmationModal({
             <DialogTitle>Confirm Downgrade</DialogTitle>
           </div>
           <DialogDescription>
-            You're about to downgrade from <strong>{currentPlan}</strong> to <strong>{targetPlan}</strong>
+            You're about to downgrade from <strong>{currentPlan}</strong> to{' '}
+            <strong>{targetPlan}</strong>
           </DialogDescription>
         </DialogHeader>
 
@@ -78,7 +86,7 @@ export function DowngradeConfirmationModal({
               </div>
               <Badge className="mb-3">Active</Badge>
               <p className="text-xs text-muted-foreground">
-                Current benefits through {format(currentPeriodEnd, "MMM d, yyyy")}
+                Current benefits through {format(currentPeriodEnd, 'MMM d, yyyy')}
               </p>
             </Card>
 
@@ -88,9 +96,11 @@ export function DowngradeConfirmationModal({
                 <Users className="h-5 w-5 text-muted-foreground" />
                 <h4 className="font-semibold">After: {targetPlan}</h4>
               </div>
-              <Badge variant="outline" className="mb-3">Downgrade</Badge>
+              <Badge variant="outline" className="mb-3">
+                Downgrade
+              </Badge>
               <p className="text-xs text-muted-foreground">
-                Takes effect {format(currentPeriodEnd, "MMM d, yyyy")}
+                Takes effect {format(currentPeriodEnd, 'MMM d, yyyy')}
               </p>
             </Card>
           </div>
@@ -117,9 +127,12 @@ export function DowngradeConfirmationModal({
               <div className="flex items-start gap-3">
                 <AlertTriangle className="h-5 w-5 text-amber-600 mt-0.5" />
                 <div>
-                  <h4 className="font-semibold text-amber-900 mb-2">Usage Exceeds {targetPlan} Limits</h4>
+                  <h4 className="font-semibold text-amber-900 mb-2">
+                    Usage Exceeds {targetPlan} Limits
+                  </h4>
                   <p className="text-sm text-amber-800 mb-3">
-                    Your current usage exceeds the limits of the {targetPlan} plan. Here's what will happen:
+                    Your current usage exceeds the limits of the {targetPlan} plan. Here's what will
+                    happen:
                   </p>
 
                   <div className="space-y-2">
@@ -153,7 +166,8 @@ export function DowngradeConfirmationModal({
                   </div>
 
                   <p className="text-xs text-amber-800 mt-3">
-                    <strong>Action Required:</strong> You'll need to archive trips or remove members before the downgrade takes effect.
+                    <strong>Action Required:</strong> You'll need to archive trips or remove members
+                    before the downgrade takes effect.
                   </p>
                 </div>
               </div>
@@ -171,26 +185,24 @@ export function DowngradeConfirmationModal({
               <li className="flex items-start gap-2">
                 <Check className="h-4 w-4 mt-0.5 text-blue-600" />
                 <span>
-                  Your {currentPlan} plan remains active until {format(currentPeriodEnd, "MMM d, yyyy")}
+                  Your {currentPlan} plan remains active until{' '}
+                  {format(currentPeriodEnd, 'MMM d, yyyy')}
                 </span>
               </li>
               <li className="flex items-start gap-2">
                 <Check className="h-4 w-4 mt-0.5 text-blue-600" />
-                <span>
-                  You won't be charged again after this billing period ends
-                </span>
+                <span>You won't be charged again after this billing period ends</span>
               </li>
               <li className="flex items-start gap-2">
                 <Check className="h-4 w-4 mt-0.5 text-blue-600" />
                 <span>
-                  On {format(currentPeriodEnd, "MMM d, yyyy")}, you'll switch to {targetPlan} plan with its limitations
+                  On {format(currentPeriodEnd, 'MMM d, yyyy')}, you'll switch to {targetPlan} plan
+                  with its limitations
                 </span>
               </li>
               <li className="flex items-start gap-2">
                 <Check className="h-4 w-4 mt-0.5 text-blue-600" />
-                <span>
-                  You can upgrade back anytime to regain access to premium features
-                </span>
+                <span>You can upgrade back anytime to regain access to premium features</span>
               </li>
             </ul>
           </Card>
@@ -203,12 +215,10 @@ export function DowngradeConfirmationModal({
                 checked={acknowledged}
                 onCheckedChange={(checked) => setAcknowledged(checked as boolean)}
               />
-              <Label
-                htmlFor="acknowledge"
-                className="text-sm cursor-pointer leading-relaxed"
-              >
+              <Label htmlFor="acknowledge" className="text-sm cursor-pointer leading-relaxed">
                 I understand that I will lose access to {featuresYoullLose.length} premium features
-                and that my plan will downgrade to {targetPlan} on {format(currentPeriodEnd, "MMM d, yyyy")}.
+                and that my plan will downgrade to {targetPlan} on{' '}
+                {format(currentPeriodEnd, 'MMM d, yyyy')}.
               </Label>
             </div>
           </Card>
@@ -217,13 +227,16 @@ export function DowngradeConfirmationModal({
           <Card className="p-4 bg-gradient-to-r from-purple-50 to-pink-50 border-purple-200">
             <h4 className="font-semibold text-purple-900 mb-2">Wait! Special Offer</h4>
             <p className="text-sm text-purple-800 mb-3">
-              We'd hate to see you go. How about <strong>50% off</strong> your next 3 months if you stay?
+              We'd hate to see you go. How about <strong>50% off</strong> your next 3 months if you
+              stay?
             </p>
             <Button
               variant="outline"
               size="sm"
               className="w-full border-purple-300 hover:bg-purple-100"
-              onClick={() => {/* Handle special offer */}}
+              onClick={() => {
+                /* Handle special offer */
+              }}
             >
               Keep {currentPlan} at 50% Off
             </Button>
@@ -239,7 +252,7 @@ export function DowngradeConfirmationModal({
             disabled={!acknowledged || isProcessing}
             variant="destructive"
           >
-            {isProcessing ? "Processing..." : `Confirm Downgrade to ${targetPlan}`}
+            {isProcessing ? 'Processing...' : `Confirm Downgrade to ${targetPlan}`}
           </Button>
         </DialogFooter>
       </DialogContent>

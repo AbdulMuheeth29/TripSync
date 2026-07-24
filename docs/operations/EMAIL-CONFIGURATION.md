@@ -37,6 +37,7 @@ SMTP_FROM=noreply@tripsync.app  # From email address
    - Copy the 16-character password
 
 3. **Configure `.env`**:
+
 ```bash
 SMTP_HOST=smtp.gmail.com
 SMTP_PORT=587
@@ -46,6 +47,7 @@ SMTP_FROM=your-email@gmail.com
 ```
 
 **Limitations**:
+
 - 500 emails/day limit
 - Gmail branding in headers
 - Less suitable for high-volume production
@@ -67,6 +69,7 @@ SMTP_FROM=your-email@gmail.com
    - Verify a single sender email or domain
 
 4. **Configure `.env`**:
+
 ```bash
 SMTP_HOST=smtp.sendgrid.net
 SMTP_PORT=587
@@ -76,6 +79,7 @@ SMTP_FROM=noreply@yourdomain.com
 ```
 
 **Benefits**:
+
 - High deliverability
 - Advanced analytics
 - Dedicated IP options
@@ -100,6 +104,7 @@ SMTP_FROM=noreply@yourdomain.com
    - Download credentials file
 
 5. **Configure `.env`**:
+
 ```bash
 SMTP_HOST=email-smtp.us-east-1.amazonaws.com
 SMTP_PORT=587
@@ -109,6 +114,7 @@ SMTP_FROM=noreply@yourdomain.com
 ```
 
 **Benefits**:
+
 - Extremely cost-effective at scale
 - 99.9% uptime SLA
 - Integrates with other AWS services
@@ -169,7 +175,7 @@ async function testEmail() {
         <p>If you're seeing this, your SMTP configuration is working correctly!</p>
         <p>Test sent at: ${new Date().toISOString()}</p>
       `,
-      text: 'If you\'re seeing this, your SMTP configuration is working correctly!',
+      text: "If you're seeing this, your SMTP configuration is working correctly!",
     });
 
     console.log('✅ Test email sent successfully!');
@@ -190,6 +196,7 @@ testEmail();
 ```
 
 Add to `package.json`:
+
 ```json
 {
   "scripts": {
@@ -199,6 +206,7 @@ Add to `package.json`:
 ```
 
 **Usage**:
+
 ```bash
 # Test with your email
 npm run test:email your-email@example.com
@@ -212,28 +220,34 @@ npm run test:email
 Trip-Sync includes the following email templates:
 
 ### 1. Trip Invitation
+
 **Trigger**: User invites someone to a trip
 **File**: `server/email-service.ts` → `sendTripInvite()`
 
 **Variables**:
+
 - `inviterName`: Name of person sending invite
 - `tripDestination`: Trip destination
 - `tripDates`: Date range (e.g., "May 15-18, 2026")
 - `joinUrl`: Link to join the trip
 
 ### 2. Password Reset
+
 **Trigger**: User requests password reset
 **File**: `server/email-service.ts` → `sendPasswordResetEmail()`
 
 **Variables**:
+
 - `userName`: User's name
 - `resetUrl`: Password reset link (expires in 1 hour)
 
 ### 3. Mention Notification
+
 **Trigger**: User is mentioned in chat/comment
 **File**: `server/email-service.ts` → `sendMentionNotification()`
 
 **Variables**:
+
 - `mentionedUserName`: User who was mentioned
 - `mentionerName`: User who did the mentioning
 - `tripDestination`: Trip name
@@ -241,10 +255,12 @@ Trip-Sync includes the following email templates:
 - `tripUrl`: Link to trip
 
 ### 4. Deadline Reminder
+
 **Trigger**: Trip starts in 7 days (via Atlas proactive system)
 **File**: `server/email-service.ts` → `sendDeadlineReminder()`
 
 **Variables**:
+
 - `userName`: Recipient's name
 - `tripDestination`: Trip name
 - `daysUntilStart`: Days until trip starts
@@ -256,6 +272,7 @@ Trip-Sync includes the following email templates:
 All templates are in `server/email-service.ts`. To customize:
 
 1. **Update HTML**:
+
 ```typescript
 const html = `
   <!DOCTYPE html>
@@ -275,11 +292,13 @@ const html = `
 ```
 
 2. **Update plain text version** (for email clients that don't support HTML):
+
 ```typescript
 const text = `Your plain text version`;
 ```
 
 3. **Test changes**:
+
 ```bash
 npm run test:email your-email@example.com
 ```
@@ -289,6 +308,7 @@ npm run test:email your-email@example.com
 ### Email not sending
 
 **Check 1**: Is service enabled?
+
 ```bash
 # Look for this log on server startup:
 ✓ Email service initialized
@@ -298,6 +318,7 @@ npm run test:email your-email@example.com
 ```
 
 **Check 2**: Are environment variables set?
+
 ```bash
 # Verify .env contains:
 SMTP_HOST=smtp.gmail.com
@@ -306,6 +327,7 @@ SMTP_PASS=your-password
 ```
 
 **Check 3**: Test SMTP connection manually
+
 ```bash
 # Install swaks (SMTP testing tool)
 # macOS:
@@ -328,7 +350,9 @@ swaks --to test@example.com \
 ### Emails going to spam
 
 **Solutions**:
+
 1. **Add SPF record** (DNS):
+
    ```
    v=spf1 include:_spf.google.com ~all
    ```
@@ -336,6 +360,7 @@ swaks --to test@example.com \
 2. **Add DKIM record** (provided by email service)
 
 3. **Add DMARC record**:
+
    ```
    v=DMARC1; p=none; rua=mailto:dmarc@yourdomain.com
    ```
@@ -374,6 +399,7 @@ Before launching with email:
 ### Log Email Sending
 
 Emails are logged automatically:
+
 ```
 Email sent to user@example.com: Trip Invitation
 Email sent to user@example.com: Password Reset
@@ -384,14 +410,17 @@ Email sent to user@example.com: Password Reset
 For production, use your email provider's dashboard:
 
 **SendGrid**:
+
 - Opens, clicks, bounces, spam reports
 - Real-time alerts for delivery issues
 
 **AWS SES**:
+
 - CloudWatch metrics
 - Bounce/complaint notifications via SNS
 
 **Gmail**:
+
 - No analytics (not recommended for production)
 
 ### Alert on Failures
@@ -452,14 +481,15 @@ Test each email type:
 
 Based on 1,000 active users:
 
-| Provider | Monthly Volume | Monthly Cost | Notes |
-|----------|---------------|--------------|-------|
-| Gmail | 15,000 | $0 | Free but limited |
-| SendGrid | 15,000 | $19.95 | Reliable, good analytics |
-| AWS SES | 15,000 | $1.50 | Cheapest, best for scale |
-| Mailgun | 15,000 | $35 | Good deliverability |
+| Provider | Monthly Volume | Monthly Cost | Notes                    |
+| -------- | -------------- | ------------ | ------------------------ |
+| Gmail    | 15,000         | $0           | Free but limited         |
+| SendGrid | 15,000         | $19.95       | Reliable, good analytics |
+| AWS SES  | 15,000         | $1.50        | Cheapest, best for scale |
+| Mailgun  | 15,000         | $35          | Good deliverability      |
 
 **Estimated emails/user/month**: 15
+
 - 8x trip invites
 - 2x password resets
 - 3x mentions

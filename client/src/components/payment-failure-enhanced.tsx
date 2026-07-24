@@ -1,8 +1,15 @@
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { XCircle, CreditCard, RefreshCw, Mail, AlertCircle } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { XCircle, CreditCard, RefreshCw, Mail, AlertCircle } from 'lucide-react';
 
 interface PaymentFailureEnhancedProps {
   isOpen: boolean;
@@ -15,41 +22,42 @@ interface PaymentFailureEnhancedProps {
 }
 
 const ERROR_MESSAGES: Record<string, { title: string; description: string; canRetry: boolean }> = {
-  "card_declined": {
-    title: "Card Declined",
-    description: "Your card was declined. Please try a different payment method or contact your bank.",
-    canRetry: false
+  card_declined: {
+    title: 'Card Declined',
+    description:
+      'Your card was declined. Please try a different payment method or contact your bank.',
+    canRetry: false,
   },
-  "insufficient_funds": {
-    title: "Insufficient Funds",
-    description: "Your card has insufficient funds. Please use a different card.",
-    canRetry: false
+  insufficient_funds: {
+    title: 'Insufficient Funds',
+    description: 'Your card has insufficient funds. Please use a different card.',
+    canRetry: false,
   },
-  "expired_card": {
-    title: "Card Expired",
-    description: "Your card has expired. Please update your payment method.",
-    canRetry: false
+  expired_card: {
+    title: 'Card Expired',
+    description: 'Your card has expired. Please update your payment method.',
+    canRetry: false,
   },
-  "incorrect_cvc": {
-    title: "Incorrect CVC",
-    description: "The security code (CVC) is incorrect. Please check and try again.",
-    canRetry: true
+  incorrect_cvc: {
+    title: 'Incorrect CVC',
+    description: 'The security code (CVC) is incorrect. Please check and try again.',
+    canRetry: true,
   },
-  "processing_error": {
-    title: "Processing Error",
-    description: "We encountered an error processing your payment. Please try again.",
-    canRetry: true
+  processing_error: {
+    title: 'Processing Error',
+    description: 'We encountered an error processing your payment. Please try again.',
+    canRetry: true,
   },
-  "network_error": {
-    title: "Network Error",
-    description: "Unable to connect to payment processor. Check your connection and try again.",
-    canRetry: true
+  network_error: {
+    title: 'Network Error',
+    description: 'Unable to connect to payment processor. Check your connection and try again.',
+    canRetry: true,
   },
-  "unknown": {
-    title: "Payment Failed",
-    description: "An unexpected error occurred. Please try again or contact support.",
-    canRetry: true
-  }
+  unknown: {
+    title: 'Payment Failed',
+    description: 'An unexpected error occurred. Please try again or contact support.',
+    canRetry: true,
+  },
 };
 
 export function PaymentFailureEnhanced({
@@ -59,9 +67,9 @@ export function PaymentFailureEnhanced({
   errorMessage,
   onTryAgain,
   onUpdateCard,
-  onContactSupport
+  onContactSupport,
 }: PaymentFailureEnhancedProps) {
-  const errorInfo = ERROR_MESSAGES[errorCode] || ERROR_MESSAGES["unknown"];
+  const errorInfo = ERROR_MESSAGES[errorCode] || ERROR_MESSAGES['unknown'];
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -70,21 +78,15 @@ export function PaymentFailureEnhanced({
           <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-red-100">
             <XCircle className="h-10 w-10 text-red-600" />
           </div>
-          <DialogTitle className="text-center text-2xl">
-            {errorInfo.title}
-          </DialogTitle>
-          <DialogDescription className="text-center">
-            {errorInfo.description}
-          </DialogDescription>
+          <DialogTitle className="text-center text-2xl">{errorInfo.title}</DialogTitle>
+          <DialogDescription className="text-center">{errorInfo.description}</DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4">
           {/* Error Details */}
           <Alert variant="destructive">
             <AlertCircle className="h-4 w-4" />
-            <AlertDescription>
-              {errorMessage}
-            </AlertDescription>
+            <AlertDescription>{errorMessage}</AlertDescription>
           </Alert>
 
           {/* Common Reasons */}
@@ -110,7 +112,7 @@ export function PaymentFailureEnhanced({
 
             <Button onClick={onUpdateCard} className="w-full" variant="outline">
               <CreditCard className="h-4 w-4 mr-2" />
-              {errorInfo.canRetry ? "Try Different Card" : "Update Card"}
+              {errorInfo.canRetry ? 'Try Different Card' : 'Update Card'}
             </Button>
 
             <Button onClick={onContactSupport} className="w-full" variant="outline">

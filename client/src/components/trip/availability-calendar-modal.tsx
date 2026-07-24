@@ -1,12 +1,19 @@
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Calendar } from "@/components/ui/calendar";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { CheckCircle2, Calendar as CalendarIcon, Users, TrendingUp } from "lucide-react";
-import { useState } from "react";
-import { format, parseISO, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay } from "date-fns";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Calendar } from '@/components/ui/calendar';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { CheckCircle2, Calendar as CalendarIcon, Users, TrendingUp } from 'lucide-react';
+import { useState } from 'react';
+import { format, parseISO, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay } from 'date-fns';
 
 interface GroupAvailability {
   id: string;
@@ -35,27 +42,32 @@ export function AvailabilityCalendarModal({
   availability,
   members,
   currentUserId,
-  onSaveAvailability
+  onSaveAvailability,
 }: AvailabilityCalendarModalProps) {
-  const currentUserAvailability = availability.find(a => a.userId === currentUserId);
+  const currentUserAvailability = availability.find((a) => a.userId === currentUserId);
   const [selectedDates, setSelectedDates] = useState<Date[]>(
-    currentUserAvailability?.availableDates.map(d => parseISO(d)) || []
+    currentUserAvailability?.availableDates.map((d) => parseISO(d)) || []
   );
   const [hasChanges, setHasChanges] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [viewMonth, setViewMonth] = useState(new Date());
 
   const getInitials = (name: string) => {
-    return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+    return name
+      .split(' ')
+      .map((n) => n[0])
+      .join('')
+      .toUpperCase()
+      .slice(0, 2);
   };
 
   const handleDateSelect = (date: Date | undefined) => {
     if (!date) return;
 
-    setSelectedDates(prev => {
-      const exists = prev.some(d => isSameDay(d, date));
+    setSelectedDates((prev) => {
+      const exists = prev.some((d) => isSameDay(d, date));
       if (exists) {
-        return prev.filter(d => !isSameDay(d, date));
+        return prev.filter((d) => !isSameDay(d, date));
       } else {
         return [...prev, date].sort((a, b) => a.getTime() - b.getTime());
       }
@@ -66,11 +78,11 @@ export function AvailabilityCalendarModal({
   const handleSave = async () => {
     setIsSaving(true);
     try {
-      const dateStrings = selectedDates.map(d => format(d, "yyyy-MM-dd"));
+      const dateStrings = selectedDates.map((d) => format(d, 'yyyy-MM-dd'));
       await onSaveAvailability(dateStrings);
       setHasChanges(false);
     } catch (error) {
-      console.error("Failed to save availability:", error);
+      console.error('Failed to save availability:', error);
     } finally {
       setIsSaving(false);
     }
@@ -78,8 +90,8 @@ export function AvailabilityCalendarModal({
 
   // Calculate consensus dates (dates where most people are available)
   const dateAvailability = new Map<string, string[]>();
-  availability.forEach(av => {
-    av.availableDates.forEach(dateStr => {
+  availability.forEach((av) => {
+    av.availableDates.forEach((dateStr) => {
       if (!dateAvailability.has(dateStr)) {
         dateAvailability.set(dateStr, []);
       }
@@ -91,22 +103,22 @@ export function AvailabilityCalendarModal({
     .map(([dateStr, userIds]) => ({
       date: dateStr,
       count: userIds.length,
-      users: userIds.map(id => members.find(m => m.id === id)!).filter(Boolean),
-      percentage: (userIds.length / members.length) * 100
+      users: userIds.map((id) => members.find((m) => m.id === id)!).filter(Boolean),
+      percentage: (userIds.length / members.length) * 100,
     }))
     .sort((a, b) => b.count - a.count)
     .slice(0, 10);
 
-  const bestDates = consensusDates.filter(d => d.percentage >= 80);
+  const bestDates = consensusDates.filter((d) => d.percentage >= 80);
 
   // Month calendar view
   const monthDays = eachDayOfInterval({
     start: startOfMonth(viewMonth),
-    end: endOfMonth(viewMonth)
+    end: endOfMonth(viewMonth),
   });
 
   const getDayAvailabilityCount = (day: Date) => {
-    const dateStr = format(day, "yyyy-MM-dd");
+    const dateStr = format(day, 'yyyy-MM-dd');
     return dateAvailability.get(dateStr)?.length || 0;
   };
 
@@ -118,9 +130,7 @@ export function AvailabilityCalendarModal({
             <CalendarIcon className="h-5 w-5 text-primary" />
             <DialogTitle>Group Availability</DialogTitle>
           </div>
-          <DialogDescription>
-            Find dates that work for everyone
-          </DialogDescription>
+          <DialogDescription>Find dates that work for everyone</DialogDescription>
         </DialogHeader>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -149,10 +159,10 @@ export function AvailabilityCalendarModal({
                 onMonthChange={setViewMonth}
                 className="rounded-md border"
                 modifiers={{
-                  available: (date) => selectedDates.some(d => isSameDay(d, date))
+                  available: (date) => selectedDates.some((d) => isSameDay(d, date)),
                 }}
                 modifiersClassNames={{
-                  available: "bg-primary text-primary-foreground"
+                  available: 'bg-primary text-primary-foreground',
                 }}
               />
 
@@ -165,19 +175,17 @@ export function AvailabilityCalendarModal({
                     variant="outline"
                     size="sm"
                     onClick={() => {
-                      setSelectedDates(currentUserAvailability?.availableDates.map(d => parseISO(d)) || []);
+                      setSelectedDates(
+                        currentUserAvailability?.availableDates.map((d) => parseISO(d)) || []
+                      );
                       setHasChanges(false);
                     }}
                     disabled={!hasChanges}
                   >
                     Reset
                   </Button>
-                  <Button
-                    size="sm"
-                    onClick={handleSave}
-                    disabled={!hasChanges || isSaving}
-                  >
-                    {isSaving ? "Saving..." : "Save Availability"}
+                  <Button size="sm" onClick={handleSave} disabled={!hasChanges || isSaving}>
+                    {isSaving ? 'Saving...' : 'Save Availability'}
                   </Button>
                 </div>
               </div>
@@ -187,7 +195,7 @@ export function AvailabilityCalendarModal({
             <Card className="p-4">
               <h4 className="font-semibold mb-3">Group Consensus</h4>
               <div className="grid grid-cols-7 gap-1">
-                {monthDays.map(day => {
+                {monthDays.map((day) => {
                   const count = getDayAvailabilityCount(day);
                   const percentage = (count / members.length) * 100;
 
@@ -198,15 +206,15 @@ export function AvailabilityCalendarModal({
                         count === 0
                           ? 'bg-gray-100 text-gray-400'
                           : percentage >= 80
-                          ? 'bg-green-500 text-white'
-                          : percentage >= 60
-                          ? 'bg-green-400 text-white'
-                          : percentage >= 40
-                          ? 'bg-amber-400 text-white'
-                          : 'bg-amber-200 text-gray-800'
+                            ? 'bg-green-500 text-white'
+                            : percentage >= 60
+                              ? 'bg-green-400 text-white'
+                              : percentage >= 40
+                                ? 'bg-amber-400 text-white'
+                                : 'bg-amber-200 text-gray-800'
                       }`}
                     >
-                      <span className="font-medium">{format(day, "d")}</span>
+                      <span className="font-medium">{format(day, 'd')}</span>
                       {count > 0 && <span className="text-[10px]">{count}</span>}
                     </div>
                   );
@@ -244,7 +252,7 @@ export function AvailabilityCalendarModal({
                     <div key={date} className="p-2 bg-white rounded-lg border border-green-200">
                       <div className="flex items-center justify-between mb-1">
                         <span className="text-sm font-medium">
-                          {format(parseISO(date), "MMM d, yyyy")}
+                          {format(parseISO(date), 'MMM d, yyyy')}
                         </span>
                         <Badge className="bg-green-600 text-white text-xs">
                           {percentage.toFixed(0)}%
@@ -266,9 +274,10 @@ export function AvailabilityCalendarModal({
                 <h4 className="font-semibold">Member Status</h4>
               </div>
               <div className="space-y-2">
-                {members.map(member => {
-                  const memberAvailability = availability.find(a => a.userId === member.id);
-                  const hasSubmitted = memberAvailability && memberAvailability.availableDates.length > 0;
+                {members.map((member) => {
+                  const memberAvailability = availability.find((a) => a.userId === member.id);
+                  const hasSubmitted =
+                    memberAvailability && memberAvailability.availableDates.length > 0;
 
                   return (
                     <div
@@ -291,7 +300,9 @@ export function AvailabilityCalendarModal({
                           </span>
                         </div>
                       ) : (
-                        <Badge variant="outline" className="text-xs">Pending</Badge>
+                        <Badge variant="outline" className="text-xs">
+                          Pending
+                        </Badge>
                       )}
                     </div>
                   );
@@ -306,7 +317,7 @@ export function AvailabilityCalendarModal({
                 <div className="space-y-2">
                   {consensusDates.slice(0, 5).map(({ date, count, percentage }) => (
                     <div key={date} className="flex items-center justify-between text-xs">
-                      <span>{format(parseISO(date), "MMM d")}</span>
+                      <span>{format(parseISO(date), 'MMM d')}</span>
                       <div className="flex items-center gap-2">
                         <div className="w-16 bg-gray-200 rounded-full h-1.5">
                           <div
@@ -328,10 +339,10 @@ export function AvailabilityCalendarModal({
 
         <DialogFooter>
           <div className="flex items-center justify-between w-full">
-            <p className="text-xs text-muted-foreground">
-              Click dates to toggle your availability
-            </p>
-            <Button variant="outline" onClick={onClose}>Close</Button>
+            <p className="text-xs text-muted-foreground">Click dates to toggle your availability</p>
+            <Button variant="outline" onClick={onClose}>
+              Close
+            </Button>
           </div>
         </DialogFooter>
       </DialogContent>

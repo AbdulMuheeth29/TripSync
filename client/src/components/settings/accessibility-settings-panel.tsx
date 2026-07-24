@@ -1,15 +1,21 @@
-import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Separator } from "@/components/ui/separator";
-import { Badge } from "@/components/ui/badge";
-import { Eye, Type, Contrast, Zap, Keyboard, Volume2, CheckCircle2 } from "lucide-react";
-import { useState } from "react";
+import { Card } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Label } from '@/components/ui/label';
+import { Switch } from '@/components/ui/switch';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Separator } from '@/components/ui/separator';
+import { Badge } from '@/components/ui/badge';
+import { Eye, Type, Contrast, Zap, Keyboard, Volume2, CheckCircle2 } from 'lucide-react';
+import { useState } from 'react';
 
 interface AccessibilitySettings {
-  fontSize: "small" | "medium" | "large" | "x-large";
+  fontSize: 'small' | 'medium' | 'large' | 'x-large';
   highContrast: boolean;
   reducedMotion: boolean;
   screenReaderOptimized: boolean;
@@ -17,7 +23,7 @@ interface AccessibilitySettings {
   focusIndicators: boolean;
   autoplayVideos: boolean;
   soundEffects: boolean;
-  colorBlindMode: "none" | "protanopia" | "deuteranopia" | "tritanopia";
+  colorBlindMode: 'none' | 'protanopia' | 'deuteranopia' | 'tritanopia';
 }
 
 interface AccessibilitySettingsPanelProps {
@@ -27,7 +33,7 @@ interface AccessibilitySettingsPanelProps {
 
 export function AccessibilitySettingsPanel({
   initialSettings,
-  onSave
+  onSave,
 }: AccessibilitySettingsPanelProps) {
   const [settings, setSettings] = useState<AccessibilitySettings>(initialSettings);
   const [isSaving, setIsSaving] = useState(false);
@@ -37,7 +43,7 @@ export function AccessibilitySettingsPanel({
     key: K,
     value: AccessibilitySettings[K]
   ) => {
-    setSettings(prev => ({ ...prev, [key]: value }));
+    setSettings((prev) => ({ ...prev, [key]: value }));
     setHasChanges(true);
   };
 
@@ -47,7 +53,7 @@ export function AccessibilitySettingsPanel({
       await onSave(settings);
       setHasChanges(false);
     } catch (error) {
-      console.error("Failed to save accessibility settings:", error);
+      console.error('Failed to save accessibility settings:', error);
     } finally {
       setIsSaving(false);
     }
@@ -60,20 +66,20 @@ export function AccessibilitySettingsPanel({
 
   const getFontSizeLabel = (size: string) => {
     const labels = {
-      small: "Small (14px)",
-      medium: "Medium (16px)",
-      large: "Large (18px)",
-      "x-large": "Extra Large (20px)"
+      small: 'Small (14px)',
+      medium: 'Medium (16px)',
+      large: 'Large (18px)',
+      'x-large': 'Extra Large (20px)',
     };
     return labels[size as keyof typeof labels];
   };
 
   const getColorBlindLabel = (mode: string) => {
     const labels = {
-      none: "None",
-      protanopia: "Protanopia (Red-Blind)",
-      deuteranopia: "Deuteranopia (Green-Blind)",
-      tritanopia: "Tritanopia (Blue-Blind)"
+      none: 'None',
+      protanopia: 'Protanopia (Red-Blind)',
+      deuteranopia: 'Deuteranopia (Green-Blind)',
+      tritanopia: 'Tritanopia (Blue-Blind)',
     };
     return labels[mode as keyof typeof labels];
   };
@@ -113,16 +119,16 @@ export function AccessibilitySettingsPanel({
             <Label htmlFor="font-size">Font Size</Label>
             <Select
               value={settings.fontSize}
-              onValueChange={(value) => handleChange("fontSize", value as any)}
+              onValueChange={(value) => handleChange('fontSize', value as any)}
             >
               <SelectTrigger id="font-size">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="small">{getFontSizeLabel("small")}</SelectItem>
-                <SelectItem value="medium">{getFontSizeLabel("medium")}</SelectItem>
-                <SelectItem value="large">{getFontSizeLabel("large")}</SelectItem>
-                <SelectItem value="x-large">{getFontSizeLabel("x-large")}</SelectItem>
+                <SelectItem value="small">{getFontSizeLabel('small')}</SelectItem>
+                <SelectItem value="medium">{getFontSizeLabel('medium')}</SelectItem>
+                <SelectItem value="large">{getFontSizeLabel('large')}</SelectItem>
+                <SelectItem value="x-large">{getFontSizeLabel('x-large')}</SelectItem>
               </SelectContent>
             </Select>
             <p className="text-xs text-muted-foreground">
@@ -146,7 +152,7 @@ export function AccessibilitySettingsPanel({
             <Switch
               id="high-contrast"
               checked={settings.highContrast}
-              onCheckedChange={(checked) => handleChange("highContrast", checked)}
+              onCheckedChange={(checked) => handleChange('highContrast', checked)}
             />
           </div>
 
@@ -157,16 +163,16 @@ export function AccessibilitySettingsPanel({
             <Label htmlFor="colorblind-mode">Color Blind Mode</Label>
             <Select
               value={settings.colorBlindMode}
-              onValueChange={(value) => handleChange("colorBlindMode", value as any)}
+              onValueChange={(value) => handleChange('colorBlindMode', value as any)}
             >
               <SelectTrigger id="colorblind-mode">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="none">{getColorBlindLabel("none")}</SelectItem>
-                <SelectItem value="protanopia">{getColorBlindLabel("protanopia")}</SelectItem>
-                <SelectItem value="deuteranopia">{getColorBlindLabel("deuteranopia")}</SelectItem>
-                <SelectItem value="tritanopia">{getColorBlindLabel("tritanopia")}</SelectItem>
+                <SelectItem value="none">{getColorBlindLabel('none')}</SelectItem>
+                <SelectItem value="protanopia">{getColorBlindLabel('protanopia')}</SelectItem>
+                <SelectItem value="deuteranopia">{getColorBlindLabel('deuteranopia')}</SelectItem>
+                <SelectItem value="tritanopia">{getColorBlindLabel('tritanopia')}</SelectItem>
               </SelectContent>
             </Select>
             <p className="text-xs text-muted-foreground">
@@ -195,7 +201,7 @@ export function AccessibilitySettingsPanel({
             <Switch
               id="reduced-motion"
               checked={settings.reducedMotion}
-              onCheckedChange={(checked) => handleChange("reducedMotion", checked)}
+              onCheckedChange={(checked) => handleChange('reducedMotion', checked)}
             />
           </div>
 
@@ -212,7 +218,7 @@ export function AccessibilitySettingsPanel({
             <Switch
               id="autoplay-videos"
               checked={settings.autoplayVideos}
-              onCheckedChange={(checked) => handleChange("autoplayVideos", checked)}
+              onCheckedChange={(checked) => handleChange('autoplayVideos', checked)}
             />
           </div>
         </div>
@@ -237,7 +243,7 @@ export function AccessibilitySettingsPanel({
             <Switch
               id="screen-reader"
               checked={settings.screenReaderOptimized}
-              onCheckedChange={(checked) => handleChange("screenReaderOptimized", checked)}
+              onCheckedChange={(checked) => handleChange('screenReaderOptimized', checked)}
             />
           </div>
 
@@ -248,7 +254,9 @@ export function AccessibilitySettingsPanel({
             <div className="flex-1 space-y-1">
               <div className="flex items-center gap-2">
                 <Label htmlFor="keyboard-nav">Enhanced Keyboard Navigation</Label>
-                <Badge variant="secondary" className="text-xs">Recommended</Badge>
+                <Badge variant="secondary" className="text-xs">
+                  Recommended
+                </Badge>
               </div>
               <p className="text-xs text-muted-foreground">
                 Navigate the entire app using only your keyboard with Tab, Enter, and Arrow keys
@@ -257,7 +265,7 @@ export function AccessibilitySettingsPanel({
             <Switch
               id="keyboard-nav"
               checked={settings.keyboardNavigation}
-              onCheckedChange={(checked) => handleChange("keyboardNavigation", checked)}
+              onCheckedChange={(checked) => handleChange('keyboardNavigation', checked)}
             />
           </div>
 
@@ -274,7 +282,7 @@ export function AccessibilitySettingsPanel({
             <Switch
               id="focus-indicators"
               checked={settings.focusIndicators}
-              onCheckedChange={(checked) => handleChange("focusIndicators", checked)}
+              onCheckedChange={(checked) => handleChange('focusIndicators', checked)}
             />
           </div>
         </div>
@@ -299,7 +307,7 @@ export function AccessibilitySettingsPanel({
             <Switch
               id="sound-effects"
               checked={settings.soundEffects}
-              onCheckedChange={(checked) => handleChange("soundEffects", checked)}
+              onCheckedChange={(checked) => handleChange('soundEffects', checked)}
             />
           </div>
         </div>
@@ -312,7 +320,8 @@ export function AccessibilitySettingsPanel({
           <div className="text-xs text-blue-900">
             <p className="font-medium mb-1">Accessibility Commitment</p>
             <p className="text-blue-800">
-              We're committed to making TripSync accessible to everyone. If you encounter any accessibility issues or have suggestions, please contact our support team.
+              We're committed to making TripSync accessible to everyone. If you encounter any
+              accessibility issues or have suggestions, please contact our support team.
             </p>
           </div>
         </div>
@@ -320,18 +329,11 @@ export function AccessibilitySettingsPanel({
 
       {/* Actions */}
       <div className="flex justify-between pt-4">
-        <Button
-          variant="outline"
-          onClick={handleReset}
-          disabled={!hasChanges || isSaving}
-        >
+        <Button variant="outline" onClick={handleReset} disabled={!hasChanges || isSaving}>
           Reset to Defaults
         </Button>
-        <Button
-          onClick={handleSave}
-          disabled={!hasChanges || isSaving}
-        >
-          {isSaving ? "Saving..." : "Save Settings"}
+        <Button onClick={handleSave} disabled={!hasChanges || isSaving}>
+          {isSaving ? 'Saving...' : 'Save Settings'}
         </Button>
       </div>
     </div>

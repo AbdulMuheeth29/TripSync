@@ -3,8 +3,8 @@
  * Handles sending email notifications for invites, reminders, and mentions
  */
 
-import nodemailer from "nodemailer";
-import type { Transporter } from "nodemailer";
+import nodemailer from 'nodemailer';
+import type { Transporter } from 'nodemailer';
 
 export interface EmailOptions {
   to: string;
@@ -20,10 +20,10 @@ class EmailService {
 
   constructor() {
     const smtpHost = process.env.SMTP_HOST;
-    const smtpPort = parseInt(process.env.SMTP_PORT || "587");
+    const smtpPort = parseInt(process.env.SMTP_PORT || '587');
     const smtpUser = process.env.SMTP_USER;
     const smtpPass = process.env.SMTP_PASS;
-    this.fromEmail = process.env.SMTP_FROM || "noreply@tripsync.app";
+    this.fromEmail = process.env.SMTP_FROM || 'noreply@tripsync.app';
 
     if (smtpHost && smtpUser && smtpPass) {
       this.transporter = nodemailer.createTransport({
@@ -36,9 +36,9 @@ class EmailService {
         },
       });
       this.enabled = true;
-      console.log("✓ Email service initialized");
+      console.log('✓ Email service initialized');
     } else {
-      console.warn("⚠ Email service not configured. Notifications will be disabled.");
+      console.warn('⚠ Email service not configured. Notifications will be disabled.');
     }
   }
 
@@ -54,7 +54,7 @@ class EmailService {
    */
   async sendEmail(options: EmailOptions): Promise<void> {
     if (!this.transporter) {
-      console.warn("Email not sent (service not configured):", options.subject);
+      console.warn('Email not sent (service not configured):', options.subject);
       return;
     }
 
@@ -68,7 +68,7 @@ class EmailService {
       });
       console.log(`Email sent to ${options.to}: ${options.subject}`);
     } catch (error) {
-      console.error("Failed to send email:", error);
+      console.error('Failed to send email:', error);
       throw error;
     }
   }
@@ -85,7 +85,8 @@ class EmailService {
     inviteId?: string;
     baseUrl: string;
   }): Promise<void> {
-    const { toEmail, inviterName, tripDestination, tripDates, joinCode, inviteId, baseUrl } = params;
+    const { toEmail, inviterName, tripDestination, tripDates, joinCode, inviteId, baseUrl } =
+      params;
     const joinUrl = inviteId ? `${baseUrl}/invite/${inviteId}` : `${baseUrl}/join/${joinCode}`;
 
     const html = `

@@ -1,14 +1,30 @@
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Scan, CheckCircle2, AlertTriangle, Edit3, Calendar, DollarSign, Store, FileText } from "lucide-react";
-import { useState } from "react";
-import { format } from "date-fns";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Card } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Separator } from '@/components/ui/separator';
+import { Checkbox } from '@/components/ui/checkbox';
+import {
+  Scan,
+  CheckCircle2,
+  AlertTriangle,
+  Edit3,
+  Calendar,
+  DollarSign,
+  Store,
+  FileText,
+} from 'lucide-react';
+import { useState } from 'react';
+import { format } from 'date-fns';
 
 interface OCRLineItem {
   description: string;
@@ -44,21 +60,21 @@ export function OCRResultsReviewModal({
   onAccept,
   onReject,
   results: initialResults,
-  receiptImageUrl
+  receiptImageUrl,
 }: OCRResultsReviewModalProps) {
   const [results, setResults] = useState(initialResults);
   const [isEditing, setIsEditing] = useState(false);
 
   const handleFieldChange = (field: keyof OCRResults, value: any) => {
-    setResults(prev => ({ ...prev, [field]: value }));
+    setResults((prev) => ({ ...prev, [field]: value }));
   };
 
   const handleLineItemChange = (index: number, field: keyof OCRLineItem, value: any) => {
-    setResults(prev => ({
+    setResults((prev) => ({
       ...prev,
       lineItems: prev.lineItems.map((item, i) =>
         i === index ? { ...item, [field]: value } : item
-      )
+      ),
     }));
   };
 
@@ -85,11 +101,15 @@ export function OCRResultsReviewModal({
 
         <div className="space-y-4">
           {/* Confidence Score */}
-          <Card className={`p-4 ${
-            isHighConfidence ? "bg-green-50 border-green-200" :
-            isMediumConfidence ? "bg-amber-50 border-amber-200" :
-            "bg-red-50 border-red-200"
-          }`}>
+          <Card
+            className={`p-4 ${
+              isHighConfidence
+                ? 'bg-green-50 border-green-200'
+                : isMediumConfidence
+                  ? 'bg-amber-50 border-amber-200'
+                  : 'bg-red-50 border-red-200'
+            }`}
+          >
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 {isHighConfidence ? (
@@ -98,24 +118,18 @@ export function OCRResultsReviewModal({
                   <AlertTriangle className="h-5 w-5 text-amber-600" />
                 )}
                 <div>
-                  <p className="text-sm font-medium">
-                    Confidence Score: {results.confidence}%
-                  </p>
+                  <p className="text-sm font-medium">Confidence Score: {results.confidence}%</p>
                   <p className="text-xs text-muted-foreground">
-                    {isHighConfidence && "High confidence - data looks accurate"}
-                    {isMediumConfidence && "Medium confidence - please verify key fields"}
-                    {isLowConfidence && "Low confidence - please review all fields carefully"}
+                    {isHighConfidence && 'High confidence - data looks accurate'}
+                    {isMediumConfidence && 'Medium confidence - please verify key fields'}
+                    {isLowConfidence && 'Low confidence - please review all fields carefully'}
                   </p>
                 </div>
               </div>
 
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setIsEditing(!isEditing)}
-              >
+              <Button variant="outline" size="sm" onClick={() => setIsEditing(!isEditing)}>
                 <Edit3 className="h-4 w-4 mr-2" />
-                {isEditing ? "Done Editing" : "Edit Results"}
+                {isEditing ? 'Done Editing' : 'Edit Results'}
               </Button>
             </div>
           </Card>
@@ -149,7 +163,7 @@ export function OCRResultsReviewModal({
                   Date
                 </Label>
                 <p className="text-sm font-medium p-2 bg-muted rounded">
-                  {format(results.date, "MMMM d, yyyy")}
+                  {format(results.date, 'MMMM d, yyyy')}
                 </p>
               </div>
 
@@ -162,12 +176,12 @@ export function OCRResultsReviewModal({
                 {isEditing ? (
                   <Input
                     id="category"
-                    value={results.category || ""}
+                    value={results.category || ''}
                     onChange={(e) => handleFieldChange('category', e.target.value)}
                     placeholder="e.g., Food & Dining"
                   />
                 ) : (
-                  <Badge variant="secondary">{results.category || "Not detected"}</Badge>
+                  <Badge variant="secondary">{results.category || 'Not detected'}</Badge>
                 )}
               </div>
 
@@ -187,7 +201,9 @@ export function OCRResultsReviewModal({
                           type="number"
                           step="0.01"
                           value={results.subtotal}
-                          onChange={(e) => handleFieldChange('subtotal', parseFloat(e.target.value))}
+                          onChange={(e) =>
+                            handleFieldChange('subtotal', parseFloat(e.target.value))
+                          }
                           className="w-24 h-8"
                         />
                       ) : (
@@ -239,7 +255,9 @@ export function OCRResultsReviewModal({
                         type="number"
                         step="0.01"
                         value={results.totalAmount}
-                        onChange={(e) => handleFieldChange('totalAmount', parseFloat(e.target.value))}
+                        onChange={(e) =>
+                          handleFieldChange('totalAmount', parseFloat(e.target.value))
+                        }
                         className="w-24 h-8"
                       />
                     ) : (
@@ -295,7 +313,9 @@ export function OCRResultsReviewModal({
                             {isEditing ? (
                               <Input
                                 value={item.description}
-                                onChange={(e) => handleLineItemChange(index, 'description', e.target.value)}
+                                onChange={(e) =>
+                                  handleLineItemChange(index, 'description', e.target.value)
+                                }
                                 className="h-8"
                               />
                             ) : (
@@ -307,7 +327,9 @@ export function OCRResultsReviewModal({
                               <Input
                                 type="number"
                                 value={item.quantity}
-                                onChange={(e) => handleLineItemChange(index, 'quantity', parseInt(e.target.value))}
+                                onChange={(e) =>
+                                  handleLineItemChange(index, 'quantity', parseInt(e.target.value))
+                                }
                                 className="h-8 w-16 text-center mx-auto"
                               />
                             ) : (
@@ -320,7 +342,13 @@ export function OCRResultsReviewModal({
                                 type="number"
                                 step="0.01"
                                 value={item.unitPrice}
-                                onChange={(e) => handleLineItemChange(index, 'unitPrice', parseFloat(e.target.value))}
+                                onChange={(e) =>
+                                  handleLineItemChange(
+                                    index,
+                                    'unitPrice',
+                                    parseFloat(e.target.value)
+                                  )
+                                }
                                 className="h-8 w-20 ml-auto"
                               />
                             ) : (

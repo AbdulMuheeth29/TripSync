@@ -71,6 +71,7 @@ END: User ready to create first trip
 ```
 
 **Success Criteria:**
+
 - ✅ Email validated and unique
 - ✅ Password meets security requirements
 - ✅ JWT token issued
@@ -78,6 +79,7 @@ END: User ready to create first trip
 - ✅ Free tier activated (3 trips, 6 members/trip, 1 AI generation)
 
 **Error Handling:**
+
 - Duplicate email → Suggest login or password reset
 - Weak password → Show password requirements
 - Network error → Retry mechanism with exponential backoff
@@ -144,6 +146,7 @@ END: User accesses dashboard
 ```
 
 **Success Criteria:**
+
 - ✅ Valid credentials authenticated
 - ✅ JWT token issued
 - ✅ Session established
@@ -151,6 +154,7 @@ END: User accesses dashboard
 - ✅ All trips loaded and displayed
 
 **Error Handling:**
+
 - Invalid credentials → Clear message, suggest password reset
 - Rate limiting → Show lockout duration
 - Network error → Retry with offline message
@@ -272,6 +276,7 @@ END: Password successfully reset and user logged in
 ```
 
 **Success Criteria:**
+
 - ✅ Email sent (if account exists)
 - ✅ Token generated with 1-hour expiration
 - ✅ Token validated on page load
@@ -280,6 +285,7 @@ END: Password successfully reset and user logged in
 - ✅ User can log in with new password
 
 **Error Handling:**
+
 - Token expired → Clear message + "Request new link" button
 - Invalid token → Friendly error + request new link
 - Network error during email send → Retry mechanism
@@ -287,6 +293,7 @@ END: Password successfully reset and user logged in
 - Passwords don't match → Real-time validation error
 
 **Security Measures:**
+
 - ✅ Rate limiting on reset requests (max 3/hour per email)
 - ✅ Tokens are single-use and expire in 1 hour
 - ✅ No indication if email exists (prevent enumeration)
@@ -370,6 +377,7 @@ User can access app for 30 days without re-login
 ```
 
 **Session Security:**
+
 - ✅ JWT tokens expire after 24 hours (or 30 days with "remember me")
 - ✅ Tokens stored in httpOnly cookies (or localStorage for PWA)
 - ✅ CSRF protection with SameSite cookies
@@ -451,6 +459,7 @@ END: User ready to create first trip
 ```
 
 **Onboarding Goals:**
+
 - ✅ Make user feel welcome
 - ✅ Explain key value propositions
 - ✅ Guide to first action (create trip)
@@ -458,6 +467,7 @@ END: User ready to create first trip
 - ✅ Show subscription tier and limits
 
 **Optional Enhancements:**
+
 - Interactive product tour with tooltips
 - Sample demo trip they can explore
 - Video introduction to key features
@@ -503,6 +513,7 @@ Future Providers:
 ## Error Scenarios & Edge Cases
 
 ### Edge Case 1: Email Verification (Optional Feature)
+
 ```
 Currently: Emails are not verified on signup
 Future: Add email verification step before full access
@@ -514,6 +525,7 @@ Registration → Email sent with verification link
 ```
 
 ### Edge Case 2: Account Deletion
+
 ```
 User requests account deletion
     ↓
@@ -529,6 +541,7 @@ Logout and redirect to landing page
 ```
 
 ### Edge Case 3: Duplicate Simultaneous Registrations
+
 ```
 User submits registration twice quickly
     ↓
@@ -541,6 +554,7 @@ Auto-login with credentials from second attempt
 ```
 
 ### Edge Case 4: Password Reset for Non-Existent Email
+
 ```
 User requests reset for email that doesn't exist
     ↓
@@ -558,6 +572,7 @@ Prevents email enumeration attacks
 ## Analytics & Tracking
 
 **Events Tracked:**
+
 1. `user_registered` - New account created
 2. `user_logged_in` - Successful login
 3. `user_logged_out` - User logout
@@ -568,6 +583,7 @@ Prevents email enumeration attacks
 8. `onboarding_tour_skipped` - User skipped tour
 
 **User Properties Tracked:**
+
 - Registration date
 - Last login date
 - Login count

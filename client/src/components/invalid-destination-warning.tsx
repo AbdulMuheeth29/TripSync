@@ -7,8 +7,8 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-import { AlertTriangle, MapPin } from "lucide-react";
+} from '@/components/ui/alert-dialog';
+import { AlertTriangle, MapPin } from 'lucide-react';
 
 interface InvalidDestinationWarningProps {
   isOpen: boolean;
@@ -23,7 +23,7 @@ export function InvalidDestinationWarning({
   onClose,
   onContinueAnyway,
   onChangeDestination,
-  destination
+  destination,
 }: InvalidDestinationWarningProps) {
   return (
     <AlertDialog open={isOpen} onOpenChange={onClose}>
@@ -36,15 +36,14 @@ export function InvalidDestinationWarning({
             Limited Information for This Destination
           </AlertDialogTitle>
           <AlertDialogDescription className="text-center">
-            We couldn't find much information about <span className="font-semibold">"{destination}"</span>
+            We couldn't find much information about{' '}
+            <span className="font-semibold">"{destination}"</span>
           </AlertDialogDescription>
         </AlertDialogHeader>
 
         <div className="space-y-4">
           <div className="rounded-lg border border-amber-200 bg-amber-50 p-4">
-            <p className="text-sm font-medium text-amber-900 mb-2">
-              This might mean:
-            </p>
+            <p className="text-sm font-medium text-amber-900 mb-2">This might mean:</p>
             <ul className="text-sm text-amber-800 space-y-1 list-disc list-inside">
               <li>The destination name might be misspelled</li>
               <li>It's a very small or uncommon location</li>
@@ -56,9 +55,7 @@ export function InvalidDestinationWarning({
             <div className="flex items-start gap-2">
               <MapPin className="h-5 w-5 text-blue-600 mt-0.5" />
               <div>
-                <p className="text-sm font-medium text-blue-900">
-                  Try these formats:
-                </p>
+                <p className="text-sm font-medium text-blue-900">Try these formats:</p>
                 <ul className="text-sm text-blue-700 mt-1 space-y-1">
                   <li>• "City, Country" (e.g., "Paris, France")</li>
                   <li>• "City, State, Country" (e.g., "Austin, Texas, USA")</li>
@@ -70,7 +67,8 @@ export function InvalidDestinationWarning({
 
           <div className="rounded-lg border border-muted bg-muted/50 p-4">
             <p className="text-sm text-muted-foreground">
-              <strong>Note:</strong> You can continue anyway, but AI-generated recommendations might be limited or generic.
+              <strong>Note:</strong> You can continue anyway, but AI-generated recommendations might
+              be limited or generic.
             </p>
           </div>
         </div>

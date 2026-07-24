@@ -1,7 +1,7 @@
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Badge } from "@/components/ui/badge";
+import { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Badge } from '@/components/ui/badge';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -11,16 +11,16 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-import { useToast } from "@/hooks/use-toast";
-import { ThumbsUp, ThumbsDown, Trash2, Check, X } from "lucide-react";
+} from '@/components/ui/alert-dialog';
+import { useToast } from '@/hooks/use-toast';
+import { ThumbsUp, ThumbsDown, Trash2, Check, X } from 'lucide-react';
 
 interface BulkActionsProps {
   selectedItems: Set<string>;
   totalItems: number;
   onSelectAll: () => void;
   onDeselectAll: () => void;
-  onBulkVote: (itemIds: string[], voteType: "up" | "down") => Promise<void>;
+  onBulkVote: (itemIds: string[], voteType: 'up' | 'down') => Promise<void>;
   onBulkDelete: (itemIds: string[]) => Promise<void>;
 }
 
@@ -40,22 +40,22 @@ export function ItineraryBulkActions({
   const allSelected = selectedCount === totalItems && totalItems > 0;
   const someSelected = selectedCount > 0 && selectedCount < totalItems;
 
-  const handleBulkVote = async (voteType: "up" | "down") => {
+  const handleBulkVote = async (voteType: 'up' | 'down') => {
     if (selectedCount === 0) return;
 
     setLoading(true);
     try {
       await onBulkVote(Array.from(selectedItems), voteType);
       toast({
-        title: "Votes submitted",
-        description: `${voteType === "up" ? "Approved" : "Rejected"} ${selectedCount} item${selectedCount > 1 ? "s" : ""}`,
+        title: 'Votes submitted',
+        description: `${voteType === 'up' ? 'Approved' : 'Rejected'} ${selectedCount} item${selectedCount > 1 ? 's' : ''}`,
       });
       onDeselectAll();
     } catch (error) {
       toast({
-        title: "Bulk vote failed",
-        description: error instanceof Error ? error.message : "Failed to submit votes",
-        variant: "destructive",
+        title: 'Bulk vote failed',
+        description: error instanceof Error ? error.message : 'Failed to submit votes',
+        variant: 'destructive',
       });
     } finally {
       setLoading(false);
@@ -69,16 +69,16 @@ export function ItineraryBulkActions({
     try {
       await onBulkDelete(Array.from(selectedItems));
       toast({
-        title: "Items deleted",
-        description: `Deleted ${selectedCount} item${selectedCount > 1 ? "s" : ""}`,
+        title: 'Items deleted',
+        description: `Deleted ${selectedCount} item${selectedCount > 1 ? 's' : ''}`,
       });
       onDeselectAll();
       setShowDeleteDialog(false);
     } catch (error) {
       toast({
-        title: "Bulk delete failed",
-        description: error instanceof Error ? error.message : "Failed to delete items",
-        variant: "destructive",
+        title: 'Bulk delete failed',
+        description: error instanceof Error ? error.message : 'Failed to delete items',
+        variant: 'destructive',
       });
     } finally {
       setLoading(false);
@@ -119,19 +119,12 @@ export function ItineraryBulkActions({
                   onDeselectAll();
                 }
               }}
-              aria-label={allSelected ? "Deselect all" : "Select all"}
+              aria-label={allSelected ? 'Deselect all' : 'Select all'}
             />
             <div className="flex items-center gap-2">
-              <Badge variant="secondary">
-                {selectedCount} selected
-              </Badge>
+              <Badge variant="secondary">{selectedCount} selected</Badge>
               {someSelected && !allSelected && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={onSelectAll}
-                  className="h-7 text-xs"
-                >
+                <Button variant="ghost" size="sm" onClick={onSelectAll} className="h-7 text-xs">
                   Select all {totalItems}
                 </Button>
               )}
@@ -143,7 +136,7 @@ export function ItineraryBulkActions({
             <Button
               variant="outline"
               size="sm"
-              onClick={() => handleBulkVote("up")}
+              onClick={() => handleBulkVote('up')}
               disabled={loading}
               className="gap-2"
             >
@@ -155,7 +148,7 @@ export function ItineraryBulkActions({
             <Button
               variant="outline"
               size="sm"
-              onClick={() => handleBulkVote("down")}
+              onClick={() => handleBulkVote('down')}
               disabled={loading}
               className="gap-2"
             >
@@ -194,9 +187,12 @@ export function ItineraryBulkActions({
       <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete {selectedCount} item{selectedCount > 1 ? "s" : ""}?</AlertDialogTitle>
+            <AlertDialogTitle>
+              Delete {selectedCount} item{selectedCount > 1 ? 's' : ''}?
+            </AlertDialogTitle>
             <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete the selected itinerary items, including:
+              This action cannot be undone. This will permanently delete the selected itinerary
+              items, including:
               <ul className="list-disc list-inside mt-2 space-y-1">
                 <li>All booking information</li>
                 <li>All votes and comments</li>
@@ -211,7 +207,9 @@ export function ItineraryBulkActions({
               disabled={loading}
               className="bg-red-600 hover:bg-red-700"
             >
-              {loading ? "Deleting..." : `Delete ${selectedCount} item${selectedCount > 1 ? "s" : ""}`}
+              {loading
+                ? 'Deleting...'
+                : `Delete ${selectedCount} item${selectedCount > 1 ? 's' : ''}`}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

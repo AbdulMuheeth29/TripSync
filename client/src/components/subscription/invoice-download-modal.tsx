@@ -1,16 +1,23 @@
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
-import { Download, Mail, Printer, FileText, CheckCircle2 } from "lucide-react";
-import { format } from "date-fns";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+import { Separator } from '@/components/ui/separator';
+import { Download, Mail, Printer, FileText, CheckCircle2 } from 'lucide-react';
+import { format } from 'date-fns';
 
 interface InvoiceData {
   invoiceNumber: string;
   invoiceDate: Date;
   dueDate: Date;
-  status: "paid" | "pending" | "overdue";
-  plan: "Pro" | "Teams";
+  status: 'paid' | 'pending' | 'overdue';
+  plan: 'Pro' | 'Teams';
   billingPeriod: {
     start: Date;
     end: Date;
@@ -48,33 +55,33 @@ export function InvoiceDownloadModal({
   invoice,
   onDownloadPdf,
   onEmailInvoice,
-  onPrint
+  onPrint,
 }: InvoiceDownloadModalProps) {
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
       currency: 'USD',
       minimumFractionDigits: 2,
-      maximumFractionDigits: 2
+      maximumFractionDigits: 2,
     }).format(amount);
   };
 
   const getStatusBadge = () => {
     switch (invoice.status) {
-      case "paid":
+      case 'paid':
         return (
           <div className="flex items-center gap-2 px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm font-medium">
             <CheckCircle2 className="h-4 w-4" />
             Paid
           </div>
         );
-      case "pending":
+      case 'pending':
         return (
           <div className="px-3 py-1 bg-amber-100 text-amber-800 rounded-full text-sm font-medium">
             Pending
           </div>
         );
-      case "overdue":
+      case 'overdue':
         return (
           <div className="px-3 py-1 bg-red-100 text-red-800 rounded-full text-sm font-medium">
             Overdue
@@ -91,9 +98,7 @@ export function InvoiceDownloadModal({
             <FileText className="h-5 w-5" />
             <DialogTitle>Invoice Details</DialogTitle>
           </div>
-          <DialogDescription>
-            Invoice #{invoice.invoiceNumber}
-          </DialogDescription>
+          <DialogDescription>Invoice #{invoice.invoiceNumber}</DialogDescription>
         </DialogHeader>
 
         <div className="space-y-6">
@@ -114,16 +119,17 @@ export function InvoiceDownloadModal({
               </div>
               <div>
                 <p className="text-muted-foreground mb-1">Invoice Date</p>
-                <p className="font-semibold">{format(invoice.invoiceDate, "MMM d, yyyy")}</p>
+                <p className="font-semibold">{format(invoice.invoiceDate, 'MMM d, yyyy')}</p>
               </div>
               <div>
                 <p className="text-muted-foreground mb-1">Due Date</p>
-                <p className="font-semibold">{format(invoice.dueDate, "MMM d, yyyy")}</p>
+                <p className="font-semibold">{format(invoice.dueDate, 'MMM d, yyyy')}</p>
               </div>
               <div>
                 <p className="text-muted-foreground mb-1">Billing Period</p>
                 <p className="font-semibold">
-                  {format(invoice.billingPeriod.start, "MMM d")} - {format(invoice.billingPeriod.end, "MMM d, yyyy")}
+                  {format(invoice.billingPeriod.start, 'MMM d')} -{' '}
+                  {format(invoice.billingPeriod.end, 'MMM d, yyyy')}
                 </p>
               </div>
             </div>
@@ -139,7 +145,8 @@ export function InvoiceDownloadModal({
                 <>
                   <p className="text-sm text-muted-foreground">{invoice.billingAddress.address}</p>
                   <p className="text-sm text-muted-foreground">
-                    {invoice.billingAddress.city}, {invoice.billingAddress.state} {invoice.billingAddress.zip}
+                    {invoice.billingAddress.city}, {invoice.billingAddress.state}{' '}
+                    {invoice.billingAddress.zip}
                   </p>
                   <p className="text-sm text-muted-foreground">{invoice.billingAddress.country}</p>
                 </>
@@ -167,7 +174,8 @@ export function InvoiceDownloadModal({
                         <p className="text-sm text-muted-foreground">Monthly subscription</p>
                       </td>
                       <td className="p-4 text-right text-sm">
-                        {format(invoice.billingPeriod.start, "MMM d")} - {format(invoice.billingPeriod.end, "MMM d, yyyy")}
+                        {format(invoice.billingPeriod.start, 'MMM d')} -{' '}
+                        {format(invoice.billingPeriod.end, 'MMM d, yyyy')}
                       </td>
                       <td className="p-4 text-right font-medium">
                         {formatCurrency(invoice.amount)}
@@ -208,9 +216,13 @@ export function InvoiceDownloadModal({
                   <FileText className="h-5 w-5 text-primary" />
                 </div>
                 <div>
-                  <p className="font-medium">{invoice.paymentMethod.type} •••• {invoice.paymentMethod.last4}</p>
+                  <p className="font-medium">
+                    {invoice.paymentMethod.type} •••• {invoice.paymentMethod.last4}
+                  </p>
                   <p className="text-sm text-muted-foreground">
-                    {invoice.status === "paid" ? `Charged on ${format(invoice.invoiceDate, "MMM d, yyyy")}` : "Pending payment"}
+                    {invoice.status === 'paid'
+                      ? `Charged on ${format(invoice.invoiceDate, 'MMM d, yyyy')}`
+                      : 'Pending payment'}
                   </p>
                 </div>
               </div>
@@ -220,7 +232,8 @@ export function InvoiceDownloadModal({
           {/* Actions Info */}
           <Card className="p-4 bg-blue-50 border-blue-200">
             <p className="text-sm text-blue-900">
-              <strong>Need help?</strong> Contact our support team at support@tripsync.com if you have any questions about this invoice.
+              <strong>Need help?</strong> Contact our support team at support@tripsync.com if you
+              have any questions about this invoice.
             </p>
           </Card>
         </div>

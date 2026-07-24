@@ -1,7 +1,7 @@
-import { useState, useEffect, useRef, ImgHTMLAttributes } from "react";
-import { Skeleton } from "@/components/ui/skeleton";
+import { useState, useEffect, useRef, ImgHTMLAttributes } from 'react';
+import { Skeleton } from '@/components/ui/skeleton';
 
-interface LazyImageProps extends Omit<ImgHTMLAttributes<HTMLImageElement>, "src"> {
+interface LazyImageProps extends Omit<ImgHTMLAttributes<HTMLImageElement>, 'src'> {
   src: string;
   alt: string;
   fallback?: string;
@@ -12,7 +12,7 @@ interface LazyImageProps extends Omit<ImgHTMLAttributes<HTMLImageElement>, "src"
 export function LazyImage({
   src,
   alt,
-  fallback = "/placeholder.png",
+  fallback = '/placeholder.png',
   aspectRatio,
   placeholderClassName,
   className,
@@ -37,8 +37,8 @@ export function LazyImage({
         });
       },
       {
-        rootMargin: "50px", // Start loading 50px before image enters viewport
-        threshold: 0.01
+        rootMargin: '50px', // Start loading 50px before image enters viewport
+        threshold: 0.01,
       }
     );
 
@@ -59,27 +59,21 @@ export function LazyImage({
     setIsLoaded(true);
   };
 
-  const containerStyle = aspectRatio
-    ? { paddingBottom: `${(1 / aspectRatio) * 100}%` }
-    : {};
+  const containerStyle = aspectRatio ? { paddingBottom: `${(1 / aspectRatio) * 100}%` } : {};
 
   return (
     <div
-      className={`relative overflow-hidden ${aspectRatio ? "relative" : ""} ${placeholderClassName || ""}`}
+      className={`relative overflow-hidden ${aspectRatio ? 'relative' : ''} ${placeholderClassName || ''}`}
       style={containerStyle}
     >
-      {!isLoaded && (
-        <Skeleton
-          className={`absolute inset-0 ${className || ""}`}
-        />
-      )}
+      {!isLoaded && <Skeleton className={`absolute inset-0 ${className || ''}`} />}
 
       <img
         ref={imgRef}
-        src={isInView ? (error ? fallback : src) : ""}
+        src={isInView ? (error ? fallback : src) : ''}
         alt={alt}
-        className={`${aspectRatio ? "absolute inset-0 w-full h-full object-cover" : ""} ${className || ""} ${
-          isLoaded ? "opacity-100" : "opacity-0"
+        className={`${aspectRatio ? 'absolute inset-0 w-full h-full object-cover' : ''} ${className || ''} ${
+          isLoaded ? 'opacity-100' : 'opacity-0'
         } transition-opacity duration-300`}
         onLoad={handleLoad}
         onError={handleError}

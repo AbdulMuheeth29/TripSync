@@ -236,7 +236,7 @@ export const trackEvent = {
     analytics.track('error_occurred', {
       error_type: errorType,
       message: message.substring(0, 100), // Truncate long messages
-      ...context
+      ...context,
     });
   },
 };

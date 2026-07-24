@@ -1,12 +1,19 @@
-import { useState } from "react";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { AlertCircle, Heart, Gift } from "lucide-react";
-import { format } from "date-fns";
+import { useState } from 'react';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { AlertCircle, Heart, Gift } from 'lucide-react';
+import { format } from 'date-fns';
 
 interface CancelSubscriptionDialogProps {
   isOpen: boolean;
@@ -18,12 +25,12 @@ interface CancelSubscriptionDialogProps {
 }
 
 const CANCEL_REASONS = [
-  { value: "too_expensive", label: "Too expensive" },
-  { value: "not_using", label: "Not using it enough" },
-  { value: "missing_features", label: "Missing features I need" },
-  { value: "bugs", label: "Too many bugs/issues" },
-  { value: "switching", label: "Switching to another service" },
-  { value: "other", label: "Other" },
+  { value: 'too_expensive', label: 'Too expensive' },
+  { value: 'not_using', label: 'Not using it enough' },
+  { value: 'missing_features', label: 'Missing features I need' },
+  { value: 'bugs', label: 'Too many bugs/issues' },
+  { value: 'switching', label: 'Switching to another service' },
+  { value: 'other', label: 'Other' },
 ];
 
 export function CancelSubscriptionDialog({
@@ -32,18 +39,20 @@ export function CancelSubscriptionDialog({
   onCancel,
   onAcceptDiscount,
   currentPeriodEnd,
-  showRetentionOffer = true
+  showRetentionOffer = true,
 }: CancelSubscriptionDialogProps) {
-  const [step, setStep] = useState<"reason" | "retention" | "confirm">(showRetentionOffer ? "reason" : "confirm");
-  const [selectedReason, setSelectedReason] = useState("");
-  const [feedback, setFeedback] = useState("");
+  const [step, setStep] = useState<'reason' | 'retention' | 'confirm'>(
+    showRetentionOffer ? 'reason' : 'confirm'
+  );
+  const [selectedReason, setSelectedReason] = useState('');
+  const [feedback, setFeedback] = useState('');
   const [isCanceling, setIsCanceling] = useState(false);
 
   const handleSubmitReason = () => {
-    if (selectedReason === "too_expensive" && showRetentionOffer) {
-      setStep("retention");
+    if (selectedReason === 'too_expensive' && showRetentionOffer) {
+      setStep('retention');
     } else {
-      setStep("confirm");
+      setStep('confirm');
     }
   };
 
@@ -59,15 +68,13 @@ export function CancelSubscriptionDialog({
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-lg">
-        {step === "reason" && (
+        {step === 'reason' && (
           <>
             <DialogHeader>
               <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-amber-100">
                 <Heart className="h-6 w-6 text-amber-600" />
               </div>
-              <DialogTitle className="text-center">
-                We're sorry to see you go!
-              </DialogTitle>
+              <DialogTitle className="text-center">We're sorry to see you go!</DialogTitle>
               <DialogDescription className="text-center">
                 Help us improve by telling us why you're canceling
               </DialogDescription>
@@ -88,7 +95,7 @@ export function CancelSubscriptionDialog({
                 </RadioGroup>
               </div>
 
-              {selectedReason === "other" && (
+              {selectedReason === 'other' && (
                 <div className="space-y-2">
                   <Label htmlFor="feedback">Please tell us more (optional)</Label>
                   <Textarea
@@ -106,26 +113,20 @@ export function CancelSubscriptionDialog({
               <Button variant="outline" onClick={onClose}>
                 Keep Subscription
               </Button>
-              <Button
-                onClick={handleSubmitReason}
-                disabled={!selectedReason}
-                variant="destructive"
-              >
+              <Button onClick={handleSubmitReason} disabled={!selectedReason} variant="destructive">
                 Continue
               </Button>
             </DialogFooter>
           </>
         )}
 
-        {step === "retention" && (
+        {step === 'retention' && (
           <>
             <DialogHeader>
               <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-purple-600">
                 <Gift className="h-6 w-6 text-white" />
               </div>
-              <DialogTitle className="text-center">
-                Special Offer Just For You!
-              </DialogTitle>
+              <DialogTitle className="text-center">Special Offer Just For You!</DialogTitle>
               <DialogDescription className="text-center">
                 We'd love to keep you on board
               </DialogDescription>
@@ -149,32 +150,23 @@ export function CancelSubscriptionDialog({
             </div>
 
             <DialogFooter className="flex-col sm:flex-row gap-2">
-              <Button
-                variant="outline"
-                onClick={() => setStep("confirm")}
-                className="flex-1"
-              >
+              <Button variant="outline" onClick={() => setStep('confirm')} className="flex-1">
                 No Thanks, Cancel Anyway
               </Button>
-              <Button
-                onClick={onAcceptDiscount}
-                className="flex-1"
-              >
+              <Button onClick={onAcceptDiscount} className="flex-1">
                 Accept 50% Off Offer
               </Button>
             </DialogFooter>
           </>
         )}
 
-        {step === "confirm" && (
+        {step === 'confirm' && (
           <>
             <DialogHeader>
               <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-red-100">
                 <AlertCircle className="h-6 w-6 text-red-600" />
               </div>
-              <DialogTitle className="text-center">
-                Confirm Cancellation
-              </DialogTitle>
+              <DialogTitle className="text-center">Confirm Cancellation</DialogTitle>
               <DialogDescription className="text-center">
                 Your subscription will be canceled
               </DialogDescription>
@@ -184,7 +176,7 @@ export function CancelSubscriptionDialog({
               <div className="rounded-lg bg-muted p-4 space-y-2">
                 <p className="text-sm font-medium">What happens next:</p>
                 <ul className="text-sm text-muted-foreground space-y-1 list-disc list-inside">
-                  <li>You'll keep Pro access until {format(currentPeriodEnd, "MMM d, yyyy")}</li>
+                  <li>You'll keep Pro access until {format(currentPeriodEnd, 'MMM d, yyyy')}</li>
                   <li>No future charges will be made</li>
                   <li>Your trips will be saved (limited to 1 active trip)</li>
                   <li>You can resubscribe anytime</li>
@@ -194,7 +186,8 @@ export function CancelSubscriptionDialog({
               <Alert variant="destructive">
                 <AlertCircle className="h-4 w-4" />
                 <AlertDescription>
-                  This action will cancel your Pro subscription at the end of the current billing period.
+                  This action will cancel your Pro subscription at the end of the current billing
+                  period.
                 </AlertDescription>
               </Alert>
             </div>
@@ -203,12 +196,8 @@ export function CancelSubscriptionDialog({
               <Button variant="outline" onClick={onClose} disabled={isCanceling}>
                 Keep Subscription
               </Button>
-              <Button
-                onClick={handleConfirmCancel}
-                disabled={isCanceling}
-                variant="destructive"
-              >
-                {isCanceling ? "Canceling..." : "Cancel Subscription"}
+              <Button onClick={handleConfirmCancel} disabled={isCanceling} variant="destructive">
+                {isCanceling ? 'Canceling...' : 'Cancel Subscription'}
               </Button>
             </DialogFooter>
           </>

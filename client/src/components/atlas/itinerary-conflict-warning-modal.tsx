@@ -1,9 +1,16 @@
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Sparkles, AlertTriangle, Calendar, Clock, MapPin, Users } from "lucide-react";
-import { format } from "date-fns";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Sparkles, AlertTriangle, Calendar, Clock, MapPin, Users } from 'lucide-react';
+import { format } from 'date-fns';
 
 interface ConflictingActivity {
   id: string;
@@ -20,7 +27,7 @@ interface ItineraryConflictWarningModalProps {
   conflicts: Array<{
     date: Date;
     activities: ConflictingActivity[];
-    conflictType: "overlap" | "tight_schedule" | "location_distance";
+    conflictType: 'overlap' | 'tight_schedule' | 'location_distance';
   }>;
   onResolve: (conflictIndex: number) => void;
   onIgnore: () => void;
@@ -31,18 +38,18 @@ export function ItineraryConflictWarningModal({
   onClose,
   conflicts,
   onResolve,
-  onIgnore
+  onIgnore,
 }: ItineraryConflictWarningModalProps) {
   const getConflictMessage = (type: string) => {
     switch (type) {
-      case "overlap":
-        return "These activities overlap in time";
-      case "tight_schedule":
-        return "Not enough time between activities";
-      case "location_distance":
-        return "Activities are far apart";
+      case 'overlap':
+        return 'These activities overlap in time';
+      case 'tight_schedule':
+        return 'Not enough time between activities';
+      case 'location_distance':
+        return 'Activities are far apart';
       default:
-        return "Potential scheduling issue";
+        return 'Potential scheduling issue';
     }
   };
 
@@ -55,7 +62,8 @@ export function ItineraryConflictWarningModal({
             <DialogTitle>Itinerary Conflicts Detected</DialogTitle>
           </div>
           <DialogDescription>
-            Atlas found {conflicts.length} scheduling {conflicts.length === 1 ? 'conflict' : 'conflicts'} in your itinerary
+            Atlas found {conflicts.length} scheduling{' '}
+            {conflicts.length === 1 ? 'conflict' : 'conflicts'} in your itinerary
           </DialogDescription>
         </DialogHeader>
 
@@ -68,8 +76,8 @@ export function ItineraryConflictWarningModal({
                   Schedule Optimization Needed
                 </p>
                 <p className="text-sm text-amber-800">
-                  I've identified timing or location conflicts that could make your itinerary difficult to execute.
-                  Review and resolve them for a smoother trip.
+                  I've identified timing or location conflicts that could make your itinerary
+                  difficult to execute. Review and resolve them for a smoother trip.
                 </p>
               </div>
             </div>
@@ -80,23 +88,25 @@ export function ItineraryConflictWarningModal({
               <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-2">
                   <Calendar className="h-5 w-5 text-red-600" />
-                  <h4 className="font-semibold">{format(conflict.date, "EEEE, MMMM d")}</h4>
+                  <h4 className="font-semibold">{format(conflict.date, 'EEEE, MMMM d')}</h4>
                 </div>
-                <Badge variant="destructive">
-                  {getConflictMessage(conflict.conflictType)}
-                </Badge>
+                <Badge variant="destructive">{getConflictMessage(conflict.conflictType)}</Badge>
               </div>
 
               <div className="space-y-3">
                 {conflict.activities.map((activity, actIndex) => (
-                  <div key={activity.id} className="flex items-start gap-3 p-3 bg-red-50 rounded-lg">
+                  <div
+                    key={activity.id}
+                    className="flex items-start gap-3 p-3 bg-red-50 rounded-lg"
+                  >
                     <div className="flex-1">
                       <p className="font-medium mb-1">{activity.name}</p>
                       <div className="flex flex-wrap gap-3 text-sm text-muted-foreground">
                         <div className="flex items-center gap-1">
                           <Clock className="h-3 w-3" />
                           <span>
-                            {format(activity.startTime, "h:mm a")} - {format(activity.endTime, "h:mm a")}
+                            {format(activity.startTime, 'h:mm a')} -{' '}
+                            {format(activity.endTime, 'h:mm a')}
                           </span>
                         </div>
                         <div className="flex items-center gap-1">
@@ -109,9 +119,7 @@ export function ItineraryConflictWarningModal({
                         </div>
                       </div>
                     </div>
-                    {actIndex === 0 && (
-                      <Badge className="bg-red-500">Conflict</Badge>
-                    )}
+                    {actIndex === 0 && <Badge className="bg-red-500">Conflict</Badge>}
                   </div>
                 ))}
               </div>

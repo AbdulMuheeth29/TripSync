@@ -32,7 +32,10 @@ export function getBrandAsset(path: string): string {
 /**
  * Get logo asset with variant
  */
-export function getLogoUrl(variant: 'primary' | 'white' | 'dark' | 'icon' = 'primary', size?: number): string {
+export function getLogoUrl(
+  variant: 'primary' | 'white' | 'dark' | 'icon' = 'primary',
+  size?: number
+): string {
   const sizeStr = size ? `-${size}` : '';
   return getBrandAsset(`logos/logo-${variant}${sizeStr}.png`);
 }
@@ -74,7 +77,7 @@ const DESTINATION_IMAGES: Record<string, LocationImageSet> = {
       },
     ],
   },
-  'paris': {
+  paris: {
     hero: {
       url: 'https://images.unsplash.com/photo-1502602898657-3e91760cbb34?w=2400&q=90',
       alt: 'Eiffel Tower, Paris',
@@ -87,7 +90,7 @@ const DESTINATION_IMAGES: Record<string, LocationImageSet> = {
       },
     ],
   },
-  'tokyo': {
+  tokyo: {
     hero: {
       url: 'https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?w=2400&q=90',
       alt: 'Tokyo cityscape',
@@ -100,7 +103,7 @@ const DESTINATION_IMAGES: Record<string, LocationImageSet> = {
       },
     ],
   },
-  'london': {
+  london: {
     hero: {
       url: 'https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?w=2400&q=90',
       alt: 'London skyline with Big Ben',
@@ -113,7 +116,7 @@ const DESTINATION_IMAGES: Record<string, LocationImageSet> = {
       },
     ],
   },
-  'dubai': {
+  dubai: {
     hero: {
       url: 'https://images.unsplash.com/photo-1512453979798-5ea266f8880c?w=2400&q=90',
       alt: 'Dubai skyline at sunset',
@@ -126,7 +129,7 @@ const DESTINATION_IMAGES: Record<string, LocationImageSet> = {
       },
     ],
   },
-  'barcelona': {
+  barcelona: {
     hero: {
       url: 'https://images.unsplash.com/photo-1539037116277-4db20889f2d4?w=2400&q=90',
       alt: 'Barcelona cityscape',
@@ -134,7 +137,7 @@ const DESTINATION_IMAGES: Record<string, LocationImageSet> = {
     },
     gallery: [],
   },
-  'rome': {
+  rome: {
     hero: {
       url: 'https://images.unsplash.com/photo-1552832230-c0197dd311b5?w=2400&q=90',
       alt: 'Colosseum, Rome',
@@ -142,7 +145,7 @@ const DESTINATION_IMAGES: Record<string, LocationImageSet> = {
     },
     gallery: [],
   },
-  'bali': {
+  bali: {
     hero: {
       url: 'https://images.unsplash.com/photo-1537996194471-e657df975ab4?w=2400&q=90',
       alt: 'Bali rice terraces',
@@ -155,7 +158,7 @@ const DESTINATION_IMAGES: Record<string, LocationImageSet> = {
       },
     ],
   },
-  'santorini': {
+  santorini: {
     hero: {
       url: 'https://images.unsplash.com/photo-1570077188670-e3a8d69ac5ff?w=2400&q=90',
       alt: 'Santorini white buildings',
@@ -163,7 +166,7 @@ const DESTINATION_IMAGES: Record<string, LocationImageSet> = {
     },
     gallery: [],
   },
-  'maldives': {
+  maldives: {
     hero: {
       url: 'https://images.unsplash.com/photo-1514282401047-d79a71a590e8?w=2400&q=90',
       alt: 'Maldives overwater bungalows',
@@ -175,35 +178,35 @@ const DESTINATION_IMAGES: Record<string, LocationImageSet> = {
 
 // Country fallback images
 const COUNTRY_IMAGES: Record<string, LocationImage> = {
-  'US': {
+  US: {
     url: 'https://images.unsplash.com/photo-1485738422979-f5c462d49f74?w=2400&q=90',
     alt: 'United States landscape',
   },
-  'FR': {
+  FR: {
     url: 'https://images.unsplash.com/photo-1502602898657-3e91760cbb34?w=2400&q=90',
     alt: 'France landscape',
   },
-  'JP': {
+  JP: {
     url: 'https://images.unsplash.com/photo-1528164344705-47542687000d?w=2400&q=90',
     alt: 'Japan landscape',
   },
-  'GB': {
+  GB: {
     url: 'https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?w=2400&q=90',
     alt: 'United Kingdom landscape',
   },
-  'IT': {
+  IT: {
     url: 'https://images.unsplash.com/photo-1523906834658-6e24ef2386f9?w=2400&q=90',
     alt: 'Italy landscape',
   },
-  'ES': {
+  ES: {
     url: 'https://images.unsplash.com/photo-1543783207-ec64e4d95325?w=2400&q=90',
     alt: 'Spain landscape',
   },
-  'GR': {
+  GR: {
     url: 'https://images.unsplash.com/photo-1504548840739-d667c8f4eaa4?w=2400&q=90',
     alt: 'Greece landscape',
   },
-  'TH': {
+  TH: {
     url: 'https://images.unsplash.com/photo-1552465011-b4e21bf6e79a?w=2400&q=90',
     alt: 'Thailand landscape',
   },
@@ -242,7 +245,8 @@ const CATEGORY_IMAGES: Record<string, LocationImage> = {
  */
 export function getLocationImage(location: string, countryCode?: string): LocationImage {
   // Normalize location to slug format
-  const slug = location.toLowerCase()
+  const slug = location
+    .toLowerCase()
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-+|-+$/g, '');
 
@@ -264,7 +268,8 @@ export function getLocationImage(location: string, countryCode?: string): Locati
  * Get location image gallery
  */
 export function getLocationGallery(location: string): LocationImage[] {
-  const slug = location.toLowerCase()
+  const slug = location
+    .toLowerCase()
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-+|-+$/g, '');
 
@@ -282,7 +287,8 @@ export function getCategoryImage(category: keyof typeof CATEGORY_IMAGES): Locati
  * Add custom location images (for user-defined destinations)
  */
 export function addLocationImages(location: string, images: LocationImageSet): void {
-  const slug = location.toLowerCase()
+  const slug = location
+    .toLowerCase()
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-+|-+$/g, '');
 
@@ -294,9 +300,7 @@ export function addLocationImages(location: string, images: LocationImageSet): v
  */
 export function searchLocationImages(query: string): string[] {
   const lowerQuery = query.toLowerCase();
-  return Object.keys(DESTINATION_IMAGES).filter(key =>
-    key.includes(lowerQuery)
-  );
+  return Object.keys(DESTINATION_IMAGES).filter((key) => key.includes(lowerQuery));
 }
 
 /**
@@ -310,10 +314,7 @@ export interface ImageTransformOptions {
   format?: 'webp' | 'jpg' | 'png';
 }
 
-export function getOptimizedImageUrl(
-  url: string,
-  options: ImageTransformOptions = {}
-): string {
+export function getOptimizedImageUrl(url: string, options: ImageTransformOptions = {}): string {
   // If using Unsplash, add optimization params
   if (url.includes('unsplash.com')) {
     const params = new URLSearchParams();

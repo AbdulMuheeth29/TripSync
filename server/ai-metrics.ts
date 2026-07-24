@@ -32,13 +32,13 @@ export interface AIOperationMetrics {
  */
 const MODEL_PRICING = {
   'claude-sonnet-4-5': {
-    input: 3.00,
-    output: 15.00
+    input: 3.0,
+    output: 15.0,
   },
   'claude-3-5-haiku-20241022': {
     input: 0.25,
-    output: 1.25
-  }
+    output: 1.25,
+  },
 } as const;
 
 /**
@@ -75,7 +75,9 @@ export async function recordAIOperation(metrics: AIOperationMetrics): Promise<vo
     // or list operations (rpush, ltrim) needed for detailed tracking.
     // For now, we'll track basic counts using the cache service.
 
-    console.log(`📊 Recorded AI operation: ${operation} (${success ? '✅' : '❌'}, ${duration}ms, $${costUsd.toFixed(4)})`);
+    console.log(
+      `📊 Recorded AI operation: ${operation} (${success ? '✅' : '❌'}, ${duration}ms, $${costUsd.toFixed(4)})`
+    );
   } catch (error) {
     console.error('Failed to record AI metrics:', error);
     // Don't throw - metrics failure shouldn't break operations
@@ -85,7 +87,10 @@ export async function recordAIOperation(metrics: AIOperationMetrics): Promise<vo
 /**
  * Get aggregated metrics for an operation
  */
-export async function getOperationMetrics(operation: string, days: number = 7): Promise<{
+export async function getOperationMetrics(
+  operation: string,
+  days: number = 7
+): Promise<{
   totalCalls: number;
   successRate: number;
   averageDuration: number;
@@ -110,7 +115,7 @@ export async function getOperationMetrics(operation: string, days: number = 7): 
       averageDuration: 0,
       totalCost: 0,
       cacheHitRate: 0,
-      dailyBreakdown: []
+      dailyBreakdown: [],
     };
   } catch (error) {
     console.error('Failed to get operation metrics:', error);
@@ -120,7 +125,7 @@ export async function getOperationMetrics(operation: string, days: number = 7): 
       averageDuration: 0,
       totalCost: 0,
       cacheHitRate: 0,
-      dailyBreakdown: []
+      dailyBreakdown: [],
     };
   }
 }
@@ -144,23 +149,17 @@ export async function getSystemMetrics(days: number = 7): Promise<{
     'conversational-planning',
     'trip-recap',
     'packing-list',
-    'email-parsing'
+    'email-parsing',
   ];
 
-  const metrics = await Promise.all(
-    operations.map(op => getOperationMetrics(op, days))
-  );
+  const metrics = await Promise.all(operations.map((op) => getOperationMetrics(op, days)));
 
   const totalCost = metrics.reduce((sum, m) => sum + m.totalCost, 0);
   const totalCalls = metrics.reduce((sum, m) => sum + m.totalCalls, 0);
 
-  const totalSuccesses = metrics.reduce((sum, m) =>
-    sum + (m.totalCalls * m.successRate / 100), 0
-  );
+  const totalSuccesses = metrics.reduce((sum, m) => sum + (m.totalCalls * m.successRate) / 100, 0);
 
-  const totalCached = metrics.reduce((sum, m) =>
-    sum + (m.totalCalls * m.cacheHitRate / 100), 0
-  );
+  const totalCached = metrics.reduce((sum, m) => sum + (m.totalCalls * m.cacheHitRate) / 100, 0);
 
   const costByOperation: Record<string, number> = {};
   const callsByOperation: Record<string, number> = {};
@@ -177,7 +176,7 @@ export async function getSystemMetrics(days: number = 7): Promise<{
     overallSuccessRate: totalCalls > 0 ? (totalSuccesses / totalCalls) * 100 : 0,
     overallCacheHitRate: totalCalls > 0 ? (totalCached / totalCalls) * 100 : 0,
     costByOperation,
-    callsByOperation
+    callsByOperation,
   };
 }
 
@@ -201,7 +200,7 @@ export async function checkSLA(): Promise<{
     passing,
     message: passing
       ? `✅ Meeting SLA (${metrics.overallSuccessRate.toFixed(2)}% success rate)`
-      : `⚠️  Below SLA (${metrics.overallSuccessRate.toFixed(2)}% success rate, target ${TARGET_SUCCESS_RATE}%)`
+      : `⚠️  Below SLA (${metrics.overallSuccessRate.toFixed(2)}% success rate, target ${TARGET_SUCCESS_RATE}%)`,
   };
 }
 
@@ -224,7 +223,7 @@ export async function projectMonthlyCost(): Promise<{
   return {
     last7Days: last7Days.totalCost,
     projected30Days,
-    breakdown
+    breakdown,
   };
 }
 
@@ -239,20 +238,22 @@ export interface AlertConfig {
 
 export const DEFAULT_ALERTS: AlertConfig = {
   successRateThreshold: 99.0, // Alert if below 99%
-  costThreshold: 100,          // Alert if daily cost exceeds $100
-  latencyThreshold: 10000      // Alert if p95 latency exceeds 10s
+  costThreshold: 100, // Alert if daily cost exceeds $100
+  latencyThreshold: 10000, // Alert if p95 latency exceeds 10s
 };
 
 /**
  * Check for alert conditions
  */
-export async function checkAlerts(config: AlertConfig = DEFAULT_ALERTS): Promise<Array<{
-  severity: 'warning' | 'critical';
-  message: string;
-  metric: string;
-  value: number;
-  threshold: number;
-}>> {
+export async function checkAlerts(config: AlertConfig = DEFAULT_ALERTS): Promise<
+  Array<{
+    severity: 'warning' | 'critical';
+    message: string;
+    metric: string;
+    value: number;
+    threshold: number;
+  }>
+> {
   const alerts: Array<{
     severity: 'warning' | 'critical';
     message: string;
@@ -265,11 +266,13 @@ export async function checkAlerts(config: AlertConfig = DEFAULT_ALERTS): Promise
   // Success rate alert
   if (metrics.overallSuccessRate < config.successRateThreshold) {
     alerts.push({
-      severity: (metrics.overallSuccessRate < 95 ? 'critical' : 'warning') as 'warning' | 'critical',
+      severity: (metrics.overallSuccessRate < 95 ? 'critical' : 'warning') as
+        | 'warning'
+        | 'critical',
       message: `AI success rate below threshold`,
       metric: 'success_rate',
       value: metrics.overallSuccessRate,
-      threshold: config.successRateThreshold
+      threshold: config.successRateThreshold,
     });
   }
 
@@ -280,7 +283,7 @@ export async function checkAlerts(config: AlertConfig = DEFAULT_ALERTS): Promise
       message: `Daily AI cost exceeded threshold`,
       metric: 'cost',
       value: metrics.totalCost,
-      threshold: config.costThreshold
+      threshold: config.costThreshold,
     });
   }
 

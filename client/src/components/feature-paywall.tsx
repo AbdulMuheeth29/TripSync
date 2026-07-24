@@ -1,7 +1,14 @@
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Lock, Sparkles, Check, Zap } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Lock, Sparkles, Check, Zap } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
 
 interface FeaturePaywallProps {
   isOpen: boolean;
@@ -17,79 +24,74 @@ interface FeaturePaywallProps {
 
 const FEATURE_CONFIGS = {
   receipt_ocr: {
-    name: "Receipt OCR",
-    description: "Automatically extract expense data from receipt photos using AI",
-    icon: "📸",
+    name: 'Receipt OCR',
+    description: 'Automatically extract expense data from receipt photos using AI',
+    icon: '📸',
     benefits: [
-      "AI extracts amount, merchant, date automatically",
-      "Supports multiple currencies",
-      "Save time on manual data entry",
-      "More accurate expense tracking"
-    ]
+      'AI extracts amount, merchant, date automatically',
+      'Supports multiple currencies',
+      'Save time on manual data entry',
+      'More accurate expense tracking',
+    ],
   },
   currency_conversion: {
-    name: "Currency Conversion",
-    description: "Track expenses in multiple currencies with real-time exchange rates",
-    icon: "💱",
+    name: 'Currency Conversion',
+    description: 'Track expenses in multiple currencies with real-time exchange rates',
+    icon: '💱',
     benefits: [
-      "10+ supported currencies",
-      "Real-time exchange rates",
-      "Automatic conversion for multi-country trips",
-      "See totals in your preferred currency"
-    ]
+      '10+ supported currencies',
+      'Real-time exchange rates',
+      'Automatic conversion for multi-country trips',
+      'See totals in your preferred currency',
+    ],
   },
   map_view: {
-    name: "Interactive Map View",
-    description: "Visualize your trip itinerary on an interactive map",
-    icon: "🗺️",
+    name: 'Interactive Map View',
+    description: 'Visualize your trip itinerary on an interactive map',
+    icon: '🗺️',
     benefits: [
-      "See all activities plotted on map",
-      "Optimize travel routes",
-      "Discover nearby attractions",
-      "Export map to Google Maps"
-    ]
+      'See all activities plotted on map',
+      'Optimize travel routes',
+      'Discover nearby attractions',
+      'Export map to Google Maps',
+    ],
   },
   email_import: {
-    name: "Email Import",
-    description: "Paste booking confirmation emails and let AI extract the details",
-    icon: "📧",
+    name: 'Email Import',
+    description: 'Paste booking confirmation emails and let AI extract the details',
+    icon: '📧',
     benefits: [
-      "Auto-extract flights, hotels, activities",
-      "Parse dates, times, prices automatically",
-      "Support for major booking sites",
-      "Save hours of manual entry"
-    ]
+      'Auto-extract flights, hotels, activities',
+      'Parse dates, times, prices automatically',
+      'Support for major booking sites',
+      'Save hours of manual entry',
+    ],
   },
   advanced_analytics: {
-    name: "Advanced Analytics",
-    description: "Deep insights into trip budget, spending patterns, and group behavior",
-    icon: "📊",
+    name: 'Advanced Analytics',
+    description: 'Deep insights into trip budget, spending patterns, and group behavior',
+    icon: '📊',
     benefits: [
-      "Spending breakdown by category",
-      "Budget vs. actual analysis",
-      "Member contribution tracking",
-      "Export reports (CSV, PDF)"
-    ]
+      'Spending breakdown by category',
+      'Budget vs. actual analysis',
+      'Member contribution tracking',
+      'Export reports (CSV, PDF)',
+    ],
   },
   priority_support: {
-    name: "Priority Atlas AI",
-    description: "Skip the queue and get instant responses from Atlas AI",
-    icon: "⚡",
+    name: 'Priority Atlas AI',
+    description: 'Skip the queue and get instant responses from Atlas AI',
+    icon: '⚡',
     benefits: [
-      "Faster AI response times",
-      "No rate limiting",
-      "Access to advanced AI features",
-      "Early access to new AI capabilities"
-    ]
-  }
+      'Faster AI response times',
+      'No rate limiting',
+      'Access to advanced AI features',
+      'Early access to new AI capabilities',
+    ],
+  },
 };
 
-export function FeaturePaywall({
-  isOpen,
-  onClose,
-  onUpgrade,
-  feature
-}: FeaturePaywallProps) {
+export function FeaturePaywall({ isOpen, onClose, onUpgrade, feature }: FeaturePaywallProps) {
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-md">
@@ -100,16 +102,12 @@ export function FeaturePaywall({
             </div>
           </div>
           <div className="flex items-center justify-center gap-2 mb-2">
-            <DialogTitle className="text-center text-xl">
-              {feature.name}
-            </DialogTitle>
+            <DialogTitle className="text-center text-xl">{feature.name}</DialogTitle>
             <Badge className="bg-gradient-to-r from-purple-500 to-pink-500 text-white border-0">
               Pro Feature
             </Badge>
           </div>
-          <DialogDescription className="text-center">
-            {feature.description}
-          </DialogDescription>
+          <DialogDescription className="text-center">{feature.description}</DialogDescription>
         </DialogHeader>
 
         <div className="py-4 space-y-4">

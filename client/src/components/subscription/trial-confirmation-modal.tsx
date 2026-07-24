@@ -1,17 +1,24 @@
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { CheckCircle2, Calendar, CreditCard, Sparkles, Zap, Bell, Info } from "lucide-react";
-import { format, addDays } from "date-fns";
-import confetti from "canvas-confetti";
-import { useEffect } from "react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { CheckCircle2, Calendar, CreditCard, Sparkles, Zap, Bell, Info } from 'lucide-react';
+import { format, addDays } from 'date-fns';
+import confetti from 'canvas-confetti';
+import { useEffect } from 'react';
 
 interface TrialConfirmationModalProps {
   isOpen: boolean;
   onClose: () => void;
   onGetStarted: () => void;
-  plan: "Pro" | "Teams";
+  plan: 'Pro' | 'Teams';
   trialDays: number;
   trialStartDate: Date;
   features: string[];
@@ -24,7 +31,7 @@ export function TrialConfirmationModal({
   plan,
   trialDays,
   trialStartDate,
-  features
+  features,
 }: TrialConfirmationModalProps) {
   const trialEndDate = addDays(trialStartDate, trialDays);
 
@@ -39,13 +46,13 @@ export function TrialConfirmationModal({
           particleCount: 3,
           angle: 60,
           spread: 55,
-          origin: { x: 0, y: 0.6 }
+          origin: { x: 0, y: 0.6 },
         });
         confetti({
           particleCount: 3,
           angle: 120,
           spread: 55,
-          origin: { x: 1, y: 0.6 }
+          origin: { x: 1, y: 0.6 },
         });
 
         if (Date.now() < end) {
@@ -64,12 +71,8 @@ export function TrialConfirmationModal({
           <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-green-400 to-emerald-600 shadow-lg animate-bounce">
             <CheckCircle2 className="h-8 w-8 text-white" />
           </div>
-          <DialogTitle className="text-center text-2xl">
-            Trial Activated! 🎉
-          </DialogTitle>
-          <DialogDescription className="text-center">
-            Welcome to TripSync {plan}
-          </DialogDescription>
+          <DialogTitle className="text-center text-2xl">Trial Activated! 🎉</DialogTitle>
+          <DialogDescription className="text-center">Welcome to TripSync {plan}</DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4">
@@ -80,9 +83,7 @@ export function TrialConfirmationModal({
                 <Zap className="h-3 w-3 mr-1" />
                 {trialDays}-Day Free Trial
               </Badge>
-              <p className="text-sm text-muted-foreground">
-                Full access to all {plan} features
-              </p>
+              <p className="text-sm text-muted-foreground">Full access to all {plan} features</p>
             </div>
 
             <div className="space-y-2">
@@ -91,7 +92,7 @@ export function TrialConfirmationModal({
                   <Calendar className="h-4 w-4 text-green-600" />
                   <span className="font-medium">Trial Starts</span>
                 </div>
-                <span className="text-sm">{format(trialStartDate, "MMM d, yyyy")}</span>
+                <span className="text-sm">{format(trialStartDate, 'MMM d, yyyy')}</span>
               </div>
 
               <div className="flex items-center justify-between p-3 bg-white rounded-lg">
@@ -99,7 +100,7 @@ export function TrialConfirmationModal({
                   <Calendar className="h-4 w-4 text-amber-600" />
                   <span className="font-medium">Trial Ends</span>
                 </div>
-                <span className="text-sm font-semibold">{format(trialEndDate, "MMM d, yyyy")}</span>
+                <span className="text-sm font-semibold">{format(trialEndDate, 'MMM d, yyyy')}</span>
               </div>
             </div>
           </Card>
@@ -155,7 +156,9 @@ export function TrialConfirmationModal({
             </div>
 
             <ol className="space-y-1 text-xs text-green-800 list-decimal list-inside">
-              <li>Explore all {plan} features for {trialDays} days</li>
+              <li>
+                Explore all {plan} features for {trialDays} days
+              </li>
               <li>We'll send you helpful tips to get the most out of your trial</li>
               <li>3 days before your trial ends, you'll get a reminder</li>
               <li>Decide if you want to continue with {plan} or switch to Free</li>

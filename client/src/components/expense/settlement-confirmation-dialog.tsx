@@ -1,6 +1,15 @@
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { CheckCircle2, ArrowRight } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { CheckCircle2, ArrowRight } from 'lucide-react';
 
 interface SettlementConfirmationDialogProps {
   isOpen: boolean;
@@ -20,8 +29,8 @@ export function SettlementConfirmationDialog({
   fromPerson,
   toPerson,
   amount,
-  currency = "USD",
-  isProcessing = false
+  currency = 'USD',
+  isProcessing = false,
 }: SettlementConfirmationDialogProps) {
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-US', {
@@ -32,7 +41,12 @@ export function SettlementConfirmationDialog({
   };
 
   const getInitials = (name: string) => {
-    return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+    return name
+      .split(' ')
+      .map((n) => n[0])
+      .join('')
+      .toUpperCase()
+      .slice(0, 2);
   };
 
   return (
@@ -42,9 +56,7 @@ export function SettlementConfirmationDialog({
           <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-green-100">
             <CheckCircle2 className="h-6 w-6 text-green-600" />
           </div>
-          <AlertDialogTitle className="text-center">
-            Mark Payment as Settled?
-          </AlertDialogTitle>
+          <AlertDialogTitle className="text-center">Mark Payment as Settled?</AlertDialogTitle>
           <AlertDialogDescription className="text-center">
             This will mark the payment as completed in the settlement summary
           </AlertDialogDescription>
@@ -61,9 +73,7 @@ export function SettlementConfirmationDialog({
 
             <div className="flex flex-col items-center gap-1">
               <ArrowRight className="h-6 w-6 text-muted-foreground" />
-              <p className="text-2xl font-bold text-green-600">
-                {formatCurrency(amount)}
-              </p>
+              <p className="text-2xl font-bold text-green-600">{formatCurrency(amount)}</p>
             </div>
 
             <div className="text-center">
@@ -77,7 +87,8 @@ export function SettlementConfirmationDialog({
 
         <div className="rounded-lg border border-muted bg-muted/50 p-4">
           <p className="text-sm text-muted-foreground text-center">
-            <strong>Note:</strong> This action can be undone later if needed. The payment will be marked as settled in expense reports.
+            <strong>Note:</strong> This action can be undone later if needed. The payment will be
+            marked as settled in expense reports.
           </p>
         </div>
 
@@ -88,7 +99,7 @@ export function SettlementConfirmationDialog({
             disabled={isProcessing}
             className="bg-green-600 hover:bg-green-700"
           >
-            {isProcessing ? "Marking as Settled..." : "Mark as Settled"}
+            {isProcessing ? 'Marking as Settled...' : 'Mark as Settled'}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

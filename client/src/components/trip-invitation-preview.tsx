@@ -1,11 +1,18 @@
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Separator } from "@/components/ui/separator";
-import { MapPin, Calendar, Users, DollarSign, Sparkles, CheckCircle2 } from "lucide-react";
-import { format, differenceInDays } from "date-fns";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Separator } from '@/components/ui/separator';
+import { MapPin, Calendar, Users, DollarSign, Sparkles, CheckCircle2 } from 'lucide-react';
+import { format, differenceInDays } from 'date-fns';
 
 interface TripInvitation {
   tripId: string;
@@ -42,13 +49,18 @@ export function TripInvitationPreview({
   onAccept,
   onDecline,
   invitation,
-  isProcessing = false
+  isProcessing = false,
 }: TripInvitationPreviewProps) {
   const duration = differenceInDays(invitation.endDate, invitation.startDate) + 1;
   const daysUntilTrip = differenceInDays(invitation.startDate, new Date());
 
   const getInitials = (name: string) => {
-    return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+    return name
+      .split(' ')
+      .map((n) => n[0])
+      .join('')
+      .toUpperCase()
+      .slice(0, 2);
   };
 
   return (
@@ -58,9 +70,7 @@ export function TripInvitationPreview({
           <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-purple-600">
             <Sparkles className="h-6 w-6 text-white" />
           </div>
-          <DialogTitle className="text-center text-2xl">
-            You're Invited to Join a Trip!
-          </DialogTitle>
+          <DialogTitle className="text-center text-2xl">You're Invited to Join a Trip!</DialogTitle>
           <DialogDescription className="text-center">
             {invitation.organizer.name} invited you to join their group trip
           </DialogDescription>
@@ -80,9 +90,7 @@ export function TripInvitationPreview({
           {invitation.inviteMessage && (
             <Card className="p-4 bg-amber-50 border-amber-200">
               <p className="text-sm italic">"{invitation.inviteMessage}"</p>
-              <p className="text-xs text-muted-foreground mt-2">
-                - {invitation.organizer.name}
-              </p>
+              <p className="text-xs text-muted-foreground mt-2">- {invitation.organizer.name}</p>
             </Card>
           )}
 
@@ -95,10 +103,12 @@ export function TripInvitationPreview({
                 <div className="flex-1">
                   <p className="text-sm text-muted-foreground">Dates</p>
                   <p className="font-medium">
-                    {format(invitation.startDate, "MMM d")} - {format(invitation.endDate, "MMM d, yyyy")}
+                    {format(invitation.startDate, 'MMM d')} -{' '}
+                    {format(invitation.endDate, 'MMM d, yyyy')}
                   </p>
                   <p className="text-xs text-muted-foreground">
-                    {duration} days • {daysUntilTrip > 0 ? `Starts in ${daysUntilTrip} days` : "Started"}
+                    {duration} days •{' '}
+                    {daysUntilTrip > 0 ? `Starts in ${daysUntilTrip} days` : 'Started'}
                   </p>
                 </div>
               </div>
@@ -134,13 +144,13 @@ export function TripInvitationPreview({
               {invitation.currentMembers.map((member) => (
                 <div key={member.id} className="flex items-center gap-2">
                   <Avatar className="h-8 w-8">
-                    <AvatarFallback className="text-xs">
-                      {getInitials(member.name)}
-                    </AvatarFallback>
+                    <AvatarFallback className="text-xs">{getInitials(member.name)}</AvatarFallback>
                   </Avatar>
                   <span className="text-sm">{member.name}</span>
                   {member.name === invitation.organizer.name && (
-                    <Badge variant="secondary" className="text-xs">Organizer</Badge>
+                    <Badge variant="secondary" className="text-xs">
+                      Organizer
+                    </Badge>
                   )}
                 </div>
               ))}
@@ -178,21 +188,11 @@ export function TripInvitationPreview({
         </div>
 
         <DialogFooter className="flex-col sm:flex-row gap-2">
-          <Button
-            variant="outline"
-            onClick={onDecline}
-            disabled={isProcessing}
-            className="flex-1"
-          >
+          <Button variant="outline" onClick={onDecline} disabled={isProcessing} className="flex-1">
             Decline
           </Button>
-          <Button
-            onClick={onAccept}
-            disabled={isProcessing}
-            className="flex-1"
-            size="lg"
-          >
-            {isProcessing ? "Joining..." : "Accept & Join Trip"}
+          <Button onClick={onAccept} disabled={isProcessing} className="flex-1" size="lg">
+            {isProcessing ? 'Joining...' : 'Accept & Join Trip'}
           </Button>
         </DialogFooter>
       </DialogContent>

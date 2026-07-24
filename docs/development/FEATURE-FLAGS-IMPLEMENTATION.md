@@ -24,7 +24,7 @@ FEATURE_PUSH_ENABLED=true
 **Create `server/feature-flags.ts`:**
 
 ```typescript
-import { env } from "./env";
+import { env } from './env';
 
 type FeatureFlag = {
   name: string;
@@ -37,11 +37,11 @@ class FeatureFlags {
 
   constructor() {
     // Initialize from environment variables
-    this.flags.set("ai", env.isFeatureEnabled("FEATURE_AI_ENABLED"));
-    this.flags.set("fileUploads", env.isFeatureEnabled("FEATURE_FILE_UPLOADS_ENABLED"));
-    this.flags.set("stripe", env.isFeatureEnabled("FEATURE_STRIPE_ENABLED"));
-    this.flags.set("chat", env.isFeatureEnabled("FEATURE_CHAT_ENABLED"));
-    this.flags.set("push", env.isFeatureEnabled("FEATURE_PUSH_ENABLED"));
+    this.flags.set('ai', env.isFeatureEnabled('FEATURE_AI_ENABLED'));
+    this.flags.set('fileUploads', env.isFeatureEnabled('FEATURE_FILE_UPLOADS_ENABLED'));
+    this.flags.set('stripe', env.isFeatureEnabled('FEATURE_STRIPE_ENABLED'));
+    this.flags.set('chat', env.isFeatureEnabled('FEATURE_CHAT_ENABLED'));
+    this.flags.set('push', env.isFeatureEnabled('FEATURE_PUSH_ENABLED'));
   }
 
   isEnabled(flag: string): boolean {
@@ -58,13 +58,13 @@ class FeatureFlags {
 
   private getDescription(flag: string): string {
     const descriptions: Record<string, string> = {
-      ai: "AI trip generation and Atlas assistant",
-      fileUploads: "Photo and document uploads",
-      stripe: "Billing and subscriptions",
-      chat: "Real-time chat",
-      push: "Push notifications",
+      ai: 'AI trip generation and Atlas assistant',
+      fileUploads: 'Photo and document uploads',
+      stripe: 'Billing and subscriptions',
+      chat: 'Real-time chat',
+      push: 'Push notifications',
     };
-    return descriptions[flag] || "";
+    return descriptions[flag] || '';
   }
 }
 
@@ -88,13 +88,13 @@ isFeatureEnabled(key: string): boolean {
 
 ```typescript
 // In server/routes.ts
-import { featureFlags } from "./feature-flags";
+import { featureFlags } from './feature-flags';
 
-app.post("/api/trips/:tripId/generate-itinerary", requireAuth, (req, res) => {
-  if (!featureFlags.isEnabled("ai")) {
+app.post('/api/trips/:tripId/generate-itinerary', requireAuth, (req, res) => {
+  if (!featureFlags.isEnabled('ai')) {
     return res.status(503).json({
-      error: "AI features temporarily disabled",
-      code: "FEATURE_DISABLED"
+      error: 'AI features temporarily disabled',
+      code: 'FEATURE_DISABLED',
     });
   }
 
@@ -106,11 +106,11 @@ app.post("/api/trips/:tripId/generate-itinerary", requireAuth, (req, res) => {
 
 ```typescript
 // Add to server/routes.ts
-app.get("/api/admin/feature-flags", requireAuth, (req, res) => {
+app.get('/api/admin/feature-flags', requireAuth, (req, res) => {
   const user = await storage.getUser(req.user!.userId);
 
   if (!env.isAdmin(user.email)) {
-    return res.status(403).json({ error: "Forbidden" });
+    return res.status(403).json({ error: 'Forbidden' });
   }
 
   res.json({ flags: featureFlags.getAll() });
@@ -145,6 +145,7 @@ curl -H "Authorization: Bearer $ADMIN_TOKEN" \
 ## Advanced: Database-Backed Flags (Future)
 
 For v1.1+, consider:
+
 - Store flags in database
 - Per-user feature flags (gradual rollout)
 - Percentage rollouts (10% of users)
@@ -155,6 +156,7 @@ For v1.1+, consider:
 ## Don't Over-Engineer
 
 For MVP launch, environment variable flags are sufficient. You can:
+
 - Disable features without code changes
 - Re-enable with just a restart
 - Control via .env file

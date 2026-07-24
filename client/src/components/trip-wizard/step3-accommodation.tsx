@@ -1,10 +1,10 @@
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { cn } from "@/lib/utils";
-import { Building2, Home, Sparkles } from "lucide-react";
+import { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+import { cn } from '@/lib/utils';
+import { Building2, Home, Sparkles } from 'lucide-react';
 
-export type AccommodationType = "hotels" | "airbnb" | "mix";
+export type AccommodationType = 'hotels' | 'airbnb' | 'mix';
 
 interface Step3AccommodationProps {
   onNext: (accommodation: AccommodationType) => void;
@@ -20,26 +20,36 @@ const ACCOMMODATION_OPTIONS: Array<{
   pros: string[];
 }> = [
   {
-    id: "hotels",
-    name: "Hotels & Resorts",
+    id: 'hotels',
+    name: 'Hotels & Resorts',
     icon: Building2,
-    description: "Professional service, amenities, and consistent quality",
-    pros: ["Daily housekeeping", "Hotel amenities (pool, gym, spa)", "Concierge service", "Breakfast included"]
+    description: 'Professional service, amenities, and consistent quality',
+    pros: [
+      'Daily housekeeping',
+      'Hotel amenities (pool, gym, spa)',
+      'Concierge service',
+      'Breakfast included',
+    ],
   },
   {
-    id: "airbnb",
-    name: "Airbnb & Vacation Rentals",
+    id: 'airbnb',
+    name: 'Airbnb & Vacation Rentals',
     icon: Home,
-    description: "Local experience, privacy, and often more space",
-    pros: ["Full kitchen", "More space for groups", "Local neighborhood", "Usually more affordable"]
+    description: 'Local experience, privacy, and often more space',
+    pros: [
+      'Full kitchen',
+      'More space for groups',
+      'Local neighborhood',
+      'Usually more affordable',
+    ],
   },
   {
-    id: "mix",
-    name: "Mix of Both",
+    id: 'mix',
+    name: 'Mix of Both',
     icon: Sparkles,
-    description: "Best of both worlds - variety throughout your trip",
-    pros: ["Hotel for convenience", "Airbnb for local vibes", "Flexibility", "Diverse experiences"]
-  }
+    description: 'Best of both worlds - variety throughout your trip',
+    pros: ['Hotel for convenience', 'Airbnb for local vibes', 'Flexibility', 'Diverse experiences'],
+  },
 ];
 
 export function Step3Accommodation({ onNext, onBack, defaultValue }: Step3AccommodationProps) {
@@ -55,9 +65,7 @@ export function Step3Accommodation({ onNext, onBack, defaultValue }: Step3Accomm
     <div className="space-y-6">
       <div className="space-y-2">
         <h2 className="text-2xl font-bold">Where would you like to stay?</h2>
-        <p className="text-muted-foreground">
-          Choose your preferred accommodation style
-        </p>
+        <p className="text-muted-foreground">Choose your preferred accommodation style</p>
       </div>
 
       <div className="space-y-4">
@@ -69,16 +77,18 @@ export function Step3Accommodation({ onNext, onBack, defaultValue }: Step3Accomm
             <Card
               key={option.id}
               className={cn(
-                "p-5 cursor-pointer transition-all hover:border-primary hover:shadow-md",
-                isSelected && "border-primary border-2 bg-primary/5"
+                'p-5 cursor-pointer transition-all hover:border-primary hover:shadow-md',
+                isSelected && 'border-primary border-2 bg-primary/5'
               )}
               onClick={() => setSelectedType(option.id)}
             >
               <div className="flex items-start gap-4">
-                <div className={cn(
-                  "rounded-lg p-3",
-                  isSelected ? "bg-primary text-primary-foreground" : "bg-muted"
-                )}>
+                <div
+                  className={cn(
+                    'rounded-lg p-3',
+                    isSelected ? 'bg-primary text-primary-foreground' : 'bg-muted'
+                  )}
+                >
                   <Icon className="h-6 w-6" />
                 </div>
                 <div className="flex-1">
@@ -91,9 +101,7 @@ export function Step3Accommodation({ onNext, onBack, defaultValue }: Step3Accomm
                       </div>
                     )}
                   </div>
-                  <p className="text-sm text-muted-foreground mb-3">
-                    {option.description}
-                  </p>
+                  <p className="text-sm text-muted-foreground mb-3">{option.description}</p>
                   <div className="grid grid-cols-2 gap-2">
                     {option.pros.map((pro, index) => (
                       <div key={index} className="flex items-center gap-2 text-sm">
@@ -112,7 +120,9 @@ export function Step3Accommodation({ onNext, onBack, defaultValue }: Step3Accomm
       {selectedType && (
         <div className="rounded-lg border border-primary/50 bg-primary/5 p-4">
           <p className="text-sm text-primary">
-            ✨ We'll recommend {selectedType === "mix" ? "a variety of" : ""} {ACCOMMODATION_OPTIONS.find(o => o.id === selectedType)?.name.toLowerCase()} for your stay.
+            ✨ We'll recommend {selectedType === 'mix' ? 'a variety of' : ''}{' '}
+            {ACCOMMODATION_OPTIONS.find((o) => o.id === selectedType)?.name.toLowerCase()} for your
+            stay.
           </p>
         </div>
       )}

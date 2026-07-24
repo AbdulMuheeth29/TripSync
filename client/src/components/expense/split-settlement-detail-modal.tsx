@@ -1,17 +1,32 @@
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Separator } from "@/components/ui/separator";
-import { ArrowRight, CheckCircle2, Clock, CreditCard, Banknote, Smartphone, DollarSign } from "lucide-react";
-import { format } from "date-fns";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Separator } from '@/components/ui/separator';
+import {
+  ArrowRight,
+  CheckCircle2,
+  Clock,
+  CreditCard,
+  Banknote,
+  Smartphone,
+  DollarSign,
+} from 'lucide-react';
+import { format } from 'date-fns';
 
 interface SettlementHistory {
   id: string;
   amount: number;
   settledAt: Date;
-  method: "cash" | "card" | "venmo" | "paypal" | "zelle" | "other";
+  method: 'cash' | 'card' | 'venmo' | 'paypal' | 'zelle' | 'other';
   note?: string;
 }
 
@@ -39,7 +54,10 @@ interface SplitSettlementDetailModalProps {
   };
   split: Split;
   currentUserId: string;
-  onMarkAsSettled: (method: "cash" | "card" | "venmo" | "paypal" | "zelle" | "other", note?: string) => Promise<void>;
+  onMarkAsSettled: (
+    method: 'cash' | 'card' | 'venmo' | 'paypal' | 'zelle' | 'other',
+    note?: string
+  ) => Promise<void>;
   onSendReminder?: () => void;
 }
 
@@ -51,30 +69,35 @@ export function SplitSettlementDetailModal({
   split,
   currentUserId,
   onMarkAsSettled,
-  onSendReminder
+  onSendReminder,
 }: SplitSettlementDetailModalProps) {
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
       currency: expense.currency,
       minimumFractionDigits: 2,
-      maximumFractionDigits: 2
+      maximumFractionDigits: 2,
     }).format(amount);
   };
 
   const getInitials = (name: string) => {
-    return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+    return name
+      .split(' ')
+      .map((n) => n[0])
+      .join('')
+      .toUpperCase()
+      .slice(0, 2);
   };
 
   const getMethodIcon = (method: string) => {
     switch (method) {
-      case "cash":
+      case 'cash':
         return <Banknote className="h-4 w-4" />;
-      case "card":
+      case 'card':
         return <CreditCard className="h-4 w-4" />;
-      case "venmo":
-      case "paypal":
-      case "zelle":
+      case 'venmo':
+      case 'paypal':
+      case 'zelle':
         return <Smartphone className="h-4 w-4" />;
       default:
         return <DollarSign className="h-4 w-4" />;
@@ -90,7 +113,9 @@ export function SplitSettlementDetailModal({
   const isCurrentUserPayer = currentUserId === payer.id;
   const isCurrentUserDebtor = currentUserId === split.userId;
 
-  const handleQuickSettle = async (method: "cash" | "card" | "venmo" | "paypal" | "zelle" | "other") => {
+  const handleQuickSettle = async (
+    method: 'cash' | 'card' | 'venmo' | 'paypal' | 'zelle' | 'other'
+  ) => {
     await onMarkAsSettled(method);
     onClose();
   };
@@ -101,7 +126,7 @@ export function SplitSettlementDetailModal({
         <DialogHeader>
           <DialogTitle>Settlement Details</DialogTitle>
           <DialogDescription>
-            {expense.title} • {format(expense.date, "MMM d, yyyy")}
+            {expense.title} • {format(expense.date, 'MMM d, yyyy')}
           </DialogDescription>
         </DialogHeader>
 
@@ -111,9 +136,7 @@ export function SplitSettlementDetailModal({
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <Avatar className="h-12 w-12">
-                  <AvatarFallback className="text-sm">
-                    {getInitials(split.userName)}
-                  </AvatarFallback>
+                  <AvatarFallback className="text-sm">{getInitials(split.userName)}</AvatarFallback>
                 </Avatar>
                 <div>
                   <p className="text-xs text-muted-foreground">Owes</p>
@@ -129,9 +152,7 @@ export function SplitSettlementDetailModal({
                   <p className="font-semibold">{payer.name}</p>
                 </div>
                 <Avatar className="h-12 w-12">
-                  <AvatarFallback className="text-sm">
-                    {getInitials(payer.name)}
-                  </AvatarFallback>
+                  <AvatarFallback className="text-sm">{getInitials(payer.name)}</AvatarFallback>
                 </Avatar>
               </div>
             </div>
@@ -140,9 +161,7 @@ export function SplitSettlementDetailModal({
 
             <div className="text-center">
               <p className="text-sm text-muted-foreground mb-1">Amount</p>
-              <p className="text-3xl font-bold text-primary">
-                {formatCurrency(split.amount)}
-              </p>
+              <p className="text-3xl font-bold text-primary">{formatCurrency(split.amount)}</p>
             </div>
           </Card>
 
@@ -171,7 +190,9 @@ export function SplitSettlementDetailModal({
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">Remaining</span>
-                  <span className="font-semibold text-red-600">{formatCurrency(remainingAmount)}</span>
+                  <span className="font-semibold text-red-600">
+                    {formatCurrency(remainingAmount)}
+                  </span>
                 </div>
                 <div className="w-full bg-gray-200 rounded-full h-2 mt-2">
                   <div
@@ -191,7 +212,7 @@ export function SplitSettlementDetailModal({
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => handleQuickSettle("cash")}
+                  onClick={() => handleQuickSettle('cash')}
                   className="flex flex-col h-auto py-2"
                 >
                   <Banknote className="h-4 w-4 mb-1" />
@@ -200,7 +221,7 @@ export function SplitSettlementDetailModal({
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => handleQuickSettle("card")}
+                  onClick={() => handleQuickSettle('card')}
                   className="flex flex-col h-auto py-2"
                 >
                   <CreditCard className="h-4 w-4 mb-1" />
@@ -209,7 +230,7 @@ export function SplitSettlementDetailModal({
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => handleQuickSettle("venmo")}
+                  onClick={() => handleQuickSettle('venmo')}
                   className="flex flex-col h-auto py-2"
                 >
                   <Smartphone className="h-4 w-4 mb-1" />
@@ -218,7 +239,7 @@ export function SplitSettlementDetailModal({
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => handleQuickSettle("paypal")}
+                  onClick={() => handleQuickSettle('paypal')}
                   className="flex flex-col h-auto py-2"
                 >
                   <Smartphone className="h-4 w-4 mb-1" />
@@ -227,7 +248,7 @@ export function SplitSettlementDetailModal({
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => handleQuickSettle("zelle")}
+                  onClick={() => handleQuickSettle('zelle')}
                   className="flex flex-col h-auto py-2"
                 >
                   <Smartphone className="h-4 w-4 mb-1" />
@@ -236,7 +257,7 @@ export function SplitSettlementDetailModal({
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => handleQuickSettle("other")}
+                  onClick={() => handleQuickSettle('other')}
                   className="flex flex-col h-auto py-2"
                 >
                   <DollarSign className="h-4 w-4 mb-1" />
@@ -255,7 +276,10 @@ export function SplitSettlementDetailModal({
               </h4>
               <div className="space-y-3">
                 {split.settlementHistory.map((settlement) => (
-                  <div key={settlement.id} className="flex items-center justify-between p-2 rounded-lg bg-muted/50">
+                  <div
+                    key={settlement.id}
+                    className="flex items-center justify-between p-2 rounded-lg bg-muted/50"
+                  >
                     <div className="flex items-center gap-3">
                       <div className="flex h-8 w-8 items-center justify-center rounded-full bg-green-100">
                         {getMethodIcon(settlement.method)}
@@ -263,12 +287,14 @@ export function SplitSettlementDetailModal({
                       <div>
                         <p className="text-sm font-medium">{formatCurrency(settlement.amount)}</p>
                         <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                          <span>{format(settlement.settledAt, "MMM d, yyyy")}</span>
+                          <span>{format(settlement.settledAt, 'MMM d, yyyy')}</span>
                           <span>•</span>
                           <span>{getMethodLabel(settlement.method)}</span>
                         </div>
                         {settlement.note && (
-                          <p className="text-xs text-muted-foreground italic mt-0.5">"{settlement.note}"</p>
+                          <p className="text-xs text-muted-foreground italic mt-0.5">
+                            "{settlement.note}"
+                          </p>
                         )}
                       </div>
                     </div>
@@ -295,7 +321,9 @@ export function SplitSettlementDetailModal({
         </div>
 
         <DialogFooter>
-          <Button variant="outline" onClick={onClose}>Close</Button>
+          <Button variant="outline" onClick={onClose}>
+            Close
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

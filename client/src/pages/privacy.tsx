@@ -1,10 +1,10 @@
-import { Link } from "wouter";
-import { AppLogo } from "@/components/app-logo";
-import { ThemeToggle } from "@/components/theme-toggle";
-import { spacing } from "@/lib/spacing-tokens";
+import { Link } from 'wouter';
+import { AppLogo } from '@/components/app-logo';
+import { ThemeToggle } from '@/components/theme-toggle';
+import { spacing } from '@/lib/spacing-tokens';
 
 export default function PrivacyPage() {
-  const effectiveDate = "February 24, 2026";
+  const effectiveDate = 'February 24, 2026';
 
   return (
     <div className="min-h-screen bg-background">
@@ -47,16 +47,16 @@ export default function PrivacyPage() {
 
           <p className="text-sm text-muted-foreground">
             TripSync (&quot;TripSync&quot;, &quot;we&quot;, &quot;us&quot;, or &quot;our&quot;) is a
-            collaborative trip planning platform that allows groups to plan trips together, manage itineraries,
-            split expenses, vote on decisions, chat in real time, and use AI-powered trip planning features.
-            This Privacy Policy explains how we collect, use, disclose, and protect your information when you
-            use TripSync and describes your rights under data protection laws including the GDPR, CCPA, and
-            CalOPPA.
+            collaborative trip planning platform that allows groups to plan trips together, manage
+            itineraries, split expenses, vote on decisions, chat in real time, and use AI-powered
+            trip planning features. This Privacy Policy explains how we collect, use, disclose, and
+            protect your information when you use TripSync and describes your rights under data
+            protection laws including the GDPR, CCPA, and CalOPPA.
           </p>
 
           <p className="text-sm text-muted-foreground">
-            By using TripSync, you agree to the practices described in this Privacy Policy. If you do not agree,
-            please do not use the service.
+            By using TripSync, you agree to the practices described in this Privacy Policy. If you
+            do not agree, please do not use the service.
           </p>
         </section>
 
@@ -78,10 +78,10 @@ export default function PrivacyPage() {
         <section className="mt-8 space-y-4 text-sm leading-relaxed">
           <h2 className="text-xl font-semibold">2. What TripSync Is</h2>
           <p>
-            TripSync is a group trip planning software-as-a-service (SaaS) platform. It enables you and your group
-            to collaboratively: plan trips, create and manage itineraries, split expenses, vote on decisions, chat
-            in real time, upload photos and documents, and use AI-powered features to generate and refine trip
-            plans.
+            TripSync is a group trip planning software-as-a-service (SaaS) platform. It enables you
+            and your group to collaboratively: plan trips, create and manage itineraries, split
+            expenses, vote on decisions, chat in real time, upload photos and documents, and use
+            AI-powered features to generate and refine trip plans.
           </p>
         </section>
 
@@ -131,8 +131,8 @@ export default function PrivacyPage() {
 
           <h3 className="font-semibold mt-4">3.5 Payment and Subscription Data (via Stripe)</h3>
           <p>
-            For paid plans, we use Stripe as our payment processor. Stripe collects and stores your card details.
-            We do not store full card numbers ourselves.
+            For paid plans, we use Stripe as our payment processor. Stripe collects and stores your
+            card details. We do not store full card numbers ourselves.
           </p>
           <p>We receive and/or process:</p>
           <ul className="list-disc list-inside space-y-1">
@@ -143,19 +143,22 @@ export default function PrivacyPage() {
 
           <h3 className="font-semibold mt-4">3.6 Data Used with AI (Anthropic Claude)</h3>
           <p>
-            To generate and refine trip itineraries, we may send trip-related context to Anthropic Claude AI, such
-            as:
+            To generate and refine trip itineraries, we may send trip-related context to Anthropic
+            Claude AI, such as:
           </p>
           <ul className="list-disc list-inside space-y-1">
             <li>Trip destinations and high-level location information</li>
             <li>Travel dates and duration</li>
-            <li>Group size and general preferences (e.g., &quot;foodie&quot;, &quot;adventure&quot;)</li>
+            <li>
+              Group size and general preferences (e.g., &quot;foodie&quot;, &quot;adventure&quot;)
+            </li>
             <li>Budget ranges and itinerary structure</li>
           </ul>
           <p className="text-sm text-muted-foreground">
-            We design these features so that we do not intentionally send personally identifiable information (such
-            as your full name or email address) to the AI provider. You should avoid including sensitive personal
-            information in free-form text fields that you share with AI features.
+            We design these features so that we do not intentionally send personally identifiable
+            information (such as your full name or email address) to the AI provider. You should
+            avoid including sensitive personal information in free-form text fields that you share
+            with AI features.
           </p>
         </section>
 
@@ -167,14 +170,17 @@ export default function PrivacyPage() {
           <ul className="list-disc list-inside space-y-1">
             <li>Create and manage your account</li>
             <li>Allow you to create, edit, and manage trips and itineraries</li>
-            <li>Enable collaboration features like invites, comments, chat, votes, and shared expenses</li>
+            <li>
+              Enable collaboration features like invites, comments, chat, votes, and shared expenses
+            </li>
             <li>Store and display your photos and other uploaded content</li>
           </ul>
 
           <h3 className="font-semibold mt-4">4.2 AI Trip Planning</h3>
           <p>
-            We use trip context with Anthropic Claude AI to generate suggested itineraries, summaries, packing lists,
-            and similar content. You can choose whether or not to use these AI features.
+            We use trip context with Anthropic Claude AI to generate suggested itineraries,
+            summaries, packing lists, and similar content. You can choose whether or not to use
+            these AI features.
           </p>
 
           <h3 className="font-semibold mt-4">4.3 Communications</h3>
@@ -182,59 +188,76 @@ export default function PrivacyPage() {
           <ul className="list-disc list-inside space-y-1">
             <li>Send trip invitations, updates, and reminders</li>
             <li>Send account or security alerts (e.g., login notifications)</li>
-            <li>Send product updates or feature announcements (you can opt out of non-essential emails)</li>
+            <li>
+              Send product updates or feature announcements (you can opt out of non-essential
+              emails)
+            </li>
           </ul>
 
           <h3 className="font-semibold mt-4">4.4 Payments and Subscriptions</h3>
           <p>
-            With Stripe, we process subscription payments, manage billing, and comply with tax and financial
-            regulations.
+            With Stripe, we process subscription payments, manage billing, and comply with tax and
+            financial regulations.
           </p>
 
           <h3 className="font-semibold mt-4">4.5 Analytics and Product Improvement</h3>
           <p>
-            We analyze aggregated and pseudonymized usage data to understand how TripSync is used, improve the
-            experience, and develop new features.
+            We analyze aggregated and pseudonymized usage data to understand how TripSync is used,
+            improve the experience, and develop new features.
           </p>
 
           <h3 className="font-semibold mt-4">4.6 Security and Abuse Prevention</h3>
           <p>
-            We use information like IP addresses and usage patterns to detect suspicious activity, prevent fraud,
-            protect accounts, and enforce our Terms of Service.
+            We use information like IP addresses and usage patterns to detect suspicious activity,
+            prevent fraud, protect accounts, and enforce our Terms of Service.
           </p>
 
           <h3 className="font-semibold mt-4">4.7 Legal Compliance</h3>
           <p>
-            We may process and retain certain data to comply with legal obligations, resolve disputes, and enforce
-            our agreements.
+            We may process and retain certain data to comply with legal obligations, resolve
+            disputes, and enforce our agreements.
           </p>
         </section>
 
         <section className="mt-8 space-y-4 text-sm leading-relaxed">
           <h2 className="text-xl font-semibold">5. Third-Party Services</h2>
-          <p>We share data with third parties only as needed to operate TripSync or as required by law.</p>
+          <p>
+            We share data with third parties only as needed to operate TripSync or as required by
+            law.
+          </p>
 
           <ul className="list-disc list-inside space-y-2">
             <li>
               <strong>Stripe</strong> – Payment processing for Pro and Teams subscriptions.
               <br />
               <span className="text-muted-foreground">
-                Data shared: email, billing address, payment information. Privacy policy:{" "}
-                <a href="https://stripe.com/privacy" className="underline" target="_blank" rel="noreferrer">
+                Data shared: email, billing address, payment information. Privacy policy:{' '}
+                <a
+                  href="https://stripe.com/privacy"
+                  className="underline"
+                  target="_blank"
+                  rel="noreferrer"
+                >
                   https://stripe.com/privacy
                 </a>
                 .
               </span>
             </li>
             <li>
-              <strong>AWS S3 / Cloudflare R2</strong> – Cloud storage for user-uploaded photos and files.
+              <strong>AWS S3 / Cloudflare R2</strong> – Cloud storage for user-uploaded photos and
+              files.
               <br />
               <span className="text-muted-foreground">
-                Data shared: uploaded files and metadata. Privacy:{" "}
-                <a href="https://aws.amazon.com/privacy/" className="underline" target="_blank" rel="noreferrer">
+                Data shared: uploaded files and metadata. Privacy:{' '}
+                <a
+                  href="https://aws.amazon.com/privacy/"
+                  className="underline"
+                  target="_blank"
+                  rel="noreferrer"
+                >
                   AWS
-                </a>{" "}
-                /{" "}
+                </a>{' '}
+                /{' '}
                 <a
                   href="https://www.cloudflare.com/privacypolicy/"
                   className="underline"
@@ -247,11 +270,12 @@ export default function PrivacyPage() {
               </span>
             </li>
             <li>
-              <strong>Anthropic Claude AI</strong> – AI-powered trip planning and itinerary generation.
+              <strong>Anthropic Claude AI</strong> – AI-powered trip planning and itinerary
+              generation.
               <br />
               <span className="text-muted-foreground">
-                Data shared: trip destinations, dates, preferences, budgets, and itinerary context (no intentional
-                PII). Privacy:{" "}
+                Data shared: trip destinations, dates, preferences, budgets, and itinerary context
+                (no intentional PII). Privacy:{' '}
                 <a
                   href="https://www.anthropic.com/privacy"
                   className="underline"
@@ -267,7 +291,7 @@ export default function PrivacyPage() {
               <strong>Google Maps API (optional)</strong> – Interactive maps and place details.
               <br />
               <span className="text-muted-foreground">
-                Data shared: location coordinates, destination names. Privacy:{" "}
+                Data shared: location coordinates, destination names. Privacy:{' '}
                 <a
                   href="https://policies.google.com/privacy"
                   className="underline"
@@ -283,7 +307,7 @@ export default function PrivacyPage() {
               <strong>Open-Meteo Weather API</strong> – Weather forecasts for trip destinations.
               <br />
               <span className="text-muted-foreground">
-                Data shared: location coordinates and dates. Terms/privacy:{" "}
+                Data shared: location coordinates and dates. Terms/privacy:{' '}
                 <a
                   href="https://open-meteo.com/en/terms"
                   className="underline"
@@ -316,25 +340,34 @@ export default function PrivacyPage() {
 
           <h3 className="font-semibold mt-4">Optional Cookies</h3>
           <p>
-            With your consent where required, we may use analytics and preference cookies to understand how TripSync
-            is used and remember settings like dark/light mode. You can manage these via your browser and any cookie
-            banner we provide.
+            With your consent where required, we may use analytics and preference cookies to
+            understand how TripSync is used and remember settings like dark/light mode. You can
+            manage these via your browser and any cookie banner we provide.
           </p>
 
           <h3 className="font-semibold mt-4">Do Not Track</h3>
           <p>
-            Some browsers send a &quot;Do Not Track&quot; (DNT) signal. There is currently no industry standard
-            for responding to DNT, and TripSync does not respond to these signals at this time.
+            Some browsers send a &quot;Do Not Track&quot; (DNT) signal. There is currently no
+            industry standard for responding to DNT, and TripSync does not respond to these signals
+            at this time.
           </p>
         </section>
 
         <section className="mt-8 space-y-4 text-sm leading-relaxed">
           <h2 className="text-xl font-semibold">7. Data Retention</h2>
-          <p>We retain your data only as long as necessary for the purposes described above or as required by law.</p>
+          <p>
+            We retain your data only as long as necessary for the purposes described above or as
+            required by law.
+          </p>
           <ul className="list-disc list-inside space-y-1">
             <li>Active accounts: data retained while your account remains active.</li>
-            <li>Deleted accounts: data deleted or anonymized within ~30 days of confirmed deletion.</li>
-            <li>Backups: removed from backups on our normal backup rotation schedule (typically within 90 days).</li>
+            <li>
+              Deleted accounts: data deleted or anonymized within ~30 days of confirmed deletion.
+            </li>
+            <li>
+              Backups: removed from backups on our normal backup rotation schedule (typically within
+              90 days).
+            </li>
             <li>Legal holds: certain data may be retained longer if required by law.</li>
           </ul>
         </section>
@@ -342,8 +375,8 @@ export default function PrivacyPage() {
         <section className="mt-8 space-y-4 text-sm leading-relaxed">
           <h2 className="text-xl font-semibold">8. Your Rights</h2>
           <p>
-            Your privacy rights depend on your location, but we aim to honor core rights wherever practical. These
-            may include:
+            Your privacy rights depend on your location, but we aim to honor core rights wherever
+            practical. These may include:
           </p>
           <ul className="list-disc list-inside space-y-1">
             <li>Access – request a copy of your personal data.</li>
@@ -354,7 +387,7 @@ export default function PrivacyPage() {
             <li>Withdrawal of consent – where processing is based on consent.</li>
           </ul>
           <p>
-            To exercise your rights, contact us at{" "}
+            To exercise your rights, contact us at{' '}
             <a href="mailto:privacy@tripsync.app" className="underline">
               privacy@tripsync.app
             </a>
@@ -376,9 +409,9 @@ export default function PrivacyPage() {
         <section className="mt-8 space-y-4 text-sm leading-relaxed">
           <h2 className="text-xl font-semibold">10. International Data Transfers</h2>
           <p>
-            Our servers are located in the United States. If you access TripSync from
-            outside this region, your data may be transferred to and processed in this location. Where required, we
-            use appropriate safeguards such as Standard Contractual Clauses (SCCs).
+            Our servers are located in the United States. If you access TripSync from outside this
+            region, your data may be transferred to and processed in this location. Where required,
+            we use appropriate safeguards such as Standard Contractual Clauses (SCCs).
           </p>
         </section>
 
@@ -388,40 +421,45 @@ export default function PrivacyPage() {
           <ul className="list-disc list-inside space-y-1">
             <li>Passwords stored using strong one-way hashing (e.g., bcrypt)</li>
             <li>HTTPS/TLS for data in transit</li>
-            <li>Database and infrastructure protections (including encryption at rest where supported)</li>
+            <li>
+              Database and infrastructure protections (including encryption at rest where supported)
+            </li>
             <li>JWT-based authentication with token expiration</li>
             <li>Access controls and limited employee access to user data</li>
             <li>Rate limiting and monitoring for abuse</li>
           </ul>
           <p>
-            No system is completely secure, and we cannot guarantee absolute security. If we become aware of a data
-            breach that may affect you, we will notify you where required by law.
+            No system is completely secure, and we cannot guarantee absolute security. If we become
+            aware of a data breach that may affect you, we will notify you where required by law.
           </p>
         </section>
 
         <section className="mt-8 space-y-4 text-sm leading-relaxed">
           <h2 className="text-xl font-semibold">12. Children&apos;s Privacy</h2>
           <p>
-            TripSync is not intended for children under 13 years old (or 16 in the EU/EEA). We do not knowingly
-            collect personal data from children. If you believe a child has provided us with data, please contact
-            us so we can take appropriate action.
+            TripSync is not intended for children under 13 years old (or 16 in the EU/EEA). We do
+            not knowingly collect personal data from children. If you believe a child has provided
+            us with data, please contact us so we can take appropriate action.
           </p>
         </section>
 
         <section className="mt-8 space-y-4 text-sm leading-relaxed">
           <h2 className="text-xl font-semibold">13. Changes to This Policy</h2>
           <p>
-            We may update this Privacy Policy from time to time. When we make material changes, we will update the
-            effective date and, where appropriate, provide additional notice (for example, via email or in-app
-            notification). Your continued use of TripSync after changes take effect constitutes acceptance.
+            We may update this Privacy Policy from time to time. When we make material changes, we
+            will update the effective date and, where appropriate, provide additional notice (for
+            example, via email or in-app notification). Your continued use of TripSync after changes
+            take effect constitutes acceptance.
           </p>
         </section>
 
         <section className="mt-8 mb-12 space-y-4 text-sm leading-relaxed">
           <h2 className="text-xl font-semibold">14. Contact Us</h2>
-          <p>If you have questions about this Privacy Policy or your data, you can contact us at:</p>
           <p>
-            <strong>Email:</strong>{" "}
+            If you have questions about this Privacy Policy or your data, you can contact us at:
+          </p>
+          <p>
+            <strong>Email:</strong>{' '}
             <a href="mailto:privacy@tripsync.app" className="underline">
               privacy@tripsync.app
             </a>
@@ -429,12 +467,11 @@ export default function PrivacyPage() {
             <strong>Mail:</strong> 123 Example Street, Example City, Example Country
           </p>
           <p className="text-xs text-muted-foreground">
-            If required by law, details of our GDPR representative and/or Data Protection Officer (DPO) will be
-            provided here once designated.
+            If required by law, details of our GDPR representative and/or Data Protection Officer
+            (DPO) will be provided here once designated.
           </p>
         </section>
       </main>
     </div>
   );
 }
-

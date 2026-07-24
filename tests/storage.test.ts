@@ -183,7 +183,14 @@ describe('Storage Interface', () => {
     });
 
     it('should validate expense categories', () => {
-      const validCategories = ['accommodation', 'transport', 'meal', 'activity', 'shopping', 'other'];
+      const validCategories = [
+        'accommodation',
+        'transport',
+        'meal',
+        'activity',
+        'shopping',
+        'other',
+      ];
       const testCategory = 'meal';
 
       expect(validCategories).toContain(testCategory);

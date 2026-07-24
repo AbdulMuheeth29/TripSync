@@ -1,14 +1,23 @@
-import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
-import { Separator } from "@/components/ui/separator";
-import { CreditCard, Calendar, TrendingUp, Zap, Users, Image, Sparkles, MapPin } from "lucide-react";
-import { format, addMonths } from "date-fns";
+import { Card } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Progress } from '@/components/ui/progress';
+import { Separator } from '@/components/ui/separator';
+import {
+  CreditCard,
+  Calendar,
+  TrendingUp,
+  Zap,
+  Users,
+  Image,
+  Sparkles,
+  MapPin,
+} from 'lucide-react';
+import { format, addMonths } from 'date-fns';
 
 interface SubscriptionData {
-  plan: "Free" | "Pro" | "Teams";
-  status: "active" | "trialing" | "canceled" | "past_due";
+  plan: 'Free' | 'Pro' | 'Teams';
+  status: 'active' | 'trialing' | 'canceled' | 'past_due';
   currentPeriodStart: Date;
   currentPeriodEnd: Date;
   cancelAtPeriodEnd: boolean;
@@ -39,33 +48,36 @@ export function SubscriptionDashboard({
   onUpgrade,
   onUpdatePayment,
   onCancelSubscription,
-  onReactivate
+  onReactivate,
 }: SubscriptionDashboardProps) {
   const { plan, status, currentPeriodEnd, cancelAtPeriodEnd, paymentMethod, usage } = subscription;
 
   const getStatusBadge = () => {
     switch (status) {
-      case "active":
+      case 'active':
         return <Badge className="bg-green-100 text-green-800">Active</Badge>;
-      case "trialing":
+      case 'trialing':
         return <Badge className="bg-blue-100 text-blue-800">Trial</Badge>;
-      case "canceled":
+      case 'canceled':
         return <Badge variant="destructive">Canceled</Badge>;
-      case "past_due":
+      case 'past_due':
         return <Badge variant="destructive">Past Due</Badge>;
     }
   };
 
   const getPlanPrice = () => {
     switch (plan) {
-      case "Free": return "$0";
-      case "Pro": return "$4.99";
-      case "Teams": return "$9.99";
+      case 'Free':
+        return '$0';
+      case 'Pro':
+        return '$4.99';
+      case 'Teams':
+        return '$9.99';
     }
   };
 
   const formatUsage = (used: number, limit: number | null) => {
-    if (limit === null) return "Unlimited";
+    if (limit === null) return 'Unlimited';
     return `${used} / ${limit}`;
   };
 
@@ -84,9 +96,12 @@ export function SubscriptionDashboard({
               <h2 className="text-2xl font-bold">{plan} Plan</h2>
               {getStatusBadge()}
             </div>
-            <p className="text-3xl font-bold text-primary">{getPlanPrice()}<span className="text-base text-muted-foreground font-normal">/month</span></p>
+            <p className="text-3xl font-bold text-primary">
+              {getPlanPrice()}
+              <span className="text-base text-muted-foreground font-normal">/month</span>
+            </p>
           </div>
-          {plan !== "Teams" && (
+          {plan !== 'Teams' && (
             <Button onClick={onUpgrade}>
               <TrendingUp className="h-4 w-4 mr-2" />
               Upgrade
@@ -103,7 +118,7 @@ export function SubscriptionDashboard({
               <Calendar className="h-4 w-4 text-muted-foreground" />
               <span className="text-muted-foreground">Next Billing Date</span>
             </div>
-            <span className="font-medium">{format(currentPeriodEnd, "MMM d, yyyy")}</span>
+            <span className="font-medium">{format(currentPeriodEnd, 'MMM d, yyyy')}</span>
           </div>
 
           {paymentMethod && (
@@ -126,17 +141,12 @@ export function SubscriptionDashboard({
           {cancelAtPeriodEnd && (
             <div className="rounded-lg border border-amber-200 bg-amber-50 p-4">
               <p className="text-sm font-medium text-amber-900">
-                Subscription will cancel on {format(currentPeriodEnd, "MMM d, yyyy")}
+                Subscription will cancel on {format(currentPeriodEnd, 'MMM d, yyyy')}
               </p>
               <p className="text-sm text-amber-700 mt-1">
                 You'll have access to {plan} features until then.
               </p>
-              <Button
-                variant="outline"
-                size="sm"
-                className="mt-3"
-                onClick={onReactivate}
-              >
+              <Button variant="outline" size="sm" className="mt-3" onClick={onReactivate}>
                 Reactivate Subscription
               </Button>
             </div>
@@ -158,7 +168,7 @@ export function SubscriptionDashboard({
               </div>
               <span className="font-medium">
                 {formatUsage(usage.trips.used, usage.trips.limit)}
-                {usage.trips.limit === null && " ✓"}
+                {usage.trips.limit === null && ' ✓'}
               </span>
             </div>
             {usage.trips.limit !== null && (
@@ -175,11 +185,13 @@ export function SubscriptionDashboard({
               </div>
               <span className="font-medium">
                 {formatUsage(usage.aiGenerations.used, usage.aiGenerations.limit)}
-                {usage.aiGenerations.limit === null && " ✓"}
+                {usage.aiGenerations.limit === null && ' ✓'}
               </span>
             </div>
             {usage.aiGenerations.limit !== null && (
-              <Progress value={getUsagePercentage(usage.aiGenerations.used, usage.aiGenerations.limit)} />
+              <Progress
+                value={getUsagePercentage(usage.aiGenerations.used, usage.aiGenerations.limit)}
+              />
             )}
           </div>
 
@@ -192,7 +204,7 @@ export function SubscriptionDashboard({
               </div>
               <span className="font-medium">
                 {formatUsage(usage.members.used, usage.members.limit)}
-                {usage.members.limit === null && " ✓"}
+                {usage.members.limit === null && ' ✓'}
               </span>
             </div>
             {usage.members.limit !== null && (
@@ -217,7 +229,7 @@ export function SubscriptionDashboard({
       </Card>
 
       {/* Actions */}
-      {!cancelAtPeriodEnd && plan !== "Free" && (
+      {!cancelAtPeriodEnd && plan !== 'Free' && (
         <Card className="p-6">
           <h3 className="text-lg font-semibold mb-4">Manage Subscription</h3>
           <div className="space-y-3">
@@ -225,7 +237,11 @@ export function SubscriptionDashboard({
               <CreditCard className="h-4 w-4 mr-2" />
               Update Payment Method
             </Button>
-            <Button variant="outline" className="w-full justify-start text-red-600 hover:text-red-600" onClick={onCancelSubscription}>
+            <Button
+              variant="outline"
+              className="w-full justify-start text-red-600 hover:text-red-600"
+              onClick={onCancelSubscription}
+            >
               <Zap className="h-4 w-4 mr-2" />
               Cancel Subscription
             </Button>

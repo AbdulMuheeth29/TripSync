@@ -55,14 +55,14 @@ async function testRedis() {
 async function testS3() {
   console.log('\n🔍 Testing S3/R2 Storage...');
 
-  const hasS3 = process.env.AWS_ACCESS_KEY_ID &&
-                process.env.AWS_SECRET_ACCESS_KEY &&
-                process.env.AWS_S3_BUCKET;
+  const hasS3 =
+    process.env.AWS_ACCESS_KEY_ID && process.env.AWS_SECRET_ACCESS_KEY && process.env.AWS_S3_BUCKET;
 
-  const hasR2 = process.env.R2_ACCOUNT_ID &&
-                process.env.R2_ACCESS_KEY_ID &&
-                process.env.R2_SECRET_ACCESS_KEY &&
-                process.env.R2_BUCKET_NAME;
+  const hasR2 =
+    process.env.R2_ACCOUNT_ID &&
+    process.env.R2_ACCESS_KEY_ID &&
+    process.env.R2_SECRET_ACCESS_KEY &&
+    process.env.R2_BUCKET_NAME;
 
   if (!hasS3 && !hasR2) {
     console.log('⚠️  No cloud storage configured - file uploads disabled');
@@ -70,7 +70,8 @@ async function testS3() {
   }
 
   try {
-    const { S3Client, ListBucketsCommand, PutObjectCommand, DeleteObjectCommand } = await import('@aws-sdk/client-s3');
+    const { S3Client, ListBucketsCommand, PutObjectCommand, DeleteObjectCommand } =
+      await import('@aws-sdk/client-s3');
 
     const accountId = process.env.R2_ACCOUNT_ID;
     const accessKeyId = process.env.R2_ACCESS_KEY_ID || process.env.AWS_ACCESS_KEY_ID;
@@ -78,9 +79,7 @@ async function testS3() {
     const region = process.env.AWS_REGION || 'auto';
     const bucket = process.env.R2_BUCKET_NAME || process.env.AWS_S3_BUCKET;
 
-    const endpoint = accountId
-      ? `https://${accountId}.r2.cloudflarestorage.com`
-      : undefined;
+    const endpoint = accountId ? `https://${accountId}.r2.cloudflarestorage.com` : undefined;
 
     const client = new S3Client({
       region,
@@ -96,19 +95,23 @@ async function testS3() {
 
     // Test write
     const testKey = `test-connection-${Date.now()}.txt`;
-    await client.send(new PutObjectCommand({
-      Bucket: bucket,
-      Key: testKey,
-      Body: 'Connection test',
-      ContentType: 'text/plain',
-    }));
+    await client.send(
+      new PutObjectCommand({
+        Bucket: bucket,
+        Key: testKey,
+        Body: 'Connection test',
+        ContentType: 'text/plain',
+      })
+    );
     console.log(`✅ ${storageType}: Upload working`);
 
     // Test delete
-    await client.send(new DeleteObjectCommand({
-      Bucket: bucket,
-      Key: testKey,
-    }));
+    await client.send(
+      new DeleteObjectCommand({
+        Bucket: bucket,
+        Key: testKey,
+      })
+    );
     console.log(`✅ ${storageType}: Delete working`);
 
     return true;
@@ -260,11 +263,21 @@ async function main() {
   const passed = Object.values(results).filter(Boolean).length;
   const total = Object.keys(results).length;
 
-  console.log(`\n✅ Database:      ${results.database ? 'PASS' : 'FAIL'} ${!results.database ? '(REQUIRED)' : ''}`);
-  console.log(`${results.redis ? '✅' : '⚠️ '} Redis:         ${results.redis ? 'PASS' : 'NOT CONFIGURED (optional)'}`);
-  console.log(`${results.storage ? '✅' : '⚠️ '} Cloud Storage: ${results.storage ? 'PASS' : 'NOT CONFIGURED (optional)'}`);
-  console.log(`${results.sentry ? '✅' : '⚠️ '} Sentry:        ${results.sentry ? 'PASS' : 'NOT CONFIGURED (optional)'}`);
-  console.log(`${results.smtp ? '✅' : '⚠️ '} SMTP:          ${results.smtp ? 'PASS' : 'NOT CONFIGURED (recommended)'}`);
+  console.log(
+    `\n✅ Database:      ${results.database ? 'PASS' : 'FAIL'} ${!results.database ? '(REQUIRED)' : ''}`
+  );
+  console.log(
+    `${results.redis ? '✅' : '⚠️ '} Redis:         ${results.redis ? 'PASS' : 'NOT CONFIGURED (optional)'}`
+  );
+  console.log(
+    `${results.storage ? '✅' : '⚠️ '} Cloud Storage: ${results.storage ? 'PASS' : 'NOT CONFIGURED (optional)'}`
+  );
+  console.log(
+    `${results.sentry ? '✅' : '⚠️ '} Sentry:        ${results.sentry ? 'PASS' : 'NOT CONFIGURED (optional)'}`
+  );
+  console.log(
+    `${results.smtp ? '✅' : '⚠️ '} SMTP:          ${results.smtp ? 'PASS' : 'NOT CONFIGURED (recommended)'}`
+  );
 
   console.log(`\n📈 Status: ${passed}/${total} services configured`);
 
@@ -304,7 +317,9 @@ async function main() {
   } else if (criticalPassed && recommendedPassed) {
     console.log('\n✅ Core services configured. Consider adding Sentry for error tracking.');
   } else if (criticalPassed) {
-    console.log('\n✅ Minimum requirements met. Consider adding optional services for better experience.');
+    console.log(
+      '\n✅ Minimum requirements met. Consider adding optional services for better experience.'
+    );
   }
 
   console.log('');

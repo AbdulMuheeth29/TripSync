@@ -1,14 +1,20 @@
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Card } from "@/components/ui/card";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Button } from "@/components/ui/button";
-import { Shield, Loader2, AlertCircle, Info, RefreshCw } from "lucide-react";
-import { useState, useEffect } from "react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { Card } from '@/components/ui/card';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Button } from '@/components/ui/button';
+import { Shield, Loader2, AlertCircle, Info, RefreshCw } from 'lucide-react';
+import { useState, useEffect } from 'react';
 
 interface PaymentVerificationModalProps {
   isOpen: boolean;
   onClose: () => void;
-  verificationType: "3ds" | "bank_auth" | "sca";
+  verificationType: '3ds' | 'bank_auth' | 'sca';
   verificationUrl: string;
   amount: number;
   currency: string;
@@ -24,7 +30,7 @@ export function PaymentVerificationModal({
   amount,
   currency,
   onVerificationComplete,
-  onCancel
+  onCancel,
 }: PaymentVerificationModalProps) {
   const [isLoading, setIsLoading] = useState(true);
   const [timeoutWarning, setTimeoutWarning] = useState(false);
@@ -34,47 +40,47 @@ export function PaymentVerificationModal({
       style: 'currency',
       currency: currency,
       minimumFractionDigits: 2,
-      maximumFractionDigits: 2
+      maximumFractionDigits: 2,
     }).format(amt);
   };
 
   const getVerificationTitle = () => {
     switch (verificationType) {
-      case "3ds":
-        return "3D Secure Verification";
-      case "bank_auth":
-        return "Bank Authorization";
-      case "sca":
-        return "Strong Customer Authentication";
+      case '3ds':
+        return '3D Secure Verification';
+      case 'bank_auth':
+        return 'Bank Authorization';
+      case 'sca':
+        return 'Strong Customer Authentication';
       default:
-        return "Payment Verification";
+        return 'Payment Verification';
     }
   };
 
   const getVerificationDescription = () => {
     switch (verificationType) {
-      case "3ds":
-        return "Your bank requires additional verification for this payment. Please complete the verification in the window below.";
-      case "bank_auth":
-        return "Your bank needs to authorize this payment. You may need to enter a code or use your banking app.";
-      case "sca":
-        return "EU regulations require additional authentication. Please verify your identity to continue.";
+      case '3ds':
+        return 'Your bank requires additional verification for this payment. Please complete the verification in the window below.';
+      case 'bank_auth':
+        return 'Your bank needs to authorize this payment. You may need to enter a code or use your banking app.';
+      case 'sca':
+        return 'EU regulations require additional authentication. Please verify your identity to continue.';
       default:
-        return "Additional verification is required to complete this payment.";
+        return 'Additional verification is required to complete this payment.';
     }
   };
 
   useEffect(() => {
     const handleMessage = (event: MessageEvent) => {
       // Handle messages from the verification iframe
-      if (event.data.type === "verification_complete") {
+      if (event.data.type === 'verification_complete') {
         onVerificationComplete(true);
-      } else if (event.data.type === "verification_failed") {
+      } else if (event.data.type === 'verification_failed') {
         onVerificationComplete(false);
       }
     };
 
-    window.addEventListener("message", handleMessage);
+    window.addEventListener('message', handleMessage);
 
     // Show timeout warning after 2 minutes
     const timeoutTimer = setTimeout(() => {
@@ -82,7 +88,7 @@ export function PaymentVerificationModal({
     }, 120000);
 
     return () => {
-      window.removeEventListener("message", handleMessage);
+      window.removeEventListener('message', handleMessage);
       clearTimeout(timeoutTimer);
     };
   }, [onVerificationComplete]);
@@ -95,7 +101,7 @@ export function PaymentVerificationModal({
     setIsLoading(true);
     setTimeoutWarning(false);
     // Force iframe reload
-    const iframe = document.getElementById("verification-iframe") as HTMLIFrameElement;
+    const iframe = document.getElementById('verification-iframe') as HTMLIFrameElement;
     if (iframe) {
       iframe.src = verificationUrl;
     }
@@ -103,28 +109,27 @@ export function PaymentVerificationModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-2xl max-h-[90vh]" onInteractOutside={(e) => e.preventDefault()}>
+      <DialogContent
+        className="sm:max-w-2xl max-h-[90vh]"
+        onInteractOutside={(e) => e.preventDefault()}
+      >
         <DialogHeader>
           <div className="flex items-center gap-2">
             <Shield className="h-5 w-5 text-primary" />
             <DialogTitle>{getVerificationTitle()}</DialogTitle>
           </div>
-          <DialogDescription>
-            Verifying payment of {formatCurrency(amount)}
-          </DialogDescription>
+          <DialogDescription>Verifying payment of {formatCurrency(amount)}</DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4">
           {/* Instructions */}
           <Alert>
             <Info className="h-4 w-4" />
-            <AlertDescription className="text-sm">
-              {getVerificationDescription()}
-            </AlertDescription>
+            <AlertDescription className="text-sm">{getVerificationDescription()}</AlertDescription>
           </Alert>
 
           {/* Verification Frame Container */}
-          <Card className="relative overflow-hidden" style={{ height: "400px" }}>
+          <Card className="relative overflow-hidden" style={{ height: '400px' }}>
             {isLoading && (
               <div className="absolute inset-0 flex flex-col items-center justify-center bg-muted z-10">
                 <Loader2 className="h-8 w-8 animate-spin text-primary mb-3" />
@@ -146,7 +151,8 @@ export function PaymentVerificationModal({
             <Alert variant="destructive">
               <AlertCircle className="h-4 w-4" />
               <AlertDescription className="text-sm">
-                Verification is taking longer than expected. If you're having trouble, try refreshing or contact your bank.
+                Verification is taking longer than expected. If you're having trouble, try
+                refreshing or contact your bank.
               </AlertDescription>
             </Alert>
           )}
@@ -188,7 +194,8 @@ export function PaymentVerificationModal({
             <div className="text-xs text-muted-foreground">
               <p className="font-medium mb-1">Secure Connection</p>
               <p>
-                This verification is provided directly by your bank. TripSync never sees your banking credentials or verification codes.
+                This verification is provided directly by your bank. TripSync never sees your
+                banking credentials or verification codes.
               </p>
             </div>
           </div>

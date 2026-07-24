@@ -1,9 +1,9 @@
-import { useState, useEffect } from "react";
-import { Link } from "wouter";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
+import { useState, useEffect } from 'react';
+import { Link } from 'wouter';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Progress } from '@/components/ui/progress';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -14,9 +14,9 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
-import { Textarea } from "@/components/ui/textarea";
-import { useToast } from "@/hooks/use-toast";
+} from '@/components/ui/alert-dialog';
+import { Textarea } from '@/components/ui/textarea';
+import { useToast } from '@/hooks/use-toast';
 import {
   CreditCard,
   Sparkles,
@@ -28,8 +28,8 @@ import {
   Zap,
   AlertTriangle,
   X,
-} from "lucide-react";
-import { apiRequest } from "@/lib/queryClient";
+} from 'lucide-react';
+import { apiRequest } from '@/lib/queryClient';
 
 interface BillingContentProps {
   user: any;
@@ -43,10 +43,11 @@ export function BillingPageContent({ user, subscriptionTier }: BillingContentPro
   const [usageStats, setUsageStats] = useState<any>(null);
   const [billingHistory, setBillingHistory] = useState<any[]>([]);
   const [paymentMethod, setPaymentMethod] = useState<any>(null);
-  const [cancelFeedback, setCancelFeedback] = useState("");
+  const [cancelFeedback, setCancelFeedback] = useState('');
 
-  const planLabel = subscriptionTier === "teams" ? "Teams" : subscriptionTier === "pro" ? "Pro" : "Free";
-  const isPaid = subscriptionTier === "pro" || subscriptionTier === "teams";
+  const planLabel =
+    subscriptionTier === 'teams' ? 'Teams' : subscriptionTier === 'pro' ? 'Pro' : 'Free';
+  const isPaid = subscriptionTier === 'pro' || subscriptionTier === 'teams';
 
   // Fetch subscription details
   useEffect(() => {
@@ -60,48 +61,48 @@ export function BillingPageContent({ user, subscriptionTier }: BillingContentPro
 
   const fetchSubscriptionDetails = async () => {
     try {
-      const response = await apiRequest("GET", "/api/stripe/subscription");
+      const response = await apiRequest('GET', '/api/stripe/subscription');
       const data = await response.json();
       setSubscriptionDetails(data);
     } catch (error) {
-      console.error("Failed to fetch subscription details:", error);
+      console.error('Failed to fetch subscription details:', error);
     }
   };
 
   const fetchUsageStats = async () => {
     try {
-      const response = await apiRequest("GET", "/api/user/usage-stats");
+      const response = await apiRequest('GET', '/api/user/usage-stats');
       const data = await response.json();
       setUsageStats(data);
     } catch (error) {
-      console.error("Failed to fetch usage stats:", error);
+      console.error('Failed to fetch usage stats:', error);
     }
   };
 
   const fetchBillingHistory = async () => {
     try {
-      const response = await apiRequest("GET", "/api/stripe/invoices");
+      const response = await apiRequest('GET', '/api/stripe/invoices');
       const data = await response.json();
       setBillingHistory(data.invoices || []);
     } catch (error) {
-      console.error("Failed to fetch billing history:", error);
+      console.error('Failed to fetch billing history:', error);
     }
   };
 
   const fetchPaymentMethod = async () => {
     try {
-      const response = await apiRequest("GET", "/api/stripe/payment-method");
+      const response = await apiRequest('GET', '/api/stripe/payment-method');
       const data = await response.json();
       setPaymentMethod(data);
     } catch (error) {
-      console.error("Failed to fetch payment method:", error);
+      console.error('Failed to fetch payment method:', error);
     }
   };
 
   const openPortal = async () => {
     setLoading(true);
     try {
-      const response = await apiRequest("POST", "/api/stripe/portal", {
+      const response = await apiRequest('POST', '/api/stripe/portal', {
         returnUrl: `${window.location.origin}/dashboard/billing`,
       });
       const data = await response.json();
@@ -110,9 +111,9 @@ export function BillingPageContent({ user, subscriptionTier }: BillingContentPro
       }
     } catch (error) {
       toast({
-        title: "Error",
-        description: "Failed to open billing portal",
-        variant: "destructive",
+        title: 'Error',
+        description: 'Failed to open billing portal',
+        variant: 'destructive',
       });
     } finally {
       setLoading(false);
@@ -122,19 +123,19 @@ export function BillingPageContent({ user, subscriptionTier }: BillingContentPro
   const handleCancelSubscription = async () => {
     setLoading(true);
     try {
-      await apiRequest("POST", "/api/stripe/cancel-subscription", {
+      await apiRequest('POST', '/api/stripe/cancel-subscription', {
         feedback: cancelFeedback,
       });
       toast({
-        title: "Subscription cancelled",
-        description: "Your subscription will remain active until the end of the billing period.",
+        title: 'Subscription cancelled',
+        description: 'Your subscription will remain active until the end of the billing period.',
       });
       fetchSubscriptionDetails();
     } catch (error) {
       toast({
-        title: "Error",
-        description: "Failed to cancel subscription",
-        variant: "destructive",
+        title: 'Error',
+        description: 'Failed to cancel subscription',
+        variant: 'destructive',
       });
     } finally {
       setLoading(false);
@@ -143,10 +144,10 @@ export function BillingPageContent({ user, subscriptionTier }: BillingContentPro
 
   const downloadInvoice = async (invoiceId: string) => {
     try {
-      const response = await apiRequest("GET", `/api/stripe/invoices/${invoiceId}/pdf`);
+      const response = await apiRequest('GET', `/api/stripe/invoices/${invoiceId}/pdf`);
       const blob = await response.blob();
       const url = URL.createObjectURL(blob);
-      const link = document.createElement("a");
+      const link = document.createElement('a');
       link.href = url;
       link.download = `invoice-${invoiceId}.pdf`;
       document.body.appendChild(link);
@@ -155,9 +156,9 @@ export function BillingPageContent({ user, subscriptionTier }: BillingContentPro
       URL.revokeObjectURL(url);
     } catch (error) {
       toast({
-        title: "Error",
-        description: "Failed to download invoice",
-        variant: "destructive",
+        title: 'Error',
+        description: 'Failed to download invoice',
+        variant: 'destructive',
       });
     }
   };
@@ -165,28 +166,28 @@ export function BillingPageContent({ user, subscriptionTier }: BillingContentPro
   // Plan features
   const planFeatures = {
     free: [
-      "3 active trips",
-      "Up to 6 members per trip",
-      "Basic itinerary planning",
-      "Expense tracking",
-      "Community support",
+      '3 active trips',
+      'Up to 6 members per trip',
+      'Basic itinerary planning',
+      'Expense tracking',
+      'Community support',
     ],
     pro: [
-      "Unlimited trips",
-      "Unlimited members",
-      "AI itinerary generation",
-      "Advanced features",
-      "Priority support",
-      "Export to PDF/CSV",
-      "Map view",
-      "Place discovery",
+      'Unlimited trips',
+      'Unlimited members',
+      'AI itinerary generation',
+      'Advanced features',
+      'Priority support',
+      'Export to PDF/CSV',
+      'Map view',
+      'Place discovery',
     ],
     teams: [
-      "Everything in Pro",
-      "Team collaboration tools",
-      "Admin dashboard",
-      "Priority support",
-      "Custom branding (coming soon)",
+      'Everything in Pro',
+      'Team collaboration tools',
+      'Admin dashboard',
+      'Priority support',
+      'Custom branding (coming soon)',
     ],
   };
 
@@ -201,9 +202,7 @@ export function BillingPageContent({ user, subscriptionTier }: BillingContentPro
             <CreditCard className="h-5 w-5" />
             Current Subscription
           </CardTitle>
-          <CardDescription>
-            Manage your {planLabel} plan and billing settings
-          </CardDescription>
+          <CardDescription>Manage your {planLabel} plan and billing settings</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex items-center justify-between">
@@ -211,7 +210,9 @@ export function BillingPageContent({ user, subscriptionTier }: BillingContentPro
               <div className="flex items-center gap-2">
                 <h3 className="text-2xl font-bold">{planLabel} Plan</h3>
                 {subscriptionDetails?.status && (
-                  <Badge variant={subscriptionDetails.status === "active" ? "default" : "secondary"}>
+                  <Badge
+                    variant={subscriptionDetails.status === 'active' ? 'default' : 'secondary'}
+                  >
                     {subscriptionDetails.status}
                   </Badge>
                 )}
@@ -219,7 +220,7 @@ export function BillingPageContent({ user, subscriptionTier }: BillingContentPro
               {subscriptionDetails?.currentPeriodEnd && (
                 <p className="text-sm text-muted-foreground mt-1">
                   <Calendar className="inline h-3 w-3 mr-1" />
-                  {subscriptionDetails.cancelAtPeriodEnd ? "Ends" : "Renews"} on{" "}
+                  {subscriptionDetails.cancelAtPeriodEnd ? 'Ends' : 'Renews'} on{' '}
                   {new Date(subscriptionDetails.currentPeriodEnd).toLocaleDateString()}
                 </p>
               )}
@@ -231,7 +232,7 @@ export function BillingPageContent({ user, subscriptionTier }: BillingContentPro
             </div>
             {isPaid && (
               <Button onClick={openPortal} disabled={loading}>
-                {loading ? "Loading..." : "Manage Subscription"}
+                {loading ? 'Loading...' : 'Manage Subscription'}
               </Button>
             )}
           </div>
@@ -289,7 +290,9 @@ export function BillingPageContent({ user, subscriptionTier }: BillingContentPro
               <div className="space-y-2">
                 <div className="flex justify-between text-sm">
                   <span>Storage Used</span>
-                  <span>{usageStats.storageUsed || 0} MB / {usageStats.limits.storage} MB</span>
+                  <span>
+                    {usageStats.storageUsed || 0} MB / {usageStats.limits.storage} MB
+                  </span>
                 </div>
                 <Progress value={(usageStats.storageUsed / usageStats.limits.storage) * 100} />
               </div>
@@ -348,9 +351,7 @@ export function BillingPageContent({ user, subscriptionTier }: BillingContentPro
               </ul>
               <Button asChild className="w-full" variant="outline">
                 <Link href="/pricing?checkout=teams">
-                  <a className="inline-flex items-center gap-2">
-                    Upgrade to Teams
-                  </a>
+                  <a className="inline-flex items-center gap-2">Upgrade to Teams</a>
                 </Link>
               </Button>
             </CardContent>
@@ -401,7 +402,10 @@ export function BillingPageContent({ user, subscriptionTier }: BillingContentPro
           <CardContent>
             <div className="space-y-2">
               {billingHistory.map((invoice) => (
-                <div key={invoice.id} className="flex items-center justify-between p-3 rounded-lg border">
+                <div
+                  key={invoice.id}
+                  className="flex items-center justify-between p-3 rounded-lg border"
+                >
                   <div className="flex-1">
                     <div className="font-medium">
                       {new Date(invoice.created * 1000).toLocaleDateString()}
@@ -413,7 +417,10 @@ export function BillingPageContent({ user, subscriptionTier }: BillingContentPro
                   <div className="flex items-center gap-4">
                     <div className="text-right">
                       <div className="font-medium">${(invoice.amount / 100).toFixed(2)}</div>
-                      <Badge variant={invoice.status === "paid" ? "default" : "secondary"} className="text-xs">
+                      <Badge
+                        variant={invoice.status === 'paid' ? 'default' : 'secondary'}
+                        className="text-xs"
+                      >
                         {invoice.status}
                       </Badge>
                     </div>
@@ -421,7 +428,7 @@ export function BillingPageContent({ user, subscriptionTier }: BillingContentPro
                       <Button
                         variant="ghost"
                         size="sm"
-                        onClick={() => window.open(invoice.invoicePdf, "_blank")}
+                        onClick={() => window.open(invoice.invoicePdf, '_blank')}
                       >
                         <Download className="h-4 w-4" />
                       </Button>
@@ -443,7 +450,8 @@ export function BillingPageContent({ user, subscriptionTier }: BillingContentPro
               Cancel Subscription
             </CardTitle>
             <CardDescription>
-              Cancel your subscription at any time. You'll retain access until the end of your billing period.
+              Cancel your subscription at any time. You'll retain access until the end of your
+              billing period.
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -482,7 +490,7 @@ export function BillingPageContent({ user, subscriptionTier }: BillingContentPro
                     className="bg-destructive hover:bg-destructive/90"
                     disabled={loading}
                   >
-                    {loading ? "Cancelling..." : "Yes, Cancel Subscription"}
+                    {loading ? 'Cancelling...' : 'Yes, Cancel Subscription'}
                   </AlertDialogAction>
                 </AlertDialogFooter>
               </AlertDialogContent>
@@ -500,8 +508,9 @@ export function BillingPageContent({ user, subscriptionTier }: BillingContentPro
               Subscription Ending
             </CardTitle>
             <CardDescription>
-              Your subscription will end on {new Date(subscriptionDetails.currentPeriodEnd).toLocaleDateString()}.
-              You can reactivate it at any time before then.
+              Your subscription will end on{' '}
+              {new Date(subscriptionDetails.currentPeriodEnd).toLocaleDateString()}. You can
+              reactivate it at any time before then.
             </CardDescription>
           </CardHeader>
           <CardContent>

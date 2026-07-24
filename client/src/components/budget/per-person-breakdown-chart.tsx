@@ -1,9 +1,9 @@
-import { Card } from "@/components/ui/card";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
-import { Users, ArrowUpDown } from "lucide-react";
-import { useState } from "react";
+import { Card } from '@/components/ui/card';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Badge } from '@/components/ui/badge';
+import { Progress } from '@/components/ui/progress';
+import { Users, ArrowUpDown } from 'lucide-react';
+import { useState } from 'react';
 
 interface PersonSpending {
   id: string;
@@ -21,10 +21,7 @@ interface PerPersonBreakdownChartProps {
 
 type SortBy = 'name' | 'paid' | 'owed' | 'balance';
 
-export function PerPersonBreakdownChart({
-  data,
-  currency
-}: PerPersonBreakdownChartProps) {
+export function PerPersonBreakdownChart({ data, currency }: PerPersonBreakdownChartProps) {
   const [sortBy, setSortBy] = useState<SortBy>('paid');
 
   const formatCurrency = (amount: number) => {
@@ -32,12 +29,17 @@ export function PerPersonBreakdownChart({
       style: 'currency',
       currency: currency,
       minimumFractionDigits: 0,
-      maximumFractionDigits: 0
+      maximumFractionDigits: 0,
     }).format(Math.abs(amount));
   };
 
   const getInitials = (name: string) => {
-    return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+    return name
+      .split(' ')
+      .map((n) => n[0])
+      .join('')
+      .toUpperCase()
+      .slice(0, 2);
   };
 
   // Sort data
@@ -56,7 +58,7 @@ export function PerPersonBreakdownChart({
     }
   });
 
-  const maxPaid = Math.max(...data.map(d => d.totalPaid));
+  const maxPaid = Math.max(...data.map((d) => d.totalPaid));
   const totalPaid = data.reduce((sum, d) => sum + d.totalPaid, 0);
 
   if (data.length === 0) {
@@ -125,10 +127,15 @@ export function PerPersonBreakdownChart({
                     {/* Net Balance Badge */}
                     {person.netBalance !== 0 && (
                       <Badge
-                        variant={person.netBalance > 0 ? "default" : "secondary"}
-                        className={person.netBalance > 0 ? "bg-green-100 text-green-800" : "bg-amber-100 text-amber-800"}
+                        variant={person.netBalance > 0 ? 'default' : 'secondary'}
+                        className={
+                          person.netBalance > 0
+                            ? 'bg-green-100 text-green-800'
+                            : 'bg-amber-100 text-amber-800'
+                        }
                       >
-                        {person.netBalance > 0 ? "Owed " : "Owes "}{formatCurrency(person.netBalance)}
+                        {person.netBalance > 0 ? 'Owed ' : 'Owes '}
+                        {formatCurrency(person.netBalance)}
                       </Badge>
                     )}
 
@@ -154,10 +161,7 @@ export function PerPersonBreakdownChart({
                       <span className="text-muted-foreground">Amount Owed</span>
                       <span className="font-semibold">{formatCurrency(person.totalOwed)}</span>
                     </div>
-                    <Progress
-                      value={owedPercentage}
-                      className="h-2"
-                    />
+                    <Progress value={owedPercentage} className="h-2" />
                   </div>
                 </div>
               </div>
@@ -186,7 +190,8 @@ export function PerPersonBreakdownChart({
       {sortedData[0] && (
         <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
           <p className="text-sm text-blue-900">
-            <strong>{sortedData[0].name}</strong> has paid the most ({formatCurrency(sortedData[0].totalPaid)})
+            <strong>{sortedData[0].name}</strong> has paid the most (
+            {formatCurrency(sortedData[0].totalPaid)})
           </p>
         </div>
       )}

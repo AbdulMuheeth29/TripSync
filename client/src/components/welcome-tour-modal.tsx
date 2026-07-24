@@ -1,8 +1,24 @@
-import { useState } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Progress } from "@/components/ui/progress";
-import { Sparkles, Users, Vote, DollarSign, MessageSquare, Check, ArrowRight, ArrowLeft } from "lucide-react";
+import { useState } from 'react';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Progress } from '@/components/ui/progress';
+import {
+  Sparkles,
+  Users,
+  Vote,
+  DollarSign,
+  MessageSquare,
+  Check,
+  ArrowRight,
+  ArrowLeft,
+} from 'lucide-react';
 
 interface WelcomeTourModalProps {
   isOpen: boolean;
@@ -19,67 +35,67 @@ interface TourStep {
 
 const TOUR_STEPS: TourStep[] = [
   {
-    title: "Welcome to TripSync! 🎉",
-    description: "Plan group trips effortlessly with AI-powered itineraries and smart collaboration tools.",
+    title: 'Welcome to TripSync! 🎉',
+    description:
+      'Plan group trips effortlessly with AI-powered itineraries and smart collaboration tools.',
     icon: Sparkles,
     features: [
-      "AI generates personalized itineraries in 60 seconds",
-      "Collaborative planning with your entire group",
-      "Smart expense tracking and settlements",
-      "Real-time chat with Atlas, your AI travel assistant"
-    ]
+      'AI generates personalized itineraries in 60 seconds',
+      'Collaborative planning with your entire group',
+      'Smart expense tracking and settlements',
+      'Real-time chat with Atlas, your AI travel assistant',
+    ],
   },
   {
-    title: "Create Your First Trip",
-    description: "Get started by creating a trip with our 5-step wizard. AI will handle the heavy lifting!",
+    title: 'Create Your First Trip',
+    description:
+      'Get started by creating a trip with our 5-step wizard. AI will handle the heavy lifting!',
     icon: Sparkles,
     features: [
-      "Choose your destination, dates, and budget",
-      "Select your trip vibe and preferences",
-      "Invite your travel buddies",
-      "AI generates a complete itinerary automatically"
-    ]
+      'Choose your destination, dates, and budget',
+      'Select your trip vibe and preferences',
+      'Invite your travel buddies',
+      'AI generates a complete itinerary automatically',
+    ],
   },
   {
-    title: "Democratic Decision Making",
-    description: "Everyone gets a voice! Vote on activities, chat in real-time, and make decisions together.",
+    title: 'Democratic Decision Making',
+    description:
+      'Everyone gets a voice! Vote on activities, chat in real-time, and make decisions together.',
     icon: Vote,
     features: [
-      "Upvote or downvote any activity",
-      "Auto-approve when 70%+ of group agrees",
-      "Atlas AI helps resolve deadlocks",
-      "Real-time group chat with @mentions"
-    ]
+      'Upvote or downvote any activity',
+      'Auto-approve when 70%+ of group agrees',
+      'Atlas AI helps resolve deadlocks',
+      'Real-time group chat with @mentions',
+    ],
   },
   {
-    title: "Smart Expense Tracking",
-    description: "Split bills fairly and see who owes what with our intelligent settlement system.",
+    title: 'Smart Expense Tracking',
+    description: 'Split bills fairly and see who owes what with our intelligent settlement system.',
     icon: DollarSign,
     features: [
-      "Add expenses with receipt photos",
-      "AI extracts data from receipts (Pro)",
-      "Automatic \"who owes whom\" calculations",
-      "Quick payment links for Venmo/Zelle"
-    ]
+      'Add expenses with receipt photos',
+      'AI extracts data from receipts (Pro)',
+      'Automatic "who owes whom" calculations',
+      'Quick payment links for Venmo/Zelle',
+    ],
   },
   {
-    title: "Meet Atlas, Your AI Assistant",
-    description: "Chat with Atlas anytime for recommendations, packing lists, budget tips, and more.",
+    title: 'Meet Atlas, Your AI Assistant',
+    description:
+      'Chat with Atlas anytime for recommendations, packing lists, budget tips, and more.',
     icon: MessageSquare,
     features: [
-      "Context-aware travel recommendations",
-      "24/7 proactive trip monitoring",
-      "Generates packing lists and trip recaps",
-      "Helps optimize your budget and itinerary"
-    ]
-  }
+      'Context-aware travel recommendations',
+      '24/7 proactive trip monitoring',
+      'Generates packing lists and trip recaps',
+      'Helps optimize your budget and itinerary',
+    ],
+  },
 ];
 
-export function WelcomeTourModal({
-  isOpen,
-  onComplete,
-  userName
-}: WelcomeTourModalProps) {
+export function WelcomeTourModal({ isOpen, onComplete, userName }: WelcomeTourModalProps) {
   const [currentStep, setCurrentStep] = useState(0);
 
   const step = TOUR_STEPS[currentStep];
@@ -91,13 +107,13 @@ export function WelcomeTourModal({
     if (isLastStep) {
       onComplete();
     } else {
-      setCurrentStep(prev => prev + 1);
+      setCurrentStep((prev) => prev + 1);
     }
   };
 
   const handleBack = () => {
     if (currentStep > 0) {
-      setCurrentStep(prev => prev - 1);
+      setCurrentStep((prev) => prev - 1);
     }
   };
 
@@ -117,9 +133,7 @@ export function WelcomeTourModal({
           <DialogTitle className="text-center text-2xl">
             {currentStep === 0 && userName ? `Welcome, ${userName}!` : step.title}
           </DialogTitle>
-          <DialogDescription className="text-center">
-            {step.description}
-          </DialogDescription>
+          <DialogDescription className="text-center">{step.description}</DialogDescription>
         </DialogHeader>
 
         <div className="py-4 space-y-4">
@@ -153,10 +167,10 @@ export function WelcomeTourModal({
                 key={index}
                 className={`h-2 rounded-full transition-all ${
                   index === currentStep
-                    ? "w-8 bg-primary"
+                    ? 'w-8 bg-primary'
                     : index < currentStep
-                    ? "w-2 bg-primary/50"
-                    : "w-2 bg-muted"
+                      ? 'w-2 bg-primary/50'
+                      : 'w-2 bg-muted'
                 }`}
               />
             ))}
@@ -164,30 +178,19 @@ export function WelcomeTourModal({
         </div>
 
         <DialogFooter className="flex-col sm:flex-row gap-2">
-          <Button
-            variant="ghost"
-            onClick={handleSkip}
-            className="sm:w-auto w-full"
-          >
+          <Button variant="ghost" onClick={handleSkip} className="sm:w-auto w-full">
             Skip Tour
           </Button>
 
           <div className="flex gap-2 w-full sm:w-auto">
             {currentStep > 0 && (
-              <Button
-                variant="outline"
-                onClick={handleBack}
-                className="flex-1 sm:flex-none"
-              >
+              <Button variant="outline" onClick={handleBack} className="flex-1 sm:flex-none">
                 <ArrowLeft className="h-4 w-4 mr-2" />
                 Back
               </Button>
             )}
 
-            <Button
-              onClick={handleNext}
-              className="flex-1 sm:flex-none"
-            >
+            <Button onClick={handleNext} className="flex-1 sm:flex-none">
               {isLastStep ? (
                 <>
                   <Check className="h-4 w-4 mr-2" />

@@ -7,8 +7,8 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-import { AlertTriangle, Sparkles } from "lucide-react";
+} from '@/components/ui/alert-dialog';
+import { AlertTriangle, Sparkles } from 'lucide-react';
 
 interface RegenerateItineraryDialogProps {
   isOpen: boolean;
@@ -21,7 +21,7 @@ export function RegenerateItineraryDialog({
   isOpen,
   onClose,
   onConfirm,
-  isRegenerating = false
+  isRegenerating = false,
 }: RegenerateItineraryDialogProps) {
   return (
     <AlertDialog open={isOpen} onOpenChange={onClose}>
@@ -30,9 +30,7 @@ export function RegenerateItineraryDialog({
           <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-amber-100">
             <AlertTriangle className="h-6 w-6 text-amber-600" />
           </div>
-          <AlertDialogTitle className="text-center">
-            Regenerate Itinerary?
-          </AlertDialogTitle>
+          <AlertDialogTitle className="text-center">Regenerate Itinerary?</AlertDialogTitle>
           <AlertDialogDescription className="text-center">
             This will replace your current itinerary with a new AI-generated plan.
           </AlertDialogDescription>
@@ -40,9 +38,7 @@ export function RegenerateItineraryDialog({
 
         <div className="space-y-4">
           <div className="rounded-lg border border-amber-200 bg-amber-50 p-4">
-            <p className="text-sm font-medium text-amber-900 mb-2">
-              What will happen:
-            </p>
+            <p className="text-sm font-medium text-amber-900 mb-2">What will happen:</p>
             <ul className="text-sm text-amber-800 space-y-1 list-disc list-inside">
               <li>All current activities will be replaced</li>
               <li>Votes and comments will be preserved</li>
@@ -55,12 +51,10 @@ export function RegenerateItineraryDialog({
             <div className="flex items-start gap-2">
               <Sparkles className="h-5 w-5 text-blue-600 mt-0.5" />
               <div>
-                <p className="text-sm font-medium text-blue-900">
-                  AI Regeneration
-                </p>
+                <p className="text-sm font-medium text-blue-900">AI Regeneration</p>
                 <p className="text-sm text-blue-700 mt-1">
-                  Atlas AI will create a fresh itinerary based on your trip preferences.
-                  This usually takes 30-60 seconds.
+                  Atlas AI will create a fresh itinerary based on your trip preferences. This
+                  usually takes 30-60 seconds.
                 </p>
               </div>
             </div>
@@ -68,9 +62,7 @@ export function RegenerateItineraryDialog({
         </div>
 
         <AlertDialogFooter>
-          <AlertDialogCancel disabled={isRegenerating}>
-            Cancel
-          </AlertDialogCancel>
+          <AlertDialogCancel disabled={isRegenerating}>Cancel</AlertDialogCancel>
           <AlertDialogAction
             onClick={onConfirm}
             disabled={isRegenerating}
@@ -82,7 +74,7 @@ export function RegenerateItineraryDialog({
                 Regenerating...
               </>
             ) : (
-              "Regenerate Itinerary"
+              'Regenerate Itinerary'
             )}
           </AlertDialogAction>
         </AlertDialogFooter>

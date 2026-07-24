@@ -1,11 +1,28 @@
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Separator } from "@/components/ui/separator";
-import { Receipt, Calendar, DollarSign, Users, Tag, FileText, Edit, Trash2, Image as ImageIcon } from "lucide-react";
-import { format } from "date-fns";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Separator } from '@/components/ui/separator';
+import {
+  Receipt,
+  Calendar,
+  DollarSign,
+  Users,
+  Tag,
+  FileText,
+  Edit,
+  Trash2,
+  Image as ImageIcon,
+} from 'lucide-react';
+import { format } from 'date-fns';
 
 interface ExpenseSplit {
   userId: string;
@@ -25,7 +42,7 @@ interface ExpenseDetailViewModalProps {
     category: string;
     date: Date;
     paidBy: { id: string; name: string };
-    splitMethod: "equal" | "percentage" | "custom" | "self";
+    splitMethod: 'equal' | 'percentage' | 'custom' | 'self';
     splits: ExpenseSplit[];
     notes?: string;
     receiptUrl?: string;
@@ -48,22 +65,27 @@ export function ExpenseDetailViewModal({
   canDelete,
   onEdit,
   onDelete,
-  onViewReceipt
+  onViewReceipt,
 }: ExpenseDetailViewModalProps) {
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
       currency: expense.currency,
       minimumFractionDigits: 2,
-      maximumFractionDigits: 2
+      maximumFractionDigits: 2,
     }).format(amount);
   };
 
   const getInitials = (name: string) => {
-    return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+    return name
+      .split(' ')
+      .map((n) => n[0])
+      .join('')
+      .toUpperCase()
+      .slice(0, 2);
   };
 
-  const settledCount = expense.splits.filter(s => s.settled).length;
+  const settledCount = expense.splits.filter((s) => s.settled).length;
   const allSettled = settledCount === expense.splits.length;
 
   return (
@@ -72,8 +94,11 @@ export function ExpenseDetailViewModal({
         <DialogHeader>
           <div className="flex items-center justify-between">
             <DialogTitle>{expense.title}</DialogTitle>
-            <Badge variant={allSettled ? "secondary" : "outline"} className={allSettled ? "bg-green-100 text-green-800" : ""}>
-              {allSettled ? "Fully Settled" : `${settledCount}/${expense.splits.length} Settled`}
+            <Badge
+              variant={allSettled ? 'secondary' : 'outline'}
+              className={allSettled ? 'bg-green-100 text-green-800' : ''}
+            >
+              {allSettled ? 'Fully Settled' : `${settledCount}/${expense.splits.length} Settled`}
             </Badge>
           </div>
           <DialogDescription>
@@ -113,7 +138,7 @@ export function ExpenseDetailViewModal({
                 <Calendar className="h-5 w-5 text-muted-foreground" />
                 <div>
                   <p className="text-xs text-muted-foreground">Date</p>
-                  <p className="font-medium">{format(expense.date, "MMM d, yyyy")}</p>
+                  <p className="font-medium">{format(expense.date, 'MMM d, yyyy')}</p>
                 </div>
               </div>
             </Card>
@@ -154,14 +179,19 @@ export function ExpenseDetailViewModal({
                 <Users className="h-5 w-5 text-muted-foreground" />
                 <h4 className="font-semibold">Split Details</h4>
               </div>
-              <Badge variant="outline" className="capitalize">{expense.splitMethod} Split</Badge>
+              <Badge variant="outline" className="capitalize">
+                {expense.splitMethod} Split
+              </Badge>
             </div>
 
             <Separator className="mb-3" />
 
             <div className="space-y-2">
               {expense.splits.map((split) => (
-                <div key={split.userId} className="flex items-center justify-between p-2 rounded-lg hover:bg-muted/50">
+                <div
+                  key={split.userId}
+                  className="flex items-center justify-between p-2 rounded-lg hover:bg-muted/50"
+                >
                   <div className="flex items-center gap-3">
                     <Avatar className="h-8 w-8">
                       <AvatarFallback className="text-xs">
@@ -177,7 +207,9 @@ export function ExpenseDetailViewModal({
                         Settled
                       </Badge>
                     ) : (
-                      <Badge variant="outline" className="text-xs">Pending</Badge>
+                      <Badge variant="outline" className="text-xs">
+                        Pending
+                      </Badge>
                     )}
                   </div>
                 </div>

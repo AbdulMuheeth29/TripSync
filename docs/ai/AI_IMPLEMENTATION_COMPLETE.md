@@ -145,6 +145,7 @@ atlas-routes.ts                       ✅ Conversational planning API
 ### Competitive Advantages
 
 **Only TripSync has:**
+
 1. ✅ Claude Sonnet 4.5 (most advanced travel AI)
 2. ✅ Proactive Atlas monitoring (watches trips 24/7)
 3. ✅ AI-powered vote deadlock resolution
@@ -248,6 +249,7 @@ GET /api/admin/ai/learning
 ### Atlas Monitoring (Automatic)
 
 Atlas runs every 15 minutes and monitors:
+
 - Budget overruns (>110% spent) → suggests optimizations
 - Vote deadlocks (tied >24 hours) → proposes compromises
 - Deadline urgency (trip <7 days, <50% complete) → nudges to finalize
@@ -256,6 +258,7 @@ Atlas runs every 15 minutes and monitors:
 ### Admin Monitoring
 
 Check `/api/admin/ai/dashboard` for:
+
 - Total AI costs and projections
 - Success rates (target: 99.9%)
 - Cache hit rates (target: 60-80%)
@@ -265,6 +268,7 @@ Check `/api/admin/ai/dashboard` for:
 ### Alerts
 
 Automatic alerts when:
+
 - Success rate < 99%
 - Daily cost > $100
 - Circuit breakers open
@@ -284,6 +288,7 @@ Automatic alerts when:
 ### Projected Costs
 
 Based on current architecture:
+
 - **Per trip:** ~$0.05-0.15 (itinerary generation)
 - **Per month (1000 trips):** ~$50-150 with caching
 - **Without caching:** ~$500-1500 (10x more expensive)
@@ -395,6 +400,7 @@ AI_INTEGRATIONS_ANTHROPIC_BASE_URL=https://api.anthropic.com  # Override base UR
 ### API Documentation
 
 All AI endpoints documented inline with JSDoc. Check:
+
 - `server/ai-feature-routes.ts` - Advanced features
 - `server/atlas-routes.ts` - Conversational planning
 - `server/ai-admin-routes.ts` - Admin dashboard
@@ -418,6 +424,7 @@ The AI infrastructure you built was excellent - it just needed integration. Now:
 **The AI is now deeply embedded in the architecture, not just a feature.**
 
 Every trip gets:
+
 - AI-generated itinerary (already working)
 - Proactive monitoring (new - runs every 15 min)
 - Budget optimization suggestions (working)

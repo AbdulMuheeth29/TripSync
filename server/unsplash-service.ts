@@ -70,7 +70,7 @@ async function searchPhotos(query: string, perPage = 5): Promise<UnsplashPhoto[]
 
     const response = await fetch(url.toString(), {
       headers: {
-        'Authorization': `Client-ID ${UNSPLASH_ACCESS_KEY}`,
+        Authorization: `Client-ID ${UNSPLASH_ACCESS_KEY}`,
       },
     });
 
@@ -78,7 +78,7 @@ async function searchPhotos(query: string, perPage = 5): Promise<UnsplashPhoto[]
       throw new Error(`Unsplash API error: ${response.status}`);
     }
 
-    const data = await response.json() as UnsplashSearchResponse;
+    const data = (await response.json()) as UnsplashSearchResponse;
     return data.results || [];
   } catch (error) {
     console.error('[unsplash] Search failed:', error);
@@ -96,7 +96,7 @@ async function getPhoto(photoId: string): Promise<UnsplashPhoto | null> {
     const url = `${UNSPLASH_API_URL}/photos/${photoId}`;
     const response = await fetch(url, {
       headers: {
-        'Authorization': `Client-ID ${UNSPLASH_ACCESS_KEY}`,
+        Authorization: `Client-ID ${UNSPLASH_ACCESS_KEY}`,
       },
     });
 
@@ -104,7 +104,7 @@ async function getPhoto(photoId: string): Promise<UnsplashPhoto | null> {
       throw new Error(`Unsplash API error: ${response.status}`);
     }
 
-    return await response.json() as UnsplashPhoto;
+    return (await response.json()) as UnsplashPhoto;
   } catch (error) {
     console.error('[unsplash] Get photo failed:', error);
     return null;
@@ -138,7 +138,7 @@ export async function getDestinationImages(destination: string, count = 3): Prom
   }
 
   // Extract image URLs (using 'regular' size for good quality/performance balance)
-  const imageUrls = photos.map(photo => `${photo.urls.regular}&w=1600&q=80`);
+  const imageUrls = photos.map((photo) => `${photo.urls.regular}&w=1600&q=80`);
 
   // Cache for 7 days
   await cache.set(cacheKey, imageUrls, 604800);
@@ -159,9 +159,7 @@ export async function getActivityImage(
   destination?: string
 ): Promise<string> {
   // Build search query
-  const query = destination
-    ? `${activityType} ${destination}`
-    : activityType;
+  const query = destination ? `${activityType} ${destination}` : activityType;
 
   // Check cache
   const cacheKey = `unsplash:activity:${query.toLowerCase()}`;
@@ -220,14 +218,12 @@ export async function getBatchActivityImages(
  * @param vibes - Optional array of vibes/interests to influence image selection
  * @returns Cover image URL
  */
-export async function getTripCoverImage(
-  destination: string,
-  vibes?: string[]
-): Promise<string> {
+export async function getTripCoverImage(destination: string, vibes?: string[]): Promise<string> {
   // Build search query with vibes
-  const query = vibes && vibes.length > 0
-    ? `${destination} ${vibes[0]}` // Use first vibe for better matching
-    : destination;
+  const query =
+    vibes && vibes.length > 0
+      ? `${destination} ${vibes[0]}` // Use first vibe for better matching
+      : destination;
 
   const images = await getDestinationImages(query, 1);
   return images[0] || getRandomDefaultImages(1)[0];
@@ -253,11 +249,7 @@ export async function clearDestinationCache(destination: string): Promise<void> 
 /**
  * Get image URL with specific size parameters
  */
-export function getOptimizedImageUrl(
-  baseUrl: string,
-  width: number,
-  quality: number = 80
-): string {
+export function getOptimizedImageUrl(baseUrl: string, width: number, quality: number = 80): string {
   // If already has parameters, replace them
   const url = new URL(baseUrl);
   url.searchParams.set('w', String(width));
@@ -280,7 +272,7 @@ export async function isUnsplashAvailable(): Promise<boolean> {
     const url = `${UNSPLASH_API_URL}/photos/random?count=1`;
     const response = await fetch(url, {
       headers: {
-        'Authorization': `Client-ID ${UNSPLASH_ACCESS_KEY}`,
+        Authorization: `Client-ID ${UNSPLASH_ACCESS_KEY}`,
       },
     });
 

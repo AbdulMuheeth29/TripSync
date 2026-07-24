@@ -13,9 +13,9 @@ import { cache } from './cache';
 import crypto from 'crypto';
 
 export interface CacheOptions {
-  ttl?: number;           // Time to live in seconds
-  namespace?: string;     // Cache key namespace
-  ignoreCache?: boolean;  // Bypass cache for this call
+  ttl?: number; // Time to live in seconds
+  namespace?: string; // Cache key namespace
+  ignoreCache?: boolean; // Bypass cache for this call
 }
 
 export interface CachedResponse<T> {
@@ -56,9 +56,9 @@ export async function cachedAICall<T>(
   options: CacheOptions = {}
 ): Promise<CachedResponse<T>> {
   const {
-    ttl = 3600,              // Default 1 hour
+    ttl = 3600, // Default 1 hour
     namespace = 'default',
-    ignoreCache = false
+    ignoreCache = false,
   } = options;
 
   const cacheKey = generateCacheKey(namespace, inputs);
@@ -79,7 +79,7 @@ export async function cachedAICall<T>(
           data: cached,
           cached: true,
           cacheKey,
-          generatedAt: Date.now()
+          generatedAt: Date.now(),
         };
       }
     } catch (error) {
@@ -109,14 +109,17 @@ export async function cachedAICall<T>(
     data,
     cached: false,
     cacheKey,
-    generatedAt: Date.now()
+    generatedAt: Date.now(),
   };
 }
 
 /**
  * Invalidate cache for a specific operation
  */
-export async function invalidateCache(namespace: string, inputs: Record<string, any>): Promise<void> {
+export async function invalidateCache(
+  namespace: string,
+  inputs: Record<string, any>
+): Promise<void> {
   const cacheKey = generateCacheKey(namespace, inputs);
   try {
     await cache.del(cacheKey);
@@ -138,7 +141,9 @@ export async function invalidateNamespace(namespace: string): Promise<void> {
 
     // Upstash Redis doesn't support SCAN, so we'll use individual invalidation
     // This is a limitation - in production, you'd track keys in a separate set
-    console.warn(`⚠️  Namespace invalidation not fully supported - invalidate individual keys instead`);
+    console.warn(
+      `⚠️  Namespace invalidation not fully supported - invalidate individual keys instead`
+    );
   } catch (error) {
     console.error(`❌ Namespace invalidation error:`, error);
   }
@@ -187,7 +192,11 @@ interface CacheMetrics {
   hitRate: number;
 }
 
-async function trackCacheMetrics(namespace: string, type: 'hit' | 'miss', duration: number): Promise<void> {
+async function trackCacheMetrics(
+  namespace: string,
+  type: 'hit' | 'miss',
+  duration: number
+): Promise<void> {
   try {
     const key = `ai:metrics:${namespace}:${type}`;
     await cache.incr(key, 86400); // Keep metrics for 24 hours
@@ -204,8 +213,8 @@ async function trackCacheMetrics(namespace: string, type: 'hit' | 'miss', durati
  */
 export async function getCacheMetrics(namespace: string): Promise<CacheMetrics> {
   try {
-    const hits = await cache.get<number>(`ai:metrics:${namespace}:hit`) || 0;
-    const misses = await cache.get<number>(`ai:metrics:${namespace}:miss`) || 0;
+    const hits = (await cache.get<number>(`ai:metrics:${namespace}:hit`)) || 0;
+    const misses = (await cache.get<number>(`ai:metrics:${namespace}:miss`)) || 0;
     const total = hits + misses;
 
     // Simplified - duration tracking not implemented with current cache service
@@ -216,7 +225,7 @@ export async function getCacheMetrics(namespace: string): Promise<CacheMetrics> 
       misses,
       avgHitDuration: 0,
       avgMissDuration: 0,
-      hitRate: total > 0 ? (hits / total) * 100 : 0
+      hitRate: total > 0 ? (hits / total) * 100 : 0,
     };
   } catch (error) {
     console.error('Failed to get cache metrics:', error);
@@ -225,7 +234,7 @@ export async function getCacheMetrics(namespace: string): Promise<CacheMetrics> 
       misses: 0,
       avgHitDuration: 0,
       avgMissDuration: 0,
-      hitRate: 0
+      hitRate: 0,
     };
   }
 }
@@ -234,7 +243,14 @@ export async function getCacheMetrics(namespace: string): Promise<CacheMetrics> 
  * Get all cache metrics for admin dashboard
  */
 export async function getAllCacheMetrics(): Promise<Record<string, CacheMetrics>> {
-  const namespaces = ['itinerary', 'suggestions', 'conflict_resolution', 'packing_list', 'trip_recap', 'email_parsing'];
+  const namespaces = [
+    'itinerary',
+    'suggestions',
+    'conflict_resolution',
+    'packing_list',
+    'trip_recap',
+    'email_parsing',
+  ];
   const metrics: Record<string, CacheMetrics> = {};
 
   await Promise.all(
@@ -249,7 +265,10 @@ export async function getAllCacheMetrics(): Promise<Record<string, CacheMetrics>
 /**
  * Warm up cache with common queries (optional optimization)
  */
-export async function warmCache(operation: string, commonInputs: Record<string, any>[]): Promise<void> {
+export async function warmCache(
+  operation: string,
+  commonInputs: Record<string, any>[]
+): Promise<void> {
   console.log(`🔥 Warming cache for ${operation} with ${commonInputs.length} queries...`);
   // This would be implemented based on your warm-up strategy
   // For now, it's a placeholder for future optimization

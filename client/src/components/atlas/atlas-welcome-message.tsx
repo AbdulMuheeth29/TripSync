@@ -1,7 +1,15 @@
-import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Sparkles, MapPin, DollarSign, Users, Calendar, MessageCircle, TrendingUp } from "lucide-react";
+import { Card } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import {
+  Sparkles,
+  MapPin,
+  DollarSign,
+  Users,
+  Calendar,
+  MessageCircle,
+  TrendingUp,
+} from 'lucide-react';
 
 interface AtlasWelcomeMessageProps {
   userName: string;
@@ -11,45 +19,45 @@ interface AtlasWelcomeMessageProps {
 
 const QUICK_ACTIONS = [
   {
-    id: "suggest_activities",
+    id: 'suggest_activities',
     icon: MapPin,
-    label: "Suggest Activities",
-    description: "Get personalized activity recommendations"
+    label: 'Suggest Activities',
+    description: 'Get personalized activity recommendations',
   },
   {
-    id: "optimize_budget",
+    id: 'optimize_budget',
     icon: DollarSign,
-    label: "Optimize Budget",
-    description: "Tips to save money on your trip"
+    label: 'Optimize Budget',
+    description: 'Tips to save money on your trip',
   },
   {
-    id: "coordinate_group",
+    id: 'coordinate_group',
     icon: Users,
-    label: "Coordinate Group",
-    description: "Help plan group activities and voting"
+    label: 'Coordinate Group',
+    description: 'Help plan group activities and voting',
   },
   {
-    id: "create_itinerary",
+    id: 'create_itinerary',
     icon: Calendar,
-    label: "Create Itinerary",
-    description: "Build a day-by-day schedule"
-  }
+    label: 'Create Itinerary',
+    description: 'Build a day-by-day schedule',
+  },
 ];
 
 const ATLAS_CAPABILITIES = [
-  "Answer questions about your destination",
-  "Suggest restaurants and activities",
-  "Help optimize your budget",
-  "Create packing lists",
-  "Provide weather updates",
-  "Coordinate with your group",
-  "Send proactive trip reminders"
+  'Answer questions about your destination',
+  'Suggest restaurants and activities',
+  'Help optimize your budget',
+  'Create packing lists',
+  'Provide weather updates',
+  'Coordinate with your group',
+  'Send proactive trip reminders',
 ];
 
 export function AtlasWelcomeMessage({
   userName,
   tripName,
-  onQuickAction
+  onQuickAction,
 }: AtlasWelcomeMessageProps) {
   return (
     <div className="space-y-6 max-w-3xl mx-auto">
@@ -63,9 +71,7 @@ export function AtlasWelcomeMessage({
           <div className="flex-1">
             <div className="flex items-center gap-2 mb-2">
               <h2 className="text-2xl font-bold">Hey {userName}, I'm Atlas!</h2>
-              <Badge className="bg-gradient-to-r from-blue-500 to-purple-600">
-                AI Assistant
-              </Badge>
+              <Badge className="bg-gradient-to-r from-blue-500 to-purple-600">AI Assistant</Badge>
             </div>
             <p className="text-lg text-muted-foreground">
               Your personal AI travel companion for <strong>{tripName}</strong>
@@ -76,7 +82,8 @@ export function AtlasWelcomeMessage({
         <div className="space-y-4">
           <p className="text-base">
             I'm here to make your trip planning easier! I can help you discover amazing activities,
-            manage your budget, coordinate with your group, and answer any questions about your destination.
+            manage your budget, coordinate with your group, and answer any questions about your
+            destination.
           </p>
 
           <div className="flex items-center gap-2 p-3 bg-white rounded-lg border border-blue-200">
@@ -143,11 +150,11 @@ export function AtlasWelcomeMessage({
         <h3 className="font-semibold mb-3 text-blue-900">Try asking me:</h3>
         <div className="space-y-2">
           {[
-            "What are the best restaurants in [destination]?",
-            "How can I save money on this trip?",
-            "What activities should we do on Day 3?",
-            "Create a packing list for this trip",
-            "What's the weather forecast for our trip dates?"
+            'What are the best restaurants in [destination]?',
+            'How can I save money on this trip?',
+            'What activities should we do on Day 3?',
+            'Create a packing list for this trip',
+            "What's the weather forecast for our trip dates?",
           ].map((question, index) => (
             <Button
               key={index}
@@ -169,8 +176,9 @@ export function AtlasWelcomeMessage({
           <div>
             <p className="text-sm font-medium text-purple-900 mb-1">Pro Tip</p>
             <p className="text-sm text-purple-800">
-              I learn from your preferences! The more you interact with me, the better my recommendations become.
-              I'll also send proactive alerts about budget, deadlines, and trip planning milestones.
+              I learn from your preferences! The more you interact with me, the better my
+              recommendations become. I'll also send proactive alerts about budget, deadlines, and
+              trip planning milestones.
             </p>
           </div>
         </div>

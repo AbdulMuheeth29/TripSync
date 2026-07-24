@@ -1,5 +1,5 @@
-import { QueryClient, QueryFunction } from "@tanstack/react-query";
-import { getAuthHeaders } from "./auth-context";
+import { QueryClient, QueryFunction } from '@tanstack/react-query';
+import { getAuthHeaders } from './auth-context';
 
 async function throwIfResNotOk(res: Response) {
   if (!res.ok) {
@@ -10,7 +10,9 @@ async function throwIfResNotOk(res: Response) {
     } catch {
       // ignore
     }
-    const err = new Error(body.error || res.statusText || `${res.status}`) as Error & { upgradeUrl?: string };
+    const err = new Error(body.error || res.statusText || `${res.status}`) as Error & {
+      upgradeUrl?: string;
+    };
     if (body.upgradeUrl) err.upgradeUrl = body.upgradeUrl;
     throw err;
   }
@@ -19,41 +21,39 @@ async function throwIfResNotOk(res: Response) {
 export async function apiRequest(
   method: string,
   url: string,
-  data?: unknown | undefined,
+  data?: unknown | undefined
 ): Promise<Response> {
   const headers = getAuthHeaders();
   if (data) {
-    headers["Content-Type"] = "application/json";
+    headers['Content-Type'] = 'application/json';
   }
 
   const res = await fetch(url, {
     method,
     headers,
     body: data ? JSON.stringify(data) : undefined,
-    credentials: "include",
+    credentials: 'include',
   });
 
   await throwIfResNotOk(res);
   return res;
 }
 
-type UnauthorizedBehavior = "returnNull" | "throw";
-export const getQueryFn: <T>(options: {
-  on401: UnauthorizedBehavior;
-}) => QueryFunction<T> =
+type UnauthorizedBehavior = 'returnNull' | 'throw';
+export const getQueryFn: <T>(options: { on401: UnauthorizedBehavior }) => QueryFunction<T> =
   ({ on401: unauthorizedBehavior }) =>
   async ({ queryKey }) => {
     const url = queryKey[0] as string;
     const params = queryKey.slice(1);
-    const fullUrl = params.length > 0 ? `${url}/${params.join("/")}` : url;
-    
+    const fullUrl = params.length > 0 ? `${url}/${params.join('/')}` : url;
+
     const headers = getAuthHeaders();
     const res = await fetch(fullUrl, {
       headers,
-      credentials: "include",
+      credentials: 'include',
     });
 
-    if (unauthorizedBehavior === "returnNull" && res.status === 401) {
+    if (unauthorizedBehavior === 'returnNull' && res.status === 401) {
       return null;
     }
 
@@ -64,7 +64,7 @@ export const getQueryFn: <T>(options: {
 export const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      queryFn: getQueryFn({ on401: "throw" }),
+      queryFn: getQueryFn({ on401: 'throw' }),
       refetchInterval: false,
       refetchOnWindowFocus: false,
       staleTime: Infinity,

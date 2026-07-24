@@ -1,10 +1,17 @@
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Mail, CheckCircle2, Clock, RefreshCw, AlertCircle } from "lucide-react";
-import { useState } from "react";
-import { format } from "date-fns";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Mail, CheckCircle2, Clock, RefreshCw, AlertCircle } from 'lucide-react';
+import { useState } from 'react';
+import { format } from 'date-fns';
 
 interface EmailVerificationSentModalProps {
   isOpen: boolean;
@@ -19,7 +26,7 @@ export function EmailVerificationSentModal({
   onClose,
   email,
   onResendEmail,
-  sentAt
+  sentAt,
 }: EmailVerificationSentModalProps) {
   const [isResending, setIsResending] = useState(false);
   const [resendCount, setResendCount] = useState(0);
@@ -28,7 +35,7 @@ export function EmailVerificationSentModal({
   const handleResend = async () => {
     setIsResending(true);
     await onResendEmail();
-    setResendCount(prev => prev + 1);
+    setResendCount((prev) => prev + 1);
     setLastResentAt(new Date());
     setIsResending(false);
   };
@@ -42,9 +49,7 @@ export function EmailVerificationSentModal({
           <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-blue-100 animate-pulse">
             <Mail className="h-8 w-8 text-blue-600" />
           </div>
-          <DialogTitle className="text-center">
-            Check Your Email
-          </DialogTitle>
+          <DialogTitle className="text-center">Check Your Email</DialogTitle>
           <DialogDescription className="text-center">
             We've sent a verification link to your email
           </DialogDescription>
@@ -62,7 +67,7 @@ export function EmailVerificationSentModal({
                 </div>
               </div>
               <Badge variant="secondary" className="bg-blue-100 text-blue-800">
-                {format(lastResentAt || sentAt, "h:mm a")}
+                {format(lastResentAt || sentAt, 'h:mm a')}
               </Badge>
             </div>
           </Card>
@@ -94,9 +99,7 @@ export function EmailVerificationSentModal({
             <div className="flex items-start gap-2">
               <AlertCircle className="h-5 w-5 text-amber-600 mt-0.5" />
               <div>
-                <p className="text-sm font-medium text-amber-900 mb-2">
-                  Didn't receive the email?
-                </p>
+                <p className="text-sm font-medium text-amber-900 mb-2">Didn't receive the email?</p>
                 <ul className="text-xs text-amber-800 space-y-1">
                   <li>• Check your spam or junk folder</li>
                   <li>• Make sure {email} is correct</li>
@@ -125,8 +128,8 @@ export function EmailVerificationSentModal({
               <div className="flex items-start gap-2">
                 <Clock className="h-4 w-4 text-red-600 mt-0.5" />
                 <p className="text-xs text-red-900">
-                  You've reached the maximum resend attempts. Please wait 15 minutes before trying again,
-                  or contact support if you continue to have issues.
+                  You've reached the maximum resend attempts. Please wait 15 minutes before trying
+                  again, or contact support if you continue to have issues.
                 </p>
               </div>
             </Card>
@@ -141,7 +144,7 @@ export function EmailVerificationSentModal({
             className="flex-1"
           >
             <RefreshCw className={`h-4 w-4 mr-2 ${isResending ? 'animate-spin' : ''}`} />
-            {isResending ? "Resending..." : "Resend Email"}
+            {isResending ? 'Resending...' : 'Resend Email'}
           </Button>
           <Button onClick={onClose} className="flex-1">
             Done

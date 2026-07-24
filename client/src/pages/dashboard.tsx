@@ -1,19 +1,19 @@
-import { useState, useEffect, useMemo } from "react";
-import { Link, useLocation } from "wouter";
-import { useQuery } from "@tanstack/react-query";
-import confetti from "canvas-confetti";
-import { useToast } from "@/hooks/use-toast";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Progress } from "@/components/ui/progress";
-import { ThemeToggle } from "@/components/theme-toggle";
-import { OnboardingTour } from "@/components/onboarding-tour";
-import { useAuth } from "@/lib/auth-context";
-import { AppLogo } from "@/components/app-logo";
-import { AppHero } from "@/components/app-hero";
-import { getDestinationCoverImage } from "@/components/trip-destination-hero";
+import { useState, useEffect, useMemo } from 'react';
+import { Link, useLocation } from 'wouter';
+import { useQuery } from '@tanstack/react-query';
+import confetti from 'canvas-confetti';
+import { useToast } from '@/hooks/use-toast';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Progress } from '@/components/ui/progress';
+import { ThemeToggle } from '@/components/theme-toggle';
+import { OnboardingTour } from '@/components/onboarding-tour';
+import { useAuth } from '@/lib/auth-context';
+import { AppLogo } from '@/components/app-logo';
+import { AppHero } from '@/components/app-hero';
+import { getDestinationCoverImage } from '@/components/trip-destination-hero';
 import {
   Plus,
   MapPin,
@@ -24,18 +24,18 @@ import {
   LogOut,
   Sparkles,
   CalendarDays,
-} from "lucide-react";
-import type { Trip } from "@shared/schema";
-import { listOfflineTripIds } from "@/lib/offline-trips";
+} from 'lucide-react';
+import type { Trip } from '@shared/schema';
+import { listOfflineTripIds } from '@/lib/offline-trips';
 import {
   DashboardFiltersComponent,
   DashboardFilters,
-  applyDashboardFilters
-} from "@/components/dashboard/dashboard-filters";
+  applyDashboardFilters,
+} from '@/components/dashboard/dashboard-filters';
 import {
   DashboardQuickStats,
-  calculateDashboardStats
-} from "@/components/dashboard/dashboard-quick-stats";
+  calculateDashboardStats,
+} from '@/components/dashboard/dashboard-quick-stats';
 
 type TripWithCounts = Trip & {
   bookedCount?: number;
@@ -46,36 +46,53 @@ type TripWithCounts = Trip & {
 };
 
 const statusColors: Record<string, string> = {
-  planning: "bg-neutral-100 text-neutral-700 dark:bg-neutral-800 dark:text-neutral-300",
-  booking: "bg-neutral-200 text-neutral-700 dark:bg-neutral-700 dark:text-neutral-300",
-  booked: "bg-neutral-200 text-neutral-800 dark:bg-neutral-700 dark:text-neutral-200",
-  active: "bg-neutral-100 text-neutral-600 dark:bg-neutral-700 dark:text-neutral-300",
-  in_progress: "bg-neutral-100 text-neutral-600 dark:bg-neutral-700 dark:text-neutral-300",
-  completed: "bg-neutral-100 text-neutral-600 dark:bg-neutral-800 dark:text-neutral-400",
-  cancelled: "bg-muted text-muted-foreground",
+  planning: 'bg-neutral-100 text-neutral-700 dark:bg-neutral-800 dark:text-neutral-300',
+  booking: 'bg-neutral-200 text-neutral-700 dark:bg-neutral-700 dark:text-neutral-300',
+  booked: 'bg-neutral-200 text-neutral-800 dark:bg-neutral-700 dark:text-neutral-200',
+  active: 'bg-neutral-100 text-neutral-600 dark:bg-neutral-700 dark:text-neutral-300',
+  in_progress: 'bg-neutral-100 text-neutral-600 dark:bg-neutral-700 dark:text-neutral-300',
+  completed: 'bg-neutral-100 text-neutral-600 dark:bg-neutral-800 dark:text-neutral-400',
+  cancelled: 'bg-muted text-muted-foreground',
 };
 
 const statusLabels: Record<string, string> = {
-  planning: "Planning",
-  booking: "Booking",
-  booked: "Booked",
-  active: "Active",
-  in_progress: "In Progress",
-  completed: "Completed",
-  cancelled: "Cancelled",
+  planning: 'Planning',
+  booking: 'Booking',
+  booked: 'Booked',
+  active: 'Active',
+  in_progress: 'In Progress',
+  completed: 'Completed',
+  cancelled: 'Cancelled',
 };
 
-function TripCard({ trip, isPlanner, isOffline }: { trip: TripWithCounts; isPlanner?: boolean; isOffline?: boolean }) {
-  const progress = trip.totalItems ? Math.round((trip.bookedCount || 0) / trip.totalItems * 100) : 0;
+function TripCard({
+  trip,
+  isPlanner,
+  isOffline,
+}: {
+  trip: TripWithCounts;
+  isPlanner?: boolean;
+  isOffline?: boolean;
+}) {
+  const progress = trip.totalItems
+    ? Math.round(((trip.bookedCount || 0) / trip.totalItems) * 100)
+    : 0;
   const coverUrl =
-    (trip as TripWithCounts & { coverImageUrl?: string }).coverImageUrl
-    || getDestinationCoverImage(trip.destination ?? "");
+    (trip as TripWithCounts & { coverImageUrl?: string }).coverImageUrl ||
+    getDestinationCoverImage(trip.destination ?? '');
 
   return (
     <Link href={`/trip/${trip.id}`}>
-      <Card className="hover-elevate cursor-pointer group rounded-xl border-card-border shadow-sm overflow-hidden" data-testid={`card-trip-${trip.id}`}>
+      <Card
+        className="hover-elevate cursor-pointer group rounded-xl border-card-border shadow-sm overflow-hidden"
+        data-testid={`card-trip-${trip.id}`}
+      >
         <div className="h-28 w-full bg-muted overflow-hidden">
-          <img src={coverUrl} alt="" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+          <img
+            src={coverUrl}
+            alt=""
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+          />
         </div>
         <CardContent className="p-6">
           <div className="flex items-start justify-between gap-4 mb-4">
@@ -85,9 +102,16 @@ function TripCard({ trip, isPlanner, isOffline }: { trip: TripWithCounts; isPlan
               </h3>
               <div className="flex items-center gap-1 text-sm text-muted-foreground mt-1">
                 <Calendar className="h-3.5 w-3.5" />
-                {new Date(trip.startDate).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
-                {" - "}
-                {new Date(trip.endDate).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+                {new Date(trip.startDate).toLocaleDateString('en-US', {
+                  month: 'short',
+                  day: 'numeric',
+                })}
+                {' - '}
+                {new Date(trip.endDate).toLocaleDateString('en-US', {
+                  month: 'short',
+                  day: 'numeric',
+                  year: 'numeric',
+                })}
               </div>
             </div>
             <div className="flex flex-col items-end gap-1">
@@ -109,25 +133,32 @@ function TripCard({ trip, isPlanner, isOffline }: { trip: TripWithCounts; isPlan
               {trip.groupSize} people
             </div>
             <div className="flex items-center gap-1">
-              <DollarSign className="h-3.5 w-3.5" />
-              ${trip.budgetPerPerson}/person
+              <DollarSign className="h-3.5 w-3.5" />${trip.budgetPerPerson}/person
             </div>
           </div>
 
-          {isPlanner && (trip.inviteCount !== undefined || trip.preferenceCompletedCount !== undefined) && (
-            <div className="flex flex-wrap gap-2 mb-3 text-xs text-muted-foreground">
-              {trip.memberCount !== undefined && (
-                <span>{trip.memberCount} joined{trip.inviteCount != null && trip.inviteCount > 0 ? ` · ${trip.inviteCount} invited (pending)` : ""}</span>
-              )}
-              {trip.preferenceCompletedCount !== undefined && (
-                <span>{trip.preferenceCompletedCount} completed preference quiz</span>
-              )}
-            </div>
-          )}
+          {isPlanner &&
+            (trip.inviteCount !== undefined || trip.preferenceCompletedCount !== undefined) && (
+              <div className="flex flex-wrap gap-2 mb-3 text-xs text-muted-foreground">
+                {trip.memberCount !== undefined && (
+                  <span>
+                    {trip.memberCount} joined
+                    {trip.inviteCount != null && trip.inviteCount > 0
+                      ? ` · ${trip.inviteCount} invited (pending)`
+                      : ''}
+                  </span>
+                )}
+                {trip.preferenceCompletedCount !== undefined && (
+                  <span>{trip.preferenceCompletedCount} completed preference quiz</span>
+                )}
+              </div>
+            )}
           <div className="space-y-2">
             <div className="flex items-center justify-between text-sm">
               <span className="text-muted-foreground">Booking progress</span>
-              <span className="font-medium">{trip.bookedCount || 0}/{trip.totalItems || 0}</span>
+              <span className="font-medium">
+                {trip.bookedCount || 0}/{trip.totalItems || 0}
+              </span>
             </div>
             <Progress value={progress} className="h-2" />
           </div>
@@ -169,24 +200,32 @@ export default function DashboardPage() {
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
-    if (params.get("upgrade") === "success") {
-      toast({ title: "Welcome to Pro!", description: "Your subscription is active. Enjoy unlimited trips and more." });
+    if (params.get('upgrade') === 'success') {
+      toast({
+        title: 'Welcome to Pro!',
+        description: 'Your subscription is active. Enjoy unlimited trips and more.',
+      });
       refreshUser();
       confetti({ particleCount: 80, spread: 60, origin: { y: 0.6 } });
-      window.history.replaceState({}, "", "/dashboard");
+      window.history.replaceState({}, '', '/dashboard');
     }
   }, [toast, refreshUser]);
 
   const { data: trips, isLoading } = useQuery<TripWithCounts[]>({
-    queryKey: ["/api/trips"],
+    queryKey: ['/api/trips'],
     enabled: !!user?.id,
   });
 
-  const { data: insights } = useQuery<{ groupInsight: string; trendPrediction: string; pastTripCount: number; learnedFromTripCount?: number }>({
-    queryKey: ["/api/users", user?.id, "insights"],
+  const { data: insights } = useQuery<{
+    groupInsight: string;
+    trendPrediction: string;
+    pastTripCount: number;
+    learnedFromTripCount?: number;
+  }>({
+    queryKey: ['/api/users', user?.id, 'insights'],
     queryFn: async () => {
-      const res = await fetch(`/api/users/${user?.id}/insights`, { credentials: "include" });
-      if (!res.ok) throw new Error("Failed to fetch insights");
+      const res = await fetch(`/api/users/${user?.id}/insights`, { credentials: 'include' });
+      if (!res.ok) throw new Error('Failed to fetch insights');
       return res.json();
     },
     enabled: !!user?.id,
@@ -203,10 +242,10 @@ export default function DashboardPage() {
 
   // Dashboard filters state
   const [dashboardFilters, setDashboardFilters] = useState<DashboardFilters>({
-    status: "all",
-    role: "all",
-    searchQuery: "",
-    sortBy: "date-upcoming",
+    status: 'all',
+    role: 'all',
+    searchQuery: '',
+    sortBy: 'date-upcoming',
   });
 
   useEffect(() => {
@@ -225,8 +264,8 @@ export default function DashboardPage() {
   }, []);
 
   useEffect(() => {
-    if (typeof window === "undefined") return;
-    const seen = window.localStorage.getItem("tripsync_ai_demo_seen");
+    if (typeof window === 'undefined') return;
+    const seen = window.localStorage.getItem('tripsync_ai_demo_seen');
     if (!seen) {
       setShowAiDemoCard(true);
     }
@@ -235,29 +274,47 @@ export default function DashboardPage() {
   // Apply dashboard filters
   const filteredTrips = useMemo(() => {
     if (!trips) return [];
-    return applyDashboardFilters(trips, dashboardFilters, user?.id || "");
+    return applyDashboardFilters(trips, dashboardFilters, user?.id || '');
   }, [trips, dashboardFilters, user?.id]);
 
   // Calculate dashboard stats
   const stats = useMemo(() => {
-    if (!trips) return { totalTrips: 0, activeTrips: 0, completedTrips: 0, totalMembers: 0, upcomingDeparture: null };
+    if (!trips)
+      return {
+        totalTrips: 0,
+        activeTrips: 0,
+        completedTrips: 0,
+        totalMembers: 0,
+        upcomingDeparture: null,
+      };
     return calculateDashboardStats(trips);
   }, [trips]);
 
-  const upcomingTrips = filteredTrips.filter((t) => ["planning", "booked", "in_progress", "active"].includes(t.status));
-  const pastTrips = filteredTrips.filter((t) => t.status === "completed");
-  const cancelledTrips = filteredTrips.filter((t) => t.status === "cancelled");
+  const upcomingTrips = filteredTrips.filter((t) =>
+    ['planning', 'booked', 'in_progress', 'active'].includes(t.status)
+  );
+  const pastTrips = filteredTrips.filter((t) => t.status === 'completed');
+  const cancelledTrips = filteredTrips.filter((t) => t.status === 'cancelled');
 
-  const upcomingPaginated = upcomingTrips.slice(upcomingPage * PAGE_SIZE, (upcomingPage + 1) * PAGE_SIZE);
+  const upcomingPaginated = upcomingTrips.slice(
+    upcomingPage * PAGE_SIZE,
+    (upcomingPage + 1) * PAGE_SIZE
+  );
   const pastPaginated = pastTrips.slice(pastPage * PAGE_SIZE, (pastPage + 1) * PAGE_SIZE);
-  const cancelledPaginated = cancelledTrips.slice(cancelledPage * PAGE_SIZE, (cancelledPage + 1) * PAGE_SIZE);
+  const cancelledPaginated = cancelledTrips.slice(
+    cancelledPage * PAGE_SIZE,
+    (cancelledPage + 1) * PAGE_SIZE
+  );
 
   return (
     <div className="min-h-screen bg-background">
       <OnboardingTour />
       <header className="sticky top-0 z-50 glass-header">
         <div className="container mx-auto flex h-16 items-center justify-between px-4 gap-4">
-          <Link href="/" className="flex items-center gap-2 cursor-pointer no-underline text-foreground hover:opacity-90 transition-opacity">
+          <Link
+            href="/"
+            className="flex items-center gap-2 cursor-pointer no-underline text-foreground hover:opacity-90 transition-opacity"
+          >
             <AppLogo className="h-9 w-9 object-contain" />
             <span className="text-xl font-bold">TripSync</span>
           </Link>
@@ -266,16 +323,14 @@ export default function DashboardPage() {
             <ThemeToggle />
             {user && (
               <Button
-                variant={pathname === "/dashboard/billing" ? "default" : "ghost"}
+                variant={pathname === '/dashboard/billing' ? 'default' : 'ghost'}
                 size="sm"
                 asChild
               >
                 <Link href="/dashboard/billing">Billing</Link>
               </Button>
             )}
-            <div className="hidden sm:block text-sm text-muted-foreground">
-              {user?.name}
-            </div>
+            <div className="hidden sm:block text-sm text-muted-foreground">{user?.name}</div>
             <Button variant="ghost" size="icon" onClick={logout} data-testid="button-logout">
               <LogOut className="h-4 w-4" />
             </Button>
@@ -294,8 +349,8 @@ export default function DashboardPage() {
                 See Atlas plan a trip in 30 seconds
               </CardTitle>
               <CardDescription>
-                Watch a sample AI‑generated itinerary so you can see how TripSync handles real group trips before you
-                create your own.
+                Watch a sample AI‑generated itinerary so you can see how TripSync handles real group
+                trips before you create your own.
               </CardDescription>
             </CardHeader>
             <CardContent className="flex flex-wrap items-center gap-3">
@@ -311,8 +366,8 @@ export default function DashboardPage() {
                 size="sm"
                 onClick={() => {
                   setShowAiDemoCard(false);
-                  if (typeof window !== "undefined") {
-                    window.localStorage.setItem("tripsync_ai_demo_seen", "1");
+                  if (typeof window !== 'undefined') {
+                    window.localStorage.setItem('tripsync_ai_demo_seen', '1');
                   }
                 }}
               >
@@ -346,26 +401,32 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {insights && (insights.pastTripCount > 0 || insights.groupInsight || (insights.learnedFromTripCount ?? 0) > 0) && (
-          <Card className="mb-8 border-primary/20 bg-primary/5">
-            <CardHeader>
-              <CardTitle className="text-lg flex items-center gap-2">
-                <Sparkles className="h-5 w-5 text-primary" />
-                Group travel insights
-              </CardTitle>
-              <CardDescription>
-                AI learns from your past trips to improve recommendations.
-                {(insights.learnedFromTripCount ?? 0) > 0 && (
-                  <span className="block mt-1 text-primary font-medium">Learned from {insights.learnedFromTripCount} rated trip{(insights.learnedFromTripCount ?? 0) !== 1 ? "s" : ""}.</span>
-                )}
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-2">
-              <p className="text-sm">{insights.groupInsight}</p>
-              <p className="text-sm text-muted-foreground">{insights.trendPrediction}</p>
-            </CardContent>
-          </Card>
-        )}
+        {insights &&
+          (insights.pastTripCount > 0 ||
+            insights.groupInsight ||
+            (insights.learnedFromTripCount ?? 0) > 0) && (
+            <Card className="mb-8 border-primary/20 bg-primary/5">
+              <CardHeader>
+                <CardTitle className="text-lg flex items-center gap-2">
+                  <Sparkles className="h-5 w-5 text-primary" />
+                  Group travel insights
+                </CardTitle>
+                <CardDescription>
+                  AI learns from your past trips to improve recommendations.
+                  {(insights.learnedFromTripCount ?? 0) > 0 && (
+                    <span className="block mt-1 text-primary font-medium">
+                      Learned from {insights.learnedFromTripCount} rated trip
+                      {(insights.learnedFromTripCount ?? 0) !== 1 ? 's' : ''}.
+                    </span>
+                  )}
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-2">
+                <p className="text-sm">{insights.groupInsight}</p>
+                <p className="text-sm text-muted-foreground">{insights.trendPrediction}</p>
+              </CardContent>
+            </Card>
+          )}
 
         {/* Dashboard Quick Stats - Per spec screens.md#11 */}
         {!isLoading && trips && trips.length > 0 && (
@@ -388,7 +449,7 @@ export default function DashboardPage() {
           </div>
         )}
 
-        {!isLoading && (upcomingTrips.length + pastTrips.length) > 0 && (
+        {!isLoading && upcomingTrips.length + pastTrips.length > 0 && (
           <Card className="mb-8">
             <CardHeader>
               <CardTitle className="text-lg flex items-center gap-2">
@@ -404,11 +465,20 @@ export default function DashboardPage() {
                   .map((t) => (
                     <Link key={t.id} href={`/trip/${t.id}`}>
                       <div className="flex-shrink-0 w-40 rounded-lg border bg-card p-3 hover:bg-muted/50 transition-colors cursor-pointer">
-                        <p className="font-medium text-sm truncate">{(t as Trip & { title?: string }).title || t.destination}</p>
+                        <p className="font-medium text-sm truncate">
+                          {(t as Trip & { title?: string }).title || t.destination}
+                        </p>
                         <p className="text-xs text-muted-foreground mt-1">
-                          {new Date(t.startDate).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
-                          {" → "}
-                          {new Date(t.endDate).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
+                          {new Date(t.startDate).toLocaleDateString('en-US', {
+                            month: 'short',
+                            day: 'numeric',
+                            year: 'numeric',
+                          })}
+                          {' → '}
+                          {new Date(t.endDate).toLocaleDateString('en-US', {
+                            month: 'short',
+                            day: 'numeric',
+                          })}
                         </p>
                       </div>
                     </Link>
@@ -440,9 +510,25 @@ export default function DashboardPage() {
               </div>
               {upcomingTrips.length > PAGE_SIZE && (
                 <div className="flex justify-center gap-2 mt-6">
-                  <Button variant="outline" size="sm" disabled={upcomingPage === 0} onClick={() => setUpcomingPage((p) => p - 1)}>Previous</Button>
-                  <span className="flex items-center px-4 text-sm text-muted-foreground">Page {upcomingPage + 1} of {Math.ceil(upcomingTrips.length / PAGE_SIZE)}</span>
-                  <Button variant="outline" size="sm" disabled={upcomingPage >= Math.ceil(upcomingTrips.length / PAGE_SIZE) - 1} onClick={() => setUpcomingPage((p) => p + 1)}>Next</Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    disabled={upcomingPage === 0}
+                    onClick={() => setUpcomingPage((p) => p - 1)}
+                  >
+                    Previous
+                  </Button>
+                  <span className="flex items-center px-4 text-sm text-muted-foreground">
+                    Page {upcomingPage + 1} of {Math.ceil(upcomingTrips.length / PAGE_SIZE)}
+                  </span>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    disabled={upcomingPage >= Math.ceil(upcomingTrips.length / PAGE_SIZE) - 1}
+                    onClick={() => setUpcomingPage((p) => p + 1)}
+                  >
+                    Next
+                  </Button>
                 </div>
               )}
             </>
@@ -454,7 +540,8 @@ export default function DashboardPage() {
                 </div>
                 <h3 className="text-lg font-semibold mb-2">No trips yet</h3>
                 <p className="text-muted-foreground mb-6 max-w-sm">
-                  Start planning your next adventure. Our AI will create the perfect itinerary for your group.
+                  Start planning your next adventure. Our AI will create the perfect itinerary for
+                  your group.
                 </p>
                 <Link href="/create">
                   <Button className="gap-2" data-testid="button-create-first-trip">
@@ -482,9 +569,25 @@ export default function DashboardPage() {
             </div>
             {pastTrips.length > PAGE_SIZE && (
               <div className="flex justify-center gap-2 mt-6">
-                <Button variant="outline" size="sm" disabled={pastPage === 0} onClick={() => setPastPage((p) => p - 1)}>Previous</Button>
-                <span className="flex items-center px-4 text-sm text-muted-foreground">Page {pastPage + 1} of {Math.ceil(pastTrips.length / PAGE_SIZE)}</span>
-                <Button variant="outline" size="sm" disabled={pastPage >= Math.ceil(pastTrips.length / PAGE_SIZE) - 1} onClick={() => setPastPage((p) => p + 1)}>Next</Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={pastPage === 0}
+                  onClick={() => setPastPage((p) => p - 1)}
+                >
+                  Previous
+                </Button>
+                <span className="flex items-center px-4 text-sm text-muted-foreground">
+                  Page {pastPage + 1} of {Math.ceil(pastTrips.length / PAGE_SIZE)}
+                </span>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={pastPage >= Math.ceil(pastTrips.length / PAGE_SIZE) - 1}
+                  onClick={() => setPastPage((p) => p + 1)}
+                >
+                  Next
+                </Button>
               </div>
             )}
           </section>
@@ -505,9 +608,25 @@ export default function DashboardPage() {
             </div>
             {cancelledTrips.length > PAGE_SIZE && (
               <div className="flex justify-center gap-2 mt-6">
-                <Button variant="outline" size="sm" disabled={cancelledPage === 0} onClick={() => setCancelledPage((p) => p - 1)}>Previous</Button>
-                <span className="flex items-center px-4 text-sm text-muted-foreground">Page {cancelledPage + 1} of {Math.ceil(cancelledTrips.length / PAGE_SIZE)}</span>
-                <Button variant="outline" size="sm" disabled={cancelledPage >= Math.ceil(cancelledTrips.length / PAGE_SIZE) - 1} onClick={() => setCancelledPage((p) => p + 1)}>Next</Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={cancelledPage === 0}
+                  onClick={() => setCancelledPage((p) => p - 1)}
+                >
+                  Previous
+                </Button>
+                <span className="flex items-center px-4 text-sm text-muted-foreground">
+                  Page {cancelledPage + 1} of {Math.ceil(cancelledTrips.length / PAGE_SIZE)}
+                </span>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={cancelledPage >= Math.ceil(cancelledTrips.length / PAGE_SIZE) - 1}
+                  onClick={() => setCancelledPage((p) => p + 1)}
+                >
+                  Next
+                </Button>
               </div>
             )}
           </section>

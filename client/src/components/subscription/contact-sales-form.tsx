@@ -1,18 +1,24 @@
-import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Badge } from "@/components/ui/badge";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Building, Users, Mail, Phone, Send, CheckCircle2, Sparkles } from "lucide-react";
-import { useState } from "react";
-import { z } from "zod";
+import { Card } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Badge } from '@/components/ui/badge';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Building, Users, Mail, Phone, Send, CheckCircle2, Sparkles } from 'lucide-react';
+import { useState } from 'react';
+import { z } from 'zod';
 
 interface ContactSalesFormProps {
   onSubmit: (data: SalesInquiry) => void | Promise<void>;
-  defaultPlan?: "Teams" | "Enterprise";
+  defaultPlan?: 'Teams' | 'Enterprise';
 }
 
 export interface SalesInquiry {
@@ -21,42 +27,39 @@ export interface SalesInquiry {
   email: string;
   phone?: string;
   companySize: string;
-  planInterest: "Teams" | "Enterprise" | "Custom";
+  planInterest: 'Teams' | 'Enterprise' | 'Custom';
   message: string;
   interestedInDemo: boolean;
 }
 
 const contactSchema = z.object({
-  companyName: z.string().min(2, "Company name is required"),
-  contactName: z.string().min(2, "Contact name is required"),
-  email: z.string().email("Valid email is required"),
+  companyName: z.string().min(2, 'Company name is required'),
+  contactName: z.string().min(2, 'Contact name is required'),
+  email: z.string().email('Valid email is required'),
   phone: z.string().optional(),
-  companySize: z.string().min(1, "Please select company size"),
-  message: z.string().min(10, "Please provide more details (minimum 10 characters)")
+  companySize: z.string().min(1, 'Please select company size'),
+  message: z.string().min(10, 'Please provide more details (minimum 10 characters)'),
 });
 
 const COMPANY_SIZES = [
-  "1-10 employees",
-  "11-50 employees",
-  "51-200 employees",
-  "201-500 employees",
-  "501-1000 employees",
-  "1000+ employees"
+  '1-10 employees',
+  '11-50 employees',
+  '51-200 employees',
+  '201-500 employees',
+  '501-1000 employees',
+  '1000+ employees',
 ];
 
-export function ContactSalesForm({
-  onSubmit,
-  defaultPlan = "Teams"
-}: ContactSalesFormProps) {
+export function ContactSalesForm({ onSubmit, defaultPlan = 'Teams' }: ContactSalesFormProps) {
   const [formData, setFormData] = useState<SalesInquiry>({
-    companyName: "",
-    contactName: "",
-    email: "",
-    phone: "",
-    companySize: "",
+    companyName: '',
+    contactName: '',
+    email: '',
+    phone: '',
+    companySize: '',
     planInterest: defaultPlan,
-    message: "",
-    interestedInDemo: false
+    message: '',
+    interestedInDemo: false,
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -64,11 +67,11 @@ export function ContactSalesForm({
   const [isSubmitted, setIsSubmitted] = useState(false);
 
   const handleChange = (field: keyof SalesInquiry, value: any) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+    setFormData((prev) => ({ ...prev, [field]: value }));
 
     // Clear error when user types
     if (errors[field]) {
-      setErrors(prev => {
+      setErrors((prev) => {
         const newErrors = { ...prev };
         delete newErrors[field];
         return newErrors;
@@ -84,7 +87,7 @@ export function ContactSalesForm({
     } catch (error) {
       if (error instanceof z.ZodError) {
         const newErrors: Record<string, string> = {};
-        error.errors.forEach(err => {
+        error.errors.forEach((err) => {
           if (err.path[0]) {
             newErrors[err.path[0].toString()] = err.message;
           }
@@ -127,7 +130,9 @@ export function ContactSalesForm({
           <ul className="text-sm text-blue-800 space-y-1 list-disc list-inside">
             <li>You'll receive a confirmation email shortly</li>
             <li>A sales representative will contact you within 24 hours</li>
-            {formData.interestedInDemo && <li>We'll schedule a personalized demo at your convenience</li>}
+            {formData.interestedInDemo && (
+              <li>We'll schedule a personalized demo at your convenience</li>
+            )}
             <li>We'll prepare a custom quote based on your needs</li>
           </ul>
         </Card>
@@ -191,9 +196,7 @@ export function ContactSalesForm({
                 onChange={(e) => handleChange('companyName', e.target.value)}
               />
             </div>
-            {errors.companyName && (
-              <p className="text-xs text-red-600">{errors.companyName}</p>
-            )}
+            {errors.companyName && <p className="text-xs text-red-600">{errors.companyName}</p>}
           </div>
 
           {/* Contact Name */}
@@ -209,9 +212,7 @@ export function ContactSalesForm({
                 onChange={(e) => handleChange('contactName', e.target.value)}
               />
             </div>
-            {errors.contactName && (
-              <p className="text-xs text-red-600">{errors.contactName}</p>
-            )}
+            {errors.contactName && <p className="text-xs text-red-600">{errors.contactName}</p>}
           </div>
         </div>
 
@@ -230,9 +231,7 @@ export function ContactSalesForm({
                 onChange={(e) => handleChange('email', e.target.value)}
               />
             </div>
-            {errors.email && (
-              <p className="text-xs text-red-600">{errors.email}</p>
-            )}
+            {errors.email && <p className="text-xs text-red-600">{errors.email}</p>}
           </div>
 
           {/* Phone */}
@@ -267,14 +266,14 @@ export function ContactSalesForm({
                 <SelectValue placeholder="Select company size" />
               </SelectTrigger>
               <SelectContent>
-                {COMPANY_SIZES.map(size => (
-                  <SelectItem key={size} value={size}>{size}</SelectItem>
+                {COMPANY_SIZES.map((size) => (
+                  <SelectItem key={size} value={size}>
+                    {size}
+                  </SelectItem>
                 ))}
               </SelectContent>
             </Select>
-            {errors.companySize && (
-              <p className="text-xs text-red-600">{errors.companySize}</p>
-            )}
+            {errors.companySize && <p className="text-xs text-red-600">{errors.companySize}</p>}
           </div>
 
           {/* Plan Interest */}
@@ -307,9 +306,7 @@ export function ContactSalesForm({
             value={formData.message}
             onChange={(e) => handleChange('message', e.target.value)}
           />
-          {errors.message && (
-            <p className="text-xs text-red-600">{errors.message}</p>
-          )}
+          {errors.message && <p className="text-xs text-red-600">{errors.message}</p>}
         </div>
 
         {/* Demo Interest */}
@@ -327,19 +324,14 @@ export function ContactSalesForm({
         </Card>
 
         {/* Submit Button */}
-        <Button
-          type="submit"
-          size="lg"
-          className="w-full"
-          disabled={isSubmitting}
-        >
+        <Button type="submit" size="lg" className="w-full" disabled={isSubmitting}>
           <Send className="h-4 w-4 mr-2" />
-          {isSubmitting ? "Sending..." : "Contact Sales Team"}
+          {isSubmitting ? 'Sending...' : 'Contact Sales Team'}
         </Button>
 
         <p className="text-xs text-center text-muted-foreground">
-          By submitting this form, you agree to be contacted by our sales team.
-          We typically respond within 24 hours.
+          By submitting this form, you agree to be contacted by our sales team. We typically respond
+          within 24 hours.
         </p>
       </form>
     </div>

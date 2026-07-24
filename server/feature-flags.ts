@@ -1,4 +1,4 @@
-import { env } from "./env";
+import { env } from './env';
 
 type FeatureFlag = {
   name: string;
@@ -25,34 +25,34 @@ class FeatureFlags {
 
   constructor() {
     // Initialize from environment variables
-    this.flags.set("ai", {
+    this.flags.set('ai', {
       enabled: env.isAiEnabled,
-      description: "AI trip generation and Atlas assistant",
-      envVar: "FEATURE_AI_ENABLED"
+      description: 'AI trip generation and Atlas assistant',
+      envVar: 'FEATURE_AI_ENABLED',
     });
 
-    this.flags.set("fileUploads", {
+    this.flags.set('fileUploads', {
       enabled: env.isFileUploadsEnabled,
-      description: "Photo and document uploads",
-      envVar: "FEATURE_FILE_UPLOADS_ENABLED"
+      description: 'Photo and document uploads',
+      envVar: 'FEATURE_FILE_UPLOADS_ENABLED',
     });
 
-    this.flags.set("stripe", {
+    this.flags.set('stripe', {
       enabled: env.isStripeEnabled,
-      description: "Billing and subscriptions",
-      envVar: "FEATURE_STRIPE_ENABLED"
+      description: 'Billing and subscriptions',
+      envVar: 'FEATURE_STRIPE_ENABLED',
     });
 
-    this.flags.set("chat", {
+    this.flags.set('chat', {
       enabled: env.isChatEnabled,
-      description: "Real-time chat",
-      envVar: "FEATURE_CHAT_ENABLED"
+      description: 'Real-time chat',
+      envVar: 'FEATURE_CHAT_ENABLED',
     });
 
-    this.flags.set("push", {
+    this.flags.set('push', {
       enabled: env.isPushEnabled,
-      description: "Push notifications",
-      envVar: "FEATURE_PUSH_ENABLED"
+      description: 'Push notifications',
+      envVar: 'FEATURE_PUSH_ENABLED',
     });
   }
 
@@ -71,7 +71,7 @@ class FeatureFlags {
       name,
       enabled,
       description,
-      envVar
+      envVar,
     }));
   }
 
@@ -80,23 +80,20 @@ class FeatureFlags {
    */
   getStatusReport(): string {
     const flags = this.getAll();
-    const lines = [
-      "Feature Flags Status:",
-      "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-    ];
+    const lines = ['Feature Flags Status:', '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━'];
 
     for (const flag of flags) {
-      const status = flag.enabled ? "✓ ENABLED " : "✗ DISABLED";
+      const status = flag.enabled ? '✓ ENABLED ' : '✗ DISABLED';
       lines.push(`${status} ${flag.name.padEnd(15)} - ${flag.description}`);
       lines.push(`           ${flag.envVar}=${flag.enabled}`);
     }
 
-    lines.push("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
-    return lines.join("\n");
+    lines.push('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+    return lines.join('\n');
   }
 }
 
 export const featureFlags = new FeatureFlags();
 
 // Log feature flags status on startup
-console.log("\n" + featureFlags.getStatusReport() + "\n");
+console.log('\n' + featureFlags.getStatusReport() + '\n');

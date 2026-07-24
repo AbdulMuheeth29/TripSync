@@ -1,16 +1,21 @@
-import { useState, useEffect, useRef } from "react";
-import { Link, useLocation } from "wouter";
-import { useToast } from "@/hooks/use-toast";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Switch } from "@/components/ui/switch";
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { ThemeToggle } from "@/components/theme-toggle";
-import { AppLogo } from "@/components/app-logo";
-import { spacing } from "@/lib/spacing-tokens";
-import { AppHero } from "@/components/app-hero";
-import { useAuth } from "@/lib/auth-context";
+import { useState, useEffect, useRef } from 'react';
+import { Link, useLocation } from 'wouter';
+import { useToast } from '@/hooks/use-toast';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Switch } from '@/components/ui/switch';
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from '@/components/ui/accordion';
+import { ThemeToggle } from '@/components/theme-toggle';
+import { AppLogo } from '@/components/app-logo';
+import { spacing } from '@/lib/spacing-tokens';
+import { AppHero } from '@/components/app-hero';
+import { useAuth } from '@/lib/auth-context';
 import {
   Check,
   X,
@@ -25,123 +30,141 @@ import {
   Zap,
   Shield,
   ArrowRight,
-} from "lucide-react";
+} from 'lucide-react';
 
 const pricingPlans = {
   free: {
-    name: "Free",
+    name: 'Free',
     monthlyPrice: 0,
     annualPrice: 0,
-    description: "Perfect for occasional group trips",
+    description: 'Perfect for occasional group trips',
     popular: false,
     features: [
-      { text: "3 active trips", included: true },
-      { text: "Up to 6 members per trip", included: true },
-      { text: "Basic AI itinerary (1 per trip)", included: true },
-      { text: "Voting & collaboration", included: true },
-      { text: "Expense tracking", included: true },
-      { text: "Group chat", included: true },
-      { text: "5 photos per trip", included: true },
-      { text: "Weather forecasts", included: true },
-      { text: "Community support", included: true },
-      { text: "Map view", included: false },
-      { text: "Offline access", included: false },
-      { text: "Calendar export", included: false },
-      { text: "Email import", included: false },
-      { text: "Unlimited AI generations", included: false },
+      { text: '3 active trips', included: true },
+      { text: 'Up to 6 members per trip', included: true },
+      { text: 'Basic AI itinerary (1 per trip)', included: true },
+      { text: 'Voting & collaboration', included: true },
+      { text: 'Expense tracking', included: true },
+      { text: 'Group chat', included: true },
+      { text: '5 photos per trip', included: true },
+      { text: 'Weather forecasts', included: true },
+      { text: 'Community support', included: true },
+      { text: 'Map view', included: false },
+      { text: 'Offline access', included: false },
+      { text: 'Calendar export', included: false },
+      { text: 'Email import', included: false },
+      { text: 'Unlimited AI generations', included: false },
     ],
-    cta: "Get Started",
-    ctaHref: "/login",
+    cta: 'Get Started',
+    ctaHref: '/login',
   },
   pro: {
-    name: "Pro",
+    name: 'Pro',
     monthlyPrice: 4.99,
     annualPrice: 39,
-    description: "Best for frequent travelers",
+    description: 'Best for frequent travelers',
     popular: true,
     features: [
-      { text: "Everything in Free, plus:", included: true, bold: true },
-      { text: "Unlimited trips & members", included: true },
-      { text: "Unlimited AI generations", included: true },
-      { text: "Interactive map view", included: true },
-      { text: "Offline access & PWA", included: true },
-      { text: "Calendar export (.ics)", included: true },
-      { text: "Email import", included: true },
-      { text: "Place discovery", included: true },
-      { text: "Receipt OCR", included: true },
-      { text: "Currency conversion", included: true },
-      { text: "AI Trip Concierge", included: true },
-      { text: "Unlimited photos", included: true },
-      { text: "Priority support", included: true },
+      { text: 'Everything in Free, plus:', included: true, bold: true },
+      { text: 'Unlimited trips & members', included: true },
+      { text: 'Unlimited AI generations', included: true },
+      { text: 'Interactive map view', included: true },
+      { text: 'Offline access & PWA', included: true },
+      { text: 'Calendar export (.ics)', included: true },
+      { text: 'Email import', included: true },
+      { text: 'Place discovery', included: true },
+      { text: 'Receipt OCR', included: true },
+      { text: 'Currency conversion', included: true },
+      { text: 'AI Trip Concierge', included: true },
+      { text: 'Unlimited photos', included: true },
+      { text: 'Priority support', included: true },
     ],
-    cta: "Start Free Trial",
-    ctaHref: "/login?plan=pro",
+    cta: 'Start Free Trial',
+    ctaHref: '/login?plan=pro',
   },
   teams: {
-    name: "Teams",
+    name: 'Teams',
     monthlyPrice: 9.99,
     annualPrice: 89,
-    description: "Built for travel professionals",
+    description: 'Built for travel professionals',
     popular: false,
     features: [
-      { text: "Everything in Pro, plus:", included: true, bold: true },
-      { text: "Custom branding", included: true },
-      { text: "Analytics dashboard", included: true },
-      { text: "Admin controls", included: true },
-      { text: "API access", included: true },
-      { text: "White-label options", included: true },
-      { text: "Dedicated support", included: true },
-      { text: "SLA guarantee", included: true },
+      { text: 'Everything in Pro, plus:', included: true, bold: true },
+      { text: 'Custom branding', included: true },
+      { text: 'Analytics dashboard', included: true },
+      { text: 'Admin controls', included: true },
+      { text: 'API access', included: true },
+      { text: 'White-label options', included: true },
+      { text: 'Dedicated support', included: true },
+      { text: 'SLA guarantee', included: true },
     ],
-    cta: "Contact Sales",
-    ctaHref: "mailto:sales@tripsync.app",
+    cta: 'Contact Sales',
+    ctaHref: 'mailto:sales@tripsync.app',
   },
 };
 
 const comparisonFeatures = [
-  { category: "Planning", features: [
-    { name: "Active trips", free: "3", pro: "Unlimited", teams: "Unlimited" },
-    { name: "Group size", free: "6 people", pro: "Unlimited", teams: "Unlimited" },
-    { name: "AI generations", free: "1 per trip", pro: "Unlimited", teams: "Unlimited" },
-    { name: "Map view", free: false, pro: true, teams: true },
-    { name: "Route optimization", free: false, pro: true, teams: true },
-    { name: "Place discovery", free: false, pro: true, teams: true },
-    { name: "Calendar export", free: false, pro: true, teams: true },
-    { name: "Email import", free: false, pro: true, teams: true },
-  ]},
-  { category: "Collaboration", features: [
-    { name: "Voting & polls", free: true, pro: true, teams: true },
-    { name: "Group chat", free: true, pro: true, teams: true },
-    { name: "@mentions", free: true, pro: true, teams: true },
-    { name: "Advanced voting", free: false, pro: true, teams: true },
-    { name: "Video integration", free: false, pro: true, teams: true },
-  ]},
-  { category: "Expenses", features: [
-    { name: "Expense tracking", free: true, pro: true, teams: true },
-    { name: "Fair splitting", free: true, pro: true, teams: true },
-    { name: "Receipt OCR", free: false, pro: true, teams: true },
-    { name: "Currency conversion", free: false, pro: true, teams: true },
-    { name: "Budget optimizer", free: false, pro: true, teams: true },
-    { name: "Payment integrations", free: false, pro: true, teams: true },
-  ]},
-  { category: "Storage", features: [
-    { name: "Photo uploads", free: "5 per trip", pro: "Unlimited", teams: "Unlimited" },
-    { name: "Document storage", free: false, pro: true, teams: true },
-    { name: "High-res storage", free: false, pro: true, teams: true },
-  ]},
-  { category: "Mobile & Offline", features: [
-    { name: "Mobile responsive", free: true, pro: true, teams: true },
-    { name: "Offline access", free: false, pro: true, teams: true },
-    { name: "PWA install", free: false, pro: true, teams: true },
-  ]},
-  { category: "Support & Features", features: [
-    { name: "Community support", free: true, pro: true, teams: true },
-    { name: "Priority support", free: false, pro: true, teams: true },
-    { name: "Dedicated support", free: false, pro: false, teams: true },
-    { name: "Custom branding", free: false, pro: false, teams: true },
-    { name: "Analytics", free: false, pro: false, teams: true },
-    { name: "API access", free: false, pro: false, teams: true },
-  ]},
+  {
+    category: 'Planning',
+    features: [
+      { name: 'Active trips', free: '3', pro: 'Unlimited', teams: 'Unlimited' },
+      { name: 'Group size', free: '6 people', pro: 'Unlimited', teams: 'Unlimited' },
+      { name: 'AI generations', free: '1 per trip', pro: 'Unlimited', teams: 'Unlimited' },
+      { name: 'Map view', free: false, pro: true, teams: true },
+      { name: 'Route optimization', free: false, pro: true, teams: true },
+      { name: 'Place discovery', free: false, pro: true, teams: true },
+      { name: 'Calendar export', free: false, pro: true, teams: true },
+      { name: 'Email import', free: false, pro: true, teams: true },
+    ],
+  },
+  {
+    category: 'Collaboration',
+    features: [
+      { name: 'Voting & polls', free: true, pro: true, teams: true },
+      { name: 'Group chat', free: true, pro: true, teams: true },
+      { name: '@mentions', free: true, pro: true, teams: true },
+      { name: 'Advanced voting', free: false, pro: true, teams: true },
+      { name: 'Video integration', free: false, pro: true, teams: true },
+    ],
+  },
+  {
+    category: 'Expenses',
+    features: [
+      { name: 'Expense tracking', free: true, pro: true, teams: true },
+      { name: 'Fair splitting', free: true, pro: true, teams: true },
+      { name: 'Receipt OCR', free: false, pro: true, teams: true },
+      { name: 'Currency conversion', free: false, pro: true, teams: true },
+      { name: 'Budget optimizer', free: false, pro: true, teams: true },
+      { name: 'Payment integrations', free: false, pro: true, teams: true },
+    ],
+  },
+  {
+    category: 'Storage',
+    features: [
+      { name: 'Photo uploads', free: '5 per trip', pro: 'Unlimited', teams: 'Unlimited' },
+      { name: 'Document storage', free: false, pro: true, teams: true },
+      { name: 'High-res storage', free: false, pro: true, teams: true },
+    ],
+  },
+  {
+    category: 'Mobile & Offline',
+    features: [
+      { name: 'Mobile responsive', free: true, pro: true, teams: true },
+      { name: 'Offline access', free: false, pro: true, teams: true },
+      { name: 'PWA install', free: false, pro: true, teams: true },
+    ],
+  },
+  {
+    category: 'Support & Features',
+    features: [
+      { name: 'Community support', free: true, pro: true, teams: true },
+      { name: 'Priority support', free: false, pro: true, teams: true },
+      { name: 'Dedicated support', free: false, pro: false, teams: true },
+      { name: 'Custom branding', free: false, pro: false, teams: true },
+      { name: 'Analytics', free: false, pro: false, teams: true },
+      { name: 'API access', free: false, pro: false, teams: true },
+    ],
+  },
 ];
 
 function PricingCard({
@@ -154,17 +177,17 @@ function PricingCard({
 }: {
   plan: typeof pricingPlans.free;
   isAnnual: boolean;
-  planKey: "free" | "pro" | "teams";
-  onUpgrade?: (tier: "pro" | "teams", isAnnual: boolean) => void;
+  planKey: 'free' | 'pro' | 'teams';
+  onUpgrade?: (tier: 'pro' | 'teams', isAnnual: boolean) => void;
   upgradeLoading?: boolean;
   /** When set and not using checkout, use this link (e.g. login then redirect back to checkout) */
   ctaHrefOverride?: string;
 }) {
   const price = isAnnual ? plan.annualPrice : plan.monthlyPrice;
-  const period = isAnnual ? "year" : "month";
+  const period = isAnnual ? 'year' : 'month';
   const savings = plan.monthlyPrice * 12 - plan.annualPrice;
-  const isPro = plan.name === "Pro";
-  const isPaidPlan = planKey === "pro" || planKey === "teams";
+  const isPro = plan.name === 'Pro';
+  const isPaidPlan = planKey === 'pro' || planKey === 'teams';
   const useCheckout = isPaidPlan && onUpgrade;
   const ctaHref = ctaHrefOverride ?? plan.ctaHref;
 
@@ -172,8 +195,8 @@ function PricingCard({
     <Card
       className={`relative overflow-hidden transition-all hover:shadow-2xl ${
         plan.popular
-          ? "border-2 border-primary shadow-xl scale-105"
-          : "border-border hover:border-primary/50"
+          ? 'border-2 border-primary shadow-xl scale-105'
+          : 'border-border hover:border-primary/50'
       }`}
     >
       {plan.popular && (
@@ -183,7 +206,7 @@ function PricingCard({
         </div>
       )}
 
-      <CardHeader className={plan.popular ? "pt-10" : ""}>
+      <CardHeader className={plan.popular ? 'pt-10' : ''}>
         <CardTitle className="text-2xl font-bold">{plan.name}</CardTitle>
         <CardDescription className="text-base">{plan.description}</CardDescription>
 
@@ -211,23 +234,25 @@ function PricingCard({
       <CardContent>
         {useCheckout ? (
           <Button
-            className={`w-full mb-6 ${plan.popular ? "bg-primary hover:bg-primary/90" : ""}`}
-            variant={plan.popular ? "default" : "outline"}
+            className={`w-full mb-6 ${plan.popular ? 'bg-primary hover:bg-primary/90' : ''}`}
+            variant={plan.popular ? 'default' : 'outline'}
             disabled={upgradeLoading}
-            onClick={() => onUpgrade(planKey as "pro" | "teams", isAnnual)}
+            onClick={() => onUpgrade(planKey as 'pro' | 'teams', isAnnual)}
           >
-            {upgradeLoading ? "Redirecting…" : plan.cta}
-            {plan.cta.includes("Trial") && !upgradeLoading && <ArrowRight className="ml-2 h-4 w-4" />}
+            {upgradeLoading ? 'Redirecting…' : plan.cta}
+            {plan.cta.includes('Trial') && !upgradeLoading && (
+              <ArrowRight className="ml-2 h-4 w-4" />
+            )}
           </Button>
         ) : (
           <Button
-            className={`w-full mb-6 ${plan.popular ? "bg-primary hover:bg-primary/90" : ""}`}
-            variant={plan.popular ? "default" : "outline"}
+            className={`w-full mb-6 ${plan.popular ? 'bg-primary hover:bg-primary/90' : ''}`}
+            variant={plan.popular ? 'default' : 'outline'}
             asChild
           >
             <Link href={ctaHref}>
               {plan.cta}
-              {plan.cta.includes("Trial") && <ArrowRight className="ml-2 h-4 w-4" />}
+              {plan.cta.includes('Trial') && <ArrowRight className="ml-2 h-4 w-4" />}
             </Link>
           </Button>
         )}
@@ -240,7 +265,9 @@ function PricingCard({
               ) : (
                 <X className="h-5 w-5 text-muted-foreground shrink-0 mt-0.5" />
               )}
-              <span className={`text-sm ${'bold' in feature && feature.bold ? "font-semibold" : ""} ${!feature.included ? "text-muted-foreground" : ""}`}>
+              <span
+                className={`text-sm ${'bold' in feature && feature.bold ? 'font-semibold' : ''} ${!feature.included ? 'text-muted-foreground' : ''}`}
+              >
                 {feature.text}
               </span>
             </li>
@@ -252,7 +279,7 @@ function PricingCard({
 }
 
 function FeatureCell({ value }: { value: string | boolean | undefined }) {
-  if (typeof value === "boolean") {
+  if (typeof value === 'boolean') {
     return value ? (
       <Check className="h-5 w-5 text-primary mx-auto" />
     ) : (
@@ -275,9 +302,13 @@ export default function PricingPage() {
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
-    if (params.get("upgrade") === "canceled") {
-      toast({ title: "Checkout canceled", description: "No charges were made. Try again when you're ready.", variant: "default" });
-      window.history.replaceState({}, "", "/pricing");
+    if (params.get('upgrade') === 'canceled') {
+      toast({
+        title: 'Checkout canceled',
+        description: "No charges were made. Try again when you're ready.",
+        variant: 'default',
+      });
+      window.history.replaceState({}, '', '/pricing');
     }
   }, [toast]);
 
@@ -285,47 +316,57 @@ export default function PricingPage() {
   useEffect(() => {
     if (!user || upgradeLoading || checkoutStarted.current) return;
     const params = new URLSearchParams(window.location.search);
-    const checkout = params.get("checkout");
-    if (checkout !== "pro" && checkout !== "teams") return;
+    const checkout = params.get('checkout');
+    if (checkout !== 'pro' && checkout !== 'teams') return;
     checkoutStarted.current = true;
-    window.history.replaceState({}, "", "/pricing");
+    window.history.replaceState({}, '', '/pricing');
     handleUpgrade(checkout, true);
   }, [user]);
 
-  const handleUpgrade = async (tier: "pro" | "teams", isAnnualPlan: boolean) => {
+  const handleUpgrade = async (tier: 'pro' | 'teams', isAnnualPlan: boolean) => {
     setUpgradeError(null);
     setUpgradeLoading(true);
     try {
-      const token = localStorage.getItem("tripsync_token") || sessionStorage.getItem("tripsync_token");
-      const res = await fetch("/api/stripe/checkout", {
-        method: "POST",
+      const token =
+        localStorage.getItem('tripsync_token') || sessionStorage.getItem('tripsync_token');
+      const res = await fetch('/api/stripe/checkout', {
+        method: 'POST',
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
           ...(token ? { Authorization: `Bearer ${token}` } : {}),
         },
-        credentials: "include",
+        credentials: 'include',
         body: JSON.stringify({ tier, isAnnual: isAnnualPlan }),
       });
       const data = await res.json();
       if (!res.ok) {
-        setUpgradeError(data?.error || "Checkout failed");
+        setUpgradeError(data?.error || 'Checkout failed');
         return;
       }
       if (data?.url) {
         window.location.href = data.url;
         return;
       }
-      setUpgradeError("No checkout URL returned");
+      setUpgradeError('No checkout URL returned');
     } catch (e) {
-      setUpgradeError("Network error. Please try again.");
+      setUpgradeError('Network error. Please try again.');
     } finally {
       setUpgradeLoading(false);
     }
   };
 
-  const checkoutParam = typeof window !== "undefined" ? new URLSearchParams(window.location.search).get("checkout") : null;
-  const loginThenCheckoutHrefPro = !user && checkoutParam === "pro" ? `/login?redirect=${encodeURIComponent("/pricing?checkout=pro")}` : undefined;
-  const loginThenCheckoutHrefTeams = !user && checkoutParam === "teams" ? `/login?redirect=${encodeURIComponent("/pricing?checkout=teams")}` : undefined;
+  const checkoutParam =
+    typeof window !== 'undefined'
+      ? new URLSearchParams(window.location.search).get('checkout')
+      : null;
+  const loginThenCheckoutHrefPro =
+    !user && checkoutParam === 'pro'
+      ? `/login?redirect=${encodeURIComponent('/pricing?checkout=pro')}`
+      : undefined;
+  const loginThenCheckoutHrefTeams =
+    !user && checkoutParam === 'teams'
+      ? `/login?redirect=${encodeURIComponent('/pricing?checkout=teams')}`
+      : undefined;
 
   return (
     <div className="min-h-screen bg-background">
@@ -348,7 +389,9 @@ export default function PricingPage() {
             <Link href="/pricing">
               <a
                 className={`text-sm transition-colors ${
-                  pathname === "/pricing" ? "text-foreground font-medium" : "text-muted-foreground hover:text-foreground"
+                  pathname === '/pricing'
+                    ? 'text-foreground font-medium'
+                    : 'text-muted-foreground hover:text-foreground'
                 }`}
               >
                 Pricing
@@ -357,7 +400,9 @@ export default function PricingPage() {
             <Link href="/contact">
               <a
                 className={`text-sm transition-colors ${
-                  pathname === "/contact" ? "text-foreground font-medium" : "text-muted-foreground hover:text-foreground"
+                  pathname === '/contact'
+                    ? 'text-foreground font-medium'
+                    : 'text-muted-foreground hover:text-foreground'
                 }`}
               >
                 Contact
@@ -393,12 +438,13 @@ export default function PricingPage() {
             Transparent pricing that grows with you
           </h1>
           <p className="text-xl text-muted-foreground mb-12 max-w-2xl mx-auto">
-            Start with our free plan and upgrade as your travel needs evolve. Flexible billing with no long-term commitment.
+            Start with our free plan and upgrade as your travel needs evolve. Flexible billing with
+            no long-term commitment.
           </p>
 
           {/* Annual/Monthly Toggle */}
           <div className="flex items-center justify-center gap-4 mb-16">
-            <span className={isAnnual ? "text-muted-foreground" : "text-foreground font-medium"}>
+            <span className={isAnnual ? 'text-muted-foreground' : 'text-foreground font-medium'}>
               Monthly
             </span>
             <Switch
@@ -406,7 +452,7 @@ export default function PricingPage() {
               onCheckedChange={setIsAnnual}
               className="data-[state=checked]:bg-primary"
             />
-            <span className={isAnnual ? "text-foreground font-medium" : "text-muted-foreground"}>
+            <span className={isAnnual ? 'text-foreground font-medium' : 'text-muted-foreground'}>
               Annual
               <Badge variant="secondary" className="ml-2">
                 Save 34%
@@ -415,7 +461,9 @@ export default function PricingPage() {
           </div>
 
           {upgradeError && (
-            <p className="text-sm text-destructive mb-4 max-w-6xl mx-auto text-center">{upgradeError}</p>
+            <p className="text-sm text-destructive mb-4 max-w-6xl mx-auto text-center">
+              {upgradeError}
+            </p>
           )}
           {/* Pricing Cards */}
           <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
@@ -468,12 +516,18 @@ export default function PricingPage() {
                 {comparisonFeatures.map((section) => (
                   <>
                     <tr key={section.category} className="border-b bg-muted/50">
-                      <td colSpan={4} className="py-3 px-4 font-semibold text-sm uppercase tracking-wide">
+                      <td
+                        colSpan={4}
+                        className="py-3 px-4 font-semibold text-sm uppercase tracking-wide"
+                      >
                         {section.category}
                       </td>
                     </tr>
                     {section.features.map((feature) => (
-                      <tr key={feature.name} className="border-b hover:bg-muted/20 transition-colors">
+                      <tr
+                        key={feature.name}
+                        className="border-b hover:bg-muted/20 transition-colors"
+                      >
                         <td className="py-3 px-4 text-sm">{feature.name}</td>
                         <td className="py-3 px-4">
                           <FeatureCell value={feature.free} />
@@ -556,7 +610,8 @@ export default function PricingPage() {
                 Is there a free trial?
               </AccordionTrigger>
               <AccordionContent>
-                Yes. TripSync Pro includes a risk-free 14-day trial with complete access to all premium features. Start immediately—no credit card required.
+                Yes. TripSync Pro includes a risk-free 14-day trial with complete access to all
+                premium features. Start immediately—no credit card required.
               </AccordionContent>
             </AccordionItem>
 
@@ -565,7 +620,9 @@ export default function PricingPage() {
                 Can I cancel anytime?
               </AccordionTrigger>
               <AccordionContent>
-                Yes. Cancel anytime directly from your account settings with no fees or penalties. After cancellation, you'll retain full access through the end of your current billing cycle.
+                Yes. Cancel anytime directly from your account settings with no fees or penalties.
+                After cancellation, you'll retain full access through the end of your current
+                billing cycle.
               </AccordionContent>
             </AccordionItem>
 
@@ -574,7 +631,8 @@ export default function PricingPage() {
                 What's your refund policy?
               </AccordionTrigger>
               <AccordionContent>
-                We offer a 14-day money-back guarantee. If you're not satisfied with TripSync Pro for any reason, contact us within 14 days of purchase for a full refund.
+                We offer a 14-day money-back guarantee. If you're not satisfied with TripSync Pro
+                for any reason, contact us within 14 days of purchase for a full refund.
               </AccordionContent>
             </AccordionItem>
 
@@ -583,7 +641,9 @@ export default function PricingPage() {
                 Can I upgrade or downgrade later?
               </AccordionTrigger>
               <AccordionContent>
-                Yes! You can upgrade to Pro or Teams at any time to unlock premium features. If you want to downgrade, you can do so at the end of your current billing cycle. Any unused time on your current plan will be prorated.
+                Yes! You can upgrade to Pro or Teams at any time to unlock premium features. If you
+                want to downgrade, you can do so at the end of your current billing cycle. Any
+                unused time on your current plan will be prorated.
               </AccordionContent>
             </AccordionItem>
 
@@ -592,7 +652,8 @@ export default function PricingPage() {
                 What payment methods do you accept?
               </AccordionTrigger>
               <AccordionContent>
-                We accept all major credit cards (Visa, Mastercard, American Express, Discover) via Stripe, our secure payment processor. We also accept payments via PayPal.
+                We accept all major credit cards (Visa, Mastercard, American Express, Discover) via
+                Stripe, our secure payment processor. We also accept payments via PayPal.
               </AccordionContent>
             </AccordionItem>
 
@@ -601,7 +662,9 @@ export default function PricingPage() {
                 What happens when I hit the free plan limits?
               </AccordionTrigger>
               <AccordionContent>
-                When you reach 3 active trips on the Free plan, you can either archive a completed trip or upgrade to Pro for unlimited trips. Archived trips remain accessible in read-only mode.
+                When you reach 3 active trips on the Free plan, you can either archive a completed
+                trip or upgrade to Pro for unlimited trips. Archived trips remain accessible in
+                read-only mode.
               </AccordionContent>
             </AccordionItem>
 
@@ -610,7 +673,9 @@ export default function PricingPage() {
                 How does the Teams plan work?
               </AccordionTrigger>
               <AccordionContent>
-                The Teams plan is designed for travel agencies, tour operators, and professional trip planners. It includes custom branding, analytics, admin controls, and dedicated support. Contact our sales team to discuss your specific needs and pricing.
+                The Teams plan is designed for travel agencies, tour operators, and professional
+                trip planners. It includes custom branding, analytics, admin controls, and dedicated
+                support. Contact our sales team to discuss your specific needs and pricing.
               </AccordionContent>
             </AccordionItem>
 
@@ -619,7 +684,9 @@ export default function PricingPage() {
                 What happens to my data if I cancel?
               </AccordionTrigger>
               <AccordionContent>
-                Your trips and data remain accessible even if you downgrade to the free plan. However, if you have more than 3 active trips, you'll need to archive some to continue using the app. You can export your data at any time.
+                Your trips and data remain accessible even if you downgrade to the free plan.
+                However, if you have more than 3 active trips, you'll need to archive some to
+                continue using the app. You can export your data at any time.
               </AccordionContent>
             </AccordionItem>
           </Accordion>

@@ -10,6 +10,7 @@ psql $DATABASE_URL < server/migrations/add-ai-infrastructure.sql
 ```
 
 This adds:
+
 - ✅ 5 AI metadata columns to `itinerary_items`
 - ✅ 5 new tables: `ai_generation_feedback`, `ai_cost_log`, `ai_user_preferences`, `atlas_monitoring_state`, `atlas_interventions`
 - ✅ 3 analytics views
@@ -242,7 +243,7 @@ await recordFeedback({
   originalSuggestion: { price: 100 },
   userModification: { price: 75 },
   fieldChanged: 'price',
-  changeMagnitude: -25
+  changeMagnitude: -25,
 });
 
 // ✅ AI learns: This user prefers budget-friendly options
@@ -309,10 +310,12 @@ export function getSmartTTL(operation: string, inputs: any): number {
 ## 📚 Learn More
 
 **Full Documentation:**
+
 - `/AI_TRANSFORMATION_COMPLETE.md` - Complete implementation details
 - `/AI_INFRASTRUCTURE_TRANSFORMATION_PLAN.md` - Original transformation plan
 
 **Key Files:**
+
 - `/server/ai-retry.ts` - Retry mechanism
 - `/server/ai-circuit-breaker.ts` - Circuit breaker
 - `/server/ai-cache.ts` - Response caching
@@ -327,6 +330,7 @@ export function getSmartTTL(operation: string, inputs: any): number {
 ## 🎉 You're Done!
 
 Your AI is now:
+
 - ✅ **99.9% reliable** (retry + circuit breaker)
 - ✅ **90% cheaper** (caching)
 - ✅ **Learning from users** (proprietary dataset)

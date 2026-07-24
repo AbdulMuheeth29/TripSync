@@ -34,6 +34,7 @@
 ## System Overview
 
 ### Tech Stack
+
 - **Frontend:** React 18 + TypeScript + Vite + TailwindCSS + Shadcn/ui
 - **Backend:** Node.js + Express 5 + TypeScript
 - **Database:** PostgreSQL + Drizzle ORM
@@ -41,6 +42,7 @@
 - **External APIs:** Open-Meteo (weather)
 
 ### Architecture Principles
+
 - RESTful API design
 - Stateless authentication (JWT)
 - Database-first validation
@@ -54,6 +56,7 @@
 ### Core Entities
 
 #### `users`
+
 ```typescript
 {
   id: UUID (PK)
@@ -65,9 +68,11 @@
 ```
 
 **Relationships:**
+
 - One-to-many: `tripMembers`, `expenses`, `votes`, `comments`, `chatMessages`
 
 **Business Rules:**
+
 - Email must be unique (case-insensitive)
 - Email format validated via Zod
 - Name required, min 1 char, max 255
@@ -76,6 +81,7 @@
 ---
 
 #### `trips`
+
 ```typescript
 {
   id: UUID (PK)
@@ -101,10 +107,12 @@
 ```
 
 **Relationships:**
+
 - Many-to-one: `users` (organizer)
 - One-to-many: `tripMembers`, `itineraryItems`, `expenses`, `chatMessages`, `polls`
 
 **Business Rules:**
+
 - `startDate` must be before `endDate`
 - `endDate` must be after `startDate` (at least 1 day gap)
 - `budgetPerPerson` cannot be negative
@@ -116,6 +124,7 @@
 - Cancelled status can be set from any state (organizer only)
 
 **Status Business Rules:**
+
 - `planning`: Default state, all features available
 - `booking`: Vote deadline passed or organizer manually set
 - `active`: Trip startDate reached
@@ -125,6 +134,7 @@
 ---
 
 #### `tripMembers`
+
 ```typescript
 {
   id: UUID (PK)
@@ -138,10 +148,12 @@
 ```
 
 **Relationships:**
+
 - Many-to-one: `trips`, `users`
 - One-to-one: `memberPreferences`
 
 **Business Rules:**
+
 - Composite unique constraint: (tripId, userId)
 - Trip organizer automatically added as 'planner' with 'accepted' status
 - Only planners can invite new members
@@ -154,6 +166,7 @@
 ---
 
 #### `tripInvites`
+
 ```typescript
 {
   id: UUID (PK)
@@ -168,6 +181,7 @@
 ```
 
 **Business Rules:**
+
 - Token valid for 7 days
 - Expired invites cannot be accepted
 - Email can have multiple pending invites (different trips)
@@ -178,6 +192,7 @@
 ---
 
 #### `memberPreferences`
+
 ```typescript
 {
   id: UUID (PK)
@@ -194,6 +209,7 @@
 ```
 
 **Business Rules:**
+
 - One preference record per trip member
 - Used by AI for itinerary generation
 - Organizer can view all preferences
@@ -203,6 +219,7 @@
 ---
 
 #### `itineraryItems`
+
 ```typescript
 {
   id: UUID (PK)
@@ -229,10 +246,12 @@
 ```
 
 **Relationships:**
+
 - Many-to-one: `trips`
 - One-to-many: `votes`, `comments`
 
 **Business Rules:**
+
 - `dayNumber` must be between 1 and trip duration (endDate - startDate + 1)
 - Items within same day ordered by `time`, then `sortOrder`
 - Locked items cannot be edited/deleted (except by organizer)
@@ -250,6 +269,7 @@
 ---
 
 #### `votes`
+
 ```typescript
 {
   id: UUID (PK)
@@ -262,9 +282,11 @@
 ```
 
 **Relationships:**
+
 - Many-to-one: `itineraryItems`, `users`
 
 **Business Rules:**
+
 - Composite unique constraint: (itemId, userId)
 - Only trip members can vote
 - Can change vote (update voteType)
@@ -275,6 +297,7 @@
 ---
 
 #### `comments`
+
 ```typescript
 {
   id: UUID (PK)
@@ -287,6 +310,7 @@
 ```
 
 **Business Rules:**
+
 - Only trip members can comment
 - Content must be non-empty after trimming
 - XSS prevention: sanitize before display
@@ -297,6 +321,7 @@
 ---
 
 #### `chatMessages`
+
 ```typescript
 {
   id: UUID (PK)
@@ -309,6 +334,7 @@
 ```
 
 **Business Rules:**
+
 - Only trip members can send messages
 - Content must be non-empty after trimming
 - @mentions: Parse content for @username patterns
@@ -321,6 +347,7 @@
 ---
 
 #### `expenses`
+
 ```typescript
 {
   id: UUID (PK)
@@ -342,6 +369,7 @@
 ```
 
 **Business Rules:**
+
 - `paidByUserId` must be trip member
 - All users in `splitAmong` must be trip members
 - `splitAmong` cannot be empty
@@ -356,6 +384,7 @@
 - Currency conversion: Store in original currency, convert for display
 
 **Split Algorithm:**
+
 ```
 amountPerPerson = amount / splitAmong.length
 For each user in splitAmong:
@@ -368,6 +397,7 @@ For each user in splitAmong:
 ---
 
 #### `packingItems`
+
 ```typescript
 {
   id: UUID (PK)
@@ -383,6 +413,7 @@ For each user in splitAmong:
 ```
 
 **Business Rules:**
+
 - All trip members can add items
 - Items can be assigned to specific member or shared (assignedTo = null)
 - Only assigned user can mark as packed (or organizer)
@@ -392,6 +423,7 @@ For each user in splitAmong:
 ---
 
 #### `transportationEntries`
+
 ```typescript
 {
   id: UUID (PK)
@@ -409,6 +441,7 @@ For each user in splitAmong:
 ```
 
 **Business Rules:**
+
 - All referenced users must be trip members
 - Driver cannot also be in passengers array
 - If type = 'driver', driverId must be set
@@ -419,6 +452,7 @@ For each user in splitAmong:
 ---
 
 #### `tripDocuments`
+
 ```typescript
 {
   id: UUID (PK)
@@ -435,6 +469,7 @@ For each user in splitAmong:
 ```
 
 **Business Rules:**
+
 - File uploads must be validated (type, size)
 - Allowed types: PDF, JPG, PNG (max 10MB)
 - Store in secure cloud storage (S3/R2) with private ACL
@@ -446,6 +481,7 @@ For each user in splitAmong:
 ---
 
 #### `emergencyContacts`
+
 ```typescript
 {
   id: UUID (PK)
@@ -461,6 +497,7 @@ For each user in splitAmong:
 ```
 
 **Business Rules:**
+
 - Each trip member can add their own emergency contacts
 - Only contact owner and organizer can view/edit
 - Phone number required, email optional
@@ -470,6 +507,7 @@ For each user in splitAmong:
 ---
 
 #### `tripPhotos`
+
 ```typescript
 {
   id: UUID (PK)
@@ -484,6 +522,7 @@ For each user in splitAmong:
 ```
 
 **Business Rules:**
+
 - Only trip members can upload
 - Image validation: JPG, PNG, HEIC (max 25MB)
 - Auto-extract EXIF data (date, location) if available
@@ -495,6 +534,7 @@ For each user in splitAmong:
 ---
 
 #### `polls`
+
 ```typescript
 {
   id: UUID (PK)
@@ -509,9 +549,11 @@ For each user in splitAmong:
 ```
 
 **Relationships:**
+
 - One-to-many: `pollVotes`
 
 **Business Rules:**
+
 - Minimum 2 options, maximum 10
 - Only trip members can create polls
 - Options must be unique within poll
@@ -522,6 +564,7 @@ For each user in splitAmong:
 ---
 
 #### `pollVotes`
+
 ```typescript
 {
   id: UUID (PK)
@@ -533,6 +576,7 @@ For each user in splitAmong:
 ```
 
 **Business Rules:**
+
 - Composite unique constraint: (pollId, userId)
 - If poll.allowMultiple = false, selectedOptions.length must be 1
 - Option indices must be valid (< options.length)
@@ -542,6 +586,7 @@ For each user in splitAmong:
 ---
 
 #### `groupAvailability`
+
 ```typescript
 {
   id: UUID (PK)
@@ -555,6 +600,7 @@ For each user in splitAmong:
 ```
 
 **Business Rules:**
+
 - Used during trip creation for date selection
 - Show calendar with highlighted dates (green = most available)
 - Calculate best dates (most members available)
@@ -563,6 +609,7 @@ For each user in splitAmong:
 ---
 
 #### `userLearnedPreferences`
+
 ```typescript
 {
   id: UUID (PK)
@@ -577,6 +624,7 @@ For each user in splitAmong:
 ```
 
 **Business Rules:**
+
 - AI populates this after trip completion
 - Examples:
   - type='activity', value='museums', confidence=0.85 (visited 5/6 museums)
@@ -587,6 +635,7 @@ For each user in splitAmong:
 ---
 
 #### `tripSatisfaction`
+
 ```typescript
 {
   id: UUID (PK)
@@ -602,6 +651,7 @@ For each user in splitAmong:
 ```
 
 **Business Rules:**
+
 - Only trip members can rate
 - Can only rate after trip status = 'completed'
 - Composite unique constraint: (tripId, userId)
@@ -611,6 +661,7 @@ For each user in splitAmong:
 ---
 
 #### `locationSharing` (Optional Feature)
+
 ```typescript
 {
   id: UUID (PK)
@@ -625,6 +676,7 @@ For each user in splitAmong:
 ```
 
 **Business Rules:**
+
 - Opt-in only (privacy-sensitive)
 - Location deleted after trip ends + 1 day
 - Only visible to trip members
@@ -636,6 +688,7 @@ For each user in splitAmong:
 ### Database Indexes
 
 **Critical for Performance:**
+
 ```sql
 -- Trips
 CREATE INDEX idx_trips_organizer ON trips(organizerId);
@@ -671,6 +724,7 @@ CREATE UNIQUE INDEX idx_votes_composite ON votes(itemId, userId);
 ### Feature: User Registration
 
 **Frontend:**
+
 - Route: `/register`
 - Form fields:
   - Name (text input, required)
@@ -684,6 +738,7 @@ CREATE UNIQUE INDEX idx_votes_composite ON votes(itemId, userId);
   - Show validation errors inline
 
 **API Endpoint:**
+
 ```
 POST /api/auth/register
 Body: { name, email, password }
@@ -691,6 +746,7 @@ Response: { token, user: { id, email, name } }
 ```
 
 **Backend Logic:**
+
 1. Validate input with Zod schema
 2. Check if email already exists (case-insensitive)
 3. Hash password with bcrypt (12 rounds)
@@ -699,6 +755,7 @@ Response: { token, user: { id, email, name } }
 6. Return token + user data (exclude password hash)
 
 **Business Rules:**
+
 - Email must be unique (case-insensitive comparison)
 - Convert email to lowercase before storage
 - Password min 8 chars, max 128 chars
@@ -706,6 +763,7 @@ Response: { token, user: { id, email, name } }
 - No special characters validation on name (support international names)
 
 **Edge Cases:**
+
 - Email already exists → 409 Conflict "Email already registered"
 - Weak password → 400 Bad Request "Password too weak"
 - Name contains only whitespace → 400 "Name required"
@@ -713,6 +771,7 @@ Response: { token, user: { id, email, name } }
 - Email format invalid → 400 "Invalid email format"
 
 **Security:**
+
 - Rate limit: 5 registrations per IP per hour
 - Captcha on frontend (future: hCaptcha/Turnstile)
 - Email verification required before full access (Tier 2 security)
@@ -722,6 +781,7 @@ Response: { token, user: { id, email, name } }
 ### Feature: User Login
 
 **Frontend:**
+
 - Route: `/login`
 - Form fields:
   - Email (email input, required)
@@ -730,6 +790,7 @@ Response: { token, user: { id, email, name } }
 - Forgot password link (future feature)
 
 **API Endpoint:**
+
 ```
 POST /api/auth/login
 Body: { email, password }
@@ -737,6 +798,7 @@ Response: { token, user: { id, email, name } }
 ```
 
 **Backend Logic:**
+
 1. Validate input
 2. Find user by email (case-insensitive)
 3. Verify password with bcrypt.compare()
@@ -745,17 +807,20 @@ Response: { token, user: { id, email, name } }
 6. Return token + user data
 
 **Business Rules:**
+
 - Generic error message "Invalid credentials" (don't reveal if email exists)
 - Token expires in 7 days (or 30 days if "remember me")
 - Failed login doesn't lock account (rate limiting handles abuse)
 
 **Edge Cases:**
+
 - Email not found → 401 "Invalid credentials"
 - Wrong password → 401 "Invalid credentials"
 - Account locked (future) → 403 "Account locked"
 - Too many attempts → 429 "Too many attempts, try again in 15 minutes"
 
 **Security:**
+
 - Rate limit: 5 attempts per IP per 15 minutes
 - Rate limit: 3 attempts per email per 15 minutes (prevent targeted attacks)
 - Log all login attempts (successful + failed)
@@ -766,29 +831,31 @@ Response: { token, user: { id, email, name } }
 ### Feature: Authentication Middleware
 
 **Implementation:**
+
 ```typescript
 // server/middleware/auth.ts
 
 export async function requireAuth(req, res, next) {
-  const token = req.headers.authorization?.replace('Bearer ', '')
+  const token = req.headers.authorization?.replace('Bearer ', '');
 
   if (!token) {
-    return res.status(401).json({ error: "Authentication required" })
+    return res.status(401).json({ error: 'Authentication required' });
   }
 
-  const payload = verifyToken(token)
+  const payload = verifyToken(token);
 
   if (!payload) {
-    return res.status(401).json({ error: "Invalid or expired token" })
+    return res.status(401).json({ error: 'Invalid or expired token' });
   }
 
   // Attach user to request
-  req.userId = payload.userId
-  next()
+  req.userId = payload.userId;
+  next();
 }
 ```
 
 **Business Rules:**
+
 - All protected routes must use this middleware
 - Token in Authorization header: `Bearer <token>`
 - Expired tokens → 401 Unauthorized
@@ -800,35 +867,38 @@ export async function requireAuth(req, res, next) {
 ### Feature: Trip Access Authorization
 
 **Implementation:**
+
 ```typescript
 export async function requireTripAccess(req, res, next) {
-  const { tripId } = req.params
-  const userId = req.userId
+  const { tripId } = req.params;
+  const userId = req.userId;
 
   const membership = await db.query.tripMembers.findFirst({
     where: and(
       eq(tripMembers.tripId, tripId),
       eq(tripMembers.userId, userId),
       eq(tripMembers.rsvpStatus, 'accepted')
-    )
-  })
+    ),
+  });
 
   if (!membership) {
-    return res.status(403).json({ error: "Access denied" })
+    return res.status(403).json({ error: 'Access denied' });
   }
 
-  req.tripMembership = membership // Attach for later use
-  next()
+  req.tripMembership = membership; // Attach for later use
+  next();
 }
 ```
 
 **Business Rules:**
+
 - Only accepted members can access trip data
 - Pending/declined members cannot access
 - Non-members get 403 Forbidden
 - Use on ALL trip-related endpoints
 
 **Edge Cases:**
+
 - User removed from trip mid-session → 403 on next request
 - Trip deleted → 404 Not Found (checked before this middleware)
 - User never invited → 403 Access denied
@@ -838,19 +908,21 @@ export async function requireTripAccess(req, res, next) {
 ### Feature: Organizer/Planner Authorization
 
 **Implementation:**
+
 ```typescript
 export async function requirePlannerRole(req, res, next) {
-  const membership = req.tripMembership // From requireTripAccess
+  const membership = req.tripMembership; // From requireTripAccess
 
   if (membership.role !== 'planner') {
-    return res.status(403).json({ error: "Planner access required" })
+    return res.status(403).json({ error: 'Planner access required' });
   }
 
-  next()
+  next();
 }
 ```
 
 **Business Rules:**
+
 - Use for actions like: lock trip, delete items, assign tasks
 - Organizer automatically has planner role
 - Regular members cannot perform planner actions
@@ -862,6 +934,7 @@ export async function requirePlannerRole(req, res, next) {
 ### Feature: Create Trip
 
 **Frontend:**
+
 - Route: `/create`
 - Multi-step wizard (5 steps):
   1. Basic info (destination, dates, budget, group size)
@@ -871,6 +944,7 @@ export async function requirePlannerRole(req, res, next) {
   5. Invite members (email list input)
 
 **API Endpoint:**
+
 ```
 POST /api/trips
 Body: {
@@ -891,6 +965,7 @@ Response: { tripId, shareCode }
 ```
 
 **Backend Logic:**
+
 1. Validate all fields with Zod
 2. Check date logic (end > start)
 3. Generate unique shareCode (8 chars, alphanumeric)
@@ -901,6 +976,7 @@ Response: { tripId, shareCode }
 8. Return tripId and shareCode
 
 **Business Rules:**
+
 - startDate must be today or future
 - endDate must be after startDate
 - budgetPerPerson min 0, max 1,000,000
@@ -914,6 +990,7 @@ Response: { tripId, shareCode }
 - Cannot invite organizer's own email
 
 **Edge Cases:**
+
 - startDate in past → 400 "Start date must be today or later"
 - endDate before startDate → 400 "End date must be after start date"
 - Same day trip (start = end) → Allow (1 day trip valid)
@@ -924,6 +1001,7 @@ Response: { tripId, shareCode }
 - AI generation fails → Create trip anyway, set itinerary to empty
 
 **AI Integration:**
+
 - After trip created, enqueue AI itinerary generation
 - Input: destination, dates, budget, vibes, preferences
 - If fails, user can manually regenerate later
@@ -934,6 +1012,7 @@ Response: { tripId, shareCode }
 ### Feature: View Trip Dashboard
 
 **Frontend:**
+
 - Route: `/dashboard`
 - Display:
   - Upcoming trips (startDate >= today, status != completed)
@@ -941,6 +1020,7 @@ Response: { tripId, shareCode }
   - Trip cards show: destination, dates, budget, members, progress
 
 **API Endpoint:**
+
 ```
 GET /api/trips
 Query params: ?status=upcoming|past|all (default: all)
@@ -948,19 +1028,22 @@ Response: { trips: Trip[] }
 ```
 
 **Backend Logic:**
+
 1. Get all trips where user is a member (rsvpStatus='accepted')
 2. Filter by status if provided
 3. Include: member count, booking progress, budget spent
 4. Order by startDate (upcoming: ASC, past: DESC)
 
 **Business Rules:**
+
 - Only show trips where user is accepted member
-- Booking progress = (booked items / total items) * 100
-- Budget spent = sum(expenses.amount) / (budgetPerPerson * groupSize) * 100
+- Booking progress = (booked items / total items) \* 100
+- Budget spent = sum(expenses.amount) / (budgetPerPerson _ groupSize) _ 100
 - Upcoming = startDate >= today AND status != 'completed'
 - Past = endDate < today OR status = 'completed'
 
 **Edge Cases:**
+
 - No trips → Show empty state with "Create Trip" CTA
 - Trip deleted while viewing dashboard → Disappears on next refresh
 - Very old trips → Paginate (future: load more)
@@ -970,11 +1053,13 @@ Response: { trips: Trip[] }
 ### Feature: View Trip Detail
 
 **Frontend:**
+
 - Route: `/trip/:id`
 - Tabs: Overview, Itinerary, Team, Expenses, Chat, More
 - Overview shows: header, members, share code, status, quick stats
 
 **API Endpoint:**
+
 ```
 GET /api/trips/:tripId
 Response: {
@@ -990,10 +1075,12 @@ Response: {
 ```
 
 **Middleware:**
+
 - requireAuth
 - requireTripAccess
 
 **Backend Logic:**
+
 1. Fetch trip by ID
 2. Fetch all members with user info
 3. Calculate stats:
@@ -1004,12 +1091,14 @@ Response: {
 4. Return combined data
 
 **Business Rules:**
+
 - Only accessible by trip members
 - Stats calculated in real-time
 - Share code visible to all members
 - Edit buttons shown only to organizer/planners
 
 **Edge Cases:**
+
 - Trip not found → 404
 - User not member → 403
 - Trip deleted mid-view → 404 on next request
@@ -1020,11 +1109,13 @@ Response: {
 ### Feature: Edit Trip
 
 **Frontend:**
+
 - Modal/page for editing basic trip info
 - Fields: title, destination, dates, budget, vibes, preferences
 - Cannot edit: shareCode, organizer, creation date
 
 **API Endpoint:**
+
 ```
 PATCH /api/trips/:tripId
 Body: { (any of the editable fields) }
@@ -1032,11 +1123,13 @@ Response: { trip: Trip }
 ```
 
 **Middleware:**
+
 - requireAuth
 - requireTripAccess
 - requirePlannerRole
 
 **Business Rules:**
+
 - Only organizer/planners can edit
 - Cannot change shareCode
 - Cannot change organizer
@@ -1045,6 +1138,7 @@ Response: { trip: Trip }
 - Editing locked trip requires unlock first
 
 **Edge Cases:**
+
 - Changing dates invalidates itinerary items → Warn user
 - Reducing budget below current expenses → Warn but allow
 - Changing destination → Offer to regenerate itinerary
@@ -1055,11 +1149,13 @@ Response: { trip: Trip }
 ### Feature: Delete Trip
 
 **Frontend:**
+
 - Danger zone button in settings
 - Confirmation modal: "Type trip name to confirm"
 - Shows impact: "Will delete all itinerary, expenses, chat"
 
 **API Endpoint:**
+
 ```
 DELETE /api/trips/:tripId
 Body: { confirmation: string } // Trip title
@@ -1067,11 +1163,13 @@ Response: { success: true }
 ```
 
 **Middleware:**
+
 - requireAuth
 - requireTripAccess
 - Organizer only (custom check)
 
 **Business Rules:**
+
 - Only organizer can delete
 - Must type trip title exactly to confirm
 - Cascade deletes: all members, items, expenses, chat, photos
@@ -1079,6 +1177,7 @@ Response: { success: true }
 - Audit log deletion event
 
 **Edge Cases:**
+
 - Trip already started → Extra confirmation required
 - Trip has expenses → Show settlement summary, require confirmation
 - Trip deleted while member is viewing → 404 on next action
@@ -1088,11 +1187,13 @@ Response: { success: true }
 ### Feature: Lock/Unlock Trip
 
 **Frontend:**
+
 - Toggle in trip header
 - Icon changes (locked/unlocked)
 - Tooltip explains: "Locked trips prevent member edits to itinerary"
 
 **API Endpoint:**
+
 ```
 PATCH /api/trips/:tripId/lock
 Body: { locked: boolean }
@@ -1100,11 +1201,13 @@ Response: { trip: Trip }
 ```
 
 **Middleware:**
+
 - requireAuth
 - requireTripAccess
 - requirePlannerRole
 
 **Business Rules:**
+
 - Only planners can lock/unlock
 - Locked = members cannot add/edit/delete itinerary items
 - Locked = members CAN still vote and comment
@@ -1112,6 +1215,7 @@ Response: { trip: Trip }
 - Used to finalize itinerary before booking
 
 **Edge Cases:**
+
 - Locking with pending votes → Allowed
 - Unlocking during active trip → Allowed
 - Multiple planners toggling simultaneously → Last write wins
@@ -1121,12 +1225,14 @@ Response: { trip: Trip }
 ### Feature: Share Trip
 
 **Frontend:**
+
 - Share button → modal with options:
   - Share code (8 chars, copy button)
   - Email invites (input list)
   - Share link (copy full URL with code)
 
 **API Endpoints:**
+
 ```
 GET /api/trips/:tripId/share-code
 Response: { shareCode: string, shareUrl: string }
@@ -1137,6 +1243,7 @@ Response: { invited: number, failed: string[] }
 ```
 
 **Business Rules:**
+
 - Share code never expires
 - Anyone with code can join (if they have account)
 - Email invites send notification
@@ -1144,6 +1251,7 @@ Response: { invited: number, failed: string[] }
 - Can re-invite declined members
 
 **Edge Cases:**
+
 - Share code → anyone can join (privacy risk: use with caution)
 - Invalid emails in bulk invite → Skip invalid, invite rest
 - Inviting existing member → Return "Already a member"
@@ -1154,11 +1262,13 @@ Response: { invited: number, failed: string[] }
 ### Feature: Join Trip via Share Code
 
 **Frontend:**
+
 - Route: `/join/:shareCode` or `/join?code=XXX`
 - Shows trip preview: destination, dates, organizer, member count
 - "Join Trip" button (requires login)
 
 **API Endpoint:**
+
 ```
 POST /api/trips/join
 Body: { shareCode: string }
@@ -1166,9 +1276,11 @@ Response: { trip: Trip }
 ```
 
 **Middleware:**
+
 - requireAuth
 
 **Backend Logic:**
+
 1. Find trip by shareCode
 2. Check if user already a member
 3. Check if trip at capacity
@@ -1176,6 +1288,7 @@ Response: { trip: Trip }
 5. Return trip details
 
 **Business Rules:**
+
 - Must be logged in to join
 - Cannot join if already a member
 - Cannot join if declined previously (must be re-invited)
@@ -1183,6 +1296,7 @@ Response: { trip: Trip }
 - Auto-redirect to trip detail page after join
 
 **Edge Cases:**
+
 - Invalid code → 404 "Trip not found"
 - Already a member → 400 "Already a member"
 - Trip full → 400 "Trip is full"
@@ -1195,6 +1309,7 @@ Response: { trip: Trip }
 ### Feature: View Itinerary
 
 **Frontend:**
+
 - Route: `/trip/:id` → Itinerary tab
 - Display: Day-by-day timeline
 - Each item shows: time, type badge, name, description, location, price, votes, booking status
@@ -1202,6 +1317,7 @@ Response: { trip: Trip }
 - Drag-and-drop to reorder (planner only)
 
 **API Endpoint:**
+
 ```
 GET /api/trips/:tripId/itinerary
 Response: {
@@ -1212,22 +1328,26 @@ Response: {
 ```
 
 **Middleware:**
+
 - requireAuth
 - requireTripAccess
 
 **Backend Logic:**
+
 1. Fetch all itinerary items for trip
 2. Order by dayNumber, time, sortOrder
 3. Group by day for frontend convenience
 4. Calculate currentDay if trip active (today - startDate + 1)
 
 **Business Rules:**
+
 - Items sorted by: dayNumber ASC, time ASC, sortOrder ASC
 - Free time blocks shown as gaps
 - Locked items have lock icon
 - Booking status color-coded
 
 **Edge Cases:**
+
 - No items → Show "Generate Itinerary" or "Add Item" button
 - Trip not started → Don't show "Today" indicator
 - Items span multiple days (e.g., hotel) → Show on check-in day
@@ -1238,6 +1358,7 @@ Response: {
 ### Feature: Add Itinerary Item
 
 **Frontend:**
+
 - Button: "Add Activity"
 - Modal with form:
   - Day (select: 1 to trip duration)
@@ -1251,6 +1372,7 @@ Response: {
   - Booking URL (text, optional)
 
 **API Endpoint:**
+
 ```
 POST /api/trips/:tripId/itinerary
 Body: {
@@ -1269,11 +1391,13 @@ Response: { item: ItineraryItem }
 ```
 
 **Middleware:**
+
 - requireAuth
 - requireTripAccess
 - If trip locked: requirePlannerRole
 
 **Backend Logic:**
+
 1. Validate all fields
 2. Check dayNumber in valid range (1 to trip duration)
 3. Calculate sortOrder (max + 1 for that day)
@@ -1281,6 +1405,7 @@ Response: { item: ItineraryItem }
 5. Return created item
 
 **Business Rules:**
+
 - dayNumber must be 1 to (endDate - startDate + 1)
 - time in 24-hour format (HH:MM)
 - pricePerPerson min 0
@@ -1289,6 +1414,7 @@ Response: { item: ItineraryItem }
 - Auto-calculate trip duration on save
 
 **Edge Cases:**
+
 - Day number out of range → 400 "Invalid day number"
 - Negative price → 400 "Price cannot be negative"
 - Invalid time format → 400 "Invalid time"
@@ -1300,11 +1426,13 @@ Response: { item: ItineraryItem }
 ### Feature: Edit Itinerary Item
 
 **Frontend:**
+
 - Click item → Edit modal (same as add)
 - Pre-filled with current values
 - Save button updates item
 
 **API Endpoint:**
+
 ```
 PATCH /api/trips/:tripId/itinerary/:itemId
 Body: { (any editable fields) }
@@ -1312,18 +1440,21 @@ Response: { item: ItineraryItem }
 ```
 
 **Middleware:**
+
 - requireAuth
 - requireTripAccess
 - If trip locked: requirePlannerRole
 - If item locked: requirePlannerRole
 
 **Business Rules:**
+
 - Cannot edit if trip locked (unless planner)
 - Cannot edit if item locked (unless planner)
 - Changing day recalculates sortOrder
 - Editing doesn't reset votes/comments
 
 **Edge Cases:**
+
 - Item locked → 403 unless planner
 - Item booked → Warn "Item is booked, changes may affect confirmation"
 - Moving to invalid day → 400
@@ -1334,10 +1465,12 @@ Response: { item: ItineraryItem }
 ### Feature: Delete Itinerary Item
 
 **Frontend:**
+
 - Delete button/icon on item
 - Confirmation dialog if item has votes or is booked
 
 **API Endpoint:**
+
 ```
 DELETE /api/trips/:tripId/itinerary/:itemId
 Body: { confirm: boolean } (required if booked)
@@ -1345,17 +1478,20 @@ Response: { success: true }
 ```
 
 **Middleware:**
+
 - requireAuth
 - requireTripAccess
 - If trip locked: requirePlannerRole
 - If item locked: requirePlannerRole
 
 **Business Rules:**
+
 - Cascade deletes: all votes, comments for this item
 - If booked, require explicit confirmation
 - If has votes, show confirmation with count
 
 **Edge Cases:**
+
 - Item locked → 403 unless planner
 - Item booked without confirmation → 400 "Confirmation required"
 - Last item on day → Allowed (empty day valid)
@@ -1366,10 +1502,12 @@ Response: { success: true }
 ### Feature: Lock/Unlock Itinerary Item
 
 **Frontend:**
+
 - Lock icon on item (planner only)
 - Tooltip: "Locked items prevent member edits"
 
 **API Endpoint:**
+
 ```
 PATCH /api/trips/:tripId/itinerary/:itemId/lock
 Body: { locked: boolean }
@@ -1377,11 +1515,13 @@ Response: { item: ItineraryItem }
 ```
 
 **Middleware:**
+
 - requireAuth
 - requireTripAccess
 - requirePlannerRole
 
 **Business Rules:**
+
 - Only planners can lock/unlock
 - Locked items prevent edit/delete by members
 - Locked items still allow voting/commenting
@@ -1392,11 +1532,13 @@ Response: { item: ItineraryItem }
 ### Feature: Reorder Itinerary Items
 
 **Frontend:**
+
 - Drag-and-drop within day (planner only)
 - Visual feedback during drag
 - Auto-save on drop
 
 **API Endpoint:**
+
 ```
 PATCH /api/trips/:tripId/itinerary/reorder
 Body: {
@@ -1408,17 +1550,20 @@ Response: { item: ItineraryItem }
 ```
 
 **Middleware:**
+
 - requireAuth
 - requireTripAccess
 - requirePlannerRole (if trip locked)
 
 **Business Rules:**
+
 - Can drag within same day or across days
 - sortOrder recalculated for all items on affected days
 - Time doesn't auto-update (manual edit if needed)
 - Locked items cannot be reordered (unless by planner)
 
 **Edge Cases:**
+
 - Dragging to invalid day → 400
 - Simultaneous reorders → Last write wins (rare)
 - Reordering locked item → 403 unless planner
@@ -1428,11 +1573,13 @@ Response: { item: ItineraryItem }
 ### Feature: Generate AI Itinerary
 
 **Frontend:**
+
 - Button: "Generate AI Itinerary" (shows if no items or explicitly clicked)
 - Loading state: "AI is planning your trip..."
 - Progress indicator (if background job)
 
 **API Endpoint:**
+
 ```
 POST /api/trips/:tripId/generate-itinerary
 Body: { regenerate: boolean } // If true, delete existing items
@@ -1443,11 +1590,13 @@ Response: { status: 'pending' | 'processing' | 'completed' | 'failed', items?: I
 ```
 
 **Middleware:**
+
 - requireAuth
 - requireTripAccess
 - requirePlannerRole
 
 **Backend Logic:**
+
 1. Get trip details + member preferences
 2. Build Claude prompt with all context
 3. Call Claude API (can take 10-30 seconds)
@@ -1456,6 +1605,7 @@ Response: { status: 'pending' | 'processing' | 'completed' | 'failed', items?: I
 6. Handle failures gracefully
 
 **Business Rules:**
+
 - Only planners can generate
 - If items exist, require confirmation to regenerate
 - Regenerate = delete all items first
@@ -1464,6 +1614,7 @@ Response: { status: 'pending' | 'processing' | 'completed' | 'failed', items?: I
 - Member preferences influence AI output
 
 **Edge Cases:**
+
 - AI API timeout → 503 "AI service unavailable, try again"
 - Invalid AI response → Use fallback template
 - Regenerate with existing bookings → Warn "Booked items will be deleted"
@@ -1471,6 +1622,7 @@ Response: { status: 'pending' | 'processing' | 'completed' | 'failed', items?: I
 - Rate limit hit → 429 "Too many generations, wait 1 hour"
 
 **AI Prompt Structure:**
+
 ```
 You are a travel planning expert. Generate a day-by-day itinerary.
 
@@ -1520,12 +1672,14 @@ RULES:
 ### Feature: Vote on Itinerary Item
 
 **Frontend:**
+
 - Vote buttons on each item: 👍 Upvote | 👎 Downvote | ⚪ Abstain
 - Active button highlighted
 - Vote count shown: "+5 / -2" or net "+3"
 - Can change vote
 
 **API Endpoint:**
+
 ```
 POST /api/trips/:tripId/itinerary/:itemId/vote
 Body: { voteType: 'up' | 'down' | 'abstain' }
@@ -1533,10 +1687,12 @@ Response: { vote: Vote, voteCounts: { up: number, down: number, abstain: number,
 ```
 
 **Middleware:**
+
 - requireAuth
 - requireTripAccess
 
 **Backend Logic:**
+
 1. Check if user already voted
 2. If yes, update existing vote
 3. If no, create new vote
@@ -1544,6 +1700,7 @@ Response: { vote: Vote, voteCounts: { up: number, down: number, abstain: number,
 5. Return vote + counts
 
 **Business Rules:**
+
 - One vote per user per item
 - Can change vote anytime (before deadline if set)
 - Abstain = neutral (doesn't affect count)
@@ -1552,6 +1709,7 @@ Response: { vote: Vote, voteCounts: { up: number, down: number, abstain: number,
 - Vote deadline: if set, cannot vote after deadline
 
 **Edge Cases:**
+
 - Voting on deleted item → 404
 - Voting after deadline → 400 "Vote deadline passed"
 - Changing vote rapidly → Debounce on frontend, last write wins
@@ -1562,12 +1720,14 @@ Response: { vote: Vote, voteCounts: { up: number, down: number, abstain: number,
 ### Feature: View Vote Summary
 
 **Frontend:**
+
 - Vote counts on each item
 - Vote breakdown modal: shows who voted what
 - Highlight items with consensus (>75% approval)
 - Highlight items with conflict (<25% approval)
 
 **API Endpoint:**
+
 ```
 GET /api/trips/:tripId/itinerary/:itemId/votes
 Response: {
@@ -1579,10 +1739,12 @@ Response: {
 ```
 
 **Middleware:**
+
 - requireAuth
 - requireTripAccess
 
 **Business Rules:**
+
 - Consensus = (upvotes / (upvotes + downvotes)) > 0.75
 - Conflict = (upvotes / (upvotes + downvotes)) < 0.25
 - Abstain votes excluded from percentage calc
@@ -1593,23 +1755,27 @@ Response: {
 ### Feature: Vote Deadline
 
 **Frontend:**
+
 - Countdown timer on trip detail
 - Notification when deadline approaching
 - Disable voting after deadline
 
 **Backend Logic:**
+
 - Set deadline when creating/editing trip
 - Validate voteDeadline < startDate (must vote before trip)
 - Background job: send reminders 3 days, 1 day, 1 hour before deadline
 - After deadline, voting endpoints return 400
 
 **Business Rules:**
+
 - Deadline must be before trip startDate
 - After deadline, votes are locked
 - Organizer can extend deadline
 - Items added after deadline have no voting (or extend deadline)
 
 **Edge Cases:**
+
 - Deadline in past → 400 when setting
 - Extending deadline → Notify members
 - Deadline passes mid-vote → Accept in-flight request, reject new
@@ -1621,12 +1787,14 @@ Response: {
 ### Feature: Comment on Itinerary Item
 
 **Frontend:**
+
 - Comments section below each item
 - Text input + "Post" button
 - Display: avatar, name, timestamp, comment text
 - Edit own comments (15 min window)
 
 **API Endpoint:**
+
 ```
 POST /api/trips/:tripId/itinerary/:itemId/comments
 Body: { content: string }
@@ -1637,16 +1805,19 @@ Response: { comments: Comment[] }
 ```
 
 **Middleware:**
+
 - requireAuth
 - requireTripAccess
 
 **Backend Logic:**
+
 1. Validate content (non-empty, max 2000 chars)
 2. Sanitize for XSS
 3. Create comment
 4. Return with user info
 
 **Business Rules:**
+
 - Content max 2000 chars
 - No empty comments (after trim)
 - Can edit own comments within 15 minutes
@@ -1654,6 +1825,7 @@ Response: { comments: Comment[] }
 - Markdown support (future: bold, links)
 
 **Edge Cases:**
+
 - Empty content → 400 "Comment cannot be empty"
 - XSS attempt → Sanitized before save
 - Commenting on deleted item → 404
@@ -1664,6 +1836,7 @@ Response: { comments: Comment[] }
 ### Feature: Trip-Level Chat
 
 **Frontend:**
+
 - Route: `/trip/:id` → Chat tab
 - Real-time message list (poll every 5s when active)
 - Text input with "Send" button
@@ -1671,6 +1844,7 @@ Response: { comments: Comment[] }
 - Highlight messages where user is mentioned
 
 **API Endpoint:**
+
 ```
 GET /api/trips/:tripId/chat
 Query: ?limit=100&offset=0
@@ -1682,16 +1856,19 @@ Response: { message: ChatMessage }
 ```
 
 **Middleware:**
+
 - requireAuth
 - requireTripAccess
 
 **Backend Logic:**
+
 1. GET: Fetch messages ordered by createdAt DESC, paginate
 2. POST: Validate content, sanitize, create message
 3. Parse @mentions (optional: notify mentioned users)
 4. Return message with user info
 
 **Business Rules:**
+
 - Content max 2000 chars
 - Poll every 5 seconds for new messages
 - Load 100 messages initially, infinite scroll for more
@@ -1700,6 +1877,7 @@ Response: { message: ChatMessage }
 - itemId optional: link message to specific itinerary item
 
 **Edge Cases:**
+
 - Empty message → 400
 - @mention non-member → Allowed (no notification)
 - Rapid message sending → Rate limit (10 per minute)
@@ -1711,16 +1889,19 @@ Response: { message: ChatMessage }
 ### Feature: Message Notifications
 
 **Frontend:**
+
 - Badge on Chat tab when new messages
 - Desktop notification if @mentioned (opt-in)
 - Mark as read when tab opened
 
 **Backend Logic:**
+
 - Track last read message per user (new table: chat_read_status)
 - Count unread = messages after last read
 - Send push notification if @mentioned (Tier 2 feature)
 
 **Business Rules:**
+
 - Unread count resets when tab viewed
 - @mention triggers notification (if enabled)
 - Mute chat option (future)
@@ -1732,11 +1913,13 @@ Response: { message: ChatMessage }
 ### Feature: Invite Members
 
 **Frontend:**
+
 - "Invite Members" button on Team tab
 - Modal: email input (comma-separated or multi-entry)
 - Shows pending invites
 
 **API Endpoint:**
+
 ```
 POST /api/trips/:tripId/invite
 Body: { emails: string[] }
@@ -1747,11 +1930,13 @@ Response: {
 ```
 
 **Middleware:**
+
 - requireAuth
 - requireTripAccess
 - requirePlannerRole
 
 **Backend Logic:**
+
 1. Validate emails
 2. Check each email:
    - Already a member? → Skip
@@ -1762,6 +1947,7 @@ Response: {
 5. Return summary
 
 **Business Rules:**
+
 - Only planners can invite
 - Max 50 members per trip
 - Invite expires in 7 days
@@ -1769,6 +1955,7 @@ Response: {
 - Cannot invite organizer
 
 **Edge Cases:**
+
 - Invalid email format → Add to failed list
 - Already member → Skip silently
 - Trip at capacity → 400 "Trip full"
@@ -1779,11 +1966,13 @@ Response: {
 ### Feature: Accept/Decline Invite
 
 **Frontend:**
+
 - Email contains link: `/join/:inviteToken`
 - Shows trip preview
 - Buttons: "Accept" | "Decline"
 
 **API Endpoint:**
+
 ```
 POST /api/trips/invites/:token/accept
 Response: { trip: Trip }
@@ -1793,9 +1982,11 @@ Response: { success: true }
 ```
 
 **Middleware:**
+
 - requireAuth (must login/register first)
 
 **Backend Logic:**
+
 1. Verify token validity (not expired)
 2. Find invite
 3. Accept: Create tripMember (rsvpStatus='accepted'), update invite
@@ -1803,6 +1994,7 @@ Response: { success: true }
 5. Redirect to trip or dashboard
 
 **Business Rules:**
+
 - Token expires in 7 days
 - Must be logged in to accept/decline
 - Cannot accept if trip full
@@ -1810,6 +2002,7 @@ Response: { success: true }
 - Can be re-invited after decline
 
 **Edge Cases:**
+
 - Expired token → 400 "Invite expired"
 - Already accepted → 400 "Already a member"
 - Trip full → 400 "Trip is full"
@@ -1820,12 +2013,14 @@ Response: { success: true }
 ### Feature: View Members
 
 **Frontend:**
+
 - Team tab shows all members
 - Avatar, name, role, RSVP status
 - Pending invites shown separately
 - Organizer badge on organizer
 
 **API Endpoint:**
+
 ```
 GET /api/trips/:tripId/members
 Response: {
@@ -1835,10 +2030,12 @@ Response: {
 ```
 
 **Middleware:**
+
 - requireAuth
 - requireTripAccess
 
 **Business Rules:**
+
 - Show accepted members first
 - Pending invites shown separately
 - Organizer always listed first
@@ -1849,28 +2046,33 @@ Response: {
 ### Feature: Remove Member
 
 **Frontend:**
+
 - Remove button next to member (planner only)
 - Confirmation dialog
 - Cannot remove organizer
 
 **API Endpoint:**
+
 ```
 DELETE /api/trips/:tripId/members/:userId
 Response: { success: true }
 ```
 
 **Middleware:**
+
 - requireAuth
 - requireTripAccess
 - requirePlannerRole
 
 **Backend Logic:**
+
 1. Check if target is organizer → Block
 2. Check if target is self → Allow (leave trip)
 3. Delete tripMember record
 4. Optionally notify removed user
 
 **Business Rules:**
+
 - Cannot remove organizer
 - Planners can remove members
 - Members can leave voluntarily
@@ -1878,6 +2080,7 @@ Response: { success: true }
 - Removing member keeps their expenses (financial audit)
 
 **Edge Cases:**
+
 - Removing organizer → 403 "Cannot remove organizer"
 - Removing self → Allowed (leave trip)
 - Last member leaving → Trip remains (organizer always stays)
@@ -1887,10 +2090,12 @@ Response: { success: true }
 ### Feature: Change Member Role
 
 **Frontend:**
+
 - Role dropdown on member card (organizer only)
 - Confirm promotion to planner
 
 **API Endpoint:**
+
 ```
 PATCH /api/trips/:tripId/members/:userId/role
 Body: { role: 'planner' | 'member' }
@@ -1898,11 +2103,13 @@ Response: { member: TripMember }
 ```
 
 **Middleware:**
+
 - requireAuth
 - requireTripAccess
 - Organizer only (stricter than planner)
 
 **Business Rules:**
+
 - Only organizer can change roles
 - Cannot demote organizer
 - Planners have edit access to itinerary, members, settings
@@ -1913,11 +2120,13 @@ Response: { member: TripMember }
 ### Feature: Member Preferences
 
 **Frontend:**
+
 - Preference form on Team tab (each member completes for self)
 - Fields: dietary restrictions, budget flexibility, must-do activities, accessibility needs, pace
 - Used by AI for itinerary generation
 
 **API Endpoint:**
+
 ```
 GET /api/trips/:tripId/members/:userId/preferences
 Response: { preferences: MemberPreferences }
@@ -1928,15 +2137,18 @@ Response: { preferences: MemberPreferences }
 ```
 
 **Middleware:**
+
 - requireAuth
 - requireTripAccess
 
 **Backend Logic:**
+
 1. GET: Organizer can view all, members can view own
 2. POST: Members can only edit their own preferences
 3. Upsert (create or update)
 
 **Business Rules:**
+
 - Each member has one preference record per trip
 - Optional fields (all can be empty)
 - Preferences influence AI itinerary generation
@@ -1949,6 +2161,7 @@ Response: { preferences: MemberPreferences }
 ### Feature: Add Expense
 
 **Frontend:**
+
 - "Add Expense" button on Expenses tab
 - Form:
   - Amount (number, required)
@@ -1961,6 +2174,7 @@ Response: { preferences: MemberPreferences }
   - Link to itinerary item (optional)
 
 **API Endpoint:**
+
 ```
 POST /api/trips/:tripId/expenses
 Body: {
@@ -1977,10 +2191,12 @@ Response: { expense: Expense }
 ```
 
 **Middleware:**
+
 - requireAuth
 - requireTripAccess
 
 **Backend Logic:**
+
 1. Validate all fields
 2. Verify paidByUserId is trip member
 3. Verify all splitAmong users are trip members
@@ -1989,6 +2205,7 @@ Response: { expense: Expense }
 6. Calculate balances (for display)
 
 **Business Rules:**
+
 - Amount min 0, max 1,000,000
 - Description max 500 chars
 - Date should be within trip dates (warn if outside)
@@ -1999,6 +2216,7 @@ Response: { expense: Expense }
 - Cannot add expenses for cancelled trips
 
 **Edge Cases:**
+
 - Amount = 0 → Allowed (free item, tracking only)
 - Date before trip start → Allow with warning
 - Date >7 days after trip end → Warn "Add during trip"
@@ -2011,11 +2229,13 @@ Response: { expense: Expense }
 ### Feature: Edit Expense
 
 **Frontend:**
+
 - Edit button on expense card
 - Same form as add (pre-filled)
 - Cannot edit if settled (flag)
 
 **API Endpoint:**
+
 ```
 PATCH /api/trips/:tripId/expenses/:expenseId
 Body: { (any editable fields) }
@@ -2023,22 +2243,26 @@ Response: { expense: Expense }
 ```
 
 **Middleware:**
+
 - requireAuth
 - requireTripAccess
 
 **Backend Logic:**
+
 1. Check if expense belongs to trip
 2. Check if settled → Block or require confirmation
 3. Update fields
 4. Recalculate balances
 
 **Business Rules:**
+
 - Can edit own expenses anytime
 - Organizer can edit any expense
 - Cannot edit settled expenses (require unsettling first)
 - Editing recalculates split amounts
 
 **Edge Cases:**
+
 - Editing settled expense → 400 "Cannot edit settled expense"
 - Changing split amount → Recalculate balances
 - Removing user from split → Must have at least 1 user
@@ -2048,10 +2272,12 @@ Response: { expense: Expense }
 ### Feature: Delete Expense
 
 **Frontend:**
+
 - Delete button with confirmation
 - Extra confirmation if settled
 
 **API Endpoint:**
+
 ```
 DELETE /api/trips/:tripId/expenses/:expenseId
 Body: { confirm: boolean } (required if settled)
@@ -2059,10 +2285,12 @@ Response: { success: true }
 ```
 
 **Middleware:**
+
 - requireAuth
 - requireTripAccess
 
 **Business Rules:**
+
 - Can delete own expenses
 - Organizer can delete any expense
 - Deleting settled expense requires confirmation
@@ -2073,12 +2301,14 @@ Response: { success: true }
 ### Feature: Calculate Settlement
 
 **Frontend:**
+
 - Settlement summary card on Expenses tab
 - Shows: who owes whom, exact amounts
 - Suggests optimal transactions (minimize # of payments)
 - Export summary as CSV
 
 **API Endpoint:**
+
 ```
 GET /api/trips/:tripId/expenses/settlement
 Response: {
@@ -2090,10 +2320,12 @@ Response: {
 ```
 
 **Middleware:**
+
 - requireAuth
 - requireTripAccess
 
 **Backend Logic:**
+
 1. Calculate each user's balance:
    - For each expense:
      - Payer: +amount
@@ -2106,45 +2338,52 @@ Response: {
    - Repeat until all settled
 
 **Settlement Algorithm:**
+
 ```javascript
 function calculateSettlement(expenses) {
-  const balances = {}
+  const balances = {};
 
   // Calculate balances
-  expenses.forEach(exp => {
-    const amountPerPerson = exp.amount / exp.splitAmong.length
-    balances[exp.paidByUserId] = (balances[exp.paidByUserId] || 0) + exp.amount
-    exp.splitAmong.forEach(userId => {
-      balances[userId] = (balances[userId] || 0) - amountPerPerson
-    })
-  })
+  expenses.forEach((exp) => {
+    const amountPerPerson = exp.amount / exp.splitAmong.length;
+    balances[exp.paidByUserId] = (balances[exp.paidByUserId] || 0) + exp.amount;
+    exp.splitAmong.forEach((userId) => {
+      balances[userId] = (balances[userId] || 0) - amountPerPerson;
+    });
+  });
 
   // Separate debtors and creditors
-  const debtors = Object.entries(balances).filter(([_, b]) => b < 0).map(([id, b]) => ({ id, amount: -b }))
-  const creditors = Object.entries(balances).filter(([_, b]) => b > 0).map(([id, b]) => ({ id, amount: b }))
+  const debtors = Object.entries(balances)
+    .filter(([_, b]) => b < 0)
+    .map(([id, b]) => ({ id, amount: -b }));
+  const creditors = Object.entries(balances)
+    .filter(([_, b]) => b > 0)
+    .map(([id, b]) => ({ id, amount: b }));
 
   // Optimize transactions
-  const transactions = []
-  let i = 0, j = 0
+  const transactions = [];
+  let i = 0,
+    j = 0;
   while (i < debtors.length && j < creditors.length) {
-    const debt = debtors[i].amount
-    const credit = creditors[j].amount
-    const amount = Math.min(debt, credit)
+    const debt = debtors[i].amount;
+    const credit = creditors[j].amount;
+    const amount = Math.min(debt, credit);
 
-    transactions.push({ from: debtors[i].id, to: creditors[j].id, amount })
+    transactions.push({ from: debtors[i].id, to: creditors[j].id, amount });
 
-    debtors[i].amount -= amount
-    creditors[j].amount -= amount
+    debtors[i].amount -= amount;
+    creditors[j].amount -= amount;
 
-    if (debtors[i].amount === 0) i++
-    if (creditors[j].amount === 0) j++
+    if (debtors[i].amount === 0) i++;
+    if (creditors[j].amount === 0) j++;
   }
 
-  return { balances, transactions }
+  return { balances, transactions };
 }
 ```
 
 **Business Rules:**
+
 - Balance = total paid - total owed
 - Positive balance = overpaid (should receive)
 - Negative balance = underpaid (should pay)
@@ -2152,6 +2391,7 @@ function calculateSettlement(expenses) {
 - Optimize to minimize # of transactions
 
 **Edge Cases:**
+
 - No expenses → Empty settlement
 - Perfect split → All balances = 0
 - One person paid everything → Others owe them
@@ -2163,11 +2403,13 @@ function calculateSettlement(expenses) {
 ### Feature: Mark Expenses as Settled
 
 **Frontend:**
+
 - Checkbox on settlement summary
 - "Mark as Settled" button (organizer only)
 - Settled expenses grayed out
 
 **API Endpoint:**
+
 ```
 POST /api/trips/:tripId/expenses/settle
 Body: { expenseIds: UUID[] }
@@ -2175,11 +2417,13 @@ Response: { settled: number }
 ```
 
 **Middleware:**
+
 - requireAuth
 - requireTripAccess
 - requirePlannerRole
 
 **Business Rules:**
+
 - Only organizer can mark settled
 - Settled expenses locked from editing
 - Can unsettle if needed (undo)
@@ -2189,16 +2433,19 @@ Response: { settled: number }
 ### Feature: Export Expenses
 
 **Frontend:**
+
 - "Export CSV" button
 - Downloads expense report
 
 **API Endpoint:**
+
 ```
 GET /api/trips/:tripId/expenses/export
 Response: CSV file download
 ```
 
 **CSV Format:**
+
 ```
 Date,Description,Category,Amount,Paid By,Split Among,Balance
 2024-09-15,Dinner at Le Bernardin,food,240.00,John,John;Sarah;Alex,-80.00
@@ -2206,6 +2453,7 @@ Date,Description,Category,Amount,Paid By,Split Among,Balance
 ```
 
 **Business Rules:**
+
 - Include all expenses (settled + unsettled)
 - Calculate running balance per user
 - Include settlement summary at end
@@ -2217,11 +2465,13 @@ Date,Description,Category,Amount,Paid By,Split Among,Balance
 ### Feature: Update Booking Status
 
 **Frontend:**
+
 - Status dropdown on itinerary item
 - Options: not_started, in_progress, booked, cancelled
 - Color-coded badges
 
 **API Endpoint:**
+
 ```
 PATCH /api/trips/:tripId/itinerary/:itemId/booking
 Body: {
@@ -2234,16 +2484,19 @@ Response: { item: ItineraryItem }
 ```
 
 **Middleware:**
+
 - requireAuth
 - requireTripAccess
 
 **Backend Logic:**
+
 1. Validate status enum
 2. If status = 'booked', require bookedByUserId
 3. Update item
 4. Calculate booking progress for trip
 
 **Business Rules:**
+
 - When status → 'booked': bookedByUserId required
 - Confirmation number optional but recommended
 - Status transitions: not_started → in_progress → booked
@@ -2251,6 +2504,7 @@ Response: { item: ItineraryItem }
 - Cancelled status allowed from any state
 
 **Edge Cases:**
+
 - Marking booked without bookedBy → 400 "User required"
 - Cancelling booked item → Allowed
 - Re-booking cancelled item → Allowed
@@ -2260,11 +2514,13 @@ Response: { item: ItineraryItem }
 ### Feature: Upload Confirmation
 
 **Frontend:**
+
 - File upload on booking status form
 - Accepts: images (JPG, PNG), PDFs
 - Shows thumbnail if uploaded
 
 **API Endpoint:**
+
 ```
 POST /api/trips/:tripId/itinerary/:itemId/booking/upload
 Body: FormData (file)
@@ -2272,6 +2528,7 @@ Response: { url: string }
 ```
 
 **Backend Logic:**
+
 1. Validate file type (images, PDF only)
 2. Validate file size (max 10MB)
 3. Upload to cloud storage (S3/R2)
@@ -2279,12 +2536,14 @@ Response: { url: string }
 5. Return URL to save in confirmationImageUrl
 
 **Business Rules:**
+
 - Max 10MB per file
 - Allowed types: JPG, PNG, PDF
 - Store in private bucket
 - Generate signed URLs for viewing
 
 **Edge Cases:**
+
 - Invalid file type → 400 "Invalid file type"
 - File too large → 413 "File too large"
 - Upload fails → 500 "Upload failed, try again"
@@ -2294,11 +2553,13 @@ Response: { url: string }
 ### Feature: Assign Booking Task
 
 **Frontend:**
+
 - "Assign to" dropdown on item
 - Assigns member to handle booking
 - Notification sent to assignee
 
 **API Endpoint:**
+
 ```
 PATCH /api/trips/:tripId/itinerary/:itemId/assign
 Body: { assignedTo: UUID }
@@ -2306,6 +2567,7 @@ Response: { item: ItineraryItem }
 ```
 
 **Business Rules:**
+
 - Can assign to any trip member
 - Assignee gets notification
 - Doesn't enforce (just a suggestion)
@@ -2318,10 +2580,12 @@ Response: { item: ItineraryItem }
 ### Feature: Add Packing Item
 
 **Frontend:**
+
 - "Add Item" button on packing list
 - Form: name, category, quantity, assign to, notes
 
 **API Endpoint:**
+
 ```
 POST /api/trips/:tripId/packing
 Body: {
@@ -2335,10 +2599,12 @@ Response: { item: PackingItem }
 ```
 
 **Middleware:**
+
 - requireAuth
 - requireTripAccess
 
 **Business Rules:**
+
 - Name max 200 chars
 - Quantity min 1
 - assignedTo must be trip member (or null for shared)
@@ -2349,10 +2615,12 @@ Response: { item: PackingItem }
 ### Feature: Mark Item as Packed
 
 **Frontend:**
+
 - Checkbox next to item
 - Only assignee can check (or organizer)
 
 **API Endpoint:**
+
 ```
 PATCH /api/trips/:tripId/packing/:itemId/pack
 Body: { isPacked: boolean }
@@ -2360,15 +2628,18 @@ Response: { item: PackingItem }
 ```
 
 **Middleware:**
+
 - requireAuth
 - requireTripAccess
 
 **Backend Logic:**
+
 1. Check if current user = assignedTo OR organizer
 2. Update isPacked
 3. Return item
 
 **Business Rules:**
+
 - Only assigned user can mark packed (exception: organizer)
 - Can uncheck if needed
 - Progress bar: packed / total items
@@ -2380,9 +2651,11 @@ Response: { item: PackingItem }
 ### Feature: Add Transportation Entry
 
 **Frontend:**
+
 - Form: type (driver/passenger/ride_share), driver, passengers, vehicle, locations, time
 
 **API Endpoint:**
+
 ```
 POST /api/trips/:tripId/transportation
 Body: {
@@ -2399,12 +2672,14 @@ Response: { entry: TransportationEntry }
 ```
 
 **Business Rules:**
+
 - All users must be trip members
 - If type=driver, driverId required
 - Driver cannot be in passengers
 - Departure time should be within trip dates
 
 **Edge Cases:**
+
 - Driver in passengers → 400 "Driver cannot be passenger"
 - Invalid user IDs → 400 "User not found"
 
@@ -2415,10 +2690,12 @@ Response: { entry: TransportationEntry }
 ### Feature: Upload Document
 
 **Frontend:**
+
 - File upload with type selection
 - Optional: expiry date, belongs to user
 
 **API Endpoint:**
+
 ```
 POST /api/trips/:tripId/documents
 Body: FormData {
@@ -2432,6 +2709,7 @@ Response: { document: TripDocument }
 ```
 
 **Business Rules:**
+
 - Max 10MB, PDF/JPG/PNG only
 - Store in private storage
 - Expiry warning if <30 days
@@ -2442,9 +2720,11 @@ Response: { document: TripDocument }
 ### Feature: Add Emergency Contact
 
 **Frontend:**
+
 - Form: name, relationship, phone, email
 
 **API Endpoint:**
+
 ```
 POST /api/trips/:tripId/emergency-contacts
 Body: { name, relationship, phone, email? }
@@ -2452,6 +2732,7 @@ Response: { contact: EmergencyContact }
 ```
 
 **Business Rules:**
+
 - Phone required, email optional
 - Encrypt phone in database
 - Only owner + organizer can view
@@ -2464,11 +2745,13 @@ Response: { contact: EmergencyContact }
 ### Feature: Upload Photos
 
 **Frontend:**
+
 - Batch upload (up to 50 at once)
 - Auto-extract EXIF (date, location)
 - Optional caption
 
 **API Endpoint:**
+
 ```
 POST /api/trips/:tripId/photos
 Body: FormData (multiple files)
@@ -2476,6 +2759,7 @@ Response: { photos: TripPhoto[] }
 ```
 
 **Business Rules:**
+
 - Max 25MB per photo
 - Auto-generate thumbnails
 - Extract EXIF data
@@ -2488,9 +2772,11 @@ Response: { photos: TripPhoto[] }
 ### Feature: Create Poll
 
 **Frontend:**
+
 - Form: question, 2-10 options, allow multiple, expiry
 
 **API Endpoint:**
+
 ```
 POST /api/trips/:tripId/polls
 Body: {
@@ -2503,6 +2789,7 @@ Response: { poll: Poll }
 ```
 
 **Business Rules:**
+
 - 2-10 options required
 - Options must be unique
 - Cannot edit after first vote
@@ -2512,10 +2799,12 @@ Response: { poll: Poll }
 ### Feature: Vote on Poll
 
 **Frontend:**
+
 - Radio buttons (single) or checkboxes (multiple)
 - Results shown after voting
 
 **API Endpoint:**
+
 ```
 POST /api/trips/:tripId/polls/:pollId/vote
 Body: { selectedOptions: number[] }
@@ -2523,6 +2812,7 @@ Response: { vote: PollVote, results: { option: string, count: number }[] }
 ```
 
 **Business Rules:**
+
 - If allowMultiple=false, selectedOptions.length must be 1
 - Can change vote before expiry
 - Show percentages in results
@@ -2534,11 +2824,13 @@ Response: { vote: PollVote, results: { option: string, count: number }[] }
 ### Feature: View Weather Forecast
 
 **Frontend:**
+
 - Weather card on each day in itinerary
 - Hourly breakdown (scrollable)
 - Icons for conditions
 
 **API Endpoint:**
+
 ```
 GET /api/trips/:tripId/weather
 Response: {
@@ -2551,6 +2843,7 @@ Response: {
 ```
 
 **Backend Logic:**
+
 1. Get trip destination
 2. Geocode to lat/lng (Open-Meteo API)
 3. Fetch hourly forecast for trip dates
@@ -2558,6 +2851,7 @@ Response: {
 5. Return forecast by day
 
 **Business Rules:**
+
 - Only fetch for trips starting within 16 days (API limit)
 - Cache forecast for 6 hours
 - Show warning if forecast unavailable
@@ -2569,6 +2863,7 @@ Response: {
 ### Feature: Budget Optimization
 
 **API Endpoint:**
+
 ```
 POST /api/trips/:tripId/ai/optimize-budget
 Response: {
@@ -2584,6 +2879,7 @@ Response: {
 ```
 
 **Backend Logic:**
+
 1. Get all itinerary items + expenses + preferences
 2. Build Claude prompt with context
 3. Call Claude API
@@ -2591,6 +2887,7 @@ Response: {
 5. Return suggestions
 
 **Business Rules:**
+
 - Rate limit: 10 AI calls per user per hour
 - Consider member preferences (don't suggest removing must-dos)
 - Provide realistic alternatives
@@ -2600,6 +2897,7 @@ Response: {
 ### Feature: Conflict Detection
 
 **Backend Logic (runs automatically on itinerary changes):**
+
 1. Get all items for each day
 2. Calculate time gaps
 3. Detect issues:
@@ -2615,6 +2913,7 @@ Response: {
 ### Feature: Smart Expense Splitting
 
 **Backend Logic:**
+
 1. OCR receipt (Google Vision API)
 2. Parse items and prices
 3. Get member context (dietary restrictions)
@@ -2628,10 +2927,12 @@ Response: {
 ### Feature: Trip Analytics
 
 **Frontend:**
+
 - Analytics dashboard (More tab)
 - Charts: budget breakdown, activity types, booking progress
 
 **API Endpoint:**
+
 ```
 GET /api/trips/:tripId/analytics
 Response: {
@@ -2643,6 +2944,7 @@ Response: {
 ```
 
 **Business Rules:**
+
 - Budget breakdown by category
 - Activity types distribution
 - Booking progress percentage
@@ -2653,6 +2955,7 @@ Response: {
 ### Feature: Learned Preferences
 
 **Backend Logic (runs after trip completion):**
+
 1. Analyze user's behavior:
    - Which activities rated highly
    - Which activities skipped
@@ -2667,6 +2970,7 @@ Response: {
 ## Global Business Rules
 
 ### Trip Lifecycle
+
 1. **Planning** → **Booking** → **Active** → **Completed**
 2. Transitions:
    - Planning → Booking: Vote deadline passed or manual
@@ -2675,11 +2979,13 @@ Response: {
 3. Cancelled status can be set from any state (organizer only)
 
 ### Permission Hierarchy
+
 1. **Organizer:** Full access (create, edit, delete, lock, assign roles)
 2. **Planner:** Edit itinerary, manage members, view all data
 3. **Member:** View, vote, comment, add expenses, chat
 
 ### Rate Limits
+
 - **Auth endpoints:** 5 attempts per 15 minutes per IP
 - **AI features:** 10 calls per hour per user
 - **File uploads:** 50 photos per batch, 10MB per file
@@ -2687,6 +2993,7 @@ Response: {
 - **API calls:** 200 per 15 minutes per user (global)
 
 ### Data Privacy
+
 - **Emergency contacts:** Encrypted, owner + organizer only
 - **Documents:** Private storage, signed URLs
 - **Location sharing:** Opt-in, deleted after trip
@@ -2694,6 +3001,7 @@ Response: {
 - **GDPR:** Data export + deletion endpoints required
 
 ### Data Retention
+
 - **Active trips:** Indefinite
 - **Completed trips:** Indefinite (user can delete)
 - **Cancelled trips:** 30 days then auto-delete (configurable)
@@ -2701,12 +3009,14 @@ Response: {
 - **Audit logs:** 1 year retention
 
 ### Financial Rules
+
 - **Currency:** Default USD, support multi-currency (future)
 - **Rounding:** 2 decimal places
 - **Settlement:** Optimize for minimum transactions
 - **Expenses:** Cannot be negative
 
 ### Validation Standards
+
 - **Emails:** RFC 5322 format, lowercase storage
 - **UUIDs:** v4 format
 - **Dates:** ISO 8601 format
@@ -2718,6 +3028,7 @@ Response: {
 ## Error Handling Standards
 
 ### HTTP Status Codes
+
 - **200 OK:** Successful GET/PATCH
 - **201 Created:** Successful POST
 - **204 No Content:** Successful DELETE
@@ -2732,6 +3043,7 @@ Response: {
 - **503 Service Unavailable:** External API failure (AI, email)
 
 ### Error Response Format
+
 ```json
 {
   "error": "Human-readable error message",
@@ -2741,6 +3053,7 @@ Response: {
 ```
 
 ### Error Codes
+
 - `AUTH_REQUIRED`: Missing authentication
 - `INVALID_TOKEN`: Expired/invalid JWT
 - `ACCESS_DENIED`: Insufficient permissions
@@ -2753,6 +3066,7 @@ Response: {
 - `UPLOAD_FAILED`: File upload failure
 
 ### Frontend Error Handling
+
 - **Network errors:** Retry with exponential backoff
 - **Validation errors:** Show inline on form fields
 - **Permission errors:** Redirect to trip list
@@ -2764,44 +3078,52 @@ Response: {
 ## Edge Cases Summary
 
 ### Authentication
+
 - Token expires mid-session → Redirect to login
 - Multiple tabs logged in → Sync auth state
 - Login from different device → Allow (multi-device)
 
 ### Trip Management
+
 - Organizer leaves trip → Cannot leave (must delete trip or transfer ownership)
 - All members decline invite → Trip exists with only organizer
 - Trip starts while editing → Changes saved if valid
 - Trip deleted while member viewing → 404 on next action
 
 ### Itinerary
+
 - Adding item to past day → Allow with warning
 - Deleting booked item → Require confirmation
 - Simultaneous edits → Last write wins (no conflict resolution)
 - Drag-drop across days → Recalculate day boundaries
 
 ### Voting
+
 - Voting after deadline → Block with error
 - Changing vote rapidly → Debounce, last vote wins
 - Item deleted with votes → Cascade delete votes
 
 ### Expenses
+
 - Deleting user with expenses → Keep expenses, mark user as "[Removed User]"
 - Editing settled expenses → Require unsettling first
 - Floating point rounding → Always round to 2 decimals
 - Multi-currency → Convert to trip currency (use historical rates)
 
 ### Chat
+
 - Message during network outage → Queue locally, send when back online
 - @mentioning removed user → Allowed (no notification)
 - Very long messages → Truncate at 2000 chars
 
 ### Files
+
 - Upload timeout → Retry with smaller chunks
 - Corrupt file → Validate on server, return error
 - Missing file (deleted from storage) → Show placeholder
 
 ### AI
+
 - API timeout → 30s timeout, return error
 - Invalid response → Use fallback logic
 - Rate limit → Show "Try again in X minutes"
@@ -2811,24 +3133,28 @@ Response: {
 ## Testing Requirements
 
 ### Unit Tests
+
 - All business logic functions
 - Input validation (Zod schemas)
 - Settlement algorithm
 - AI prompt builders
 
 ### Integration Tests
+
 - Auth flow (register, login, token)
 - Trip CRUD operations
 - Itinerary management
 - Expense calculations
 
 ### E2E Tests
+
 - Complete trip creation flow
 - Invite + accept flow
 - Voting on items
 - Settlement calculation
 
 ### Security Tests
+
 - SQL injection attempts
 - XSS payloads
 - Authorization bypass attempts
@@ -2839,18 +3165,21 @@ Response: {
 ## Performance Requirements
 
 ### API Response Times
+
 - GET endpoints: <200ms (95th percentile)
 - POST endpoints: <500ms (95th percentile)
 - AI endpoints: <30s (timeout after)
 - File uploads: <10s for 10MB
 
 ### Database Queries
+
 - Single trip fetch: <50ms
 - Itinerary list: <100ms
 - Settlement calculation: <200ms
 - Use indexes on all foreign keys
 
 ### Frontend Performance
+
 - First contentful paint: <1.5s
 - Time to interactive: <3s
 - Bundle size: <500KB (gzipped)
@@ -2860,6 +3189,7 @@ Response: {
 ## Deployment Checklist
 
 ### Pre-Launch
+
 - [ ] All Tier 0 security implemented (HTTPS, auth, encryption)
 - [ ] Environment variables secured
 - [ ] Rate limiting configured
@@ -2870,6 +3200,7 @@ Response: {
 - [ ] Health check endpoint (/health)
 
 ### Post-Launch
+
 - [ ] Monitor error rates
 - [ ] Track API response times
 - [ ] Monitor database performance

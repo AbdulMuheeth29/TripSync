@@ -1,16 +1,23 @@
-import { useEffect, useState } from "react";
-import { useParams, useLocation, Link } from "wouter";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { useAuth } from "@/lib/auth-context";
-import { useToast } from "@/hooks/use-toast";
-import { getAuthHeaders } from "@/lib/auth-context";
-import { AppLogo } from "@/components/app-logo";
-import { MapPin, Calendar, Users, Loader2, Check, X } from "lucide-react";
+import { useEffect, useState } from 'react';
+import { useParams, useLocation, Link } from 'wouter';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { useAuth } from '@/lib/auth-context';
+import { useToast } from '@/hooks/use-toast';
+import { getAuthHeaders } from '@/lib/auth-context';
+import { AppLogo } from '@/components/app-logo';
+import { MapPin, Calendar, Users, Loader2, Check, X } from 'lucide-react';
 
 interface InviteData {
   invite: { id: string; tripId: string; email: string; status: string };
-  trip: { id: string; destination: string; startDate: string; endDate: string; groupSize: number; budgetPerPerson?: number };
+  trip: {
+    id: string;
+    destination: string;
+    startDate: string;
+    endDate: string;
+    groupSize: number;
+    budgetPerPerson?: number;
+  };
 }
 
 export default function InviteRespondPage() {
@@ -30,44 +37,57 @@ export default function InviteRespondPage() {
       return;
     }
     fetch(`/api/invites/${inviteId}`)
-      .then((r) => r.ok ? r.json() : null)
+      .then((r) => (r.ok ? r.json() : null))
       .then(setData)
       .catch(() => setData(null))
       .finally(() => setLoading(false));
   }, [inviteId]);
 
-  const handleRespond = async (action: "accept" | "decline") => {
+  const handleRespond = async (action: 'accept' | 'decline') => {
     if (!inviteId || !data) return;
     setResponding(true);
     try {
       const headers = getAuthHeaders();
       const res = await fetch(`/api/invites/${inviteId}/respond`, {
-        method: "POST",
-        headers: { ...headers, "Content-Type": "application/json" },
-        credentials: "include",
+        method: 'POST',
+        headers: { ...headers, 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify({ action }),
       });
       const json = await res.json();
       if (!res.ok) {
-        if (res.status === 401 && action === "accept") {
-          toast({ title: "Log in required", description: "Redirecting to login...", variant: "default" });
+        if (res.status === 401 && action === 'accept') {
+          toast({
+            title: 'Log in required',
+            description: 'Redirecting to login...',
+            variant: 'default',
+          });
           setLocation(`/login?invite=${inviteId}&redirect=/invite/${inviteId}`);
         } else if (res.status === 403 && json.upgradeUrl) {
-          toast({ title: json.error || "Member limit reached", description: "Upgrade to Pro for unlimited members per trip.", variant: "destructive", action: <a href={json.upgradeUrl} className="text-sm font-medium underline">Upgrade</a> });
+          toast({
+            title: json.error || 'Member limit reached',
+            description: 'Upgrade to Pro for unlimited members per trip.',
+            variant: 'destructive',
+            action: (
+              <a href={json.upgradeUrl} className="text-sm font-medium underline">
+                Upgrade
+              </a>
+            ),
+          });
         } else {
-          toast({ title: json.error || "Failed", variant: "destructive" });
+          toast({ title: json.error || 'Failed', variant: 'destructive' });
         }
         return;
       }
-      if (action === "accept") {
-        toast({ title: "Invite accepted!", description: "You're in the trip." });
+      if (action === 'accept') {
+        toast({ title: 'Invite accepted!', description: "You're in the trip." });
         setLocation(`/trip/${json.tripId}`);
       } else {
-        toast({ title: "Invite declined" });
+        toast({ title: 'Invite declined' });
         setData(null);
       }
     } catch {
-      toast({ title: "Request failed", variant: "destructive" });
+      toast({ title: 'Request failed', variant: 'destructive' });
     } finally {
       setResponding(false);
     }
@@ -104,7 +124,10 @@ export default function InviteRespondPage() {
 
   return (
     <div className="min-h-screen bg-background flex flex-col items-center justify-center p-4">
-      <Link href="/" className="flex items-center gap-2 mb-8 no-underline text-foreground hover:opacity-90 transition-opacity">
+      <Link
+        href="/"
+        className="flex items-center gap-2 mb-8 no-underline text-foreground hover:opacity-90 transition-opacity"
+      >
         <AppLogo className="h-10 w-10 object-contain" />
         <span className="text-2xl font-bold">TripSync</span>
       </Link>
@@ -112,9 +135,7 @@ export default function InviteRespondPage() {
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
           <CardTitle className="text-2xl">You're Invited</CardTitle>
-          <CardDescription>
-            Join a group trip to {trip.destination}
-          </CardDescription>
+          <CardDescription>Join a group trip to {trip.destination}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="bg-muted rounded-lg p-4 space-y-2">
@@ -125,7 +146,8 @@ export default function InviteRespondPage() {
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <Calendar className="h-4 w-4" />
               <span>
-                {new Date(trip.startDate).toLocaleDateString()} – {new Date(trip.endDate).toLocaleDateString()}
+                {new Date(trip.startDate).toLocaleDateString()} –{' '}
+                {new Date(trip.endDate).toLocaleDateString()}
               </span>
             </div>
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
@@ -152,7 +174,7 @@ export default function InviteRespondPage() {
             <Button
               variant="outline"
               className="flex-1"
-              onClick={() => handleRespond("decline")}
+              onClick={() => handleRespond('decline')}
               disabled={responding}
             >
               <X className="h-4 w-4 mr-2" />
@@ -160,7 +182,7 @@ export default function InviteRespondPage() {
             </Button>
             <Button
               className="flex-1"
-              onClick={() => handleRespond("accept")}
+              onClick={() => handleRespond('accept')}
               disabled={responding || !canAccept}
             >
               {responding ? (
@@ -175,7 +197,9 @@ export default function InviteRespondPage() {
           {!user && (
             <div className="text-center">
               <Link href={`/login?invite=${inviteId}&redirect=/invite/${inviteId}`}>
-                <Button variant="ghost" size="sm">Log in to accept</Button>
+                <Button variant="ghost" size="sm">
+                  Log in to accept
+                </Button>
               </Link>
             </div>
           )}

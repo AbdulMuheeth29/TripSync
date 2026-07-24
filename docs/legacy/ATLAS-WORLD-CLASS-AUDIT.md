@@ -11,6 +11,7 @@
 Atlas has been successfully built and is **functionally operational** with a clean UI and working chat interface. However, to achieve the "world-class, revolutionary" status the user envisions, **significant enhancements are needed** across context awareness, proactive intelligence, and action execution.
 
 ### Current Status: **6/10** (Functional but not yet differentiated)
+
 ### Target Status: **10/10** (Revolutionary, industry-leading)
 
 **Key Finding:** Atlas is currently a **reactive chatbot** when it should be a **proactive intelligent agent**.
@@ -20,6 +21,7 @@ Atlas has been successfully built and is **functionally operational** with a cle
 ## ✅ WHAT'S WORKING WELL
 
 ### 1. **Core Infrastructure**
+
 - ✅ Clean, minimalist floating widget UI (bottom-right placement)
 - ✅ Expandable/collapsible chat interface
 - ✅ Claude Sonnet 4.5 API integration
@@ -28,6 +30,7 @@ Atlas has been successfully built and is **functionally operational** with a cle
 - ✅ Responsive design with glass morphism styling
 
 ### 2. **Basic Functionality**
+
 - ✅ User can initiate conversations
 - ✅ Atlas responds with trip context
 - ✅ Quick prompt suggestions (context-aware for trip pages)
@@ -35,6 +38,7 @@ Atlas has been successfully built and is **functionally operational** with a cle
 - ✅ Trip summary fetching from backend
 
 ### 3. **Technical Quality**
+
 - ✅ TypeScript types for messages and state
 - ✅ React hooks for state management
 - ✅ Proper error handling in API calls
@@ -42,6 +46,7 @@ Atlas has been successfully built and is **functionally operational** with a cle
 - ✅ Scroll-to-bottom on new messages
 
 ### 4. **Backend Integration**
+
 - ✅ Dedicated `/api/trips/:tripId/planning-chat` endpoint
 - ✅ Trip context passed to Claude (destination, itinerary summary)
 - ✅ Auth and trip access checks
@@ -55,23 +60,28 @@ Atlas has been successfully built and is **functionally operational** with a cle
 ### 1. **Limited Context Awareness** ⚠️ CRITICAL
 
 **Current State:**
+
 ```typescript
 // Only fetches basic trip summary
-const itemsSummary = items.length > 0
-  ? `Days 1-${Math.max(...items.map((i) => i.dayNumber))}: ${items.length} items`
-  : undefined;
+const itemsSummary =
+  items.length > 0
+    ? `Days 1-${Math.max(...items.map((i) => i.dayNumber))}: ${items.length} items`
+    : undefined;
 ```
 
 **Problem:**
+
 - Atlas only sees: destination, user message, and basic item count
 - **Missing:** Full itinerary details, expenses, votes, members, chat history, current budget vs spent
 
 **Impact:** Atlas can't give specific advice like:
+
 - "You're $450 over budget on Day 3"
 - "Sarah and Mike haven't voted on the hotel yet"
 - "You have a 2-hour gap between lunch and the museum—add a cafe?"
 
 **Fix Required:**
+
 ```typescript
 // Build RICH context
 const fullContext = {
@@ -112,10 +122,12 @@ const fullContext = {
 ### 2. **No Proactive Intelligence** ⚠️ CRITICAL
 
 **Current State:**
+
 - Only 1 proactive trigger: inactivity nudge after 45 seconds
 - Nudge is generic: "Not sure what to do next on this trip?"
 
 **Design Called For:** 10 intelligent triggers
+
 - ❌ Confusion signals (back button clicks, hover without click)
 - ❌ Empty state assistance
 - ❌ Budget overrun alerts
@@ -128,21 +140,22 @@ const fullContext = {
 **Impact:** Atlas is passive. Users must realize they're stuck before asking for help.
 
 **Example of Missing Intelligence:**
+
 ```typescript
 // Should exist but doesn't:
 if (totalExpenses > budget * members) {
   showProactiveMessage({
-    priority: "high",
+    priority: 'high',
     message: "You're $450 over budget. Want me to find cheaper alternatives?",
-    actions: ["Show Alternatives", "Adjust Budget", "Dismiss"],
+    actions: ['Show Alternatives', 'Adjust Budget', 'Dismiss'],
   });
 }
 
-if (votes.filter(v => isStuck(v)).length > 0) {
+if (votes.filter((v) => isStuck(v)).length > 0) {
   showProactiveMessage({
-    priority: "medium",
-    message: "Your group is tied 3-3 on hotel choice. Should I suggest a compromise?",
-    actions: ["Suggest Compromise", "Remind Group", "Dismiss"],
+    priority: 'medium',
+    message: 'Your group is tied 3-3 on hotel choice. Should I suggest a compromise?',
+    actions: ['Suggest Compromise', 'Remind Group', 'Dismiss'],
   });
 }
 ```
@@ -152,6 +165,7 @@ if (votes.filter(v => isStuck(v)).length > 0) {
 ### 3. **No Action Execution System** ⚠️ HIGH PRIORITY
 
 **Current State:**
+
 ```typescript
 // Claude returns "ACTION: add_item|edit_item|none"
 const actionMatch = text.match(/ACTION:\s*(\w+)/i);
@@ -161,6 +175,7 @@ const actionMatch = text.match(/ACTION:\s*(\w+)/i);
 **Problem:** Atlas can only **talk**, not **do**. It says "I can help you add activities" but can't actually add them.
 
 **Design Called For:**
+
 - Auto-fill forms
 - Navigate to specific tabs/pages
 - Generate AI itinerary
@@ -172,9 +187,10 @@ const actionMatch = text.match(/ACTION:\s*(\w+)/i);
 **Impact:** Users still have to do manual work after Atlas "helps." Not truly intelligent.
 
 **Fix Required:**
+
 ```typescript
 interface AtlasAction {
-  type: "navigate" | "fill_form" | "generate_ai" | "open_modal" | "execute_api";
+  type: 'navigate' | 'fill_form' | 'generate_ai' | 'open_modal' | 'execute_api';
   label: string;
   execute: () => Promise<void>;
 }
@@ -182,19 +198,19 @@ interface AtlasAction {
 // Example: Atlas says "I can add 3 restaurants" → user clicks → restaurants added
 const actions = [
   {
-    type: "execute_api",
-    label: "Add Restaurants",
+    type: 'execute_api',
+    label: 'Add Restaurants',
     execute: async () => {
       await fetch(`/api/trips/${tripId}/itinerary-items`, {
-        method: "POST",
+        method: 'POST',
         body: JSON.stringify({
           items: [
-            { day: 2, title: "Le Comptoir", type: "dining", estimatedCost: 45 },
-            { day: 3, title: "Bistro Paul Bert", type: "dining", estimatedCost: 60 },
+            { day: 2, title: 'Le Comptoir', type: 'dining', estimatedCost: 45 },
+            { day: 3, title: 'Bistro Paul Bert', type: 'dining', estimatedCost: 60 },
           ],
         }),
       });
-      toast.success("Added 2 restaurants to your itinerary");
+      toast.success('Added 2 restaurants to your itinerary');
     },
   },
 ];
@@ -205,16 +221,16 @@ const actions = [
 ### 4. **No Conversation Memory** ⚠️ HIGH PRIORITY
 
 **Current State:**
+
 ```typescript
-const [messages, setMessages] = useState<AtlasMessage[]>(() => [
-  createInitialGreeting(pathname),
-]);
+const [messages, setMessages] = useState<AtlasMessage[]>(() => [createInitialGreeting(pathname)]);
 // Stored in React state = lost on page refresh
 ```
 
 **Problem:** If user refreshes the page or navigates away, entire conversation is gone. Atlas forgets previous context.
 
 **Design Called For:**
+
 - Store conversation history in database
 - Load previous conversation on page load
 - Remember what user asked about before
@@ -223,6 +239,7 @@ const [messages, setMessages] = useState<AtlasMessage[]>(() => [
 **Impact:** User has to re-explain their issue if they navigate or refresh.
 
 **Fix Required:**
+
 ```typescript
 // Store in DB
 interface AtlasConversation {
@@ -247,7 +264,7 @@ useEffect(() => {
 // Save on every message
 const saveMessage = async (message: AtlasMessage) => {
   await fetch(`/api/trips/${tripId}/atlas/conversation`, {
-    method: "POST",
+    method: 'POST',
     body: JSON.stringify({ message }),
   });
 };
@@ -258,21 +275,24 @@ const saveMessage = async (message: AtlasMessage) => {
 ### 5. **Weak System Prompts** ⚠️ MEDIUM PRIORITY
 
 **Current State:**
+
 ```typescript
 const prompt = `You are a travel assistant for a trip to ${destination}.
 The user said: "${userMessage}".
-${itemsSummary ? `Current itinerary summary: ${itemsSummary}` : ""}
+${itemsSummary ? `Current itinerary summary: ${itemsSummary}` : ''}
 
 Reply in 1-2 short sentences...`;
 ```
 
 **Problem:**
+
 - Too generic and vague
 - Doesn't include trip stage, budget, member status
 - Doesn't give Atlas personality
 - Doesn't instruct on proactive behavior
 
 **Design Called For:**
+
 - Rich, detailed system prompt with full trip context
 - Personality guidelines ("friendly but professional")
 - Instruction to be proactive and action-oriented
@@ -281,6 +301,7 @@ Reply in 1-2 short sentences...`;
 **Impact:** Claude responds generically instead of like an intelligent travel companion.
 
 **Fix Required:**
+
 ```typescript
 const systemPrompt = `You are Atlas, TripSync's intelligent travel assistant.
 
@@ -295,7 +316,7 @@ CURRENT TRIP CONTEXT:
 - Dates: ${trip.startDate} to ${trip.endDate} (${tripDays} days)
 - Group: ${members.length} people (${confirmedMembers} confirmed, ${pendingMembers} pending)
 - Budget: $${trip.budgetPerPerson}/person (total: $${totalBudget})
-- Current spend: $${totalExpenses} (${overBudget ? "OVER budget by $" + overAmount : "under budget"})
+- Current spend: $${totalExpenses} (${overBudget ? 'OVER budget by $' + overAmount : 'under budget'})
 
 TRIP PROGRESS:
 - Itinerary: ${items.length} activities planned across ${uniqueDays} days
@@ -307,10 +328,10 @@ USER BEHAVIOR:
 - Current page: ${currentPage}
 - Time on page: ${timeOnPage} seconds
 - Last action: ${lastAction}
-${inactivityTime > 30 ? `- User inactive for ${inactivityTime}s (may be stuck)` : ""}
+${inactivityTime > 30 ? `- User inactive for ${inactivityTime}s (may be stuck)` : ''}
 
 DETECTED ISSUES:
-${detectedIssues.map(issue => `- ${issue}`).join("\n")}
+${detectedIssues.map((issue) => `- ${issue}`).join('\n')}
 
 YOUR ROLE:
 - Proactively help based on context (don't wait to be asked)
@@ -328,18 +349,18 @@ Respond with a helpful message and suggest 1-3 actions the user can take.`;
 
 ## 📊 COMPARISON: DESIGN vs IMPLEMENTATION
 
-| Feature | Design Specification | Current Implementation | Status |
-|---------|---------------------|------------------------|--------|
-| **Context Tracking** | Full trip data (itinerary, expenses, votes, members, budget) | Only destination + item count | ❌ 20% |
-| **Proactive Triggers** | 10 intelligent triggers (confusion, budget, votes, etc.) | 1 trigger (inactivity only) | ❌ 10% |
-| **Conversation Memory** | Persistent across sessions, stored in DB | React state (lost on refresh) | ❌ 0% |
-| **Action Execution** | 6 action types (navigate, fill, generate, optimize, send) | None (Claude returns action but nothing happens) | ❌ 0% |
-| **System Prompts** | Rich context, personality, examples, instructions | Basic 3-line prompt | ❌ 30% |
-| **Quick Prompts** | Context-aware suggestions per page/tab | ✅ Implemented (trip vs non-trip) | ✅ 80% |
-| **UI States** | Minimized, expanded, proactive cards, tooltips | Minimized + expanded only | ⚠️ 50% |
-| **Personality** | Friendly, concise, action-oriented | Generic chatbot tone | ❌ 40% |
-| **Trip Stage Detection** | Knows if user is planning/inviting/booking/pre-trip | No stage detection | ❌ 0% |
-| **Group Awareness** | Tracks member activity, vote status, consensus | No group awareness | ❌ 0% |
+| Feature                  | Design Specification                                         | Current Implementation                           | Status |
+| ------------------------ | ------------------------------------------------------------ | ------------------------------------------------ | ------ |
+| **Context Tracking**     | Full trip data (itinerary, expenses, votes, members, budget) | Only destination + item count                    | ❌ 20% |
+| **Proactive Triggers**   | 10 intelligent triggers (confusion, budget, votes, etc.)     | 1 trigger (inactivity only)                      | ❌ 10% |
+| **Conversation Memory**  | Persistent across sessions, stored in DB                     | React state (lost on refresh)                    | ❌ 0%  |
+| **Action Execution**     | 6 action types (navigate, fill, generate, optimize, send)    | None (Claude returns action but nothing happens) | ❌ 0%  |
+| **System Prompts**       | Rich context, personality, examples, instructions            | Basic 3-line prompt                              | ❌ 30% |
+| **Quick Prompts**        | Context-aware suggestions per page/tab                       | ✅ Implemented (trip vs non-trip)                | ✅ 80% |
+| **UI States**            | Minimized, expanded, proactive cards, tooltips               | Minimized + expanded only                        | ⚠️ 50% |
+| **Personality**          | Friendly, concise, action-oriented                           | Generic chatbot tone                             | ❌ 40% |
+| **Trip Stage Detection** | Knows if user is planning/inviting/booking/pre-trip          | No stage detection                               | ❌ 0%  |
+| **Group Awareness**      | Tracks member activity, vote status, consensus               | No group awareness                               | ❌ 0%  |
 
 **Overall Implementation Score:** **25/100**
 
@@ -354,6 +375,7 @@ Respond with a helpful message and suggest 1-3 actions the user can take.`;
 **Why:** This is the foundation of intelligence. Without full context, Atlas can't be proactive or specific.
 
 **Implementation:**
+
 1. Update backend endpoint to fetch:
    - All itinerary items (with details)
    - All expenses (with breakdown)
@@ -374,7 +396,10 @@ Respond with a helpful message and suggest 1-3 actions the user can take.`;
 ```typescript
 // server/routes.ts - Update planning-chat endpoint
 
-app.post("/api/trips/:tripId/planning-chat", requireAuth, requireTripAccess,
+app.post(
+  '/api/trips/:tripId/planning-chat',
+  requireAuth,
+  requireTripAccess,
   async (req: Request, res: Response) => {
     const { tripId } = req.params;
     const { userMessage, currentPage, timeOnPage, lastAction } = req.body;
@@ -390,9 +415,9 @@ app.post("/api/trips/:tripId/planning-chat", requireAuth, requireTripAccess,
     const totalBudget = trip.budgetPerPerson * members.length;
     const totalExpenses = expenses.reduce((sum, e) => sum + parseFloat(e.amount), 0);
     const overBudget = totalExpenses > totalBudget;
-    const confirmedMembers = members.filter(m => m.status === 'accepted').length;
-    const activeVotes = votes.filter(v => v.status === 'pending').length;
-    const stuckVotes = votes.filter(v => isTied(v)).length;
+    const confirmedMembers = members.filter((m) => m.status === 'accepted').length;
+    const activeVotes = votes.filter((v) => v.status === 'pending').length;
+    const stuckVotes = votes.filter((v) => isTied(v)).length;
 
     // Build rich context for Claude
     const context = {
@@ -462,51 +487,51 @@ export function useProactiveTriggers(context: AtlasContext) {
     // 1. Empty itinerary for too long
     if (context.itineraryItems === 0 && context.timeOnPage > 20) {
       detected.push({
-        type: "empty_itinerary",
-        priority: "high",
+        type: 'empty_itinerary',
+        priority: 'high',
         message: `Your ${context.destination} itinerary is empty. I can generate a full ${context.tripDays}-day plan with activities, dining, and transport. Want me to do that?`,
-        actions: ["Generate Itinerary", "Show Examples", "Dismiss"],
+        actions: ['Generate Itinerary', 'Show Examples', 'Dismiss'],
       });
     }
 
     // 2. Over budget
     if (context.overBudget && context.overAmount > 100) {
       detected.push({
-        type: "budget_overrun",
-        priority: "critical",
+        type: 'budget_overrun',
+        priority: 'critical',
         message: `Heads up: You're $${context.overAmount} over budget. The biggest cost is ${context.largestExpense.title} ($${context.largestExpense.amount}). Want me to find cheaper alternatives?`,
-        actions: ["Show Alternatives", "Adjust Budget", "Dismiss"],
+        actions: ['Show Alternatives', 'Adjust Budget', 'Dismiss'],
       });
     }
 
     // 3. Group stuck on vote
     if (context.stuckVotes > 0) {
-      const stuckVote = context.votes.find(v => isTied(v));
+      const stuckVote = context.votes.find((v) => isTied(v));
       detected.push({
-        type: "vote_stuck",
-        priority: "medium",
+        type: 'vote_stuck',
+        priority: 'medium',
         message: `Your group is tied ${stuckVote.yesCount}-${stuckVote.noCount} on "${stuckVote.title}". I can suggest a compromise or tiebreaker.`,
-        actions: ["Suggest Compromise", "Remind Members", "Dismiss"],
+        actions: ['Suggest Compromise', 'Remind Members', 'Dismiss'],
       });
     }
 
     // 4. Confusion signals (back button spam)
     if (context.backButtonClicks >= 2 && context.timeOnPage < 60) {
       detected.push({
-        type: "confusion",
-        priority: "medium",
+        type: 'confusion',
+        priority: 'medium',
         message: "I noticed you're navigating back and forth. Need help finding something?",
-        actions: ["Show Me Around", "Search Features", "Dismiss"],
+        actions: ['Show Me Around', 'Search Features', 'Dismiss'],
       });
     }
 
     // 5. Incomplete trip nearing start date
     if (context.daysUntilTrip < 7 && context.completionPercentage < 50) {
       detected.push({
-        type: "incomplete_trip",
-        priority: "high",
+        type: 'incomplete_trip',
+        priority: 'high',
         message: `Your trip starts in ${context.daysUntilTrip} days but is only ${context.completionPercentage}% complete. Want me to help fill in the gaps?`,
-        actions: ["Complete Itinerary", "Show Checklist", "Dismiss"],
+        actions: ['Complete Itinerary', 'Show Checklist', 'Dismiss'],
       });
     }
 
@@ -534,7 +559,7 @@ export function useProactiveTriggers(context: AtlasContext) {
 
 export interface AtlasAction {
   id: string;
-  type: "navigate" | "fill_form" | "generate_ai" | "open_modal" | "execute_api";
+  type: 'navigate' | 'fill_form' | 'generate_ai' | 'open_modal' | 'execute_api';
   label: string;
   description?: string;
   execute: () => Promise<{ success: boolean; message: string }>;
@@ -555,18 +580,18 @@ export const executeAction = async (action: AtlasAction, context: AtlasContext) 
 // Example actions:
 
 export const createGenerateItineraryAction = (tripId: string): AtlasAction => ({
-  id: "generate_itinerary",
-  type: "generate_ai",
-  label: "Generate Itinerary",
-  description: "Create AI-powered activity suggestions",
+  id: 'generate_itinerary',
+  type: 'generate_ai',
+  label: 'Generate Itinerary',
+  description: 'Create AI-powered activity suggestions',
   execute: async () => {
     const res = await fetch(`/api/trips/${tripId}/ai-suggestions`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ type: "full_itinerary" }),
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ type: 'full_itinerary' }),
     });
 
-    if (!res.ok) throw new Error("Failed to generate");
+    if (!res.ok) throw new Error('Failed to generate');
 
     const data = await res.json();
     return {
@@ -577,27 +602,27 @@ export const createGenerateItineraryAction = (tripId: string): AtlasAction => ({
 });
 
 export const createNavigateToExpensesAction = (tripId: string, router: any): AtlasAction => ({
-  id: "navigate_expenses",
-  type: "navigate",
-  label: "Go to Expenses",
-  description: "Navigate to expense tracking tab",
+  id: 'navigate_expenses',
+  type: 'navigate',
+  label: 'Go to Expenses',
+  description: 'Navigate to expense tracking tab',
   execute: async () => {
     router.push(`/trip/${tripId}?tab=expenses`);
     return {
       success: true,
-      message: "Navigated to expenses tab",
+      message: 'Navigated to expenses tab',
     };
   },
 });
 
 export const createOptimizeBudgetAction = (tripId: string): AtlasAction => ({
-  id: "optimize_budget",
-  type: "execute_api",
-  label: "Find Cheaper Alternatives",
-  description: "Replace expensive activities with budget-friendly options",
+  id: 'optimize_budget',
+  type: 'execute_api',
+  label: 'Find Cheaper Alternatives',
+  description: 'Replace expensive activities with budget-friendly options',
   execute: async () => {
     const res = await fetch(`/api/trips/${tripId}/optimize-budget`, {
-      method: "POST",
+      method: 'POST',
     });
 
     const data = await res.json();
@@ -670,18 +695,25 @@ const handleActionClick = async (action: AtlasAction) => {
 ```typescript
 // db/schema.ts - Add new table
 
-export const atlasConversations = pgTable("atlas_conversations", {
-  id: serial("id").primaryKey(),
-  tripId: integer("trip_id").notNull().references(() => trips.id),
-  userId: integer("user_id").notNull().references(() => users.id),
-  messages: json("messages").$type<AtlasMessage[]>().notNull(),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+export const atlasConversations = pgTable('atlas_conversations', {
+  id: serial('id').primaryKey(),
+  tripId: integer('trip_id')
+    .notNull()
+    .references(() => trips.id),
+  userId: integer('user_id')
+    .notNull()
+    .references(() => users.id),
+  messages: json('messages').$type<AtlasMessage[]>().notNull(),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
 });
 
 // server/routes.ts - Add endpoints
 
-app.get("/api/trips/:tripId/atlas/conversation", requireAuth, requireTripAccess,
+app.get(
+  '/api/trips/:tripId/atlas/conversation',
+  requireAuth,
+  requireTripAccess,
   async (req: Request, res: Response) => {
     const { tripId } = req.params;
     const userId = req.user!.id;
@@ -697,7 +729,10 @@ app.get("/api/trips/:tripId/atlas/conversation", requireAuth, requireTripAccess,
   }
 );
 
-app.post("/api/trips/:tripId/atlas/conversation", requireAuth, requireTripAccess,
+app.post(
+  '/api/trips/:tripId/atlas/conversation',
+  requireAuth,
+  requireTripAccess,
   async (req: Request, res: Response) => {
     const { tripId } = req.params;
     const { message } = req.body;
@@ -712,7 +747,8 @@ app.post("/api/trips/:tripId/atlas/conversation", requireAuth, requireTripAccess
     });
 
     if (existing) {
-      await db.update(atlasConversations)
+      await db
+        .update(atlasConversations)
         .set({
           messages: [...existing.messages, message],
           updatedAt: new Date(),
@@ -737,7 +773,7 @@ useEffect(() => {
     if (!tripId) return;
 
     const res = await fetch(`/api/trips/${tripId}/atlas/conversation`, {
-      credentials: "include",
+      credentials: 'include',
     });
     const data = await res.json();
 
@@ -754,9 +790,9 @@ const saveMessage = async (message: AtlasMessage) => {
   if (!tripId) return;
 
   await fetch(`/api/trips/${tripId}/atlas/conversation`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    credentials: "include",
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    credentials: 'include',
     body: JSON.stringify({ message }),
   });
 };
@@ -783,22 +819,21 @@ export async function conversationalPlanningSuggestion(params: {
   votes: Vote[];
   members: TripMember[];
 }): Promise<{ suggestion: string; actions: AtlasAction[] }> {
-
   const systemPrompt = buildRichSystemPrompt(params);
 
   const message = await anthropic.messages.create({
-    model: "claude-sonnet-4-5",
+    model: 'claude-sonnet-4-5',
     max_tokens: 1024,
     system: systemPrompt,
-    messages: [{ role: "user", content: params.userMessage }],
+    messages: [{ role: 'user', content: params.userMessage }],
   });
 
   // Parse response for actions
-  const text = message.content[0].type === "text" ? message.content[0].text : "";
+  const text = message.content[0].type === 'text' ? message.content[0].text : '';
   const actions = parseActionsFromResponse(text);
 
   return {
-    suggestion: text.replace(/\[ACTION:.*?\]/g, "").trim(),
+    suggestion: text.replace(/\[ACTION:.*?\]/g, '').trim(),
     actions,
   };
 }
@@ -823,15 +858,15 @@ CURRENT TRIP:
 PROGRESS:
 - Itinerary: ${items.length} activities planned
 - Spending: $${context.progress.totalExpenses} ${context.progress.overBudget ? `(OVER by $${context.progress.overAmount})` : `(under budget)`}
-- Votes: ${context.progress.activeVotes} active${context.progress.stuckVotes > 0 ? `, ${context.progress.stuckVotes} stuck (ties)` : ""}
+- Votes: ${context.progress.activeVotes} active${context.progress.stuckVotes > 0 ? `, ${context.progress.stuckVotes} stuck (ties)` : ''}
 
 DETECTED ISSUES:
-${context.detectedIssues.length > 0 ? context.detectedIssues.map(i => `- ${i}`).join("\n") : "- None"}
+${context.detectedIssues.length > 0 ? context.detectedIssues.map((i) => `- ${i}`).join('\n') : '- None'}
 
 USER CONTEXT:
 - Current page: ${context.behavior.currentPage}
 - Time on page: ${context.behavior.timeOnPage}s
-- Last action: ${context.behavior.lastAction || "None"}
+- Last action: ${context.behavior.lastAction || 'None'}
 
 YOUR ROLE:
 - Be proactive based on context (don't just answer questions)
@@ -865,16 +900,20 @@ Add intelligence about WHERE user is in planning journey:
 // client/src/lib/atlas/tripStageDetector.ts
 
 export type TripStage =
-  | "just_created"      // Trip created < 10 min ago, no items
-  | "itinerary_planning" // Adding activities
-  | "inviting_group"    // Sending invites
-  | "group_deciding"    // Voting phase
-  | "booking"           // Ready to book
-  | "pre_trip"          // Trip in next 7 days
-  | "during_trip"       // Trip started
-  | "completed";        // Trip ended
+  | 'just_created' // Trip created < 10 min ago, no items
+  | 'itinerary_planning' // Adding activities
+  | 'inviting_group' // Sending invites
+  | 'group_deciding' // Voting phase
+  | 'booking' // Ready to book
+  | 'pre_trip' // Trip in next 7 days
+  | 'during_trip' // Trip started
+  | 'completed'; // Trip ended
 
-export function detectTripStage(trip: Trip, items: ItineraryItem[], members: TripMember[]): TripStage {
+export function detectTripStage(
+  trip: Trip,
+  items: ItineraryItem[],
+  members: TripMember[]
+): TripStage {
   const now = new Date();
   const tripStart = new Date(trip.startDate);
   const tripEnd = new Date(trip.endDate);
@@ -882,29 +921,29 @@ export function detectTripStage(trip: Trip, items: ItineraryItem[], members: Tri
   const daysUntilTrip = Math.ceil((tripStart.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
 
   // Trip ended
-  if (now > tripEnd) return "completed";
+  if (now > tripEnd) return 'completed';
 
   // Trip ongoing
-  if (now >= tripStart && now <= tripEnd) return "during_trip";
+  if (now >= tripStart && now <= tripEnd) return 'during_trip';
 
   // Trip starting soon
-  if (daysUntilTrip <= 7) return "pre_trip";
+  if (daysUntilTrip <= 7) return 'pre_trip';
 
   // Just created
   if (now.getTime() - createdAt.getTime() < 10 * 60 * 1000 && items.length === 0) {
-    return "just_created";
+    return 'just_created';
   }
 
   // Mostly inviting
-  if (members.filter(m => m.status === "pending").length > members.length / 2) {
-    return "inviting_group";
+  if (members.filter((m) => m.status === 'pending').length > members.length / 2) {
+    return 'inviting_group';
   }
 
   // Has votes active
-  if (trip.hasActiveVotes) return "group_deciding";
+  if (trip.hasActiveVotes) return 'group_deciding';
 
   // Default: planning
-  return "itinerary_planning";
+  return 'itinerary_planning';
 }
 ```
 
@@ -913,16 +952,16 @@ export function detectTripStage(trip: Trip, items: ItineraryItem[], members: Tri
 ```typescript
 // Tailor Atlas behavior to stage
 switch (tripStage) {
-  case "just_created":
+  case 'just_created':
     return "Welcome! Let's start by adding activities to your itinerary. I can generate suggestions based on your destination and dates.";
 
-  case "itinerary_planning":
+  case 'itinerary_planning':
     return "I see you're building your itinerary. Need help filling in gaps or finding restaurants?";
 
-  case "group_deciding":
-    return "Your group is voting on activities. Want me to check if anyone needs a reminder?";
+  case 'group_deciding':
+    return 'Your group is voting on activities. Want me to check if anyone needs a reminder?';
 
-  case "pre_trip":
+  case 'pre_trip':
     return `Your trip starts in ${daysUntilTrip} days! Let's make sure everything's ready.`;
 }
 ```
@@ -1038,14 +1077,14 @@ export function useInactivityDetection() {
     interval = setInterval(incrementTimer, 1000);
 
     // Reset on any user activity
-    const events = ["mousedown", "keydown", "scroll", "touchstart"];
-    events.forEach(event => {
+    const events = ['mousedown', 'keydown', 'scroll', 'touchstart'];
+    events.forEach((event) => {
       window.addEventListener(event, resetTimer);
     });
 
     return () => {
       clearInterval(interval);
-      events.forEach(event => {
+      events.forEach((event) => {
         window.removeEventListener(event, resetTimer);
       });
     };
@@ -1057,9 +1096,9 @@ export function useInactivityDetection() {
 function isImportantPage(): boolean {
   const path = window.location.pathname;
   return (
-    path.includes("/create") ||  // Creating trip
-    path.includes("/trip/") ||   // Trip detail
-    path.includes("/pricing")    // Considering upgrade
+    path.includes('/create') || // Creating trip
+    path.includes('/trip/') || // Trip detail
+    path.includes('/pricing') // Considering upgrade
   );
 }
 ```
@@ -1077,23 +1116,25 @@ function detectGroupIssues(members: TripMember[], votes: Vote[]): string[] {
   const issues: string[] = [];
 
   // Pending invites for too long
-  const pendingMembers = members.filter(m => m.status === "pending");
+  const pendingMembers = members.filter((m) => m.status === 'pending');
   if (pendingMembers.length > 0) {
     const oldestInvite = Math.max(
-      ...pendingMembers.map(m =>
-        (Date.now() - new Date(m.invitedAt).getTime()) / (1000 * 60 * 60 * 24)
+      ...pendingMembers.map(
+        (m) => (Date.now() - new Date(m.invitedAt).getTime()) / (1000 * 60 * 60 * 24)
       )
     );
 
     if (oldestInvite > 2) {
-      issues.push(`${pendingMembers.length} members haven't responded to invites in ${Math.floor(oldestInvite)} days`);
+      issues.push(
+        `${pendingMembers.length} members haven't responded to invites in ${Math.floor(oldestInvite)} days`
+      );
     }
   }
 
   // Stuck votes (50/50 ties)
-  const stuckVotes = votes.filter(v => {
-    const yes = v.votes.filter(vote => vote.vote === "yes").length;
-    const no = v.votes.filter(vote => vote.vote === "no").length;
+  const stuckVotes = votes.filter((v) => {
+    const yes = v.votes.filter((vote) => vote.vote === 'yes').length;
+    const no = v.votes.filter((vote) => vote.vote === 'no').length;
     return yes === no && yes > 0;
   });
 
@@ -1102,7 +1143,7 @@ function detectGroupIssues(members: TripMember[], votes: Vote[]): string[] {
   }
 
   // Low participation
-  const totalVotes = votes.flatMap(v => v.votes).length;
+  const totalVotes = votes.flatMap((v) => v.votes).length;
   const expectedVotes = votes.length * members.length;
   const participationRate = totalVotes / expectedVotes;
 
@@ -1120,25 +1161,27 @@ function detectGroupIssues(members: TripMember[], votes: Vote[]): string[] {
 
 ### Metrics That Will Improve:
 
-| Metric | Current | After Improvements | Impact |
-|--------|---------|-------------------|--------|
-| **User Engagement** | ~20% interact with Atlas | ~70% interact | +250% |
-| **Issue Resolution** | User must find solution | Atlas solves with 1 click | 10x faster |
-| **Trip Completion Rate** | Baseline | +35% (proactive nudges) | +35% |
-| **Feature Discovery** | Low (users don't explore) | +50% (Atlas suggests features) | +50% |
-| **Time to Complete Trip** | Baseline | -40% (AI automation) | -40% |
-| **User Satisfaction** | Baseline | +2.5 points (out of 5) | +50% |
-| **Support Ticket Volume** | Baseline | -60% (Atlas answers questions) | -60% |
+| Metric                    | Current                   | After Improvements             | Impact     |
+| ------------------------- | ------------------------- | ------------------------------ | ---------- |
+| **User Engagement**       | ~20% interact with Atlas  | ~70% interact                  | +250%      |
+| **Issue Resolution**      | User must find solution   | Atlas solves with 1 click      | 10x faster |
+| **Trip Completion Rate**  | Baseline                  | +35% (proactive nudges)        | +35%       |
+| **Feature Discovery**     | Low (users don't explore) | +50% (Atlas suggests features) | +50%       |
+| **Time to Complete Trip** | Baseline                  | -40% (AI automation)           | -40%       |
+| **User Satisfaction**     | Baseline                  | +2.5 points (out of 5)         | +50%       |
+| **Support Ticket Volume** | Baseline                  | -60% (Atlas answers questions) | -60%       |
 
 ### Competitive Differentiation:
 
 **Before Improvements:**
+
 - Atlas is a basic chatbot (same as competitors)
 - Users must ask for help
 - Generic responses
 - No automation
 
 **After Improvements:**
+
 - **Only travel planning tool with truly intelligent, proactive AI assistant**
 - Detects issues before user notices
 - Fixes problems with one click
@@ -1146,14 +1189,14 @@ function detectGroupIssues(members: TripMember[], votes: Vote[]): string[] {
 
 **Competitor Comparison:**
 
-| Feature | Wanderlog | TripIt | Roadtrippers | **TripSync (Atlas)** |
-|---------|-----------|---------|--------------|---------------------|
-| AI Assistant | ❌ None | ❌ None | ❌ None | ✅ Full AI agent |
-| Proactive Help | ❌ No | ❌ No | ❌ No | ✅ 10 triggers |
-| Context Awareness | ❌ No | ❌ No | ❌ No | ✅ Full trip context |
-| Automated Actions | ❌ No | ❌ No | ❌ No | ✅ 6 action types |
-| Budget Optimization | ⚠️ Manual | ❌ No | ❌ No | ✅ Automatic |
-| Group Coordination Help | ❌ No | ❌ No | ❌ No | ✅ Vote reminders, stuck detection |
+| Feature                 | Wanderlog | TripIt  | Roadtrippers | **TripSync (Atlas)**               |
+| ----------------------- | --------- | ------- | ------------ | ---------------------------------- |
+| AI Assistant            | ❌ None   | ❌ None | ❌ None      | ✅ Full AI agent                   |
+| Proactive Help          | ❌ No     | ❌ No   | ❌ No        | ✅ 10 triggers                     |
+| Context Awareness       | ❌ No     | ❌ No   | ❌ No        | ✅ Full trip context               |
+| Automated Actions       | ❌ No     | ❌ No   | ❌ No        | ✅ 6 action types                  |
+| Budget Optimization     | ⚠️ Manual | ❌ No   | ❌ No        | ✅ Automatic                       |
+| Group Coordination Help | ❌ No     | ❌ No   | ❌ No        | ✅ Vote reminders, stuck detection |
 
 **Result:** Atlas becomes the ONLY reason to choose TripSync over competitors.
 
@@ -1166,18 +1209,21 @@ function detectGroupIssues(members: TripMember[], votes: Vote[]): string[] {
 **Goal:** Make Atlas intelligent and context-aware
 
 ✅ **Day 1-2: Rich Context Building**
+
 - Update backend endpoint to fetch all trip data
 - Build comprehensive context object
 - Update system prompts with full context
 - Test with sample trips
 
 ✅ **Day 3-4: Proactive Triggers**
+
 - Implement `useProactiveTriggers` hook
 - Add 5 core triggers (empty itinerary, budget, votes, inactivity, confusion)
 - Test trigger firing conditions
 - Refine messaging
 
 ✅ **Day 5: Testing & Refinement**
+
 - End-to-end testing of context + triggers
 - Ensure prompts are specific and helpful
 - Fix any bugs
@@ -1191,6 +1237,7 @@ function detectGroupIssues(members: TripMember[], votes: Vote[]): string[] {
 **Goal:** Make Atlas actionable and persistent
 
 ✅ **Day 1-3: Action Execution System**
+
 - Create `actionExecutor.ts` with action types
 - Implement 4 core actions:
   - Generate AI itinerary
@@ -1201,6 +1248,7 @@ function detectGroupIssues(members: TripMember[], votes: Vote[]): string[] {
 - Test each action type
 
 ✅ **Day 4-5: Conversation Memory**
+
 - Create `atlas_conversations` database table
 - Add GET/POST endpoints for conversation history
 - Load previous messages on mount
@@ -1216,24 +1264,28 @@ function detectGroupIssues(members: TripMember[], votes: Vote[]): string[] {
 **Goal:** Make Atlas delightful and visually polished
 
 ✅ **Day 1-2: Enhanced Prompts**
+
 - Implement trip stage detection
 - Update system prompts with stage-aware messaging
 - Add personality examples to prompts
 - Test with different trip scenarios
 
 ✅ **Day 3: Proactive Card UI**
+
 - Build `AtlasProactiveCard` component
 - Integrate into trip detail page
 - Add animations (slide-in, pulse)
 - Test dismissal behavior
 
 ✅ **Day 4: Group Awareness**
+
 - Implement group issue detection
 - Add member activity tracking
 - Create vote stuck detection
 - Test with multi-member trips
 
 ✅ **Day 5: Final Testing**
+
 - Full regression testing
 - Performance optimization
 - Bug fixes
@@ -1248,18 +1300,21 @@ function detectGroupIssues(members: TripMember[], votes: Vote[]): string[] {
 **Goal:** Release to users and gather feedback
 
 ✅ **Day 1-2: Beta Launch**
+
 - Deploy to production
 - Enable for Pro users only (controlled rollout)
 - Monitor metrics and logs
 - Fix critical bugs
 
 ✅ **Day 3-5: Feedback & Iteration**
+
 - Gather user feedback
 - Analyze Atlas engagement metrics
 - Refine trigger conditions based on data
 - Adjust messaging tone if needed
 
 ✅ **Day 6-7: Full Launch**
+
 - Enable for all users (Free + Pro)
 - Marketing announcement
 - Monitor at scale
@@ -1292,24 +1347,24 @@ function detectGroupIssues(members: TripMember[], votes: Vote[]): string[] {
 ```typescript
 interface AtlasKPIs {
   // Engagement
-  usersWhoInteracted: number;          // % of active users
-  messagesPerTrip: number;             // Average conversation depth
-  proactiveMessageOpenRate: number;    // % of proactive messages opened
+  usersWhoInteracted: number; // % of active users
+  messagesPerTrip: number; // Average conversation depth
+  proactiveMessageOpenRate: number; // % of proactive messages opened
 
   // Helpfulness
-  actionClickRate: number;             // % of actions clicked vs dismissed
-  issuesAutoResolved: number;          // # of issues Atlas fixed automatically
-  averageSatisfactionRating: number;   // 1-5 scale
+  actionClickRate: number; // % of actions clicked vs dismissed
+  issuesAutoResolved: number; // # of issues Atlas fixed automatically
+  averageSatisfactionRating: number; // 1-5 scale
 
   // Impact
-  tripCompletionRateIncrease: number;  // % improvement
-  timeToCompleteTripDecrease: number;  // % reduction
-  supportTicketDecrease: number;       // % reduction
-  userRetentionIncrease: number;       // % improvement
+  tripCompletionRateIncrease: number; // % improvement
+  timeToCompleteTripDecrease: number; // % reduction
+  supportTicketDecrease: number; // % reduction
+  userRetentionIncrease: number; // % improvement
 
   // Competitive
-  mentionedInTestimonials: number;     // % of reviews mentioning Atlas
-  reasonForChoosingTripSync: number;   // % citing Atlas as deciding factor
+  mentionedInTestimonials: number; // % of reviews mentioning Atlas
+  reasonForChoosingTripSync: number; // % citing Atlas as deciding factor
 }
 ```
 
@@ -1341,6 +1396,7 @@ interface AtlasKPIs {
 **Current Atlas:** A chatbot that waits for users to ask questions.
 
 **Atlas After Improvements:** An intelligent copilot that:
+
 - Knows EXACTLY where user is in their trip planning
 - Detects issues BEFORE user notices (budget overruns, stuck votes, missing activities)
 - Fixes problems with ONE CLICK (generates itineraries, optimizes budget, sends reminders)

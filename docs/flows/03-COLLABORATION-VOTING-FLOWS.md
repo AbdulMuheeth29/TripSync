@@ -71,6 +71,7 @@ END: Vote cast and reflected in real-time
 ```
 
 **Voting Rules:**
+
 - ✅ Each member gets one vote per item
 - ✅ Can change vote anytime before deadline
 - ✅ Three vote options: Upvote, Downvote, Abstain
@@ -81,6 +82,7 @@ END: Vote cast and reflected in real-time
   - <40% upvotes → "Not Approved" (red badge)
 
 **Vote Status Indicators:**
+
 ```
 🟢 Approved: 70%+ upvotes, locked into itinerary
 🟡 Under Discussion: 40-69% upvotes, needs more consensus
@@ -177,6 +179,7 @@ END: Deadlock resolved or alternative suggested
 ```
 
 **AI Compromise Strategies:**
+
 1. **Split-Day**: Do both activities at different times
 2. **Alternate Days**: Schedule for different days if multi-day
 3. **Hybrid Option**: Combine elements of both
@@ -264,6 +267,7 @@ END: Comment posted and notifications sent
 ```
 
 **Comment Features:**
+
 - ✅ Threaded replies (nested comments)
 - ✅ @mentions for notifications
 - ✅ Rich text formatting (bold, italic, links)
@@ -272,6 +276,7 @@ END: Comment posted and notifications sent
 - ✅ Real-time updates
 
 **Comment Permissions:**
+
 - All trip members can comment
 - Only comment author can edit/delete
 - Organizers can moderate (delete any comment)
@@ -357,6 +362,7 @@ END: Message sent and delivered to all members
 ```
 
 **Chat Features:**
+
 - ✅ Real-time messaging via WebSocket
 - ✅ @mentions with notifications
 - ✅ Emoji picker
@@ -369,6 +375,7 @@ END: Message sent and delivered to all members
 - ✅ Search chat history
 
 **Chat Permissions:**
+
 - All trip members can send messages
 - Only message author can edit/delete
 - Organizers can moderate (delete any message)
@@ -503,6 +510,7 @@ END: Invitations sent or link shared
 ```
 
 **Invitation Features:**
+
 - ✅ Email invitations with personalized message
 - ✅ Share link (public or private)
 - ✅ Link expiration options
@@ -512,6 +520,7 @@ END: Invitations sent or link shared
 - ✅ Automatic signup for new users
 
 **Tier Limits:**
+
 - Free: 6 members per trip
 - Pro: Unlimited members
 - Teams: Unlimited members
@@ -629,6 +638,7 @@ END: User successfully joined trip
 ```
 
 **Invitation Acceptance Scenarios:**
+
 1. **Already logged in** → Direct acceptance, redirect to trip
 2. **Not logged in, has account** → Login, then accept
 3. **Not logged in, no account** → Signup, then accept
@@ -750,6 +760,7 @@ END: User joined trip (immediately or after approval)
 ```
 
 **Share Link Settings:**
+
 - Public (anyone can join immediately)
 - Private (organizer approval required)
 - Expiring (auto-expires after X days)
@@ -837,25 +848,26 @@ END: Member role successfully changed
 
 **Role Permissions:**
 
-| Action | Organizer | Planner | Member |
-|--------|-----------|---------|--------|
-| View trip | ✅ | ✅ | ✅ |
-| Vote on activities | ✅ | ✅ | ✅ |
-| Comment & chat | ✅ | ✅ | ✅ |
-| Add itinerary items | ✅ | ✅ | ❌ |
-| Edit itinerary | ✅ | ✅ | ❌ |
-| Delete items | ✅ | ✅ | ❌ |
-| Add expenses | ✅ | ✅ | ❌ |
-| Invite members | ✅ | ✅ | ❌ |
-| Change settings | ✅ | ❌ | ❌ |
-| Remove members | ✅ | ❌ | ❌ |
-| Delete trip | ✅ | ❌ | ❌ |
+| Action              | Organizer | Planner | Member |
+| ------------------- | --------- | ------- | ------ |
+| View trip           | ✅        | ✅      | ✅     |
+| Vote on activities  | ✅        | ✅      | ✅     |
+| Comment & chat      | ✅        | ✅      | ✅     |
+| Add itinerary items | ✅        | ✅      | ❌     |
+| Edit itinerary      | ✅        | ✅      | ❌     |
+| Delete items        | ✅        | ✅      | ❌     |
+| Add expenses        | ✅        | ✅      | ❌     |
+| Invite members      | ✅        | ✅      | ❌     |
+| Change settings     | ✅        | ❌      | ❌     |
+| Remove members      | ✅        | ❌      | ❌     |
+| Delete trip         | ✅        | ❌      | ❌     |
 
 ---
 
 ## Analytics & Tracking
 
 **Events Tracked:**
+
 1. `vote_cast` - User voted on activity
 2. `vote_changed` - User changed their vote
 3. `comment_posted` - Comment added
@@ -868,6 +880,7 @@ END: Member role successfully changed
 10. `atlas_compromise_suggested` - AI suggested resolution
 
 **Metrics Tracked:**
+
 - Voting participation rate
 - Average time to vote consensus
 - Comment engagement per item

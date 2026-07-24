@@ -1,16 +1,39 @@
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
-import { Progress } from "@/components/ui/progress";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
-import { Package, Plus, Sparkles, User, Trash2, CheckCircle2, Circle, Users } from "lucide-react";
-import { useState } from "react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Badge } from '@/components/ui/badge';
+import { Separator } from '@/components/ui/separator';
+import { Progress } from '@/components/ui/progress';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
+import { Package, Plus, Sparkles, User, Trash2, CheckCircle2, Circle, Users } from 'lucide-react';
+import { useState } from 'react';
 
 interface PackingItem {
   id: string;
@@ -33,8 +56,16 @@ interface PackingListModalProps {
   tripId: string;
   items: PackingItem[];
   members: TripMember[];
-  onAddItem: (item: { name: string; assignedToUserId?: string; notes?: string; category?: string }) => Promise<void>;
-  onUpdateItem: (itemId: string, updates: { name?: string; assignedToUserId?: string; notes?: string; packed?: boolean }) => Promise<void>;
+  onAddItem: (item: {
+    name: string;
+    assignedToUserId?: string;
+    notes?: string;
+    category?: string;
+  }) => Promise<void>;
+  onUpdateItem: (
+    itemId: string,
+    updates: { name?: string; assignedToUserId?: string; notes?: string; packed?: boolean }
+  ) => Promise<void>;
   onDeleteItem: (itemId: string) => Promise<void>;
   onGenerateList?: () => Promise<void>;
   isGenerating?: boolean;
@@ -50,21 +81,26 @@ export function PackingListModal({
   onUpdateItem,
   onDeleteItem,
   onGenerateList,
-  isGenerating = false
+  isGenerating = false,
 }: PackingListModalProps) {
-  const [newItem, setNewItem] = useState({ name: "", assignedToUserId: "", notes: "", category: "essentials" });
+  const [newItem, setNewItem] = useState({
+    name: '',
+    assignedToUserId: '',
+    notes: '',
+    category: 'essentials',
+  });
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [editForm, setEditForm] = useState({ name: "", assignedToUserId: "", notes: "" });
+  const [editForm, setEditForm] = useState({ name: '', assignedToUserId: '', notes: '' });
 
   const categories = [
-    { id: "essentials", label: "Essentials", icon: "📋" },
-    { id: "clothing", label: "Clothing", icon: "👕" },
-    { id: "toiletries", label: "Toiletries", icon: "🧴" },
-    { id: "electronics", label: "Electronics", icon: "🔌" },
-    { id: "documents", label: "Documents", icon: "📄" },
-    { id: "medication", label: "Medication", icon: "💊" },
-    { id: "entertainment", label: "Entertainment", icon: "🎮" },
-    { id: "other", label: "Other", icon: "📦" }
+    { id: 'essentials', label: 'Essentials', icon: '📋' },
+    { id: 'clothing', label: 'Clothing', icon: '👕' },
+    { id: 'toiletries', label: 'Toiletries', icon: '🧴' },
+    { id: 'electronics', label: 'Electronics', icon: '🔌' },
+    { id: 'documents', label: 'Documents', icon: '📄' },
+    { id: 'medication', label: 'Medication', icon: '💊' },
+    { id: 'entertainment', label: 'Entertainment', icon: '🎮' },
+    { id: 'other', label: 'Other', icon: '📦' },
   ];
 
   const handleAddItem = async () => {
@@ -74,18 +110,18 @@ export function PackingListModal({
       name: newItem.name,
       assignedToUserId: newItem.assignedToUserId || undefined,
       notes: newItem.notes || undefined,
-      category: newItem.category
+      category: newItem.category,
     });
 
-    setNewItem({ name: "", assignedToUserId: "", notes: "", category: "essentials" });
+    setNewItem({ name: '', assignedToUserId: '', notes: '', category: 'essentials' });
   };
 
   const handleStartEdit = (item: PackingItem) => {
     setEditingId(item.id);
     setEditForm({
       name: item.name,
-      assignedToUserId: item.assignedToUserId || "",
-      notes: item.notes || ""
+      assignedToUserId: item.assignedToUserId || '',
+      notes: item.notes || '',
     });
   };
 
@@ -95,7 +131,7 @@ export function PackingListModal({
     await onUpdateItem(editingId, {
       name: editForm.name,
       assignedToUserId: editForm.assignedToUserId || undefined,
-      notes: editForm.notes || undefined
+      notes: editForm.notes || undefined,
     });
 
     setEditingId(null);
@@ -105,16 +141,18 @@ export function PackingListModal({
     await onUpdateItem(itemId, { packed });
   };
 
-  const categorizedItems = categories.map(category => ({
-    ...category,
-    items: items.filter(item => (item.category || "essentials") === category.id)
-  })).filter(cat => cat.items.length > 0);
+  const categorizedItems = categories
+    .map((category) => ({
+      ...category,
+      items: items.filter((item) => (item.category || 'essentials') === category.id),
+    }))
+    .filter((cat) => cat.items.length > 0);
 
   const totalItems = items.length;
-  const packedItems = items.filter(i => i.packed).length;
+  const packedItems = items.filter((i) => i.packed).length;
   const progressPercent = totalItems > 0 ? (packedItems / totalItems) * 100 : 0;
 
-  const unassignedItems = items.filter(i => !i.assignedToUserId).length;
+  const unassignedItems = items.filter((i) => !i.assignedToUserId).length;
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -124,9 +162,7 @@ export function PackingListModal({
             <Package className="h-5 w-5 text-primary" />
             <DialogTitle>Packing List</DialogTitle>
           </div>
-          <DialogDescription>
-            Shared packing checklist for your trip
-          </DialogDescription>
+          <DialogDescription>Shared packing checklist for your trip</DialogDescription>
         </DialogHeader>
 
         <div className="space-y-6">
@@ -161,7 +197,9 @@ export function PackingListModal({
               <div className="flex items-center justify-between">
                 <div className="flex-1">
                   <p className="text-sm font-semibold text-blue-900">AI-Powered Suggestions</p>
-                  <p className="text-xs text-blue-700">Let Atlas generate items based on your trip</p>
+                  <p className="text-xs text-blue-700">
+                    Let Atlas generate items based on your trip
+                  </p>
                 </div>
                 <Button
                   variant="outline"
@@ -170,7 +208,7 @@ export function PackingListModal({
                   disabled={isGenerating}
                 >
                   <Sparkles className="h-4 w-4 mr-2" />
-                  {isGenerating ? "Generating..." : "Generate List"}
+                  {isGenerating ? 'Generating...' : 'Generate List'}
                 </Button>
               </div>
             </Card>
@@ -185,8 +223,8 @@ export function PackingListModal({
                 <Input
                   placeholder="e.g., Sunscreen, Passport, Charger"
                   value={newItem.name}
-                  onChange={(e) => setNewItem(prev => ({ ...prev, name: e.target.value }))}
-                  onKeyDown={(e) => e.key === "Enter" && handleAddItem()}
+                  onChange={(e) => setNewItem((prev) => ({ ...prev, name: e.target.value }))}
+                  onKeyDown={(e) => e.key === 'Enter' && handleAddItem()}
                 />
               </div>
 
@@ -194,13 +232,13 @@ export function PackingListModal({
                 <Label>Category</Label>
                 <Select
                   value={newItem.category}
-                  onValueChange={(value) => setNewItem(prev => ({ ...prev, category: value }))}
+                  onValueChange={(value) => setNewItem((prev) => ({ ...prev, category: value }))}
                 >
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    {categories.map(cat => (
+                    {categories.map((cat) => (
                       <SelectItem key={cat.id} value={cat.id}>
                         {cat.icon} {cat.label}
                       </SelectItem>
@@ -213,14 +251,16 @@ export function PackingListModal({
                 <Label>Assign To</Label>
                 <Select
                   value={newItem.assignedToUserId}
-                  onValueChange={(value) => setNewItem(prev => ({ ...prev, assignedToUserId: value }))}
+                  onValueChange={(value) =>
+                    setNewItem((prev) => ({ ...prev, assignedToUserId: value }))
+                  }
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Unassigned" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="">Unassigned</SelectItem>
-                    {members.map(member => (
+                    {members.map((member) => (
                       <SelectItem key={member.id} value={member.id}>
                         {member.name}
                       </SelectItem>
@@ -234,16 +274,12 @@ export function PackingListModal({
                 <Input
                   placeholder="Size, quantity, etc."
                   value={newItem.notes}
-                  onChange={(e) => setNewItem(prev => ({ ...prev, notes: e.target.value }))}
+                  onChange={(e) => setNewItem((prev) => ({ ...prev, notes: e.target.value }))}
                 />
               </div>
             </div>
 
-            <Button
-              onClick={handleAddItem}
-              disabled={!newItem.name.trim()}
-              className="w-full mt-3"
-            >
+            <Button onClick={handleAddItem} disabled={!newItem.name.trim()} className="w-full mt-3">
               <Plus className="h-4 w-4 mr-2" />
               Add Item
             </Button>
@@ -253,24 +289,26 @@ export function PackingListModal({
           {categorizedItems.length === 0 ? (
             <Card className="p-8 text-center">
               <Package className="h-12 w-12 mx-auto mb-3 text-muted-foreground" />
-              <p className="text-sm text-muted-foreground">No items yet. Add your first item or generate a list with AI.</p>
+              <p className="text-sm text-muted-foreground">
+                No items yet. Add your first item or generate a list with AI.
+              </p>
             </Card>
           ) : (
             <div className="space-y-4">
-              {categorizedItems.map(category => (
+              {categorizedItems.map((category) => (
                 <Card key={category.id} className="p-4">
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center gap-2">
                       <span className="text-xl">{category.icon}</span>
                       <h4 className="font-semibold">{category.label}</h4>
                       <Badge variant="outline" className="text-xs">
-                        {category.items.filter(i => i.packed).length}/{category.items.length}
+                        {category.items.filter((i) => i.packed).length}/{category.items.length}
                       </Badge>
                     </div>
                   </div>
 
                   <div className="space-y-2">
-                    {category.items.map(item => (
+                    {category.items.map((item) => (
                       <div
                         key={item.id}
                         className={`flex items-center gap-3 p-3 rounded-lg border ${
@@ -279,26 +317,32 @@ export function PackingListModal({
                       >
                         <Checkbox
                           checked={item.packed}
-                          onCheckedChange={(checked) => handleTogglePacked(item.id, checked === true)}
+                          onCheckedChange={(checked) =>
+                            handleTogglePacked(item.id, checked === true)
+                          }
                         />
 
                         {editingId === item.id ? (
                           <div className="flex-1 grid grid-cols-1 md:grid-cols-3 gap-2">
                             <Input
                               value={editForm.name}
-                              onChange={(e) => setEditForm(prev => ({ ...prev, name: e.target.value }))}
+                              onChange={(e) =>
+                                setEditForm((prev) => ({ ...prev, name: e.target.value }))
+                              }
                               placeholder="Item name"
                             />
                             <Select
                               value={editForm.assignedToUserId}
-                              onValueChange={(value) => setEditForm(prev => ({ ...prev, assignedToUserId: value }))}
+                              onValueChange={(value) =>
+                                setEditForm((prev) => ({ ...prev, assignedToUserId: value }))
+                              }
                             >
                               <SelectTrigger>
                                 <SelectValue placeholder="Assign to" />
                               </SelectTrigger>
                               <SelectContent>
                                 <SelectItem value="">Unassigned</SelectItem>
-                                {members.map(member => (
+                                {members.map((member) => (
                                   <SelectItem key={member.id} value={member.id}>
                                     {member.name}
                                   </SelectItem>
@@ -306,14 +350,24 @@ export function PackingListModal({
                               </SelectContent>
                             </Select>
                             <div className="flex gap-2">
-                              <Button size="sm" onClick={handleSaveEdit}>Save</Button>
-                              <Button size="sm" variant="outline" onClick={() => setEditingId(null)}>Cancel</Button>
+                              <Button size="sm" onClick={handleSaveEdit}>
+                                Save
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => setEditingId(null)}
+                              >
+                                Cancel
+                              </Button>
                             </div>
                           </div>
                         ) : (
                           <>
                             <div className="flex-1">
-                              <p className={`text-sm font-medium ${item.packed ? 'line-through text-muted-foreground' : ''}`}>
+                              <p
+                                className={`text-sm font-medium ${item.packed ? 'line-through text-muted-foreground' : ''}`}
+                              >
                                 {item.name}
                               </p>
                               {item.notes && (
@@ -327,7 +381,9 @@ export function PackingListModal({
                                 <span className="text-blue-900">{item.assignedTo.name}</span>
                               </div>
                             ) : (
-                              <Badge variant="outline" className="text-xs">Unassigned</Badge>
+                              <Badge variant="outline" className="text-xs">
+                                Unassigned
+                              </Badge>
                             )}
 
                             <div className="flex items-center gap-1">
@@ -375,7 +431,9 @@ export function PackingListModal({
         </div>
 
         <DialogFooter>
-          <Button variant="outline" onClick={onClose}>Close</Button>
+          <Button variant="outline" onClick={onClose}>
+            Close
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

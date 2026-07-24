@@ -1,22 +1,31 @@
-import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
-import { Sparkles, TrendingUp, TrendingDown, AlertTriangle, CheckCircle2, Lightbulb, DollarSign, PieChart } from "lucide-react";
+import { Card } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Progress } from '@/components/ui/progress';
+import {
+  Sparkles,
+  TrendingUp,
+  TrendingDown,
+  AlertTriangle,
+  CheckCircle2,
+  Lightbulb,
+  DollarSign,
+  PieChart,
+} from 'lucide-react';
 
 interface BudgetInsight {
   category: string;
   currentSpend: number;
   projectedSpend: number;
   budgetAllocation: number;
-  status: "under" | "on_track" | "over";
+  status: 'under' | 'on_track' | 'over';
 }
 
 interface CostSavingTip {
   category: string;
   suggestion: string;
   potentialSavings: number;
-  priority: "high" | "medium" | "low";
+  priority: 'high' | 'medium' | 'low';
 }
 
 interface BudgetAnalysisCardProps {
@@ -36,7 +45,7 @@ export function BudgetAnalysisCard({
   currency,
   insights,
   costSavingTips,
-  onViewDetails
+  onViewDetails,
 }: BudgetAnalysisCardProps) {
   const percentSpent = (currentSpend / totalBudget) * 100;
   const percentProjected = (projectedFinalSpend / totalBudget) * 100;
@@ -49,7 +58,7 @@ export function BudgetAnalysisCard({
       style: 'currency',
       currency: currency,
       minimumFractionDigits: 0,
-      maximumFractionDigits: 0
+      maximumFractionDigits: 0,
     }).format(amount);
   };
 
@@ -79,14 +88,19 @@ export function BudgetAnalysisCard({
         </div>
 
         {/* Budget Overview */}
-        <Card className={`p-5 ${
-          isOverBudget ? 'bg-red-50 border-red-200' : 'bg-green-50 border-green-200'
-        }`}>
+        <Card
+          className={`p-5 ${
+            isOverBudget ? 'bg-red-50 border-red-200' : 'bg-green-50 border-green-200'
+          }`}
+        >
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <h4 className="font-semibold">Projected Final Cost</h4>
-              <Badge variant={isOverBudget ? "destructive" : "secondary"} className={!isOverBudget ? "bg-green-100 text-green-800" : ""}>
-                {isOverBudget ? "Over Budget" : "Under Budget"}
+              <Badge
+                variant={isOverBudget ? 'destructive' : 'secondary'}
+                className={!isOverBudget ? 'bg-green-100 text-green-800' : ''}
+              >
+                {isOverBudget ? 'Over Budget' : 'Under Budget'}
               </Badge>
             </div>
 
@@ -99,7 +113,9 @@ export function BudgetAnalysisCard({
 
               <div>
                 <p className="text-xs text-muted-foreground mb-1">Projected</p>
-                <p className={`text-2xl font-bold ${isOverBudget ? 'text-red-600' : 'text-green-600'}`}>
+                <p
+                  className={`text-2xl font-bold ${isOverBudget ? 'text-red-600' : 'text-green-600'}`}
+                >
                   {formatCurrency(projectedFinalSpend)}
                 </p>
                 <p className="text-xs text-muted-foreground">{percentProjected.toFixed(0)}%</p>
@@ -112,10 +128,7 @@ export function BudgetAnalysisCard({
               </div>
             </div>
 
-            <Progress
-              value={Math.min(percentProjected, 100)}
-              className="h-3"
-            />
+            <Progress value={Math.min(percentProjected, 100)} className="h-3" />
 
             <div className="flex items-center gap-2">
               {isOverBudget ? (
@@ -123,7 +136,9 @@ export function BudgetAnalysisCard({
               ) : (
                 <TrendingDown className="h-5 w-5 text-green-600" />
               )}
-              <p className={`text-sm font-medium ${isOverBudget ? 'text-red-900' : 'text-green-900'}`}>
+              <p
+                className={`text-sm font-medium ${isOverBudget ? 'text-red-900' : 'text-green-900'}`}
+              >
                 {isOverBudget
                   ? `Projected to exceed budget by ${formatCurrency(overBudgetAmount)}`
                   : `Projected to stay under budget by ${formatCurrency(underBudget)}`}
@@ -138,30 +153,35 @@ export function BudgetAnalysisCard({
           <div className="space-y-2">
             {insights.map((insight, index) => {
               const percentage = (insight.currentSpend / insight.budgetAllocation) * 100;
-              const Icon = insight.status === "over" ? AlertTriangle :
-                           insight.status === "on_track" ? TrendingUp :
-                           CheckCircle2;
+              const Icon =
+                insight.status === 'over'
+                  ? AlertTriangle
+                  : insight.status === 'on_track'
+                    ? TrendingUp
+                    : CheckCircle2;
 
               return (
                 <Card key={index} className="p-3">
                   <div className="flex items-center justify-between mb-2">
                     <div className="flex items-center gap-2">
-                      <Icon className={`h-4 w-4 ${
-                        insight.status === "over" ? "text-red-600" :
-                        insight.status === "on_track" ? "text-amber-600" :
-                        "text-green-600"
-                      }`} />
+                      <Icon
+                        className={`h-4 w-4 ${
+                          insight.status === 'over'
+                            ? 'text-red-600'
+                            : insight.status === 'on_track'
+                              ? 'text-amber-600'
+                              : 'text-green-600'
+                        }`}
+                      />
                       <span className="font-medium">{insight.category}</span>
                     </div>
                     <Badge variant="outline" className="text-xs">
-                      {formatCurrency(insight.currentSpend)} / {formatCurrency(insight.budgetAllocation)}
+                      {formatCurrency(insight.currentSpend)} /{' '}
+                      {formatCurrency(insight.budgetAllocation)}
                     </Badge>
                   </div>
 
-                  <Progress
-                    value={Math.min(percentage, 100)}
-                    className="h-2"
-                  />
+                  <Progress value={Math.min(percentage, 100)} className="h-2" />
 
                   <p className="text-xs text-muted-foreground mt-1">
                     Projected: {formatCurrency(insight.projectedSpend)}
@@ -182,16 +202,26 @@ export function BudgetAnalysisCard({
 
             <div className="space-y-3">
               {costSavingTips.map((tip, index) => (
-                <div key={index} className="flex items-start gap-3 p-3 bg-white rounded-lg border border-blue-100">
+                <div
+                  key={index}
+                  className="flex items-start gap-3 p-3 bg-white rounded-lg border border-blue-100"
+                >
                   <div>
                     <Badge
-                      variant={tip.priority === "high" ? "destructive" : "secondary"}
+                      variant={tip.priority === 'high' ? 'destructive' : 'secondary'}
                       className={`text-xs mb-2 ${
-                        tip.priority === "medium" ? "bg-amber-100 text-amber-800" :
-                        tip.priority === "low" ? "bg-blue-100 text-blue-800" : ""
+                        tip.priority === 'medium'
+                          ? 'bg-amber-100 text-amber-800'
+                          : tip.priority === 'low'
+                            ? 'bg-blue-100 text-blue-800'
+                            : ''
                       }`}
                     >
-                      {tip.priority === "high" ? "High Priority" : tip.priority === "medium" ? "Medium" : "Low Priority"}
+                      {tip.priority === 'high'
+                        ? 'High Priority'
+                        : tip.priority === 'medium'
+                          ? 'Medium'
+                          : 'Low Priority'}
                     </Badge>
                     <p className="text-sm text-blue-900 mb-1">
                       <strong>{tip.category}:</strong> {tip.suggestion}
@@ -208,7 +238,10 @@ export function BudgetAnalysisCard({
             {totalPotentialSavings > 0 && (
               <div className="mt-3 pt-3 border-t border-blue-200">
                 <p className="text-sm text-blue-900 font-medium">
-                  Total potential savings: <span className="text-lg text-green-700">{formatCurrency(totalPotentialSavings)}</span>
+                  Total potential savings:{' '}
+                  <span className="text-lg text-green-700">
+                    {formatCurrency(totalPotentialSavings)}
+                  </span>
                 </p>
               </div>
             )}
@@ -220,7 +253,7 @@ export function BudgetAnalysisCard({
           <div className="flex items-start gap-2">
             <Sparkles className="h-4 w-4 text-purple-600 mt-0.5" />
             <p className="text-xs text-purple-900">
-              <strong>Atlas Insight:</strong>{" "}
+              <strong>Atlas Insight:</strong>{' '}
               {isOverBudget
                 ? `You're projected to be over budget. Consider implementing the cost-saving tips above to get back on track.`
                 : `Great job staying on budget! Keep tracking your expenses to maintain this trend.`}

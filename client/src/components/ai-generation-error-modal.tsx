@@ -5,9 +5,9 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { AlertCircle, RefreshCw, FileEdit, Mail } from "lucide-react";
+} from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { AlertCircle, RefreshCw, FileEdit, Mail } from 'lucide-react';
 
 interface AIGenerationErrorModalProps {
   isOpen: boolean;
@@ -24,7 +24,7 @@ export function AIGenerationErrorModal({
   onTryAgain,
   onCreateManually,
   onContactSupport,
-  errorMessage = "An unexpected error occurred during AI generation"
+  errorMessage = 'An unexpected error occurred during AI generation',
 }: AIGenerationErrorModalProps) {
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -33,9 +33,7 @@ export function AIGenerationErrorModal({
           <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-red-100">
             <AlertCircle className="h-6 w-6 text-red-600" />
           </div>
-          <DialogTitle className="text-center">
-            AI Generation Failed
-          </DialogTitle>
+          <DialogTitle className="text-center">AI Generation Failed</DialogTitle>
           <DialogDescription className="text-center">
             We encountered an issue while generating your itinerary
           </DialogDescription>
@@ -62,29 +60,17 @@ export function AIGenerationErrorModal({
 
           {/* Options */}
           <div className="space-y-3">
-            <Button
-              onClick={onTryAgain}
-              className="w-full justify-start"
-              variant="outline"
-            >
+            <Button onClick={onTryAgain} className="w-full justify-start" variant="outline">
               <RefreshCw className="mr-2 h-4 w-4" />
               Try Again
             </Button>
 
-            <Button
-              onClick={onCreateManually}
-              className="w-full justify-start"
-              variant="outline"
-            >
+            <Button onClick={onCreateManually} className="w-full justify-start" variant="outline">
               <FileEdit className="mr-2 h-4 w-4" />
               Create Trip Manually
             </Button>
 
-            <Button
-              onClick={onContactSupport}
-              className="w-full justify-start"
-              variant="outline"
-            >
+            <Button onClick={onContactSupport} className="w-full justify-start" variant="outline">
               <Mail className="mr-2 h-4 w-4" />
               Contact Support
             </Button>

@@ -1,19 +1,26 @@
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
-import { Card } from "@/components/ui/card";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
-import { Checkbox } from "@/components/ui/checkbox";
-import { MessageCircle, Users, Send, AtSign } from "lucide-react";
-import { useState } from "react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
+import { Card } from '@/components/ui/card';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Badge } from '@/components/ui/badge';
+import { Checkbox } from '@/components/ui/checkbox';
+import { MessageCircle, Users, Send, AtSign } from 'lucide-react';
+import { useState } from 'react';
 
 interface TripMember {
   id: string;
   name: string;
   email: string;
-  role?: "organizer" | "member";
+  role?: 'organizer' | 'member';
 }
 
 interface SendMessageModalProps {
@@ -39,23 +46,28 @@ export function SendMessageModal({
   tripMembers,
   currentUserId,
   tripName,
-  preSelectedMemberId
+  preSelectedMemberId,
 }: SendMessageModalProps) {
   const [selectedMembers, setSelectedMembers] = useState<Set<string>>(
     new Set(preSelectedMemberId ? [preSelectedMemberId] : [])
   );
-  const [message, setMessage] = useState("");
+  const [message, setMessage] = useState('');
   const [notifyByEmail, setNotifyByEmail] = useState(true);
   const [isSending, setIsSending] = useState(false);
 
-  const availableMembers = tripMembers.filter(m => m.id !== currentUserId);
+  const availableMembers = tripMembers.filter((m) => m.id !== currentUserId);
 
   const getInitials = (name: string) => {
-    return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+    return name
+      .split(' ')
+      .map((n) => n[0])
+      .join('')
+      .toUpperCase()
+      .slice(0, 2);
   };
 
   const handleToggleMember = (memberId: string) => {
-    setSelectedMembers(prev => {
+    setSelectedMembers((prev) => {
       const newSet = new Set(prev);
       if (newSet.has(memberId)) {
         newSet.delete(memberId);
@@ -67,7 +79,7 @@ export function SendMessageModal({
   };
 
   const handleSelectAll = () => {
-    setSelectedMembers(new Set(availableMembers.map(m => m.id)));
+    setSelectedMembers(new Set(availableMembers.map((m) => m.id)));
   };
 
   const handleDeselectAll = () => {
@@ -75,7 +87,7 @@ export function SendMessageModal({
   };
 
   const handleMention = (memberName: string) => {
-    setMessage(prev => prev + `@${memberName} `);
+    setMessage((prev) => prev + `@${memberName} `);
   };
 
   const handleSend = async () => {
@@ -88,22 +100,22 @@ export function SendMessageModal({
     const messageData: SendMessageData = {
       recipientIds: Array.from(selectedMembers),
       message: message.trim(),
-      notifyByEmail
+      notifyByEmail,
     };
 
     await onSend(messageData);
 
     // Reset form
     setSelectedMembers(new Set());
-    setMessage("");
+    setMessage('');
     setNotifyByEmail(true);
     setIsSending(false);
   };
 
   const selectedCount = selectedMembers.size;
   const selectedMemberNames = availableMembers
-    .filter(m => selectedMembers.has(m.id))
-    .map(m => m.name);
+    .filter((m) => selectedMembers.has(m.id))
+    .map((m) => m.name);
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -154,7 +166,9 @@ export function SendMessageModal({
                   <Card
                     key={member.id}
                     className={`p-3 cursor-pointer transition-all ${
-                      isSelected ? "border-primary border-2 bg-primary/5" : "hover:border-primary/50"
+                      isSelected
+                        ? 'border-primary border-2 bg-primary/5'
+                        : 'hover:border-primary/50'
                     }`}
                     onClick={() => handleToggleMember(member.id)}
                   >
@@ -173,15 +187,13 @@ export function SendMessageModal({
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2">
                           <p className="font-medium truncate">{member.name}</p>
-                          {member.role === "organizer" && (
+                          {member.role === 'organizer' && (
                             <Badge variant="secondary" className="text-xs">
                               Organizer
                             </Badge>
                           )}
                         </div>
-                        <p className="text-xs text-muted-foreground truncate">
-                          {member.email}
-                        </p>
+                        <p className="text-xs text-muted-foreground truncate">{member.email}</p>
                       </div>
 
                       <Button
@@ -205,7 +217,7 @@ export function SendMessageModal({
           {selectedCount > 0 && (
             <Card className="p-3 bg-blue-50 border-blue-200">
               <p className="text-sm text-blue-900">
-                <strong>Sending to:</strong> {selectedMemberNames.join(", ")}
+                <strong>Sending to:</strong> {selectedMemberNames.join(', ')}
               </p>
             </Card>
           )}
@@ -235,10 +247,7 @@ export function SendMessageModal({
                 onCheckedChange={(checked) => setNotifyByEmail(checked as boolean)}
               />
               <div className="flex-1">
-                <Label
-                  htmlFor="emailNotify"
-                  className="text-sm font-medium cursor-pointer"
-                >
+                <Label htmlFor="emailNotify" className="text-sm font-medium cursor-pointer">
                   Send email notification
                 </Label>
                 <p className="text-xs text-muted-foreground mt-1">
@@ -251,8 +260,8 @@ export function SendMessageModal({
           {/* Info */}
           <Card className="p-3 bg-muted/50">
             <p className="text-xs text-muted-foreground">
-              <strong>Note:</strong> This message will appear in the trip's coordination tab.
-              All trip members can see messages sent through this feature.
+              <strong>Note:</strong> This message will appear in the trip's coordination tab. All
+              trip members can see messages sent through this feature.
             </p>
           </Card>
         </div>
@@ -266,7 +275,9 @@ export function SendMessageModal({
             disabled={selectedCount === 0 || !message.trim() || isSending}
           >
             <Send className="h-4 w-4 mr-2" />
-            {isSending ? "Sending..." : `Send to ${selectedCount} ${selectedCount === 1 ? 'person' : 'people'}`}
+            {isSending
+              ? 'Sending...'
+              : `Send to ${selectedCount} ${selectedCount === 1 ? 'person' : 'people'}`}
           </Button>
         </DialogFooter>
       </DialogContent>

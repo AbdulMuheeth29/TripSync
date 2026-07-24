@@ -1,7 +1,7 @@
-import { useState } from "react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
+import { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
 import {
   Dialog,
   DialogContent,
@@ -9,18 +9,18 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Badge } from "@/components/ui/badge";
-import { CheckCircle2, Edit2, Mail } from "lucide-react";
+} from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Badge } from '@/components/ui/badge';
+import { CheckCircle2, Edit2, Mail } from 'lucide-react';
 
 const emailDataSchema = z.object({
-  title: z.string().min(1, "Title is required"),
-  startDate: z.string().min(1, "Start date is required"),
-  endDate: z.string().min(1, "End date is required"),
+  title: z.string().min(1, 'Title is required'),
+  startDate: z.string().min(1, 'Start date is required'),
+  endDate: z.string().min(1, 'End date is required'),
   location: z.string().optional(),
   confirmation: z.string().optional(),
   notes: z.string().optional(),
@@ -41,17 +41,17 @@ export function EmailParsingReview({
   onClose,
   extractedData,
   onConfirm,
-  isProcessing = false
+  isProcessing = false,
 }: EmailParsingReviewProps) {
   const [isEditing, setIsEditing] = useState(false);
 
   const {
     register,
     handleSubmit,
-    formState: { errors }
+    formState: { errors },
   } = useForm<EmailData>({
     resolver: zodResolver(emailDataSchema),
-    defaultValues: extractedData
+    defaultValues: extractedData,
   });
 
   const onSubmit = (data: EmailData) => {
@@ -65,9 +65,7 @@ export function EmailParsingReview({
           <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-green-100">
             <Mail className="h-6 w-6 text-green-600" />
           </div>
-          <DialogTitle className="text-center">
-            Review Extracted Information
-          </DialogTitle>
+          <DialogTitle className="text-center">Review Extracted Information</DialogTitle>
           <DialogDescription className="text-center">
             We found this information in your email. Review and edit if needed.
           </DialogDescription>
@@ -92,7 +90,7 @@ export function EmailParsingReview({
                 onClick={() => setIsEditing(!isEditing)}
               >
                 <Edit2 className="h-4 w-4 mr-1" />
-                {isEditing ? "Done" : "Edit"}
+                {isEditing ? 'Done' : 'Edit'}
               </Button>
             </div>
           </div>
@@ -102,17 +100,19 @@ export function EmailParsingReview({
             <div className="space-y-2">
               <Label htmlFor="title" className="flex items-center gap-2">
                 Activity Title
-                {extractedData.title && <Badge variant="outline" className="text-xs">Auto-filled</Badge>}
+                {extractedData.title && (
+                  <Badge variant="outline" className="text-xs">
+                    Auto-filled
+                  </Badge>
+                )}
               </Label>
               <Input
                 id="title"
-                {...register("title")}
+                {...register('title')}
                 readOnly={!isEditing}
-                className={!isEditing ? "bg-muted" : ""}
+                className={!isEditing ? 'bg-muted' : ''}
               />
-              {errors.title && (
-                <p className="text-sm text-red-500">{errors.title.message}</p>
-              )}
+              {errors.title && <p className="text-sm text-red-500">{errors.title.message}</p>}
             </div>
 
             {/* Dates */}
@@ -120,14 +120,18 @@ export function EmailParsingReview({
               <div className="space-y-2">
                 <Label htmlFor="startDate" className="flex items-center gap-2">
                   Start Date
-                  {extractedData.startDate && <Badge variant="outline" className="text-xs">Auto-filled</Badge>}
+                  {extractedData.startDate && (
+                    <Badge variant="outline" className="text-xs">
+                      Auto-filled
+                    </Badge>
+                  )}
                 </Label>
                 <Input
                   id="startDate"
                   type="datetime-local"
-                  {...register("startDate")}
+                  {...register('startDate')}
                   readOnly={!isEditing}
-                  className={!isEditing ? "bg-muted" : ""}
+                  className={!isEditing ? 'bg-muted' : ''}
                 />
                 {errors.startDate && (
                   <p className="text-sm text-red-500">{errors.startDate.message}</p>
@@ -137,18 +141,20 @@ export function EmailParsingReview({
               <div className="space-y-2">
                 <Label htmlFor="endDate" className="flex items-center gap-2">
                   End Date
-                  {extractedData.endDate && <Badge variant="outline" className="text-xs">Auto-filled</Badge>}
+                  {extractedData.endDate && (
+                    <Badge variant="outline" className="text-xs">
+                      Auto-filled
+                    </Badge>
+                  )}
                 </Label>
                 <Input
                   id="endDate"
                   type="datetime-local"
-                  {...register("endDate")}
+                  {...register('endDate')}
                   readOnly={!isEditing}
-                  className={!isEditing ? "bg-muted" : ""}
+                  className={!isEditing ? 'bg-muted' : ''}
                 />
-                {errors.endDate && (
-                  <p className="text-sm text-red-500">{errors.endDate.message}</p>
-                )}
+                {errors.endDate && <p className="text-sm text-red-500">{errors.endDate.message}</p>}
               </div>
             </div>
 
@@ -156,14 +162,18 @@ export function EmailParsingReview({
             <div className="space-y-2">
               <Label htmlFor="location" className="flex items-center gap-2">
                 Location
-                {extractedData.location && <Badge variant="outline" className="text-xs">Auto-filled</Badge>}
+                {extractedData.location && (
+                  <Badge variant="outline" className="text-xs">
+                    Auto-filled
+                  </Badge>
+                )}
               </Label>
               <Input
                 id="location"
-                {...register("location")}
+                {...register('location')}
                 placeholder="e.g., 123 Main St, City, Country"
                 readOnly={!isEditing}
-                className={!isEditing ? "bg-muted" : ""}
+                className={!isEditing ? 'bg-muted' : ''}
               />
             </div>
 
@@ -171,14 +181,18 @@ export function EmailParsingReview({
             <div className="space-y-2">
               <Label htmlFor="confirmation" className="flex items-center gap-2">
                 Confirmation Number
-                {extractedData.confirmation && <Badge variant="outline" className="text-xs">Auto-filled</Badge>}
+                {extractedData.confirmation && (
+                  <Badge variant="outline" className="text-xs">
+                    Auto-filled
+                  </Badge>
+                )}
               </Label>
               <Input
                 id="confirmation"
-                {...register("confirmation")}
+                {...register('confirmation')}
                 placeholder="e.g., ABC123XYZ"
                 readOnly={!isEditing}
-                className={!isEditing ? "bg-muted" : ""}
+                className={!isEditing ? 'bg-muted' : ''}
               />
             </div>
 
@@ -186,15 +200,19 @@ export function EmailParsingReview({
             <div className="space-y-2">
               <Label htmlFor="notes" className="flex items-center gap-2">
                 Additional Notes
-                {extractedData.notes && <Badge variant="outline" className="text-xs">Auto-filled</Badge>}
+                {extractedData.notes && (
+                  <Badge variant="outline" className="text-xs">
+                    Auto-filled
+                  </Badge>
+                )}
               </Label>
               <Textarea
                 id="notes"
-                {...register("notes")}
+                {...register('notes')}
                 placeholder="Any additional information..."
                 rows={3}
                 readOnly={!isEditing}
-                className={!isEditing ? "bg-muted" : ""}
+                className={!isEditing ? 'bg-muted' : ''}
               />
             </div>
           </div>
@@ -204,7 +222,7 @@ export function EmailParsingReview({
               Cancel
             </Button>
             <Button type="submit" disabled={isProcessing}>
-              {isProcessing ? "Adding..." : "Add to Itinerary"}
+              {isProcessing ? 'Adding...' : 'Add to Itinerary'}
             </Button>
           </DialogFooter>
         </form>

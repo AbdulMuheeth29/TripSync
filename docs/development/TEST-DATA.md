@@ -88,8 +88,8 @@ Create the following trips under the **demo organizer** account to cover feature
 
 - **Destination:** `Austin, TX`
 - **Trip name/title:** `Austin Food & Music Weekend`
-- **Dates:**  
-  - Start: `2026-06-12`  
+- **Dates:**
+  - Start: `2026-06-12`
   - End: `2026-06-15`
 - **Budget per person:** `800`
 - **Group size:** `4`

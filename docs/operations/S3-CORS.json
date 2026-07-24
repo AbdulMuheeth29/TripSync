@@ -1,23 +1,9 @@
 [
   {
-    "AllowedHeaders": [
-      "*"
-    ],
-    "AllowedMethods": [
-      "GET",
-      "PUT",
-      "POST",
-      "DELETE",
-      "HEAD"
-    ],
-    "AllowedOrigins": [
-      "https://yourdomain.com",
-      "http://localhost:3000"
-    ],
-    "ExposeHeaders": [
-      "ETag",
-      "Content-Length"
-    ],
+    "AllowedHeaders": ["*"],
+    "AllowedMethods": ["GET", "PUT", "POST", "DELETE", "HEAD"],
+    "AllowedOrigins": ["https://yourdomain.com", "http://localhost:3000"],
+    "ExposeHeaders": ["ETag", "Content-Length"],
     "MaxAgeSeconds": 3000
   }
 ]

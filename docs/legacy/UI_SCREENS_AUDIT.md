@@ -7,6 +7,7 @@
 ## ✅ Existing Screens (All Present & Working)
 
 ### 🔐 Authentication Flow
+
 - **Landing Page** (`/`) ✅
   - Hero section with value prop
   - Feature highlights
@@ -29,6 +30,7 @@
   - **Critical for password recovery flow**
 
 ### 📊 Dashboard & Navigation
+
 - **Dashboard** (`/dashboard`) ✅
   - All trips list
   - Trip stats (items, invites, members, preferences)
@@ -43,6 +45,7 @@
   - Usage limits display
 
 ### ✈️ Trip Planning Flow
+
 - **Create Trip** (`/create`) ✅
   - Step-by-step wizard
   - Destination, dates, budget, group size
@@ -139,6 +142,7 @@
     - Change roles (planner/member)
 
 ### 🌐 Public & Social
+
 - **Join Trip** (`/join/:code`) ✅
   - Join trip by share code
   - Preview trip details before joining
@@ -153,6 +157,7 @@
   - Preview itinerary without login
 
 ### 📄 Legal & Support
+
 - **Pricing** (`/pricing`) ✅
   - Free/Pro/Teams comparison
   - Feature breakdown
@@ -180,6 +185,7 @@
   - Navigation back to home
 
 ### 🔧 Admin
+
 - **Metrics Dashboard** (`/admin/metrics`) ✅
   - Platform toggle (Web/iOS/Android)
   - User metrics
@@ -263,6 +269,7 @@ These features have **full backend APIs** but no dedicated UI components:
 ## 🎯 Complete User Flows (All Working)
 
 ### Flow 1: New User → First Trip
+
 1. ✅ Land on homepage (`/`)
 2. ✅ Sign up / login (`/login`)
 3. ✅ See dashboard (`/dashboard`)
@@ -274,6 +281,7 @@ These features have **full backend APIs** but no dedicated UI components:
 9. ✅ Friends join via `/join/:code`
 
 ### Flow 2: Collaborative Planning
+
 1. ✅ Member opens trip (`/trip/:id`)
 2. ✅ Vote on itinerary items (up/down/abstain)
 3. ✅ Comment on items
@@ -284,6 +292,7 @@ These features have **full backend APIs** but no dedicated UI components:
 8. ✅ Atlas AI helps resolve conflicts
 
 ### Flow 3: Trip Execution
+
 1. ✅ View "Today" tab during trip
 2. ✅ Check weather
 3. ✅ Share live location
@@ -291,12 +300,14 @@ These features have **full backend APIs** but no dedicated UI components:
 5. ✅ Track satisfaction
 
 ### Flow 4: Post-Trip
+
 1. ✅ Generate AI recap
 2. ✅ Review photos
 3. ✅ View analytics
 4. ✅ Check expense splits
 
 ### Flow 5: Password Reset (⚠️ INCOMPLETE)
+
 1. ✅ Click "Forgot password" on login
 2. ✅ Enter email
 3. ✅ Receive email with reset link
@@ -305,6 +316,7 @@ These features have **full backend APIs** but no dedicated UI components:
 6. ❌ **MISSING:** Redirect to login
 
 ### Flow 6: Subscription Upgrade
+
 1. ✅ See feature paywall (map, discover, email parsing)
 2. ✅ Click "Upgrade to Pro"
 3. ✅ Stripe checkout
@@ -316,6 +328,7 @@ These features have **full backend APIs** but no dedicated UI components:
 ## 📱 Mobile & PWA Features
 
 ### ✅ Implemented
+
 - **PWA Manifest** (`/manifest.json`)
   - Name: TripSync
   - Icons: 192x192, 512x512
@@ -342,6 +355,7 @@ These features have **full backend APIs** but no dedicated UI components:
   - VAPID keys configured
 
 ### ⚠️ Could Be Better
+
 - Service worker registration not visible in code audit
 - Might need explicit registration in entry point
 
@@ -350,9 +364,11 @@ These features have **full backend APIs** but no dedicated UI components:
 ## 🔴 Critical Missing Screens
 
 ### 1. Reset Password Page (CRITICAL)
+
 **Why Critical:** Password recovery flow is broken without this.
 
 **What's Needed:**
+
 - Page at `/reset-password?token=xyz`
 - Validate token via `GET /api/auth/validate-token/:token`
 - Form to enter new password
@@ -366,9 +382,11 @@ These features have **full backend APIs** but no dedicated UI components:
 ## 🟡 Recommended (Nice-to-Have)
 
 ### 1. AI Admin Dashboard Page
+
 **Why Recommended:** Backend is fully built, just needs UI.
 
 **What's Needed:**
+
 - Page at `/admin/ai`
 - Fetch data from:
   - `GET /api/admin/ai/dashboard`
@@ -385,9 +403,11 @@ These features have **full backend APIs** but no dedicated UI components:
 **Priority:** MEDIUM - Admin-only feature
 
 ### 2. Smart Features UI Components
+
 **Why Recommended:** Differentiators from competitors.
 
 **What's Needed:**
+
 - "Optimize Schedule" button on itinerary
 - Success prediction badge on trip header
 - "Check Price Trend" on itinerary items
@@ -399,14 +419,14 @@ These features have **full backend APIs** but no dedicated UI components:
 
 ## 📊 Summary
 
-| Category | Total | Complete | Missing | % Complete |
-|----------|-------|----------|---------|------------|
-| **Pages** | 17 | 16 | 1 | 94% |
-| **Trip Tabs** | 13 | 13 | 0 | 100% |
-| **Core AI Features** | 7 | 7 | 0 | 100% |
-| **Advanced AI Features** | 4 | 0 (API only) | 4 (optional UI) | N/A |
-| **User Flows** | 6 | 5 | 1 | 83% |
-| **PWA Features** | 5 | 5 | 0 | 100% |
+| Category                 | Total | Complete     | Missing         | % Complete |
+| ------------------------ | ----- | ------------ | --------------- | ---------- |
+| **Pages**                | 17    | 16           | 1               | 94%        |
+| **Trip Tabs**            | 13    | 13           | 0               | 100%       |
+| **Core AI Features**     | 7     | 7            | 0               | 100%       |
+| **Advanced AI Features** | 4     | 0 (API only) | 4 (optional UI) | N/A        |
+| **User Flows**           | 6     | 5            | 1               | 83%        |
+| **PWA Features**         | 5     | 5            | 0               | 100%       |
 
 **Overall Completion:** **95%**
 
@@ -415,6 +435,7 @@ These features have **full backend APIs** but no dedicated UI components:
 ## 🚀 What to Build Next
 
 ### Must-Have (Before Launch)
+
 1. **Reset Password Page** (2 hours)
    - Create `/reset-password` page
    - Token validation
@@ -422,6 +443,7 @@ These features have **full backend APIs** but no dedicated UI components:
    - Backend integration exists
 
 ### Nice-to-Have (Post-Launch)
+
 1. **AI Admin Dashboard** (4 hours)
    - Create `/admin/ai` page
    - Charts for metrics
@@ -438,6 +460,7 @@ These features have **full backend APIs** but no dedicated UI components:
 ## 🎨 UI/UX Quality
 
 ### ✅ Strengths
+
 - **Modern Design:** Shadcn UI components throughout
 - **Consistent:** All pages use same design system
 - **Accessible:** Proper ARIA labels, keyboard navigation
@@ -448,6 +471,7 @@ These features have **full backend APIs** but no dedicated UI components:
 - **Real-time:** Live updates for chat, votes, activity
 
 ### ⚠️ Areas to Review
+
 - **Onboarding Tour:** Exists (`OnboardingTour.tsx`) but usage not clear
 - **Service Worker:** Registration not found in code audit
 - **Performance:** Large bundle size (1.9 MB) - consider code splitting
@@ -461,6 +485,7 @@ These features have **full backend APIs** but no dedicated UI components:
 The only critical missing piece is the **Reset Password Page** - everything else is either complete or optional UI for features that already work via API.
 
 **Recommendation:**
+
 1. ✅ Build reset password page (2 hours) - **REQUIRED**
 2. 🎯 Launch with current UI
 3. 📈 Add AI admin dashboard post-launch

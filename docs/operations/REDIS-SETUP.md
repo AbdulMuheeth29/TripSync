@@ -5,12 +5,14 @@ Redis provides caching and session management for TripSync, significantly improv
 ## Why Redis?
 
 **Without Redis:**
+
 - Uses in-memory cache (lost on restart)
 - Cannot scale across multiple servers
 - Higher database load
 - Slower response times
 
 **With Redis:**
+
 - Persistent cache across restarts
 - Horizontal scaling support
 - Reduced database queries by 60-80%
@@ -30,11 +32,13 @@ Redis provides caching and session management for TripSync, significantly improv
 5. Copy the Redis URL (starts with `rediss://`)
 
 **Cost:** Free tier includes:
+
 - 10,000 commands/day
 - 256 MB storage
 - Global edge caching
 
 **Add to `.env.production`:**
+
 ```bash
 REDIS_URL=rediss://default:YOUR_PASSWORD@YOUR_HOST.upstash.io:6379
 ```
@@ -49,10 +53,12 @@ REDIS_URL=rediss://default:YOUR_PASSWORD@YOUR_HOST.upstash.io:6379
 4. Copy connection string
 
 **Cost:** Free tier includes:
+
 - 30 MB storage
 - 30 connections
 
 **Add to `.env.production`:**
+
 ```bash
 REDIS_URL=redis://default:PASSWORD@redis-12345.c123.us-east-1-1.ec2.cloud.redislabs.com:12345
 ```
@@ -68,10 +74,12 @@ REDIS_URL=redis://default:PASSWORD@redis-12345.c123.us-east-1-1.ec2.cloud.redisl
 5. Copy primary endpoint
 
 **Cost:**
+
 - cache.t3.micro: ~$12/month
 - Included in AWS free tier (first 12 months)
 
 **Add to `.env.production`:**
+
 ```bash
 REDIS_URL=redis://your-cluster.abc123.0001.use1.cache.amazonaws.com:6379
 ```
@@ -94,6 +102,7 @@ docker run -d -p 6379:6379 redis:alpine
 ```
 
 **Add to `.env.production`:**
+
 ```bash
 REDIS_URL=redis://localhost:6379
 ```
@@ -101,21 +110,25 @@ REDIS_URL=redis://localhost:6379
 ## Configuration Options
 
 ### Basic Configuration (Default)
+
 ```bash
 REDIS_URL=redis://host:6379
 ```
 
 ### With Password
+
 ```bash
 REDIS_URL=redis://:password@host:6379
 ```
 
 ### With Username and Password
+
 ```bash
 REDIS_URL=redis://username:password@host:6379
 ```
 
 ### With TLS (Upstash, production)
+
 ```bash
 REDIS_URL=rediss://default:password@host:6379
 ```
@@ -174,6 +187,7 @@ user:{userId}:revoked_before # Session revocation timestamp
 ## Cache Invalidation
 
 Cache is automatically invalidated on:
+
 - User updates
 - Trip modifications
 - Member changes
@@ -182,23 +196,27 @@ Cache is automatically invalidated on:
 ## Monitoring Redis
 
 ### Memory Usage
+
 ```bash
 redis-cli INFO memory
 ```
 
 ### Check Connection
+
 ```bash
 redis-cli PING
 # Should return: PONG
 ```
 
 ### View Keys
+
 ```bash
 redis-cli KEYS "user:*"
 redis-cli KEYS "trip:*"
 ```
 
 ### Clear All Cache (if needed)
+
 ```bash
 redis-cli FLUSHALL
 ```
@@ -206,11 +224,13 @@ redis-cli FLUSHALL
 ## Performance Impact
 
 **Without Redis:**
+
 - Average response time: 150-300ms
 - Database queries per request: 3-8
 - Can handle: ~100 concurrent users
 
 **With Redis:**
+
 - Average response time: 30-80ms
 - Database queries per request: 0-2
 - Can handle: 500+ concurrent users
@@ -226,21 +246,25 @@ redis-cli FLUSHALL
 ## Troubleshooting
 
 ### Connection Timeout
+
 - Check firewall rules
 - Verify Redis is running: `redis-cli ping`
 - Test from app server: `telnet redis-host 6379`
 
 ### Memory Issues
+
 - Check memory usage: `redis-cli INFO memory`
 - Increase max memory or adjust TTLs
 - Enable eviction policy: `maxmemory-policy allkeys-lru`
 
 ### Slow Performance
+
 - Check latency: `redis-cli --latency`
 - Ensure Redis is in same region as app
 - Consider upgrading instance size
 
 ### Connection Refused
+
 - Check Redis URL format
 - Verify credentials
 - Check if Redis allows external connections
@@ -248,6 +272,7 @@ redis-cli FLUSHALL
 ## Alternative: Without Redis
 
 TripSync will work without Redis using in-memory cache:
+
 - ✅ All features functional
 - ❌ Cache lost on restart
 - ❌ Cannot scale horizontally
@@ -258,12 +283,12 @@ TripSync will work without Redis using in-memory cache:
 
 ## Cost Comparison
 
-| Provider | Free Tier | Paid Plans | Best For |
-|----------|-----------|------------|----------|
-| Upstash | 10K cmds/day, 256MB | From $0.20/100K | Global edge, serverless |
-| Redis Cloud | 30MB | From $5/month | Fixed workload |
-| AWS ElastiCache | 750 hrs/month (1st year) | From $12/month | AWS ecosystem |
-| Local | Free | Infrastructure cost | Development only |
+| Provider        | Free Tier                | Paid Plans          | Best For                |
+| --------------- | ------------------------ | ------------------- | ----------------------- |
+| Upstash         | 10K cmds/day, 256MB      | From $0.20/100K     | Global edge, serverless |
+| Redis Cloud     | 30MB                     | From $5/month       | Fixed workload          |
+| AWS ElastiCache | 750 hrs/month (1st year) | From $12/month      | AWS ecosystem           |
+| Local           | Free                     | Infrastructure cost | Development only        |
 
 ## Next Steps
 

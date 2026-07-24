@@ -1,14 +1,32 @@
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { Textarea } from "@/components/ui/textarea";
-import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Sparkles, FileText, Download, Copy, Check, Loader2, Image, BarChart3, Calendar, DollarSign } from "lucide-react";
-import { useState } from "react";
-import { format } from "date-fns";
-import { Label } from "@/components/ui/label";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+import { Textarea } from '@/components/ui/textarea';
+import { Badge } from '@/components/ui/badge';
+import { Progress } from '@/components/ui/progress';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import {
+  Sparkles,
+  FileText,
+  Download,
+  Copy,
+  Check,
+  Loader2,
+  Image,
+  BarChart3,
+  Calendar,
+  DollarSign,
+} from 'lucide-react';
+import { useState } from 'react';
+import { format } from 'date-fns';
+import { Label } from '@/components/ui/label';
 
 interface TripStats {
   totalExpenses: number;
@@ -44,9 +62,9 @@ export function TripRecapEditorModal({
   currentRecap,
   stats,
   onSave,
-  onGenerateRecap
+  onGenerateRecap,
 }: TripRecapEditorModalProps) {
-  const [recapText, setRecapText] = useState(currentRecap || "");
+  const [recapText, setRecapText] = useState(currentRecap || '');
   const [isSaving, setIsSaving] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
   const [hasChanges, setHasChanges] = useState(false);
@@ -61,7 +79,7 @@ export function TripRecapEditorModal({
       setRecapText(generated);
       setHasChanges(true);
     } catch (error) {
-      console.error("Failed to generate recap:", error);
+      console.error('Failed to generate recap:', error);
     } finally {
       setIsGenerating(false);
     }
@@ -73,7 +91,7 @@ export function TripRecapEditorModal({
       await onSave(recapText);
       setHasChanges(false);
     } catch (error) {
-      console.error("Failed to save recap:", error);
+      console.error('Failed to save recap:', error);
     } finally {
       setIsSaving(false);
     }
@@ -133,14 +151,11 @@ export function TripRecapEditorModal({
                       <h4 className="font-semibold text-purple-900">AI-Powered Recap</h4>
                     </div>
                     <p className="text-sm text-purple-800">
-                      Let Atlas generate a personalized recap based on your trip activities, expenses, and highlights
+                      Let Atlas generate a personalized recap based on your trip activities,
+                      expenses, and highlights
                     </p>
                   </div>
-                  <Button
-                    onClick={handleGenerate}
-                    disabled={isGenerating}
-                    className="ml-4"
-                  >
+                  <Button onClick={handleGenerate} disabled={isGenerating} className="ml-4">
                     {isGenerating ? (
                       <>
                         <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -237,11 +252,10 @@ export function TripRecapEditorModal({
               <div className="text-center">
                 <h3 className="text-2xl font-bold text-green-900 mb-2">{tripName}</h3>
                 <p className="text-green-700 mb-4">
-                  {format(new Date(startDate), "MMM d")} - {format(new Date(endDate), "MMM d, yyyy")}
+                  {format(new Date(startDate), 'MMM d')} -{' '}
+                  {format(new Date(endDate), 'MMM d, yyyy')}
                 </p>
-                <Badge className="bg-green-600 text-white">
-                  {stats.daysElapsed} Days
-                </Badge>
+                <Badge className="bg-green-600 text-white">{stats.daysElapsed} Days</Badge>
               </div>
             </Card>
 
@@ -274,9 +288,7 @@ export function TripRecapEditorModal({
                   </div>
                 </div>
                 {stats.topCategory && (
-                  <p className="text-xs text-muted-foreground">
-                    Top category: {stats.topCategory}
-                  </p>
+                  <p className="text-xs text-muted-foreground">Top category: {stats.topCategory}</p>
                 )}
               </Card>
 
@@ -320,7 +332,8 @@ export function TripRecapEditorModal({
                 <div className="mb-6 pb-6 border-b">
                   <h1 className="text-3xl font-bold mb-2">{tripName}</h1>
                   <p className="text-muted-foreground">
-                    {destination} • {format(new Date(startDate), "MMMM d")} - {format(new Date(endDate), "MMMM d, yyyy")}
+                    {destination} • {format(new Date(startDate), 'MMMM d')} -{' '}
+                    {format(new Date(endDate), 'MMMM d, yyyy')}
                   </p>
                 </div>
 
@@ -329,7 +342,9 @@ export function TripRecapEditorModal({
                 ) : (
                   <div className="text-center py-12">
                     <FileText className="h-12 w-12 mx-auto mb-3 text-muted-foreground" />
-                    <p className="text-muted-foreground">No recap yet. Start writing to see a preview.</p>
+                    <p className="text-muted-foreground">
+                      No recap yet. Start writing to see a preview.
+                    </p>
                   </div>
                 )}
 
@@ -365,11 +380,8 @@ export function TripRecapEditorModal({
               <Button variant="outline" onClick={onClose}>
                 Cancel
               </Button>
-              <Button
-                onClick={handleSave}
-                disabled={!hasChanges || isSaving}
-              >
-                {isSaving ? "Saving..." : "Save Recap"}
+              <Button onClick={handleSave} disabled={!hasChanges || isSaving}>
+                {isSaving ? 'Saving...' : 'Save Recap'}
               </Button>
             </div>
           </div>

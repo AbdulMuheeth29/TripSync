@@ -82,10 +82,9 @@ class CacheService {
         appLogger.error(error, { context: 'redis_initial_connect' });
       });
     } catch (error) {
-      appLogger.error(
-        error instanceof Error ? error : new Error(String(error)),
-        { context: 'redis_initialization' }
-      );
+      appLogger.error(error instanceof Error ? error : new Error(String(error)), {
+        context: 'redis_initialization',
+      });
     }
   }
 
@@ -125,10 +124,10 @@ class CacheService {
         return value as T;
       }
     } catch (error) {
-      appLogger.error(
-        error instanceof Error ? error : new Error(String(error)),
-        { context: 'cache_get', key }
-      );
+      appLogger.error(error instanceof Error ? error : new Error(String(error)), {
+        context: 'cache_get',
+        key,
+      });
       return null;
     }
   }
@@ -148,10 +147,11 @@ class CacheService {
 
       return true;
     } catch (error) {
-      appLogger.error(
-        error instanceof Error ? error : new Error(String(error)),
-        { context: 'cache_set', key, ttl }
-      );
+      appLogger.error(error instanceof Error ? error : new Error(String(error)), {
+        context: 'cache_set',
+        key,
+        ttl,
+      });
       return false;
     }
   }
@@ -168,10 +168,10 @@ class CacheService {
       await this.client!.del(this.key(key));
       return true;
     } catch (error) {
-      appLogger.error(
-        error instanceof Error ? error : new Error(String(error)),
-        { context: 'cache_del', key }
-      );
+      appLogger.error(error instanceof Error ? error : new Error(String(error)), {
+        context: 'cache_del',
+        key,
+      });
       return false;
     }
   }
@@ -194,10 +194,10 @@ class CacheService {
       await this.client!.del(...keys);
       return keys.length;
     } catch (error) {
-      appLogger.error(
-        error instanceof Error ? error : new Error(String(error)),
-        { context: 'cache_del_pattern', pattern }
-      );
+      appLogger.error(error instanceof Error ? error : new Error(String(error)), {
+        context: 'cache_del_pattern',
+        pattern,
+      });
       return 0;
     }
   }
@@ -214,10 +214,10 @@ class CacheService {
       const result = await this.client!.exists(this.key(key));
       return result === 1;
     } catch (error) {
-      appLogger.error(
-        error instanceof Error ? error : new Error(String(error)),
-        { context: 'cache_exists', key }
-      );
+      appLogger.error(error instanceof Error ? error : new Error(String(error)), {
+        context: 'cache_exists',
+        key,
+      });
       return false;
     }
   }
@@ -227,11 +227,7 @@ class CacheService {
    * If key exists, return cached value
    * If key doesn't exist, call factory function, cache result, and return it
    */
-  async getOrSet<T>(
-    key: string,
-    factory: () => Promise<T>,
-    ttl: number = 3600
-  ): Promise<T | null> {
+  async getOrSet<T>(key: string, factory: () => Promise<T>, ttl: number = 3600): Promise<T | null> {
     // Try to get from cache
     const cached = await this.get<T>(key);
 
@@ -248,10 +244,10 @@ class CacheService {
 
       return value;
     } catch (error) {
-      appLogger.error(
-        error instanceof Error ? error : new Error(String(error)),
-        { context: 'cache_get_or_set', key }
-      );
+      appLogger.error(error instanceof Error ? error : new Error(String(error)), {
+        context: 'cache_get_or_set',
+        key,
+      });
       return null;
     }
   }
@@ -274,10 +270,10 @@ class CacheService {
 
       return value;
     } catch (error) {
-      appLogger.error(
-        error instanceof Error ? error : new Error(String(error)),
-        { context: 'cache_incr', key }
-      );
+      appLogger.error(error instanceof Error ? error : new Error(String(error)), {
+        context: 'cache_incr',
+        key,
+      });
       return 0;
     }
   }
@@ -295,10 +291,11 @@ class CacheService {
       await this.client!.hset(this.key(key), field, serialized);
       return true;
     } catch (error) {
-      appLogger.error(
-        error instanceof Error ? error : new Error(String(error)),
-        { context: 'cache_hset', key, field }
-      );
+      appLogger.error(error instanceof Error ? error : new Error(String(error)), {
+        context: 'cache_hset',
+        key,
+        field,
+      });
       return false;
     }
   }
@@ -324,10 +321,11 @@ class CacheService {
         return value as T;
       }
     } catch (error) {
-      appLogger.error(
-        error instanceof Error ? error : new Error(String(error)),
-        { context: 'cache_hget', key, field }
-      );
+      appLogger.error(error instanceof Error ? error : new Error(String(error)), {
+        context: 'cache_hget',
+        key,
+        field,
+      });
       return null;
     }
   }
@@ -359,10 +357,10 @@ class CacheService {
 
       return parsed;
     } catch (error) {
-      appLogger.error(
-        error instanceof Error ? error : new Error(String(error)),
-        { context: 'cache_hgetall', key }
-      );
+      appLogger.error(error instanceof Error ? error : new Error(String(error)), {
+        context: 'cache_hgetall',
+        key,
+      });
       return null;
     }
   }
@@ -385,10 +383,9 @@ class CacheService {
 
       return true;
     } catch (error) {
-      appLogger.error(
-        error instanceof Error ? error : new Error(String(error)),
-        { context: 'cache_clear' }
-      );
+      appLogger.error(error instanceof Error ? error : new Error(String(error)), {
+        context: 'cache_clear',
+      });
       return false;
     }
   }
@@ -423,10 +420,9 @@ class CacheService {
         stats.memory = match[1].trim();
       }
     } catch (error) {
-      appLogger.error(
-        error instanceof Error ? error : new Error(String(error)),
-        { context: 'cache_stats' }
-      );
+      appLogger.error(error instanceof Error ? error : new Error(String(error)), {
+        context: 'cache_stats',
+      });
     }
 
     return stats;
@@ -443,10 +439,9 @@ class CacheService {
           service: 'cache',
         });
       } catch (error) {
-        appLogger.error(
-          error instanceof Error ? error : new Error(String(error)),
-          { context: 'redis_shutdown' }
-        );
+        appLogger.error(error instanceof Error ? error : new Error(String(error)), {
+          context: 'redis_shutdown',
+        });
       }
     }
   }

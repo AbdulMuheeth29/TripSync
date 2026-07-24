@@ -1,15 +1,15 @@
-import { useEffect, useState } from "react";
-import { useParams, useLocation, Link } from "wouter";
-import { useMutation } from "@tanstack/react-query";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { useAuth } from "@/lib/auth-context";
-import { useToast } from "@/hooks/use-toast";
-import { apiRequest, queryClient } from "@/lib/queryClient";
-import { AppLogo } from "@/components/app-logo";
-import { Users, MapPin, Calendar, Loader2 } from "lucide-react";
+import { useEffect, useState } from 'react';
+import { useParams, useLocation, Link } from 'wouter';
+import { useMutation } from '@tanstack/react-query';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { useAuth } from '@/lib/auth-context';
+import { useToast } from '@/hooks/use-toast';
+import { apiRequest, queryClient } from '@/lib/queryClient';
+import { AppLogo } from '@/components/app-logo';
+import { Users, MapPin, Calendar, Loader2 } from 'lucide-react';
 
 export default function JoinTripPage() {
   const params = useParams();
@@ -18,9 +18,13 @@ export default function JoinTripPage() {
   const { user, register, isLoading: authLoading } = useAuth();
   const { toast } = useToast();
 
-  const [email, setEmail] = useState("");
-  const [name, setName] = useState("");
-  const [tripInfo, setTripInfo] = useState<{ destination: string; startDate: string; groupSize: number } | null>(null);
+  const [email, setEmail] = useState('');
+  const [name, setName] = useState('');
+  const [tripInfo, setTripInfo] = useState<{
+    destination: string;
+    startDate: string;
+    groupSize: number;
+  } | null>(null);
   const [isLoadingTrip, setIsLoadingTrip] = useState(true);
 
   useEffect(() => {
@@ -32,7 +36,7 @@ export default function JoinTripPage() {
           setTripInfo(data);
         }
       } catch (error) {
-        console.error("Error fetching trip info:", error);
+        console.error('Error fetching trip info:', error);
       } finally {
         setIsLoadingTrip(false);
       }
@@ -45,22 +49,22 @@ export default function JoinTripPage() {
 
   const joinMutation = useMutation({
     mutationFn: async (userId: string) => {
-      const response = await apiRequest("POST", `/api/trips/join/${shareCode}`, { userId });
+      const response = await apiRequest('POST', `/api/trips/join/${shareCode}`, { userId });
       return response.json();
     },
     onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: ["/api/trips"] });
+      queryClient.invalidateQueries({ queryKey: ['/api/trips'] });
       toast({
-        title: "Joined trip!",
+        title: 'Joined trip!',
         description: "You've successfully joined the trip",
       });
       setLocation(`/trip/${data.tripId}`);
     },
     onError: () => {
       toast({
-        title: "Failed to join",
-        description: "Could not join the trip. The link may be invalid.",
-        variant: "destructive",
+        title: 'Failed to join',
+        description: 'Could not join the trip. The link may be invalid.',
+        variant: 'destructive',
       });
     },
   });
@@ -70,21 +74,29 @@ export default function JoinTripPage() {
       joinMutation.mutate(user.id);
     } else if (email && name) {
       try {
-        const autoPassword = crypto.randomUUID().slice(0, 16) + "A1!";
+        const autoPassword = crypto.randomUUID().slice(0, 16) + 'A1!';
         await register(email, name, autoPassword, true);
-        const token = localStorage.getItem("tripsync_token") ?? sessionStorage.getItem("tripsync_token");
+        const token =
+          localStorage.getItem('tripsync_token') ?? sessionStorage.getItem('tripsync_token');
         if (token) {
-          const meRes = await fetch("/api/auth/me", { headers: { Authorization: `Bearer ${token}` }, credentials: "include" });
+          const meRes = await fetch('/api/auth/me', {
+            headers: { Authorization: `Bearer ${token}` },
+            credentials: 'include',
+          });
           if (meRes.ok) {
             const userData = await meRes.json();
             joinMutation.mutate(userData.id);
             return;
           }
         }
-        toast({ title: "Account created", description: "Please refresh and try joining again.", variant: "destructive" });
+        toast({
+          title: 'Account created',
+          description: 'Please refresh and try joining again.',
+          variant: 'destructive',
+        });
       } catch (error) {
-        const msg = error instanceof Error ? error.message : "Failed to create account";
-        toast({ title: "Error", description: msg, variant: "destructive" });
+        const msg = error instanceof Error ? error.message : 'Failed to create account';
+        toast({ title: 'Error', description: msg, variant: 'destructive' });
       }
     }
   };
@@ -117,7 +129,10 @@ export default function JoinTripPage() {
 
   return (
     <div className="min-h-screen bg-background flex flex-col items-center justify-center p-4">
-      <Link href="/" className="flex items-center gap-2 mb-8 no-underline text-foreground hover:opacity-90 transition-opacity">
+      <Link
+        href="/"
+        className="flex items-center gap-2 mb-8 no-underline text-foreground hover:opacity-90 transition-opacity"
+      >
         <AppLogo className="h-10 w-10 object-contain" />
         <span className="text-2xl font-bold">TripSync</span>
       </Link>
@@ -125,7 +140,9 @@ export default function JoinTripPage() {
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
           <CardTitle className="text-2xl">Join This Trip</CardTitle>
-          <CardDescription>You've been invited to join a group trip to {tripInfo.destination}</CardDescription>
+          <CardDescription>
+            You've been invited to join a group trip to {tripInfo.destination}
+          </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="bg-muted rounded-lg p-4 space-y-2">
@@ -160,7 +177,7 @@ export default function JoinTripPage() {
                     Joining...
                   </>
                 ) : (
-                  "Join Trip"
+                  'Join Trip'
                 )}
               </Button>
             </div>
@@ -202,7 +219,7 @@ export default function JoinTripPage() {
                     Joining...
                   </>
                 ) : (
-                  "Join Trip"
+                  'Join Trip'
                 )}
               </Button>
             </div>

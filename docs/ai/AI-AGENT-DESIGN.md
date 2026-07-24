@@ -91,6 +91,7 @@
 ### When Atlas Appears (Trigger Conditions):
 
 #### 1. **Inactivity Detection**
+
 ```javascript
 IF user idle > 30 seconds ON form page
 AND form incomplete
@@ -98,6 +99,7 @@ THEN: "Need help filling this out? I can explain what each field does."
 ```
 
 #### 2. **Confusion Signals**
+
 ```javascript
 IF user clicks back button 2+ times
 OR hovers over same button for >10 seconds without clicking
@@ -106,6 +108,7 @@ THEN: "I noticed you're exploring [feature]. Want me to walk you through it?"
 ```
 
 #### 3. **Empty State Assistance**
+
 ```javascript
 IF user views empty itinerary for >20 seconds
 AND no AI suggestions generated
@@ -113,6 +116,7 @@ THEN: "Ready to build your itinerary? I can generate AI suggestions based on you
 ```
 
 #### 4. **Feature Discovery**
+
 ```javascript
 IF user is on free plan
 AND viewing limited feature (map view, offline access)
@@ -120,6 +124,7 @@ THEN: "This feature is available on Pro. Want to see what it does? I can give yo
 ```
 
 #### 5. **Group Coordination Help**
+
 ```javascript
 IF pendingInvites > 0 for >24 hours
 THEN: "2 people haven't responded to your invite yet. Want me to help you send a reminder?"
@@ -129,12 +134,14 @@ THEN: "Looks like the group is split on [activity]. I can suggest a compromise o
 ```
 
 #### 6. **Budget Optimization**
+
 ```javascript
 IF total expenses > budgetPerPerson * groupSize
 THEN: "Your current itinerary is $450 over budget. Want me to suggest more affordable alternatives?"
 ```
 
 #### 7. **Timeline Feasibility**
+
 ```javascript
 IF itinerary items overlap in time
 OR travel time between activities unrealistic
@@ -142,6 +149,7 @@ THEN: "I noticed you have activities at 2pm and 3pm that are 45 minutes apart. S
 ```
 
 #### 8. **Onboarding Assistance**
+
 ```javascript
 IF user.experienceLevel === "first_trip"
 AND tripStage === "just_created"
@@ -163,25 +171,31 @@ THEN: "Welcome! This is your first trip on TripSync. Want a quick 2-minute tour 
 ### Example Messages:
 
 **❌ Generic Chatbot:**
+
 > "Hello! How can I help you today?"
 
 **✅ Atlas (Context-Aware):**
+
 > "I see you're adding activities to your Paris itinerary. Want me to suggest some must-see spots based on your 7-day trip?"
 
 ---
 
 **❌ Generic:**
+
 > "You can click the 'Add Activity' button to add more items."
 
 **✅ Atlas:**
+
 > "Your itinerary only has 2 activities for a 7-day trip. Let me help fill in the gaps—I can suggest activities, restaurants, and transport."
 
 ---
 
 **❌ Generic:**
+
 > "Your budget has been exceeded."
 
 **✅ Atlas:**
+
 > "Heads up: you're $450 over budget. I can find cheaper alternatives for the Eiffel Tower dinner ($200) and the Seine cruise ($80)."
 
 ---
@@ -260,13 +274,15 @@ const AtlasAgent: React.FC = () => {
 ```typescript
 // server/routes/atlas.ts
 
-app.post("/api/atlas/message", async (req, res) => {
+app.post('/api/atlas/message', async (req, res) => {
   const { message, context, tripId, userId } = req.body;
 
   // 1. Fetch full trip context from database
   const trip = await db.query.trips.findFirst({ where: eq(trips.id, tripId) });
   const members = await db.query.tripMembers.findMany({ where: eq(tripMembers.tripId, tripId) });
-  const itinerary = await db.query.itineraryItems.findMany({ where: eq(itineraryItems.tripId, tripId) });
+  const itinerary = await db.query.itineraryItems.findMany({
+    where: eq(itineraryItems.tripId, tripId),
+  });
   const expenses = await db.query.expenses.findMany({ where: eq(expenses.tripId, tripId) });
   const votes = await db.query.votes.findMany({ where: eq(votes.tripId, tripId) });
 
@@ -276,7 +292,7 @@ You are Atlas, TripSync's intelligent travel planning assistant. You are helping
 
 CURRENT CONTEXT:
 - Trip: ${trip.destination}, ${trip.startDate} to ${trip.endDate}
-- Group Size: ${members.length} people (${members.filter(m => m.status === 'accepted').length} confirmed)
+- Group Size: ${members.length} people (${members.filter((m) => m.status === 'accepted').length} confirmed)
 - Budget: $${trip.budgetPerPerson} per person
 - Current Stage: ${context.tripStage}
 - Page: ${context.currentPage}
@@ -285,13 +301,13 @@ CURRENT CONTEXT:
 TRIP PROGRESS:
 - Itinerary Items: ${itinerary.length} activities planned
 - Total Expenses: $${expenses.reduce((sum, e) => sum + parseFloat(e.amount), 0)}
-- Pending Votes: ${votes.filter(v => v.status === 'pending').length}
+- Pending Votes: ${votes.filter((v) => v.status === 'pending').length}
 - Completion: ${calculateCompletion(trip, itinerary, members)}%
 
 DETECTED ISSUES:
-${context.stuckIndicators.inactivityTime > 30 ? "- User has been inactive for " + context.stuckIndicators.inactivityTime + " seconds" : ""}
-${context.stuckIndicators.emptyStates.length > 0 ? "- Empty states: " + context.stuckIndicators.emptyStates.join(", ") : ""}
-${expenses.reduce((sum, e) => sum + parseFloat(e.amount), 0) > trip.budgetPerPerson * members.length ? "- Over budget by $" + (expenses.reduce((sum, e) => sum + parseFloat(e.amount), 0) - trip.budgetPerPerson * members.length) : ""}
+${context.stuckIndicators.inactivityTime > 30 ? '- User has been inactive for ' + context.stuckIndicators.inactivityTime + ' seconds' : ''}
+${context.stuckIndicators.emptyStates.length > 0 ? '- Empty states: ' + context.stuckIndicators.emptyStates.join(', ') : ''}
+${expenses.reduce((sum, e) => sum + parseFloat(e.amount), 0) > trip.budgetPerPerson * members.length ? '- Over budget by $' + (expenses.reduce((sum, e) => sum + parseFloat(e.amount), 0) - trip.budgetPerPerson * members.length) : ''}
 
 YOUR ROLE:
 - Be proactive but not pushy
@@ -306,10 +322,10 @@ USER MESSAGE: "${message}"
 
   // 3. Call Claude API with full context
   const response = await anthropic.messages.create({
-    model: "claude-3-5-sonnet-20241022",
+    model: 'claude-3-5-sonnet-20241022',
     max_tokens: 500,
     system: systemPrompt,
-    messages: [{ role: "user", content: message }],
+    messages: [{ role: 'user', content: message }],
   });
 
   // 4. Parse response and extract suggested actions
@@ -335,6 +351,7 @@ USER MESSAGE: "${message}"
 ### Atlas Widget States:
 
 #### 1. **Minimized (Default)**
+
 ```
 ┌─────────────────┐
 │  💬 Atlas      │  ← Floating bottom-right
@@ -343,6 +360,7 @@ USER MESSAGE: "${message}"
 ```
 
 #### 2. **Expanded (Chat Mode)**
+
 ```
 ┌─────────────────────────────────┐
 │  💬 Atlas - Your Travel Guide  │  [─][×]
@@ -368,6 +386,7 @@ USER MESSAGE: "${message}"
 ```
 
 #### 3. **Proactive Nudge (Tooltip Style)**
+
 ```
 ┌────────────────────────┐
 │ Atlas: Quick tip! You  │  ← Appears near relevant UI element
@@ -380,6 +399,7 @@ USER MESSAGE: "${message}"
 ```
 
 #### 4. **Actionable Card (Inline)**
+
 ```
 ┌─────────────────────────────────────┐
 │ 💡 Atlas Suggestion                 │
@@ -403,6 +423,7 @@ USER MESSAGE: "${message}"
 ### What Atlas Can Do:
 
 #### 1. **Generate Content**
+
 - AI itinerary suggestions
 - Restaurant recommendations
 - Activity ideas based on interests
@@ -410,6 +431,7 @@ USER MESSAGE: "${message}"
 - Budget breakdowns
 
 **Example:**
+
 ```javascript
 {
   action: "generate_itinerary",
@@ -430,10 +452,12 @@ USER MESSAGE: "${message}"
 ```
 
 #### 2. **Fill Forms**
+
 - Pre-populate fields based on conversation
 - Suggest values for budget, dates, preferences
 
 **Example:**
+
 ```javascript
 {
   action: "fill_budget_field",
@@ -445,11 +469,13 @@ USER MESSAGE: "${message}"
 ```
 
 #### 3. **Navigate User**
+
 - Guide to specific features
 - Open relevant modals
 - Scroll to incomplete sections
 
 **Example:**
+
 ```javascript
 {
   action: "navigate_to_expenses",
@@ -461,11 +487,13 @@ USER MESSAGE: "${message}"
 ```
 
 #### 4. **Send Reminders**
+
 - Nudge group members to vote
 - Remind to set budget
 - Alert about upcoming trip deadlines
 
 **Example:**
+
 ```javascript
 {
   action: "send_vote_reminder",
@@ -480,11 +508,13 @@ USER MESSAGE: "${message}"
 ```
 
 #### 5. **Optimize Plans**
+
 - Reorder itinerary for efficiency
 - Suggest budget-friendly alternatives
 - Detect scheduling conflicts
 
 **Example:**
+
 ```javascript
 {
   action: "optimize_itinerary",
@@ -497,11 +527,13 @@ USER MESSAGE: "${message}"
 ```
 
 #### 6. **Explain Features**
+
 - Contextual tooltips
 - Feature walkthroughs
 - Demo mode for Pro features
 
 **Example:**
+
 ```javascript
 {
   action: "explain_voting",
@@ -519,17 +551,20 @@ USER MESSAGE: "${message}"
 ### Page-by-Page Presence:
 
 #### **Dashboard** (`/dashboard`)
+
 - Suggests creating first trip if none exist
 - Highlights upcoming trips needing attention
 - Offers to archive completed trips
 
 #### **Create Trip** (`/create-trip`)
+
 - Guides through 5-step form
 - Suggests destinations based on season
 - Recommends budget ranges
 - Offers to invite common travel buddies
 
 #### **Trip Detail** (`/trip/:id`)
+
 - **Itinerary Tab:** Suggests activities, detects gaps, offers AI generation
 - **Expenses Tab:** Helps split costs, suggests categories, alerts if over budget
 - **Chat Tab:** Answers questions about trip, summarizes discussions
@@ -537,11 +572,13 @@ USER MESSAGE: "${message}"
 - **Members Tab:** Helps send invites, reminds inactive members
 
 #### **Pricing** (`/pricing`)
+
 - Explains plan differences
 - Calculates value based on user's trips
 - Offers trial signup assistance
 
 #### **Login/Signup** (`/login`)
+
 - Helps with password reset
 - Explains demo account
 - Guides new users through first trip
@@ -553,17 +590,20 @@ USER MESSAGE: "${message}"
 ### Example 1: Empty Itinerary
 
 **Context:**
+
 - User on trip detail page, itinerary tab
 - 0 activities added
 - Trip to "Tokyo, Japan" June 1-10
 - Budget: $2000/person, 4 people
 
 **Atlas (Proactive):**
+
 > "Your Tokyo itinerary is empty. I can generate a full 10-day plan with activities, dining, and transport based on your $2000 budget. Want me to do that?"
 
 **User:** "Yes please"
 
 **Atlas:**
+
 > "Great! Generating your Tokyo itinerary now... [Loading animation]
 >
 > Done! I've added 25 activities including Senso-ji Temple, Tokyo Skytree, Shibuya Crossing, and authentic ramen spots. Total estimated cost: $1,850/person.
@@ -575,12 +615,15 @@ USER MESSAGE: "${message}"
 ### Example 2: Budget Overrun
 
 **Context:**
+
 - Total expenses: $12,000
 - Budget: $10,000 (4 people × $2500)
 - Over by: $2,000
 
 **Atlas (Proactive):**
+
 > "Heads up: You're $2,000 over budget. The biggest costs are:
+>
 > - 5-star hotel ($5,000) - I can find 4-star for $3,200
 > - Private tour guide ($800) - Group tour is $200
 >
@@ -589,6 +632,7 @@ USER MESSAGE: "${message}"
 **User:** "Yes, show me cheaper hotels"
 
 **Atlas:**
+
 > "Here are 3 highly-rated 4-star hotels near your activities:
 >
 > 1. **Hotel Gracery Shinjuku** - $3,200 (7 nights, 4★, 8.5/10)
@@ -604,14 +648,17 @@ USER MESSAGE: "${message}"
 ### Example 3: Group Stuck on Vote
 
 **Context:**
+
 - Vote on "Dinner Reservations" has been 3-3 tie for 2 hours
 - Options: Sushi vs Ramen
 - Trip starts in 3 days
 
 **Atlas (Proactive):**
+
 > "Your group is split 50/50 on dinner for June 2. Since the trip is in 3 days, you might want to decide soon.
 >
 > Options:
+>
 > - Do both (sushi on June 2, ramen on June 3)
 > - Let trip organizer break the tie
 > - Create a new vote with different options
@@ -621,7 +668,9 @@ USER MESSAGE: "${message}"
 **User:** "Do both"
 
 **Atlas:**
+
 > "Perfect! I'll add both to your itinerary:
+>
 > - June 2, 7pm: Sukiyabashi Jiro (Sushi)
 > - June 3, 7pm: Ichiran Ramen
 >
@@ -634,6 +683,7 @@ USER MESSAGE: "${message}"
 ### Recommended: **Claude 3.5 Sonnet** (You already have API access!)
 
 **Why Claude?**
+
 - ✅ You already use it for trip planning
 - ✅ Excellent at understanding context and nuance
 - ✅ Can handle long conversations with memory
@@ -726,6 +776,7 @@ interface AtlasMetrics {
 ## 🎯 IMPLEMENTATION PHASES
 
 ### Phase 1: MVP (2-3 weeks)
+
 - ✅ Basic chat widget (minimized/expanded states)
 - ✅ Manual chat (user initiates conversation)
 - ✅ Claude API integration with trip context
@@ -733,12 +784,14 @@ interface AtlasMetrics {
 - ✅ 3 actions: generate itinerary, navigate, explain feature
 
 ### Phase 2: Smart Triggers (1 week)
+
 - ✅ Advanced behavior tracking (scroll depth, hover time, back button)
 - ✅ Journey stage detection (onboarding, planning, booking, pre-trip)
 - ✅ Conversation memory (remember previous interactions)
 - ✅ 10+ proactive triggers
 
 ### Phase 3: Autonomous Actions (2 weeks)
+
 - ✅ Auto-fill forms
 - ✅ Auto-optimize itinerary
 - ✅ Send reminders to group
@@ -746,6 +799,7 @@ interface AtlasMetrics {
 - ✅ Conflict resolution automation
 
 ### Phase 4: Advanced Intelligence (ongoing)
+
 - ✅ Learn from user patterns (ML model for trigger timing)
 - ✅ Personalized suggestions based on past trips
 - ✅ Predictive assistance (suggest things before user needs them)
@@ -806,27 +860,32 @@ server/
 ### Atlas Avatar:
 
 **Option 1: Minimalist Icon**
+
 ```
 💬  (Speech bubble with subtle animation)
 ```
 
 **Option 2: Globe/Compass**
+
 ```
 🧭  (Compass needle pointing to help)
 ```
 
 **Option 3: Custom Mascot**
+
 ```
 [A]  (Stylized "A" with subtle glow in TripSync brand colors)
 ```
 
 ### Color Scheme:
+
 - **Primary:** Amber/Gold (matches TripSync accent color)
 - **Background:** Glass morphism (backdrop-blur + transparency)
 - **Text:** White on dark, Dark on light (follows theme)
 - **Accent:** Green for positive actions, Red for warnings
 
 ### Animation:
+
 - **Pulse:** Gentle pulse on new message
 - **Slide-in:** Smooth slide from bottom-right
 - **Typing indicator:** Claude is "thinking..."
@@ -883,16 +942,17 @@ server/
 
 ### Why Atlas is Different:
 
-| Generic Chatbots | Atlas |
-|------------------|-------|
+| Generic Chatbots      | Atlas                                                              |
+| --------------------- | ------------------------------------------------------------------ |
 | "How can I help you?" | "I see you're stuck on budgeting. Want me to suggest a breakdown?" |
-| Waits for user to ask | Proactively offers help based on context |
-| Generic responses | Trip-specific, references your Paris trip and $3000 budget |
-| One-size-fits-all | Adapts to trip stage (planning vs during-trip) |
-| Text-only | Actionable buttons (Generate, Navigate, Fill Form) |
-| Isolated feature | Integrated across entire app |
+| Waits for user to ask | Proactively offers help based on context                           |
+| Generic responses     | Trip-specific, references your Paris trip and $3000 budget         |
+| One-size-fits-all     | Adapts to trip stage (planning vs during-trip)                     |
+| Text-only             | Actionable buttons (Generate, Navigate, Fill Form)                 |
+| Isolated feature      | Integrated across entire app                                       |
 
 **Atlas knows:**
+
 - Where you are in your trip planning journey
 - What you've already done
 - What's missing or incomplete
@@ -905,6 +965,7 @@ server/
 ## 📋 IMPLEMENTATION CHECKLIST
 
 ### Frontend:
+
 - [ ] Create AtlasWidget component with minimized/expanded states
 - [ ] Implement context tracking hooks (page, trip stage, user actions)
 - [ ] Build trigger engine (inactivity, confusion, empty states)
@@ -914,6 +975,7 @@ server/
 - [ ] Create settings panel (enable/disable, clear history)
 
 ### Backend:
+
 - [ ] Create `/api/atlas/message` endpoint
 - [ ] Build context builder (fetch trip, members, itinerary, votes, expenses)
 - [ ] Integrate Claude API with rich system prompts
@@ -923,6 +985,7 @@ server/
 - [ ] Implement conversation history storage
 
 ### Testing:
+
 - [ ] Test all 10 proactive triggers
 - [ ] Verify context accuracy across pages
 - [ ] Test action execution (navigate, fill, generate)
@@ -931,6 +994,7 @@ server/
 - [ ] A/B test trigger timing (30s vs 60s inactivity)
 
 ### Launch:
+
 - [ ] Beta testing with 50 users
 - [ ] Gather feedback and refine
 - [ ] Create Atlas introduction modal (first-time users)
@@ -943,30 +1007,35 @@ server/
 ## 🎯 NEXT STEPS
 
 **Immediate (This Week):**
+
 1. Review and approve this design
 2. Decide on Atlas name (Atlas, Scout, Guide, Compass?)
 3. Create wireframes for chat widget UI
 4. Set up Claude API quota for Atlas usage
 
 **Sprint 1 (Week 1-2):**
+
 1. Build basic chat widget (minimized + expanded)
 2. Implement manual chat (user initiates)
 3. Integrate Claude with trip context
 4. Test on trip detail page
 
 **Sprint 2 (Week 3-4):**
+
 1. Add 5 proactive triggers
 2. Implement 3 automated actions
 3. Beta test with team
 4. Refine based on feedback
 
 **Sprint 3 (Week 5-6):**
+
 1. Expand to all pages
 2. Add advanced triggers and actions
 3. Launch to 50 beta users
 4. Gather metrics
 
 **Launch (Week 7):**
+
 1. Public release
 2. Marketing announcement
 3. Monitor and iterate

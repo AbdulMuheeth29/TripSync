@@ -7,6 +7,7 @@
 ---
 
 ## Table of Contents
+
 - [Quick Reference](#quick-reference)
 - [Health Check](#health-check)
 - [Rollback Procedures](#rollback-procedures)
@@ -20,16 +21,19 @@
 ## Quick Reference
 
 ### Service URLs
+
 - **Production**: https://tripsync.app (when deployed)
 - **Staging**: http://localhost:3001
 - **Health Check**: https://tripsync.app/api/health?detailed=true
 
 ### Key Locations
+
 - **Logs**: `docker-compose logs -f tripsync-app-prod`
 - **Database Backups**: `./backups/`
 - **Environment Config**: `.env` (production), `.env.staging` (staging)
 
 ### Quick Commands
+
 ```bash
 # View logs
 docker-compose -f docker-compose.prod.yml logs -f --tail=100
@@ -49,17 +53,20 @@ curl -s https://tripsync.app/api/health?detailed=true | jq
 ## Health Check
 
 ### Basic Health Check
+
 ```bash
 curl -s https://tripsync.app/api/health
 # Expected: {"ok": true, "storage": "pg"}
 ```
 
 ### Detailed Health Check
+
 ```bash
 curl -s https://tripsync.app/api/health?detailed=true | jq
 ```
 
 **Expected Response:**
+
 ```json
 {
   "ok": true,
@@ -79,6 +86,7 @@ curl -s https://tripsync.app/api/health?detailed=true | jq
 ```
 
 ### Service Status Indicators
+
 - ✅ `"ok"` - Service healthy
 - ⚠️ `"unavailable"` - Service not configured (non-critical)
 - ❌ `"error"` - Service failing (investigate immediately)
@@ -90,6 +98,7 @@ curl -s https://tripsync.app/api/health?detailed=true | jq
 ### Decision Criteria: When to Rollback
 
 **IMMEDIATE ROLLBACK** if:
+
 - [ ] Error rate > 5% for 5+ consecutive minutes
 - [ ] Critical feature completely broken (auth, trip creation, data loss)
 - [ ] Data corruption detected
@@ -97,6 +106,7 @@ curl -s https://tripsync.app/api/health?detailed=true | jq
 - [ ] Database connection failures
 
 **MONITOR AND INVESTIGATE** if:
+
 - [ ] Error rate 1-5%
 - [ ] Single feature degraded
 - [ ] Performance slower than baseline (but functional)
@@ -171,6 +181,7 @@ docker-compose -f docker-compose.prod.yml restart app
 ```
 
 ### Post-Rollback Checklist
+
 - [ ] Verify health endpoint returns OK
 - [ ] Test critical user flows (login, create trip)
 - [ ] Check error rate in Sentry (if configured)
@@ -185,10 +196,12 @@ docker-compose -f docker-compose.prod.yml restart app
 ### Issue 1: Database Connection Failures
 
 **Symptoms:**
+
 - Health check shows `"database": { "status": "error" }`
 - Logs show: `Error: connect ECONNREFUSED` or `Connection terminated unexpectedly`
 
 **Diagnosis:**
+
 ```bash
 # Check if PostgreSQL is running
 docker-compose -f docker-compose.prod.yml ps postgres
@@ -201,6 +214,7 @@ docker exec tripsync-postgres-prod psql -U tripsync -c "SELECT 1;"
 ```
 
 **Fix:**
+
 ```bash
 # Restart PostgreSQL
 docker-compose -f docker-compose.prod.yml restart postgres
@@ -218,10 +232,12 @@ docker exec tripsync-postgres-prod psql -U tripsync -c "SELECT count(*) FROM pg_
 ### Issue 2: High Memory Usage / OOM
 
 **Symptoms:**
+
 - App container keeps restarting
 - Logs show: `JavaScript heap out of memory`
 
 **Diagnosis:**
+
 ```bash
 # Check memory usage
 docker stats tripsync-app-prod --no-stream
@@ -231,6 +247,7 @@ docker exec tripsync-app-prod node -e "console.log(v8.getHeapStatistics())"
 ```
 
 **Fix:**
+
 ```bash
 # Increase Node.js memory limit in docker-compose.prod.yml
 # Add to app service:
@@ -246,12 +263,14 @@ docker-compose -f docker-compose.prod.yml restart app
 ### Issue 3: Redis Connection Failures
 
 **Symptoms:**
+
 - Health check shows `"redis": { "status": "error" }`
 - Token blacklist not working (users can't logout)
 
 **Impact**: Medium - app still works, but caching disabled
 
 **Diagnosis:**
+
 ```bash
 # Check if Redis is running
 docker-compose -f docker-compose.prod.yml ps redis
@@ -262,6 +281,7 @@ docker exec tripsync-redis-prod redis-cli ping
 ```
 
 **Fix:**
+
 ```bash
 # Restart Redis
 docker-compose -f docker-compose.prod.yml restart redis
@@ -276,10 +296,12 @@ docker-compose -f docker-compose.prod.yml restart redis app
 ### Issue 4: Email Not Sending
 
 **Symptoms:**
+
 - Password reset emails not arriving
 - Trip invitations not sending
 
 **Diagnosis:**
+
 ```bash
 # Test email configuration
 npm run test:email
@@ -289,6 +311,7 @@ cat .env | grep SMTP
 ```
 
 **Fix:**
+
 ```bash
 # Verify SMTP credentials are correct
 # For Gmail: Ensure "Less secure app access" is enabled OR use App Password
@@ -305,10 +328,12 @@ curl -v --url 'smtp://smtp.gmail.com:587' \
 ### Issue 5: Slow Response Times
 
 **Symptoms:**
+
 - API requests taking >2 seconds
 - Users reporting slow page loads
 
 **Diagnosis:**
+
 ```bash
 # Check response times
 time curl https://tripsync.app/api/health
@@ -321,6 +346,7 @@ docker exec tripsync-postgres-prod psql -U tripsync -c "SELECT count(*) FROM pg_
 ```
 
 **Fix:**
+
 ```bash
 # Add database indexes (run via migration)
 docker exec tripsync-postgres-prod psql -U tripsync -c "
@@ -343,21 +369,25 @@ docker-compose -f docker-compose.prod.yml up -d --scale app=3
 ### Incident Severity Levels
 
 **P0 - Critical (Response: Immediate)**
+
 - Complete service outage
 - Data loss or corruption
 - Security breach
 
 **P1 - High (Response: <15 minutes)**
+
 - Major feature broken
 - Error rate >5%
 - Database issues
 
 **P2 - Medium (Response: <1 hour)**
+
 - Single feature degraded
 - Performance issues
 - Email not sending
 
 **P3 - Low (Response: <24 hours)**
+
 - Minor bugs
 - UI issues
 - Non-critical features
@@ -365,32 +395,38 @@ docker-compose -f docker-compose.prod.yml up -d --scale app=3
 ### Incident Response Checklist
 
 **Step 1: Assess (2 minutes)**
+
 - [ ] Check health endpoint
 - [ ] Check error rate in Sentry
 - [ ] Review recent deployments (git log)
 - [ ] Determine severity level
 
 **Step 2: Communicate (2 minutes)**
+
 - [ ] Notify team: "Investigating issue with [X]"
 - [ ] Post status update (if public status page exists)
 
 **Step 3: Mitigate (10 minutes)**
+
 - [ ] Can we rollback? If yes, do it
 - [ ] Can we disable feature? If yes, do it
 - [ ] Can we restart service? Try it (last resort)
 
 **Step 4: Fix (variable)**
+
 - [ ] Identify root cause
 - [ ] Implement fix
 - [ ] Test in staging
 - [ ] Deploy to production
 
 **Step 5: Verify (5 minutes)**
+
 - [ ] Check health endpoint
 - [ ] Test affected feature
 - [ ] Monitor error rates for 15 minutes
 
 **Step 6: Post-Mortem (within 24 hours)**
+
 - [ ] Document what happened
 - [ ] Document what we did
 - [ ] Document how to prevent it
@@ -403,16 +439,19 @@ docker-compose -f docker-compose.prod.yml up -d --scale app=3
 ### Key Metrics to Track
 
 **Application Health**
+
 - Response time (baseline: <200ms for /api/health)
 - Error rate (baseline: <0.1%)
 - Uptime (target: 99.9%)
 
 **Database**
+
 - Query time (baseline: <50ms average)
 - Connection count (max: 100)
 - Database size
 
 **User Activity**
+
 - Active users (DAU)
 - Trips created per day
 - API requests per minute
@@ -441,6 +480,7 @@ docker system df
 ## Database Operations
 
 ### Manual Backup
+
 ```bash
 # Create timestamped backup
 mkdir -p backups
@@ -451,6 +491,7 @@ gzip backups/manual-backup-*.sql
 ```
 
 ### Restore from Backup
+
 ```bash
 # Stop app to prevent writes
 docker-compose -f docker-compose.prod.yml stop app
@@ -463,6 +504,7 @@ docker-compose -f docker-compose.prod.yml start app
 ```
 
 ### Run Migration
+
 ```bash
 # Run from inside app container
 docker-compose -f docker-compose.prod.yml exec app npm run db:migrate
@@ -472,6 +514,7 @@ DATABASE_URL="postgresql://..." npm run db:migrate
 ```
 
 ### Database Maintenance
+
 ```bash
 # Vacuum and analyze (run weekly)
 docker exec tripsync-postgres-prod psql -U tripsync -c "VACUUM ANALYZE;"
@@ -499,6 +542,7 @@ docker exec tripsync-postgres-prod psql -U tripsync -c "
 **Primary On-Call**: abdulmuheethmd29@gmail.com
 
 **Service Providers**:
+
 - Database Host: [Your provider's support]
 - Hosting: [Your hosting provider's support]
 - Sentry: support@sentry.io (if using Sentry)
@@ -508,12 +552,14 @@ docker exec tripsync-postgres-prod psql -U tripsync -c "
 ## Appendix: Performance Baselines
 
 **API Response Times** (95th percentile):
+
 - GET /api/health: 50ms
 - GET /api/trips: 200ms
 - POST /api/trips: 300ms
 - POST /api/trips/:id/generate: 10s (AI generation)
 
 **Database Query Times** (average):
+
 - Simple SELECT: <10ms
 - JOIN queries: <50ms
 - Complex aggregations: <200ms
@@ -521,6 +567,7 @@ docker exec tripsync-postgres-prod psql -U tripsync -c "
 **Error Rate Baseline**: <0.1% (1 error per 1000 requests)
 
 **Resource Usage**:
+
 - App memory: 256MB typical, 512MB peak
 - Database memory: 512MB typical
 - Redis memory: 64MB typical
@@ -529,4 +576,5 @@ docker exec tripsync-postgres-prod psql -U tripsync -c "
 ---
 
 **Document Version History**:
+
 - v1.0.0 (2026-05-15): Initial runbook

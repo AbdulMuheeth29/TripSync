@@ -8,12 +8,14 @@
 ## Pre-Launch (1 Week Before)
 
 ### 1. Prepare Assets
+
 - [ ] Create launch video/GIF (30 seconds showing key features)
 - [ ] Take high-quality screenshots (5-10 images)
 - [ ] Write launch story (why you built TripSync)
 - [ ] Prepare FAQ for common questions
 
 ### 2. Build Email List
+
 - [ ] Add "Get Early Access" form to landing page
 - [ ] Collect emails from friends/family who want to try it
 - [ ] Prepare welcome email sequence
@@ -25,6 +27,7 @@
 ### Morning (8 AM)
 
 **1. Product Hunt Launch**
+
 ```markdown
 # Post Template
 
@@ -37,6 +40,7 @@ Planning trips with friends is a nightmare. Endless group chats, spreadsheets, c
 
 **The Solution:**
 TripSync brings everything together:
+
 - 🤖 AI generates complete itineraries in seconds
 - 🗳️ Democratic voting on activities
 - 💰 Smart expense splitting
@@ -44,6 +48,7 @@ TripSync brings everything together:
 - 📱 Works offline (PWA)
 
 **Free Tier:**
+
 - 3 trips
 - 8 members per trip
 - 10 AI generations/month
@@ -56,20 +61,25 @@ Questions? I'm here all day!
 ```
 
 **2. Hacker News (Show HN)**
+
 ```markdown
 # Title
+
 Show HN: TripSync – AI-powered collaborative trip planning
 
 # Body
+
 Hi HN! I built TripSync to solve a problem I kept hitting: planning group trips is chaotic.
 
 **What it does:**
+
 - AI trip itinerary generation (powered by Claude)
 - Collaborative planning with voting
 - Expense tracking and smart splitting
 - Works offline as a PWA
 
 **Tech Stack:**
+
 - Frontend: React 19 + TypeScript + Vite
 - Backend: Node.js + Express + PostgreSQL
 - AI: Anthropic Claude Sonnet 4.5
@@ -90,6 +100,7 @@ Questions welcome!
 ```
 
 **3. Send Email Announcement**
+
 ```markdown
 Subject: 🎉 TripSync is Live - Plan Your Next Trip in Minutes
 
@@ -110,6 +121,7 @@ After months of building (and many group trips gone wrong 😅), I created TripS
 👉 https://tripsync.app
 
 **Free Tier Includes:**
+
 - 3 trips
 - 8 members per trip
 - 10 AI itinerary generations per month
@@ -130,6 +142,7 @@ P.S. It's a PWA so you can install it on your phone and use it offline!
 **4. Social Media Posts**
 
 **Twitter/X:**
+
 ```
 🚀 Launching TripSync today!
 
@@ -149,6 +162,7 @@ Try it: https://tripsync.app
 ```
 
 **LinkedIn:**
+
 ```
 Excited to launch TripSync - an AI-powered platform for collaborative trip planning!
 
@@ -180,11 +194,14 @@ Would love feedback from the developer community!
 **Reddit:**
 
 **r/SaaS:**
+
 ```markdown
 # Title
+
 Launched my AI-powered group trip planner - TripSync
 
 # Body
+
 After 6 months of development, I launched TripSync today - a platform for planning group trips collaboratively.
 
 **The Problem:**
@@ -194,6 +211,7 @@ Every time I plan a trip with friends, it's chaos. Group chats explode, spreadsh
 TripSync brings AI, voting, and expense tracking together in one place.
 
 **Features:**
+
 - AI generates complete day-by-day itineraries
 - Vote on activities (no more endless debates)
 - Track expenses and split costs fairly
@@ -202,12 +220,14 @@ TripSync brings AI, voting, and expense tracking together in one place.
 - Photo uploads and trip documentation
 
 **Tech:**
+
 - React 19 + TypeScript
 - Node.js + PostgreSQL
 - Claude AI for trip generation
 - Stripe for Pro/Teams tiers
 
 **Pricing:**
+
 - Free: 3 trips, 8 members, 10 AI generations/month
 - Pro: $9.99/mo - unlimited trips, 25 members, 100 AI/month
 - Teams: $29.99/mo - unlimited everything
@@ -216,6 +236,7 @@ TripSync brings AI, voting, and expense tracking together in one place.
 **Code:** https://github.com/AbdulMuheeth29/TripSync (MIT license)
 
 **Questions I'd love feedback on:**
+
 1. What's your biggest pain point in group trip planning?
 2. Would you pay $10/month for unlimited AI trip planning?
 3. What features am I missing?
@@ -228,6 +249,7 @@ AMA about the tech, business model, or travel planning!
 ### Evening (6 PM)
 
 **5. Follow-Up & Engagement**
+
 - [ ] Respond to all comments on Product Hunt
 - [ ] Answer questions on Hacker News
 - [ ] Reply to social media comments
@@ -239,17 +261,20 @@ AMA about the tech, business model, or travel planning!
 ## Post-Launch (Days 2-7)
 
 ### Day 2-3
+
 - [ ] Send thank you email to first users
 - [ ] Ask for feedback via email
 - [ ] Post update with metrics (X sign-ups in 24 hours!)
 - [ ] Fix any critical bugs reported
 
 ### Day 4-5
+
 - [ ] Write launch retrospective blog post
 - [ ] Share learnings on social media
 - [ ] Cross-post to dev.to, Medium, Hashnode
 
 ### Day 6-7
+
 - [ ] Compile user feedback
 - [ ] Plan v1.1 features based on feedback
 - [ ] Update roadmap publicly
@@ -259,6 +284,7 @@ AMA about the tech, business model, or travel planning!
 ## Content Ideas for Ongoing Marketing
 
 ### Blog Posts
+
 1. "How I Built TripSync: From Idea to Launch"
 2. "Using Claude AI to Generate Travel Itineraries"
 3. "The Tech Stack Behind TripSync"
@@ -266,6 +292,7 @@ AMA about the tech, business model, or travel planning!
 5. "Group Travel Horror Stories (And How TripSync Fixes Them)"
 
 ### Social Media Series
+
 - "Feature Friday" - Highlight one feature per week
 - "Travel Tips Tuesday" - Travel advice + TripSync tips
 - "Behind the Scenes" - Development process
@@ -276,6 +303,7 @@ AMA about the tech, business model, or travel planning!
 ## Tracking Success
 
 ### Metrics to Watch
+
 - **Day 1:**
   - Sign-ups: Target 50+
   - Trips created: Target 20+
@@ -288,6 +316,7 @@ AMA about the tech, business model, or travel planning!
   - Positive feedback rate: Target >80%
 
 ### Tools
+
 - PostHog/GA: Track user behavior
 - Twitter Analytics: Track engagement
 - Product Hunt: Track rank and comments
@@ -323,12 +352,14 @@ A: You can upgrade to Pro ($9.99/mo) or simply archive older trips. We never del
 ## Emergency Contacts for Launch Day
 
 **If site goes down:**
+
 - [ ] Check health endpoint
 - [ ] Check server logs
 - [ ] Follow RUNBOOK.md procedures
 - [ ] Post status update: "Investigating high traffic, will be back shortly!"
 
 **If critical bug reported:**
+
 - [ ] Triage severity (P0 = data loss, P1 = feature broken, P2 = annoyance)
 - [ ] Fix immediately if P0
 - [ ] Hot patch if P1 (test in staging first)
@@ -339,6 +370,7 @@ A: You can upgrade to Pro ($9.99/mo) or simply archive older trips. We never del
 ## Launch Day Checklist
 
 **Morning:**
+
 - [ ] ☕ Get coffee
 - [ ] Final health check
 - [ ] Post to Product Hunt (8-9 AM PST)
@@ -348,6 +380,7 @@ A: You can upgrade to Pro ($9.99/mo) or simply archive older trips. We never del
 - [ ] Post on LinkedIn
 
 **Afternoon:**
+
 - [ ] Monitor Product Hunt ranking
 - [ ] Respond to all comments
 - [ ] Post Reddit threads
@@ -355,6 +388,7 @@ A: You can upgrade to Pro ($9.99/mo) or simply archive older trips. We never del
 - [ ] Monitor for errors (Sentry)
 
 **Evening:**
+
 - [ ] Thank everyone who engaged
 - [ ] Take screenshots of metrics
 - [ ] Plan tomorrow's follow-up

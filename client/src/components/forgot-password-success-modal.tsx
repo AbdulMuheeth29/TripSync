@@ -5,9 +5,9 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Mail, CheckCircle2 } from "lucide-react";
+} from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Mail, CheckCircle2 } from 'lucide-react';
 
 interface ForgotPasswordSuccessModalProps {
   isOpen: boolean;
@@ -18,7 +18,7 @@ interface ForgotPasswordSuccessModalProps {
 export function ForgotPasswordSuccessModal({
   isOpen,
   onClose,
-  email
+  email,
 }: ForgotPasswordSuccessModalProps) {
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>

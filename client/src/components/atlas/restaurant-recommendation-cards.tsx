@@ -1,7 +1,7 @@
-import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Star, MapPin, DollarSign, ExternalLink, Plus, Navigation } from "lucide-react";
+import { Card } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Star, MapPin, DollarSign, ExternalLink, Plus, Navigation } from 'lucide-react';
 
 interface Restaurant {
   id: string;
@@ -28,10 +28,10 @@ export function RestaurantRecommendationCards({
   restaurants,
   onAddToItinerary,
   onViewMenu,
-  onGetDirections
+  onGetDirections,
 }: RestaurantRecommendationCardsProps) {
   const getPriceSymbol = (level: number) => {
-    return "$".repeat(level);
+    return '$'.repeat(level);
   };
 
   if (restaurants.length === 0) {
@@ -47,7 +47,7 @@ export function RestaurantRecommendationCards({
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-lg font-semibold">Restaurant Recommendations</h3>
         <Badge variant="secondary">
-          {restaurants.length} {restaurants.length === 1 ? "Option" : "Options"}
+          {restaurants.length} {restaurants.length === 1 ? 'Option' : 'Options'}
         </Badge>
       </div>
 
@@ -93,8 +93,8 @@ export function RestaurantRecommendationCards({
                       key={i}
                       className={`h-4 w-4 ${
                         i < Math.floor(restaurant.rating)
-                          ? "fill-yellow-400 text-yellow-400"
-                          : "text-gray-300"
+                          ? 'fill-yellow-400 text-yellow-400'
+                          : 'text-gray-300'
                       }`}
                     />
                   ))}
@@ -103,9 +103,7 @@ export function RestaurantRecommendationCards({
               </div>
 
               {/* Description */}
-              <p className="text-sm text-muted-foreground line-clamp-2">
-                {restaurant.description}
-              </p>
+              <p className="text-sm text-muted-foreground line-clamp-2">{restaurant.description}</p>
 
               {/* Address */}
               <div className="flex items-start gap-2 text-sm">
@@ -113,9 +111,7 @@ export function RestaurantRecommendationCards({
                 <div>
                   <p className="text-muted-foreground">{restaurant.address}</p>
                   {restaurant.distance && (
-                    <p className="text-xs text-muted-foreground mt-1">
-                      {restaurant.distance} away
-                    </p>
+                    <p className="text-xs text-muted-foreground mt-1">{restaurant.distance} away</p>
                   )}
                 </div>
               </div>

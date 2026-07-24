@@ -7,6 +7,7 @@ Complete end-to-end flows for Atlas AI - TripSync's proactive AI assistant that 
 ## Overview: What is Atlas AI?
 
 **Atlas AI** is TripSync's unique differentiator - a proactive AI assistant powered by Claude Sonnet 4.5 that:
+
 - Monitors trip health every 15 minutes
 - Proactively intervenes when issues are detected
 - Provides contextual suggestions and optimizations
@@ -15,6 +16,7 @@ Complete end-to-end flows for Atlas AI - TripSync's proactive AI assistant that 
 - Never sleeps, always watching over your trip
 
 **Key Features:**
+
 - 🔍 Continuous monitoring (every 15 minutes)
 - 🤖 Conversational chat interface
 - 🎯 Context-aware responses (knows everything about the trip)
@@ -69,6 +71,7 @@ END: Atlas AI introduced and ready to assist
 ```
 
 **Widget States:**
+
 1. **Minimized** - Small floating button with Atlas icon
 2. **Expanded** - Full chat interface (400px × 600px)
 3. **Hidden** - User dismissed (can re-open from menu)
@@ -281,6 +284,7 @@ END: Context-aware conversation with helpful responses
 ```
 
 **Chat Features:**
+
 - ✅ Context-aware (knows everything about the trip)
 - ✅ Conversational memory (remembers chat history)
 - ✅ Quick actions (buttons to add suggestions to trip)
@@ -462,6 +466,7 @@ END: Continuous monitoring with timely interventions
 ```
 
 **Intervention Strategy:**
+
 - ✅ Only intervene when genuinely helpful (not annoying)
 - ✅ Friendly, conversational tone (not bossy)
 - ✅ Actionable suggestions (clear next steps)
@@ -469,6 +474,7 @@ END: Continuous monitoring with timely interventions
 - ✅ Context-aware (knows trip history)
 
 **Monitoring Frequency:**
+
 - Every 15 minutes for active trips
 - Every 1 hour for trips >30 days away
 - Every 5 minutes for trips <24 hours away
@@ -588,6 +594,7 @@ END: Comprehensive trip health visibility
 ```
 
 **Health Score Calculation:**
+
 ```javascript
 healthScore = (
   budgetHealth * 0.25 +      // 25% weight
@@ -704,6 +711,7 @@ END: Seamless action from Atlas suggestion
 ```
 
 **Quick Action Types:**
+
 1. ➕ Add to Itinerary - Adds suggested activity/restaurant
 2. 💰 Apply Budget Optimization - Auto-adjusts budget items
 3. 📧 Remind Members - Sends notifications to members
@@ -818,6 +826,7 @@ END: Graceful error handling with helpful fallbacks
 ```
 
 **Error Recovery Strategy:**
+
 - ✅ Automatic retries (exponential backoff)
 - ✅ Circuit breaker pattern (prevents cascading failures)
 - ✅ Fallback to cached responses
@@ -930,6 +939,7 @@ END: Continuous improvement through analytics
 ## All Atlas Use Cases Summary
 
 ### 1. Conversational Assistance
+
 - ✅ Answer questions about trip details
 - ✅ Provide recommendations (restaurants, activities)
 - ✅ Explain budget breakdown
@@ -939,6 +949,7 @@ END: Continuous improvement through analytics
 - ✅ Multi-turn conversations with context
 
 ### 2. Proactive Monitoring
+
 - ✅ Budget overrun alerts (>110%)
 - ✅ Vote deadlock detection (>24h)
 - ✅ Deadline urgency nudges (<7 days, <50% complete)
@@ -948,6 +959,7 @@ END: Continuous improvement through analytics
 - ✅ Milestone celebrations (100% complete)
 
 ### 3. Intelligent Suggestions
+
 - ✅ Budget optimization tips
 - ✅ Activity recommendations
 - ✅ Restaurant suggestions
@@ -957,6 +969,7 @@ END: Continuous improvement through analytics
 - ✅ Group compromise solutions
 
 ### 4. Problem Resolution
+
 - ✅ Vote deadlock resolution
 - ✅ Budget conflict mediation
 - ✅ Schedule conflicts
@@ -965,6 +978,7 @@ END: Continuous improvement through analytics
 - ✅ Preference conflicts
 
 ### 5. Trip Health Management
+
 - ✅ Overall health score calculation
 - ✅ Metric tracking (budget, votes, bookings)
 - ✅ Trend analysis
@@ -973,6 +987,7 @@ END: Continuous improvement through analytics
 - ✅ Progress tracking
 
 ### 6. Quick Actions
+
 - ✅ Add suggested items to itinerary
 - ✅ Apply budget optimizations
 - ✅ Send member reminders
@@ -981,6 +996,7 @@ END: Continuous improvement through analytics
 - ✅ Generate recaps
 
 ### 7. Error Handling
+
 - ✅ AI API timeouts
 - ✅ Rate limiting
 - ✅ Invalid responses
@@ -989,6 +1005,7 @@ END: Continuous improvement through analytics
 - ✅ Graceful degradation
 
 ### 8. Learning & Analytics
+
 - ✅ User preference learning
 - ✅ Interaction tracking
 - ✅ Effectiveness metrics
@@ -1001,6 +1018,7 @@ END: Continuous improvement through analytics
 ## Technical Implementation
 
 ### AI Model Selection
+
 ```
 Complex reasoning (60% of interactions):
 - Model: Claude Sonnet 4.5
@@ -1016,6 +1034,7 @@ Total average cost per trip: ~$0.50
 ```
 
 ### Caching Strategy
+
 ```
 24-hour cache for:
 - Trip health scores
@@ -1028,6 +1047,7 @@ Cost savings: ~40%
 ```
 
 ### Circuit Breaker
+
 ```
 Opens after: 5 consecutive failures
 Reset timeout: 5 minutes
@@ -1037,6 +1057,7 @@ Uptime: 99.8%
 ```
 
 ### Rate Limiting
+
 ```
 Per trip: 10 requests/minute
 Per user: 50 requests/hour
@@ -1050,6 +1071,7 @@ Prevents: Abuse and cost overruns
 ## Analytics & Tracking
 
 **Events Tracked:**
+
 1. `atlas_chat_initiated` - User opened Atlas
 2. `atlas_question_asked` - Question sent
 3. `atlas_response_generated` - Response delivered
@@ -1059,6 +1081,7 @@ Prevents: Abuse and cost overruns
 7. `atlas_error_occurred` - Fallback activated
 
 **Metrics Tracked:**
+
 - Total conversations per trip
 - Average questions per user
 - Response time (p50, p95, p99)

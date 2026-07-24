@@ -52,15 +52,18 @@ class AtlasProactiveService {
     });
 
     // Then run every 15 minutes
-    this.monitoringInterval = setInterval(async () => {
-      try {
-        await this.checkAllTrips();
-      } catch (error) {
-        appLogger.error(error instanceof Error ? error : new Error(String(error)), {
-          context: 'atlas_monitoring',
-        });
-      }
-    }, 15 * 60 * 1000); // 15 minutes
+    this.monitoringInterval = setInterval(
+      async () => {
+        try {
+          await this.checkAllTrips();
+        } catch (error) {
+          appLogger.error(error instanceof Error ? error : new Error(String(error)), {
+            context: 'atlas_monitoring',
+          });
+        }
+      },
+      15 * 60 * 1000
+    ); // 15 minutes
   }
 
   /**

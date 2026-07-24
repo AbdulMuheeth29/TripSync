@@ -1,27 +1,30 @@
-"use client";
+'use client';
 
-import { useState, useEffect } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { MapPin, Users, Sparkles } from "lucide-react";
+import { useState, useEffect } from 'react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { MapPin, Users, Sparkles } from 'lucide-react';
 
-const ONBOARDING_KEY = "tripsync_onboarding_done";
+const ONBOARDING_KEY = 'tripsync_onboarding_done';
 
 const SCREENS = [
   {
     icon: MapPin,
-    title: "Plan trips together",
-    description: "Create a trip, set destination and dates, and invite your group. Everyone can share preferences and vote on the itinerary.",
+    title: 'Plan trips together',
+    description:
+      'Create a trip, set destination and dates, and invite your group. Everyone can share preferences and vote on the itinerary.',
   },
   {
     icon: Users,
-    title: "AI does the heavy lifting",
-    description: "Our AI generates a full day-by-day plan based on your vibe, budget, and group preferences. Edit, vote, and book with one click.",
+    title: 'AI does the heavy lifting',
+    description:
+      'Our AI generates a full day-by-day plan based on your vibe, budget, and group preferences. Edit, vote, and book with one click.',
   },
   {
     icon: Sparkles,
-    title: "One place for everything",
-    description: "Maps, expenses, packing lists, emergency contacts, and trip recap—all in one place. Travel smarter with TripSync.",
+    title: 'One place for everything',
+    description:
+      'Maps, expenses, packing lists, emergency contacts, and trip recap—all in one place. Travel smarter with TripSync.',
   },
 ];
 
@@ -30,14 +33,14 @@ export function OnboardingTour() {
   const [step, setStep] = useState(0);
 
   useEffect(() => {
-    if (typeof window === "undefined") return;
+    if (typeof window === 'undefined') return;
     const done = localStorage.getItem(ONBOARDING_KEY);
     if (!done) setOpen(true);
   }, []);
 
   const handleClose = () => {
     setOpen(false);
-    localStorage.setItem(ONBOARDING_KEY, "true");
+    localStorage.setItem(ONBOARDING_KEY, 'true');
   };
 
   const handleNext = () => {
@@ -66,13 +69,11 @@ export function OnboardingTour() {
             {SCREENS.map((_, i) => (
               <div
                 key={i}
-                className={`h-1.5 rounded-full w-6 transition-colors ${i === step ? "bg-primary" : "bg-muted"}`}
+                className={`h-1.5 rounded-full w-6 transition-colors ${i === step ? 'bg-primary' : 'bg-muted'}`}
               />
             ))}
           </div>
-          <Button onClick={handleNext}>
-            {step < SCREENS.length - 1 ? "Next" : "Get started"}
-          </Button>
+          <Button onClick={handleNext}>{step < SCREENS.length - 1 ? 'Next' : 'Get started'}</Button>
         </div>
       </DialogContent>
     </Dialog>

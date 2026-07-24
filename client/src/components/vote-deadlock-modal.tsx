@@ -1,8 +1,15 @@
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Sparkles, ThumbsUp, ThumbsDown, Users, AlertTriangle } from "lucide-react";
-import { Card, CardContent } from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Sparkles, ThumbsUp, ThumbsDown, Users, AlertTriangle } from 'lucide-react';
+import { Card, CardContent } from '@/components/ui/card';
 
 interface VoteDeadlockModalProps {
   isOpen: boolean;
@@ -17,7 +24,7 @@ interface VoteDeadlockModalProps {
     total: number;
   };
   atlasSuggestion: {
-    action: "modify" | "remove" | "replace" | "compromise";
+    action: 'modify' | 'remove' | 'replace' | 'compromise';
     reasoning: string;
     details: string;
   };
@@ -30,7 +37,7 @@ export function VoteDeadlockModal({
   onRejectSuggestion,
   activityName,
   voteStats,
-  atlasSuggestion
+  atlasSuggestion,
 }: VoteDeadlockModalProps) {
   const { upvotes, downvotes, abstain, total } = voteStats;
   const upvotePercent = Math.round((upvotes / total) * 100);
@@ -38,16 +45,20 @@ export function VoteDeadlockModal({
 
   const getActionBadge = (action: string) => {
     switch (action) {
-      case "modify":
-        return { label: "Modify Activity", variant: "default" as const, color: "bg-blue-500" };
-      case "remove":
-        return { label: "Remove Activity", variant: "destructive" as const, color: "bg-red-500" };
-      case "replace":
-        return { label: "Replace Activity", variant: "default" as const, color: "bg-purple-500" };
-      case "compromise":
-        return { label: "Compromise Solution", variant: "secondary" as const, color: "bg-green-500" };
+      case 'modify':
+        return { label: 'Modify Activity', variant: 'default' as const, color: 'bg-blue-500' };
+      case 'remove':
+        return { label: 'Remove Activity', variant: 'destructive' as const, color: 'bg-red-500' };
+      case 'replace':
+        return { label: 'Replace Activity', variant: 'default' as const, color: 'bg-purple-500' };
+      case 'compromise':
+        return {
+          label: 'Compromise Solution',
+          variant: 'secondary' as const,
+          color: 'bg-green-500',
+        };
       default:
-        return { label: "Suggested Action", variant: "outline" as const, color: "bg-gray-500" };
+        return { label: 'Suggested Action', variant: 'outline' as const, color: 'bg-gray-500' };
     }
   };
 
@@ -62,9 +73,7 @@ export function VoteDeadlockModal({
               <AlertTriangle className="h-8 w-8 text-yellow-500" />
             </div>
           </div>
-          <DialogTitle className="text-center text-xl">
-            Vote Deadlock Detected
-          </DialogTitle>
+          <DialogTitle className="text-center text-xl">Vote Deadlock Detected</DialogTitle>
           <DialogDescription className="text-center">
             Your group can't agree on "{activityName}". Atlas AI has a suggestion to help.
           </DialogDescription>
@@ -85,10 +94,15 @@ export function VoteDeadlockModal({
                   <div className="flex-1">
                     <div className="flex items-center justify-between text-sm mb-1">
                       <span>Upvotes</span>
-                      <span className="font-medium">{upvotes} ({upvotePercent}%)</span>
+                      <span className="font-medium">
+                        {upvotes} ({upvotePercent}%)
+                      </span>
                     </div>
                     <div className="w-full bg-muted rounded-full h-2">
-                      <div className="bg-green-500 h-2 rounded-full" style={{ width: `${upvotePercent}%` }} />
+                      <div
+                        className="bg-green-500 h-2 rounded-full"
+                        style={{ width: `${upvotePercent}%` }}
+                      />
                     </div>
                   </div>
                 </div>
@@ -98,10 +112,15 @@ export function VoteDeadlockModal({
                   <div className="flex-1">
                     <div className="flex items-center justify-between text-sm mb-1">
                       <span>Downvotes</span>
-                      <span className="font-medium">{downvotes} ({downvotePercent}%)</span>
+                      <span className="font-medium">
+                        {downvotes} ({downvotePercent}%)
+                      </span>
                     </div>
                     <div className="w-full bg-muted rounded-full h-2">
-                      <div className="bg-red-500 h-2 rounded-full" style={{ width: `${downvotePercent}%` }} />
+                      <div
+                        className="bg-red-500 h-2 rounded-full"
+                        style={{ width: `${downvotePercent}%` }}
+                      />
                     </div>
                   </div>
                 </div>
@@ -147,24 +166,17 @@ export function VoteDeadlockModal({
           {/* Additional Info */}
           <div className="rounded-lg bg-muted/50 p-3 border border-border">
             <p className="text-xs text-muted-foreground">
-              💡 <span className="font-medium">Tip:</span> Activities need 70%+ approval to be auto-accepted.
-              Consider discussing in group chat to reach consensus.
+              💡 <span className="font-medium">Tip:</span> Activities need 70%+ approval to be
+              auto-accepted. Consider discussing in group chat to reach consensus.
             </p>
           </div>
         </div>
 
         <DialogFooter className="flex-col sm:flex-row gap-2">
-          <Button
-            variant="outline"
-            onClick={onRejectSuggestion}
-            className="w-full sm:w-auto"
-          >
+          <Button variant="outline" onClick={onRejectSuggestion} className="w-full sm:w-auto">
             Discuss More
           </Button>
-          <Button
-            onClick={onAcceptSuggestion}
-            className="w-full sm:w-auto"
-          >
+          <Button onClick={onAcceptSuggestion} className="w-full sm:w-auto">
             <Sparkles className="h-4 w-4 mr-2" />
             Accept Suggestion
           </Button>

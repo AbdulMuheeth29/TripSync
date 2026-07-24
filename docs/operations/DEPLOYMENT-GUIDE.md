@@ -1,11 +1,13 @@
 # TripSync Deployment Guide
 
 ## Overview
+
 This guide covers deploying the TripSync application (Node.js/Express backend + React frontend) to production. The app uses PostgreSQL, session management, authentication, and optional AI features.
 
 ---
 
 ## Table of Contents
+
 1. [Backend Configuration](#backend-configuration)
 2. [Middleware Setup](#middleware-setup)
 3. [Database Setup](#database-setup)
@@ -21,11 +23,13 @@ This guide covers deploying the TripSync application (Node.js/Express backend + 
 ## Backend Configuration
 
 ### 1. Prerequisites
+
 - Node.js 20 or higher
 - PostgreSQL database
 - npm or yarn
 
 ### 2. Build Configuration
+
 The project uses a custom build script that bundles the application:
 
 ```bash
@@ -33,16 +37,20 @@ npm run build
 ```
 
 This creates:
+
 - `dist/index.cjs` - Server bundle
 - `dist/public/` - Client static files
 
 ### 3. Production Environment
+
 Set the following in production:
+
 ```bash
 NODE_ENV=production
 ```
 
 This enables:
+
 - Trust proxy (for proper IP forwarding behind load balancers)
 - HTTPS security headers
 - Rate limiting (200 requests per 15 minutes)
@@ -53,6 +61,7 @@ This enables:
 ## Middleware Setup
 
 ### Security Middleware (Already Configured)
+
 The app automatically sets up:
 
 1. **Security Headers** (server/index.ts:21-29)
@@ -83,20 +92,25 @@ The app automatically sets up:
 ## Database Setup
 
 ### PostgreSQL Required in Production
+
 The app REQUIRES PostgreSQL in production (server/db.ts:7-8).
 
 **Connection String Format:**
+
 ```
 postgresql://username:password@host:port/database?sslmode=require
 ```
 
 **Key Settings (server/db.ts:18-22):**
+
 - Max connections: 20
 - Idle timeout: 30 seconds
 - Connection timeout: 10 seconds
 
 ### Migrations
+
 Run migrations before starting the app:
+
 ```bash
 npm run db:push
 # or
@@ -151,6 +165,7 @@ AWS_S3_BUCKET=...
 ```
 
 ### Generate Secrets
+
 ```bash
 # JWT + VAPID instructions (recommended)
 npm run generate-secrets
@@ -170,11 +185,13 @@ npx web-push generate-vapid-keys
 ### Option 1: Render.com (RECOMMENDED - Easiest & Free)
 
 **Cost: $0/month**
+
 - Free tier: 750 hours/month web service
 - Free PostgreSQL database (90 days, then auto-deletes)
 - Auto-deploy from GitHub
 
 **Setup:**
+
 1. Create account at [render.com](https://render.com)
 2. New → Web Service → Connect GitHub repo
 3. Settings:
@@ -186,12 +203,14 @@ npx web-push generate-vapid-keys
 6. Deploy!
 
 **Pros:**
+
 - Zero configuration
 - Auto-deploy on git push
 - Free SSL certificates
 - Easy database backups
 
 **Cons:**
+
 - Free tier spins down after 15 min inactivity (cold start ~30s)
 - Database auto-deletes after 90 days (upgrade to $7/month for persistence)
 
@@ -200,11 +219,13 @@ npx web-push generate-vapid-keys
 ### Option 2: Railway.app (Best Free Credits)
 
 **Cost: $0/month (with $5 free credit/month)**
+
 - $5 credit = ~200 hours runtime
 - Includes PostgreSQL
 - No cold starts
 
 **Setup:**
+
 1. Sign up at [railway.app](https://railway.app)
 2. New Project → Deploy from GitHub
 3. Add PostgreSQL database
@@ -212,11 +233,13 @@ npx web-push generate-vapid-keys
 5. Deploy
 
 **Pros:**
+
 - No cold starts
 - Better performance than Render free tier
 - Generous free credits
 
 **Cons:**
+
 - $5 credit can run out if traffic is high
 - After credits, need to pay (~$5-10/month)
 
@@ -225,11 +248,13 @@ npx web-push generate-vapid-keys
 ### Option 3: Fly.io (Good Global CDN)
 
 **Cost: $0-5/month**
+
 - Free tier: 3 shared CPUs, 256MB RAM
 - Free PostgreSQL (single node)
 - Auto-scaling
 
 **Setup:**
+
 ```bash
 # Install flyctl
 curl -L https://fly.io/install.sh | sh
@@ -249,11 +274,13 @@ fly deploy
 ```
 
 **Pros:**
+
 - Global edge network
 - Good for international users
 - PostgreSQL included
 
 **Cons:**
+
 - Command-line setup (more technical)
 - Free tier limited resources
 
@@ -262,10 +289,12 @@ fly deploy
 ### Option 4: Vercel (Frontend) + Supabase (Backend/DB)
 
 **Cost: $0/month**
+
 - Vercel: Free hosting for frontend
 - Supabase: Free PostgreSQL + Auth + Storage
 
 **Setup:**
+
 1. **Frontend (Vercel):**
    - Connect GitHub to Vercel
    - Build command: `npm run build`
@@ -276,11 +305,13 @@ fly deploy
    - Use Supabase for PostgreSQL
 
 **Pros:**
+
 - Best performance for frontend (global CDN)
 - Supabase has generous free tier (500MB database)
 - Built-in auth (could replace Passport.js)
 
 **Cons:**
+
 - Requires splitting frontend/backend
 - Need CORS configuration
 - More complex setup
@@ -290,11 +321,13 @@ fly deploy
 ### Option 5: DigitalOcean App Platform
 
 **Cost: $0/month (free static hosting) + $5/month (smallest backend)**
+
 - Free static site hosting
 - $5/month basic web service
 - $15/month managed PostgreSQL
 
 **Setup:**
+
 1. Create DigitalOcean account
 2. Apps → Create App → GitHub
 3. Choose Dockerfile deployment
@@ -303,11 +336,13 @@ fly deploy
 **Total: $20/month for production-ready setup**
 
 **Pros:**
+
 - Reliable and fast
 - Good documentation
 - Predictable pricing
 
 **Cons:**
+
 - Database costs $15/month (not free)
 
 ---
@@ -317,6 +352,7 @@ fly deploy
 ### Option 1: AWS (Most Scalable)
 
 **Services:**
+
 - **ECS/Fargate:** Run Docker containers (~$15-30/month)
 - **RDS PostgreSQL:** Managed database (~$15-50/month)
 - **ALB:** Load balancer (~$20/month)
@@ -326,6 +362,7 @@ fly deploy
 **Estimated Cost: $50-100/month**
 
 **Setup:**
+
 1. Create ECS cluster
 2. Push Docker image to ECR
 3. Create RDS PostgreSQL instance
@@ -333,12 +370,14 @@ fly deploy
 5. Deploy task definition
 
 **Pros:**
+
 - Infinite scalability
 - Best security and compliance
 - Full control
 - 99.99% uptime SLA
 
 **Cons:**
+
 - Complex setup
 - Higher cost
 - Requires DevOps knowledge
@@ -348,11 +387,13 @@ fly deploy
 ### Option 2: Google Cloud Run (Serverless)
 
 **Cost: ~$10-30/month**
+
 - Pay-per-request
 - Auto-scaling to zero
 - Managed PostgreSQL (Cloud SQL)
 
 **Setup:**
+
 ```bash
 # Install gcloud CLI
 gcloud init
@@ -363,11 +404,13 @@ gcloud run deploy --image gcr.io/PROJECT_ID/tripsync --platform managed
 ```
 
 **Pros:**
+
 - Serverless (pay only for usage)
 - Auto-scaling
 - Good for variable traffic
 
 **Cons:**
+
 - Cold starts (can be mitigated)
 - Cloud SQL adds cost ($10-30/month)
 
@@ -376,11 +419,13 @@ gcloud run deploy --image gcr.io/PROJECT_ID/tripsync --platform managed
 ### Option 3: Heroku (Easiest Enterprise)
 
 **Cost: $25-50/month**
+
 - $7/month: Eco Dynos (2 web + 2 worker)
 - $5/month: Essential PostgreSQL (10M rows)
 - $20/month: Optional Redis for sessions
 
 **Setup:**
+
 ```bash
 heroku create tripsync
 heroku addons:create heroku-postgresql:essential-0
@@ -389,12 +434,14 @@ git push heroku main
 ```
 
 **Pros:**
+
 - Easiest deployment
 - Excellent DX (developer experience)
 - Built-in CI/CD
 - Automatic SSL
 
 **Cons:**
+
 - More expensive than alternatives
 - Less control than AWS
 
@@ -403,12 +450,14 @@ git push heroku main
 ### Option 4: Self-Hosted VPS (Most Control)
 
 **Providers:**
+
 - **Hetzner:** €4.51/month (2 vCPU, 4GB RAM) - CHEAPEST VPS
 - **DigitalOcean Droplet:** $6/month (1 vCPU, 1GB RAM)
 - **Linode:** $5/month (1 vCPU, 1GB RAM)
 - **Vultr:** $6/month (1 vCPU, 1GB RAM)
 
 **Setup:**
+
 ```bash
 # SSH into server
 ssh root@your-server-ip
@@ -435,6 +484,7 @@ certbot --nginx -d yourdomain.com
 ```
 
 **docker-compose.yml:**
+
 ```yaml
 version: '3.8'
 
@@ -442,7 +492,7 @@ services:
   app:
     build: .
     ports:
-      - "3000:3000"
+      - '3000:3000'
     environment:
       NODE_ENV: production
       DATABASE_URL: postgresql://postgres:password@db:5432/tripsync
@@ -466,12 +516,14 @@ volumes:
 ```
 
 **Pros:**
+
 - Full control
 - Cheapest option at scale
 - No vendor lock-in
 - Can run multiple apps
 
 **Cons:**
+
 - Requires server management
 - You handle security, backups, updates
 - No auto-scaling
@@ -481,6 +533,7 @@ volumes:
 ## Deployment Steps
 
 ### Step 1: Prepare Repository
+
 ```bash
 # Ensure Dockerfile works locally
 docker build -t tripsync .
@@ -492,6 +545,7 @@ npm start
 ```
 
 ### Step 2: Setup Database
+
 1. Create PostgreSQL database (see hosting options above)
 2. Copy connection string
 3. Run migrations:
@@ -500,6 +554,7 @@ npm start
    ```
 
 ### Step 3: Generate Secrets
+
 ```bash
 # JWT Secret
 node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
@@ -509,7 +564,9 @@ npx web-push generate-vapid-keys
 ```
 
 ### Step 4: Configure Environment Variables
+
 Set in your hosting platform:
+
 - `DATABASE_URL`
 - `JWT_SECRET`
 - `NODE_ENV=production`
@@ -519,9 +576,11 @@ Set in your hosting platform:
 - `ADMIN_EMAILS` (optional)
 
 ### Step 5: Deploy
+
 Follow platform-specific instructions above.
 
 ### Step 6: Verify Deployment
+
 ```bash
 # Check health endpoint
 curl https://your-app.com/api/health
@@ -537,6 +596,7 @@ curl -X POST https://your-app.com/api/auth/register \
 ## Post-Deployment Checklist
 
 ### Security
+
 - [ ] Change all default secrets (JWT_SECRET)
 - [ ] Enable HTTPS (should be automatic on most platforms)
 - [ ] Configure CORS if frontend/backend are separate
@@ -545,18 +605,21 @@ curl -X POST https://your-app.com/api/auth/register \
 - [ ] Set up error monitoring (Sentry, LogRocket)
 
 ### Performance
+
 - [ ] Enable compression middleware
 - [ ] Configure CDN for static assets
 - [ ] Set up database connection pooling (already configured)
 - [ ] Monitor application performance
 
 ### Monitoring
+
 - [ ] Set up uptime monitoring (UptimeRobot - free)
 - [ ] Configure log aggregation
 - [ ] Set up alerts for errors
 - [ ] Monitor database performance
 
 ### Backups
+
 - [ ] Enable automated database backups
 - [ ] Test database restore process
 - [ ] Document backup retention policy
@@ -565,46 +628,56 @@ curl -X POST https://your-app.com/api/auth/register \
 
 ## Cost Comparison
 
-| Option | Monthly Cost | Best For | Difficulty |
-|--------|-------------|----------|-----------|
-| **Render (Free)** | $0 | Testing, low traffic | Easy ⭐ |
-| **Railway** | $0 (with credits) | Small projects | Easy ⭐ |
-| **Fly.io** | $0-5 | Global apps | Medium |
-| **Vercel + Supabase** | $0 | Jamstack apps | Medium |
-| **DigitalOcean App** | $20 | Simple production | Easy ⭐ |
-| **Hetzner VPS** | €4.51 (~$5) | DIY, cheapest | Hard |
-| **Heroku** | $25-50 | Fast deployment | Easy ⭐ |
-| **AWS** | $50-100+ | Enterprise, scale | Hard |
-| **Google Cloud Run** | $10-30 | Variable traffic | Medium |
+| Option                | Monthly Cost      | Best For             | Difficulty |
+| --------------------- | ----------------- | -------------------- | ---------- |
+| **Render (Free)**     | $0                | Testing, low traffic | Easy ⭐    |
+| **Railway**           | $0 (with credits) | Small projects       | Easy ⭐    |
+| **Fly.io**            | $0-5              | Global apps          | Medium     |
+| **Vercel + Supabase** | $0                | Jamstack apps        | Medium     |
+| **DigitalOcean App**  | $20               | Simple production    | Easy ⭐    |
+| **Hetzner VPS**       | €4.51 (~$5)       | DIY, cheapest        | Hard       |
+| **Heroku**            | $25-50            | Fast deployment      | Easy ⭐    |
+| **AWS**               | $50-100+          | Enterprise, scale    | Hard       |
+| **Google Cloud Run**  | $10-30            | Variable traffic     | Medium     |
 
 ---
 
 ## Recommended Setup for Different Use Cases
 
 ### 1. Just Testing / MVP
+
 **Recommendation: Render (Free)**
+
 - Cost: $0
 - Upgrade path: $7/month for persistent DB
 
 ### 2. Small Production App (<1000 users)
+
 **Recommendation: Railway or Render ($7-15/month)**
+
 - Railway: Better performance, no cold starts
 - Render: Easier to use, auto-backups
 
 ### 3. Growing App (1000-10,000 users)
+
 **Recommendation: DigitalOcean App Platform or Heroku ($20-50/month)**
+
 - Good balance of ease and scalability
 - Managed databases
 - Easy scaling
 
 ### 4. Large Production App (10,000+ users)
+
 **Recommendation: AWS or Google Cloud ($100+/month)**
+
 - Full control
 - Auto-scaling
 - Best performance
 
 ### 5. Absolute Cheapest (DIY)
+
 **Recommendation: Hetzner VPS (€4.51/month)**
+
 - Requires technical knowledge
 - You manage everything
 - Best value at scale
@@ -614,12 +687,14 @@ curl -X POST https://your-app.com/api/auth/register \
 ## Database Recommendations
 
 ### Free Tier Options
+
 1. **Supabase** - 500MB, unlimited API requests
 2. **Neon** - 512MB, serverless PostgreSQL
 3. **Render PostgreSQL** - 1GB, 90 days free
 4. **ElephantSQL** - 20MB free (very limited)
 
 ### Paid Options
+
 1. **Supabase Pro** - $25/month - 8GB
 2. **Neon** - $19/month - Scale to zero
 3. **DigitalOcean Managed** - $15/month - 1GB
@@ -631,14 +706,17 @@ curl -X POST https://your-app.com/api/auth/register \
 ## Support & Monitoring (Free Options)
 
 ### Uptime Monitoring
+
 - **UptimeRobot** - Free, 50 monitors
 - **Better Uptime** - Free tier available
 
 ### Error Tracking
+
 - **Sentry** - Free tier, 5K events/month
 - **LogRocket** - Free tier, 1K sessions/month
 
 ### Analytics
+
 - **Plausible** - Privacy-friendly (paid)
 - **Umami** - Self-hosted, free
 

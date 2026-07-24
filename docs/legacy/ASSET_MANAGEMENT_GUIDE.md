@@ -72,7 +72,7 @@ hero-background.webm    # Hero section background video
 ```tsx
 import { getBrandAsset } from '@/lib/assets';
 
-<video src={getBrandAsset('videos/demo-1080p.mp4')} />
+<video src={getBrandAsset('videos/demo-1080p.mp4')} />;
 ```
 
 ---
@@ -93,7 +93,7 @@ import { LocationImage } from '@/components/optimized-image';
   width={1200}
   height={600}
   className="rounded-lg"
-/>
+/>;
 ```
 
 ### Using the Hook
@@ -119,6 +119,7 @@ function TripHero({ destination }: { destination: string }) {
 ### Supported Destinations
 
 Currently supported cities:
+
 - New York, Paris, Tokyo, London, Dubai
 - Barcelona, Rome, Bali, Santorini, Maldives
 
@@ -171,15 +172,16 @@ import { OptimizedImage } from '@/components/optimized-image';
 <OptimizedImage
   src="https://example.com/large-image.jpg"
   alt="Trip photo"
-  width={800}          // Resize to max 800px width
-  quality={85}         // 85% quality
-  format="webp"        // Convert to WebP
-  showLoader={true}    // Show loading animation
+  width={800} // Resize to max 800px width
+  quality={85} // 85% quality
+  format="webp" // Convert to WebP
+  showLoader={true} // Show loading animation
   className="rounded-lg"
-/>
+/>;
 ```
 
 **Features:**
+
 - Lazy loading
 - Format conversion (WebP, JPEG, PNG)
 - Quality adjustment
@@ -194,7 +196,8 @@ Automatically optimize uploads with the middleware:
 // In server/upload-routes.ts
 import { imageOptimizationMiddleware } from './image-optimizer';
 
-router.post('/api/upload/photo',
+router.post(
+  '/api/upload/photo',
   requireAuth,
   upload.single('file'),
   imageOptimizationMiddleware({
@@ -202,7 +205,7 @@ router.post('/api/upload/photo',
     maxHeight: 2400,
     quality: 85,
     format: 'webp',
-    stripMetadata: true,  // Remove EXIF data
+    stripMetadata: true, // Remove EXIF data
   }),
   async (req, res) => {
     // Upload optimized image...
@@ -211,11 +214,13 @@ router.post('/api/upload/photo',
 ```
 
 **Requirements:**
+
 ```bash
 npm install sharp
 ```
 
 **Benefits:**
+
 - Reduces file size by 50-80%
 - Strips sensitive EXIF data
 - Auto-rotates based on orientation
@@ -239,7 +244,7 @@ import { ResponsiveImage } from '@/components/optimized-image';
   }}
   alt="Responsive trip photo"
   className="w-full"
-/>
+/>;
 ```
 
 ---
@@ -249,18 +254,21 @@ import { ResponsiveImage } from '@/components/optimized-image';
 ### File Naming
 
 **Logos:**
+
 ```
 logo-{variant}-{size}.{ext}
 Examples: logo-primary-512.png, logo-white-1024.svg
 ```
 
 **Location Images:**
+
 ```
 {city-slug}-{descriptor}.{ext}
 Examples: new-york-skyline.jpg, paris-eiffel-tower.jpg
 ```
 
 **UI Assets:**
+
 ```
 {component}-{state}-{variant}.{ext}
 Examples: button-hover-primary.svg, card-background-light.png
@@ -268,19 +276,20 @@ Examples: button-hover-primary.svg, card-background-light.png
 
 ### Optimization Guidelines
 
-| Asset Type | Format | Max Size | Quality | Notes |
-|------------|--------|----------|---------|-------|
-| Logos | PNG/SVG | 50KB | 100% | Use SVG when possible |
-| Hero Images | WebP | 500KB | 85% | JPEG fallback |
-| Thumbnails | WebP | 50KB | 80% | 300x300px max |
-| Icons | SVG | 10KB | - | Inline when possible |
-| Videos | WebM/MP4 | 10MB | - | Compress for web |
-| Documents | PDF | 5MB | - | Compress images inside |
+| Asset Type  | Format   | Max Size | Quality | Notes                  |
+| ----------- | -------- | -------- | ------- | ---------------------- |
+| Logos       | PNG/SVG  | 50KB     | 100%    | Use SVG when possible  |
+| Hero Images | WebP     | 500KB    | 85%     | JPEG fallback          |
+| Thumbnails  | WebP     | 50KB     | 80%     | 300x300px max          |
+| Icons       | SVG      | 10KB     | -       | Inline when possible   |
+| Videos      | WebM/MP4 | 10MB     | -       | Compress for web       |
+| Documents   | PDF      | 5MB      | -       | Compress images inside |
 
 ### Performance Tips
 
 1. **Lazy Load**: Use `loading="lazy"` on all images
 2. **Preload Critical**: Preload hero/above-fold images
+
    ```tsx
    import { preloadImage } from '@/lib/assets';
 
@@ -288,6 +297,7 @@ Examples: button-hover-primary.svg, card-background-light.png
      preloadImage('/assets/brand/logos/logo-primary-512.png');
    }, []);
    ```
+
 3. **WebP Format**: Always use WebP with JPEG/PNG fallback
 4. **Compress**: Target 85% quality for photos
 5. **Responsive**: Use srcset for different screen sizes
@@ -309,7 +319,7 @@ VITE_CDN_URL=https://cdn.yoursite.com
 When configured, all assets will be served from the CDN:
 
 ```tsx
-getAssetUrl('brand/logos/logo.png')
+getAssetUrl('brand/logos/logo.png');
 // Without CDN: /assets/brand/logos/logo.png
 // With CDN: https://cdn.yoursite.com/assets/brand/logos/logo.png
 ```
@@ -327,11 +337,11 @@ getAssetUrl('brand/logos/logo.png')
 
 Current limits (configurable in server):
 
-| Upload Type | Max Size | Max Files | Allowed Formats |
-|-------------|----------|-----------|-----------------|
-| Photos | 25MB | 50 (batch) | JPEG, PNG, WebP, HEIC |
-| Documents | 10MB | 1 | PDF, JPEG, PNG |
-| Receipts | 10MB | 1 | JPEG, PNG, PDF |
+| Upload Type | Max Size | Max Files  | Allowed Formats       |
+| ----------- | -------- | ---------- | --------------------- |
+| Photos      | 25MB     | 50 (batch) | JPEG, PNG, WebP, HEIC |
+| Documents   | 10MB     | 1          | PDF, JPEG, PNG        |
+| Receipts    | 10MB     | 1          | JPEG, PNG, PDF        |
 
 ---
 
@@ -471,9 +481,7 @@ export function TripHero({ destination, country }: Props) {
         className="w-full h-full object-cover"
       />
       <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-      <h1 className="absolute bottom-8 left-8 text-4xl font-bold text-white">
-        {destination}
-      </h1>
+      <h1 className="absolute bottom-8 left-8 text-4xl font-bold text-white">{destination}</h1>
     </div>
   );
 }
@@ -515,14 +523,16 @@ export function DestinationGallery({ location }: Props) {
 If you have existing images:
 
 1. **Move files** to new structure:
+
    ```bash
    mv client/src/assets/logo.png client/public/assets/brand/logos/logo-primary-512.png
    ```
 
 2. **Update imports**:
+
    ```tsx
    // Old
-   import logoUrl from "@/assets/logo.png";
+   import logoUrl from '@/assets/logo.png';
 
    // New
    import { getLogoUrl } from '@/lib/assets';
@@ -530,6 +540,7 @@ If you have existing images:
    ```
 
 3. **Update image tags**:
+
    ```tsx
    // Old
    <img src="/logo.png" alt="Logo" />

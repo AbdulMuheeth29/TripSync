@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from 'react';
 
 interface UsePullToRefreshOptions {
   onRefresh: () => Promise<void>;
@@ -11,7 +11,7 @@ export function usePullToRefresh({
   onRefresh,
   threshold = 80,
   resistance = 2.5,
-  enabled = true
+  enabled = true,
 }: UsePullToRefreshOptions) {
   const containerRef = useRef<HTMLElement | null>(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -77,14 +77,14 @@ export function usePullToRefresh({
       isAtTop.current = false;
     };
 
-    container.addEventListener("touchstart", handleTouchStart, { passive: true });
-    container.addEventListener("touchmove", handleTouchMove, { passive: false });
-    container.addEventListener("touchend", handleTouchEnd);
+    container.addEventListener('touchstart', handleTouchStart, { passive: true });
+    container.addEventListener('touchmove', handleTouchMove, { passive: false });
+    container.addEventListener('touchend', handleTouchEnd);
 
     return () => {
-      container.removeEventListener("touchstart", handleTouchStart);
-      container.removeEventListener("touchmove", handleTouchMove);
-      container.removeEventListener("touchend", handleTouchEnd);
+      container.removeEventListener('touchstart', handleTouchStart);
+      container.removeEventListener('touchmove', handleTouchMove);
+      container.removeEventListener('touchend', handleTouchEnd);
     };
   }, [enabled, isRefreshing, pullDistance, threshold, resistance, onRefresh]);
 
@@ -93,7 +93,7 @@ export function usePullToRefresh({
 
     return {
       transform: `translateY(${pullDistance}px)`,
-      transition: isRefreshing ? "transform 0.3s ease" : "transform 0.1s ease"
+      transition: isRefreshing ? 'transform 0.3s ease' : 'transform 0.1s ease',
     };
   };
 
@@ -104,7 +104,7 @@ export function usePullToRefresh({
     return {
       opacity,
       transform: `rotate(${rotation}deg) scale(${opacity})`,
-      transition: isRefreshing ? "all 0.3s ease" : "all 0.1s ease"
+      transition: isRefreshing ? 'all 0.3s ease' : 'all 0.1s ease',
     };
   };
 
@@ -115,6 +115,6 @@ export function usePullToRefresh({
     isActive: pullDistance > 0,
     isTriggered: pullDistance >= threshold,
     getContainerStyle,
-    getIndicatorStyle
+    getIndicatorStyle,
   };
 }

@@ -33,12 +33,14 @@ assets/
 ## File Naming Conventions
 
 ### Brand Assets
+
 - **Logos**: `logo-{variant}-{size}.{ext}`
   - Example: `logo-primary-512.png`, `logo-white-1024.svg`
 - **Videos**: `{name}-{resolution}.{ext}`
   - Example: `demo-1080p.mp4`, `hero-4k.webm`
 
 ### Location Assets
+
 - **Cities**: `{city-slug}-{number}.{ext}`
   - Example: `new-york-01.jpg`, `tokyo-skyline.jpg`
 - **Countries**: `{country-code}-{descriptor}.{ext}`
@@ -59,9 +61,9 @@ Static assets in this directory are served from `/assets/` path.
 
 ```tsx
 // Import from public directory
-<img src="/assets/brand/logos/logo-primary-512.png" alt="Logo" />
+<img src="/assets/brand/logos/logo-primary-512.png" alt="Logo" />;
 
 // Or use asset helper
 import { getAssetUrl } from '@/lib/assets';
-<img src={getAssetUrl('brand/logos/logo-primary-512.png')} alt="Logo" />
+<img src={getAssetUrl('brand/logos/logo-primary-512.png')} alt="Logo" />;
 ```

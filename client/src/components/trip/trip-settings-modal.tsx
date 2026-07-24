@@ -1,18 +1,52 @@
-import { useState } from "react";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Switch } from "@/components/ui/switch";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
-import { Badge } from "@/components/ui/badge";
-import { useToast } from "@/hooks/use-toast";
-import { Settings, Trash2, Lock, Unlock, Eye, EyeOff, Copy, RefreshCw, AlertTriangle, Check } from "lucide-react";
-import type { Trip } from "@shared/schema";
+import { useState } from 'react';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Switch } from '@/components/ui/switch';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
+import { Badge } from '@/components/ui/badge';
+import { useToast } from '@/hooks/use-toast';
+import {
+  Settings,
+  Trash2,
+  Lock,
+  Unlock,
+  Eye,
+  EyeOff,
+  Copy,
+  RefreshCw,
+  AlertTriangle,
+  Check,
+} from 'lucide-react';
+import type { Trip } from '@shared/schema';
 
 interface TripSettingsModalProps {
   trip: Trip;
@@ -32,22 +66,22 @@ export function TripSettingsModal({
   const { toast } = useToast();
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [deleteConfirmText, setDeleteConfirmText] = useState("");
+  const [deleteConfirmText, setDeleteConfirmText] = useState('');
 
   // Form states for each section
-  const [title, setTitle] = useState(trip.title || "");
+  const [title, setTitle] = useState(trip.title || '');
   const [destination, setDestination] = useState(trip.destination);
   const [startDate, setStartDate] = useState(trip.startDate);
   const [endDate, setEndDate] = useState(trip.endDate);
   const [budgetPerPerson, setBudgetPerPerson] = useState(trip.budgetPerPerson);
   const [groupSize, setGroupSize] = useState(trip.groupSize);
-  const [tripType, setTripType] = useState(trip.tripType || "leisure");
-  const [accommodationPref, setAccommodationPref] = useState(trip.accommodationPref || "mix");
-  const [diningPref, setDiningPref] = useState(trip.diningPref || "mix");
+  const [tripType, setTripType] = useState(trip.tripType || 'leisure');
+  const [accommodationPref, setAccommodationPref] = useState(trip.accommodationPref || 'mix');
+  const [diningPref, setDiningPref] = useState(trip.diningPref || 'mix');
   const [isLocked, setIsLocked] = useState(trip.isLocked || false);
   // const [isPublic, setIsPublic] = useState(trip.isPublic || false); // TODO: Add isPublic field to schema
-  const [voteDeadline, setVoteDeadline] = useState(trip.voteDeadline || "");
-  const [status, setStatus] = useState(trip.status || "planning");
+  const [voteDeadline, setVoteDeadline] = useState(trip.voteDeadline || '');
+  const [status, setStatus] = useState(trip.status || 'planning');
 
   if (!isOrganizer) {
     return null;
@@ -58,37 +92,37 @@ export function TripSettingsModal({
     try {
       const updates: Partial<Trip> = {};
 
-      if (section === "details") {
+      if (section === 'details') {
         updates.title = title;
         updates.destination = destination;
         updates.startDate = startDate;
         updates.endDate = endDate;
         updates.budgetPerPerson = budgetPerPerson;
         updates.groupSize = groupSize;
-      } else if (section === "preferences") {
-        updates.tripType = tripType as "leisure" | "business" | "adventure" | "other";
-        updates.accommodationPref = accommodationPref as "hotel" | "airbnb" | "mix";
-        updates.diningPref = diningPref as "fine_dining" | "casual" | "mix";
-      } else if (section === "visibility") {
+      } else if (section === 'preferences') {
+        updates.tripType = tripType as 'leisure' | 'business' | 'adventure' | 'other';
+        updates.accommodationPref = accommodationPref as 'hotel' | 'airbnb' | 'mix';
+        updates.diningPref = diningPref as 'fine_dining' | 'casual' | 'mix';
+      } else if (section === 'visibility') {
         // updates.isPublic = isPublic; // TODO: Add isPublic field to schema
         updates.isLocked = isLocked;
-      } else if (section === "voting") {
+      } else if (section === 'voting') {
         updates.voteDeadline = voteDeadline;
-      } else if (section === "advanced") {
-        updates.status = status as "planning" | "booking" | "active" | "completed" | "cancelled";
+      } else if (section === 'advanced') {
+        updates.status = status as 'planning' | 'booking' | 'active' | 'completed' | 'cancelled';
         updates.isLocked = isLocked;
       }
 
       await onUpdateTrip(updates);
       toast({
-        title: "Settings updated",
-        description: "Your trip settings have been saved successfully.",
+        title: 'Settings updated',
+        description: 'Your trip settings have been saved successfully.',
       });
     } catch (error) {
       toast({
-        title: "Failed to update settings",
-        description: error instanceof Error ? error.message : "Something went wrong",
-        variant: "destructive",
+        title: 'Failed to update settings',
+        description: error instanceof Error ? error.message : 'Something went wrong',
+        variant: 'destructive',
       });
     } finally {
       setLoading(false);
@@ -99,14 +133,14 @@ export function TripSettingsModal({
     try {
       const newCode = await onRegenerateShareCode();
       toast({
-        title: "Share code regenerated",
+        title: 'Share code regenerated',
         description: `New code: ${newCode}`,
       });
     } catch (error) {
       toast({
-        title: "Failed to regenerate code",
-        description: error instanceof Error ? error.message : "Something went wrong",
-        variant: "destructive",
+        title: 'Failed to regenerate code',
+        description: error instanceof Error ? error.message : 'Something went wrong',
+        variant: 'destructive',
       });
     }
   };
@@ -115,9 +149,9 @@ export function TripSettingsModal({
     const confirmText = trip.title || trip.destination;
     if (deleteConfirmText !== confirmText) {
       toast({
-        title: "Confirmation failed",
-        description: "Please type the exact trip name to confirm deletion.",
-        variant: "destructive",
+        title: 'Confirmation failed',
+        description: 'Please type the exact trip name to confirm deletion.',
+        variant: 'destructive',
       });
       return;
     }
@@ -127,14 +161,14 @@ export function TripSettingsModal({
       await onDeleteTrip();
       setOpen(false);
       toast({
-        title: "Trip deleted",
-        description: "Your trip has been permanently deleted.",
+        title: 'Trip deleted',
+        description: 'Your trip has been permanently deleted.',
       });
     } catch (error) {
       toast({
-        title: "Failed to delete trip",
-        description: error instanceof Error ? error.message : "Something went wrong",
-        variant: "destructive",
+        title: 'Failed to delete trip',
+        description: error instanceof Error ? error.message : 'Something went wrong',
+        variant: 'destructive',
       });
       setLoading(false);
     }
@@ -144,8 +178,8 @@ export function TripSettingsModal({
     const shareUrl = `${window.location.origin}/join/${trip.shareCode}`;
     navigator.clipboard.writeText(shareUrl);
     toast({
-      title: "Link copied",
-      description: "Share link copied to clipboard",
+      title: 'Link copied',
+      description: 'Share link copied to clipboard',
     });
   };
 
@@ -161,7 +195,8 @@ export function TripSettingsModal({
         <DialogHeader>
           <DialogTitle>Trip Settings</DialogTitle>
           <DialogDescription>
-            Manage your trip settings, visibility, and preferences. Only organizers can make changes.
+            Manage your trip settings, visibility, and preferences. Only organizers can make
+            changes.
           </DialogDescription>
         </DialogHeader>
 
@@ -245,8 +280,8 @@ export function TripSettingsModal({
                 </div>
               </div>
 
-              <Button onClick={() => handleSave("details")} disabled={loading}>
-                {loading ? "Saving..." : "Save Details"}
+              <Button onClick={() => handleSave('details')} disabled={loading}>
+                {loading ? 'Saving...' : 'Save Details'}
               </Button>
             </div>
           </TabsContent>
@@ -297,8 +332,8 @@ export function TripSettingsModal({
                 </Select>
               </div>
 
-              <Button onClick={() => handleSave("preferences")} disabled={loading}>
-                {loading ? "Saving..." : "Save Preferences"}
+              <Button onClick={() => handleSave('preferences')} disabled={loading}>
+                {loading ? 'Saving...' : 'Save Preferences'}
               </Button>
             </div>
           </TabsContent>
@@ -334,12 +369,15 @@ export function TripSettingsModal({
                       <AlertDialogHeader>
                         <AlertDialogTitle>Regenerate Share Code?</AlertDialogTitle>
                         <AlertDialogDescription>
-                          This will create a new share code and invalidate the old one. Anyone using the old link won't be able to join.
+                          This will create a new share code and invalidate the old one. Anyone using
+                          the old link won't be able to join.
                         </AlertDialogDescription>
                       </AlertDialogHeader>
                       <AlertDialogFooter>
                         <AlertDialogCancel>Cancel</AlertDialogCancel>
-                        <AlertDialogAction onClick={handleRegenerateCode}>Regenerate</AlertDialogAction>
+                        <AlertDialogAction onClick={handleRegenerateCode}>
+                          Regenerate
+                        </AlertDialogAction>
                       </AlertDialogFooter>
                     </AlertDialogContent>
                   </AlertDialog>
@@ -369,14 +407,11 @@ export function TripSettingsModal({
                     Prevent non-organizers from editing the itinerary
                   </p>
                 </div>
-                <Switch
-                  checked={isLocked}
-                  onCheckedChange={setIsLocked}
-                />
+                <Switch checked={isLocked} onCheckedChange={setIsLocked} />
               </div>
 
-              <Button onClick={() => handleSave("visibility")} disabled={loading}>
-                {loading ? "Saving..." : "Save Visibility Settings"}
+              <Button onClick={() => handleSave('visibility')} disabled={loading}>
+                {loading ? 'Saving...' : 'Save Visibility Settings'}
               </Button>
             </div>
           </TabsContent>
@@ -405,8 +440,8 @@ export function TripSettingsModal({
                   <div className="space-y-2">
                     <div className="flex items-center justify-between">
                       <span className="text-sm">Deadline Set</span>
-                      <Badge variant={voteDeadline ? "default" : "secondary"}>
-                        {voteDeadline ? "Yes" : "No"}
+                      <Badge variant={voteDeadline ? 'default' : 'secondary'}>
+                        {voteDeadline ? 'Yes' : 'No'}
                       </Badge>
                     </div>
                     {voteDeadline && (
@@ -421,8 +456,8 @@ export function TripSettingsModal({
                 </CardContent>
               </Card>
 
-              <Button onClick={() => handleSave("voting")} disabled={loading}>
-                {loading ? "Saving..." : "Save Voting Settings"}
+              <Button onClick={() => handleSave('voting')} disabled={loading}>
+                {loading ? 'Saving...' : 'Save Voting Settings'}
               </Button>
             </div>
           </TabsContent>
@@ -456,14 +491,11 @@ export function TripSettingsModal({
                     Only organizers can make changes when locked
                   </p>
                 </div>
-                <Switch
-                  checked={isLocked}
-                  onCheckedChange={setIsLocked}
-                />
+                <Switch checked={isLocked} onCheckedChange={setIsLocked} />
               </div>
 
-              <Button onClick={() => handleSave("advanced")} disabled={loading}>
-                {loading ? "Saving..." : "Save Advanced Settings"}
+              <Button onClick={() => handleSave('advanced')} disabled={loading}>
+                {loading ? 'Saving...' : 'Save Advanced Settings'}
               </Button>
 
               {/* Danger Zone */}
@@ -489,7 +521,8 @@ export function TripSettingsModal({
                       <AlertDialogHeader>
                         <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
                         <AlertDialogDescription>
-                          This action cannot be undone. This will permanently delete your trip, including all:
+                          This action cannot be undone. This will permanently delete your trip,
+                          including all:
                           <ul className="list-disc list-inside mt-2 space-y-1">
                             <li>Itinerary items and bookings</li>
                             <li>Expenses and settlements</li>
@@ -501,7 +534,8 @@ export function TripSettingsModal({
                       </AlertDialogHeader>
                       <div className="space-y-2">
                         <Label htmlFor="deleteConfirm">
-                          Type <span className="font-bold">{trip.title || trip.destination}</span> to confirm
+                          Type <span className="font-bold">{trip.title || trip.destination}</span>{' '}
+                          to confirm
                         </Label>
                         <Input
                           id="deleteConfirm"
@@ -511,13 +545,17 @@ export function TripSettingsModal({
                         />
                       </div>
                       <AlertDialogFooter>
-                        <AlertDialogCancel onClick={() => setDeleteConfirmText("")}>Cancel</AlertDialogCancel>
+                        <AlertDialogCancel onClick={() => setDeleteConfirmText('')}>
+                          Cancel
+                        </AlertDialogCancel>
                         <AlertDialogAction
                           onClick={handleDelete}
-                          disabled={deleteConfirmText !== (trip.title || trip.destination) || loading}
+                          disabled={
+                            deleteConfirmText !== (trip.title || trip.destination) || loading
+                          }
                           className="bg-red-600 hover:bg-red-700"
                         >
-                          {loading ? "Deleting..." : "Delete Forever"}
+                          {loading ? 'Deleting...' : 'Delete Forever'}
                         </AlertDialogAction>
                       </AlertDialogFooter>
                     </AlertDialogContent>

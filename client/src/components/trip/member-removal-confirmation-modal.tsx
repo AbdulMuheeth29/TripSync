@@ -1,12 +1,26 @@
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Label } from "@/components/ui/label";
-import { UserMinus, AlertTriangle, DollarSign, Calendar, MessageCircle, TrendingUp } from "lucide-react";
-import { useState } from "react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Label } from '@/components/ui/label';
+import {
+  UserMinus,
+  AlertTriangle,
+  DollarSign,
+  Calendar,
+  MessageCircle,
+  TrendingUp,
+} from 'lucide-react';
+import { useState } from 'react';
 
 interface MemberImpact {
   expensesOwed: number;
@@ -25,7 +39,7 @@ interface MemberRemovalConfirmationModalProps {
     id: string;
     name: string;
     email: string;
-    role: "admin" | "member";
+    role: 'admin' | 'member';
     joinedAt: Date;
   };
   impact: MemberImpact;
@@ -41,7 +55,7 @@ export function MemberRemovalConfirmationModal({
   impact,
   tripName,
   currency,
-  onConfirm
+  onConfirm,
 }: MemberRemovalConfirmationModalProps) {
   const [isConfirming, setIsConfirming] = useState(false);
   const [acknowledgeImpact, setAcknowledgeImpact] = useState(false);
@@ -52,12 +66,17 @@ export function MemberRemovalConfirmationModal({
       style: 'currency',
       currency: currency,
       minimumFractionDigits: 2,
-      maximumFractionDigits: 2
+      maximumFractionDigits: 2,
     }).format(amount);
   };
 
   const getInitials = (name: string) => {
-    return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+    return name
+      .split(' ')
+      .map((n) => n[0])
+      .join('')
+      .toUpperCase()
+      .slice(0, 2);
   };
 
   const handleConfirm = async () => {
@@ -66,7 +85,7 @@ export function MemberRemovalConfirmationModal({
       await onConfirm(reassignExpenses);
       onClose();
     } catch (error) {
-      console.error("Failed to remove member:", error);
+      console.error('Failed to remove member:', error);
     } finally {
       setIsConfirming(false);
     }
@@ -97,9 +116,7 @@ export function MemberRemovalConfirmationModal({
           <Card className="p-4">
             <div className="flex items-center gap-3">
               <Avatar className="h-12 w-12">
-                <AvatarFallback className="text-sm">
-                  {getInitials(member.name)}
-                </AvatarFallback>
+                <AvatarFallback className="text-sm">{getInitials(member.name)}</AvatarFallback>
               </Avatar>
               <div className="flex-1">
                 <p className="font-semibold">{member.name}</p>
@@ -113,8 +130,8 @@ export function MemberRemovalConfirmationModal({
             <Alert variant="destructive">
               <AlertTriangle className="h-4 w-4" />
               <AlertDescription className="text-sm">
-                <strong>Warning:</strong> {member.name} has {formatCurrency(impact.unsettledAmount)} in unsettled expenses.
-                They should settle these before being removed.
+                <strong>Warning:</strong> {member.name} has {formatCurrency(impact.unsettledAmount)}{' '}
+                in unsettled expenses. They should settle these before being removed.
               </AlertDescription>
             </Alert>
           )}
@@ -131,9 +148,13 @@ export function MemberRemovalConfirmationModal({
                       <span className="text-sm">Expenses</span>
                     </div>
                     <div className="text-sm">
-                      <span className="text-red-600">{formatCurrency(impact.expensesOwed)} owed</span>
-                      {" • "}
-                      <span className="text-green-600">{formatCurrency(impact.expensesPaid)} paid</span>
+                      <span className="text-red-600">
+                        {formatCurrency(impact.expensesOwed)} owed
+                      </span>
+                      {' • '}
+                      <span className="text-green-600">
+                        {formatCurrency(impact.expensesPaid)} paid
+                      </span>
                     </div>
                   </div>
                 )}
@@ -173,7 +194,9 @@ export function MemberRemovalConfirmationModal({
 
           {/* What Happens */}
           <Card className="p-4 bg-red-50 border-red-200">
-            <h4 className="text-sm font-semibold text-red-900 mb-2">What happens when you remove this member?</h4>
+            <h4 className="text-sm font-semibold text-red-900 mb-2">
+              What happens when you remove this member?
+            </h4>
             <ul className="text-xs text-red-800 space-y-1">
               <li>• {member.name} will lose access to this trip immediately</li>
               <li>• They will no longer receive notifications about trip updates</li>
@@ -203,9 +226,8 @@ export function MemberRemovalConfirmationModal({
               </div>
               <p className="text-xs text-muted-foreground pl-6">
                 {reassignExpenses
-                  ? "Expenses will remain in trip history with anonymized label"
-                  : "All expenses will be permanently deleted (not recommended)"
-                }
+                  ? 'Expenses will remain in trip history with anonymized label'
+                  : 'All expenses will be permanently deleted (not recommended)'}
               </p>
             </Card>
           )}
@@ -218,21 +240,20 @@ export function MemberRemovalConfirmationModal({
                 checked={acknowledgeImpact}
                 onCheckedChange={(checked) => setAcknowledgeImpact(checked === true)}
               />
-              <Label
-                htmlFor="acknowledge-removal"
-                className="text-sm font-normal cursor-pointer"
-              >
-                I understand this action cannot be undone. {member.name} will need to be re-invited to rejoin.
+              <Label htmlFor="acknowledge-removal" className="text-sm font-normal cursor-pointer">
+                I understand this action cannot be undone. {member.name} will need to be re-invited
+                to rejoin.
               </Label>
             </div>
           </Card>
 
           {/* Admin Warning */}
-          {member.role === "admin" && (
+          {member.role === 'admin' && (
             <Alert>
               <AlertTriangle className="h-4 w-4" />
               <AlertDescription className="text-sm">
-                <strong>Note:</strong> You're removing an admin. Make sure there's at least one other admin for this trip.
+                <strong>Note:</strong> You're removing an admin. Make sure there's at least one
+                other admin for this trip.
               </AlertDescription>
             </Alert>
           )}
@@ -248,7 +269,7 @@ export function MemberRemovalConfirmationModal({
             variant="destructive"
           >
             <UserMinus className="h-4 w-4 mr-2" />
-            {isConfirming ? "Removing..." : "Remove Member"}
+            {isConfirming ? 'Removing...' : 'Remove Member'}
           </Button>
         </DialogFooter>
       </DialogContent>

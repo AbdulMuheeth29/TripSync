@@ -1,19 +1,19 @@
-import { useState, useEffect } from "react";
-import { Link, useLocation } from "wouter";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { useToast } from "@/hooks/use-toast";
-import { AppLogo } from "@/components/app-logo";
-import { ArrowLeft, CheckCircle2, AlertCircle, Loader2 } from "lucide-react";
+import { useState, useEffect } from 'react';
+import { Link, useLocation } from 'wouter';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { useToast } from '@/hooks/use-toast';
+import { AppLogo } from '@/components/app-logo';
+import { ArrowLeft, CheckCircle2, AlertCircle, Loader2 } from 'lucide-react';
 
 export default function ResetPasswordPage() {
   const [, navigate] = useLocation();
   const [token, setToken] = useState<string | null>(null);
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isValidating, setIsValidating] = useState(true);
   const [isTokenValid, setIsTokenValid] = useState(false);
@@ -24,10 +24,10 @@ export default function ResetPasswordPage() {
   // Extract token from URL query params
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
-    const tokenParam = params.get("token");
+    const tokenParam = params.get('token');
 
     if (!tokenParam) {
-      setTokenError("No reset token provided. Please check your email for the reset link.");
+      setTokenError('No reset token provided. Please check your email for the reset link.');
       setIsValidating(false);
       return;
     }
@@ -42,8 +42,8 @@ export default function ResetPasswordPage() {
 
     try {
       const res = await fetch(`/api/auth/validate-token/${encodeURIComponent(tokenValue)}`, {
-        method: "GET",
-        headers: { "Content-Type": "application/json" },
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' },
       });
 
       const data = await res.json();
@@ -51,11 +51,11 @@ export default function ResetPasswordPage() {
       if (res.ok && data.valid) {
         setIsTokenValid(true);
       } else {
-        setTokenError(data.error || "This reset link is invalid or has expired.");
+        setTokenError(data.error || 'This reset link is invalid or has expired.');
         setIsTokenValid(false);
       }
     } catch (error) {
-      setTokenError("Failed to validate reset link. Please try again.");
+      setTokenError('Failed to validate reset link. Please try again.');
       setIsTokenValid(false);
     } finally {
       setIsValidating(false);
@@ -68,17 +68,17 @@ export default function ResetPasswordPage() {
     // Validation
     if (!password || !confirmPassword) {
       toast({
-        title: "All fields required",
-        variant: "destructive",
+        title: 'All fields required',
+        variant: 'destructive',
       });
       return;
     }
 
     if (password.length < 8) {
       toast({
-        title: "Password too short",
-        description: "Password must be at least 8 characters",
-        variant: "destructive",
+        title: 'Password too short',
+        description: 'Password must be at least 8 characters',
+        variant: 'destructive',
       });
       return;
     }
@@ -86,16 +86,16 @@ export default function ResetPasswordPage() {
     if (password !== confirmPassword) {
       toast({
         title: "Passwords don't match",
-        description: "Please ensure both passwords are the same",
-        variant: "destructive",
+        description: 'Please ensure both passwords are the same',
+        variant: 'destructive',
       });
       return;
     }
 
     if (!token) {
       toast({
-        title: "Invalid reset token",
-        variant: "destructive",
+        title: 'Invalid reset token',
+        variant: 'destructive',
       });
       return;
     }
@@ -103,9 +103,9 @@ export default function ResetPasswordPage() {
     setIsLoading(true);
 
     try {
-      const res = await fetch("/api/auth/reset-password", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+      const res = await fetch('/api/auth/reset-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           token,
           password,
@@ -117,25 +117,25 @@ export default function ResetPasswordPage() {
       if (res.ok) {
         setResetComplete(true);
         toast({
-          title: "Password reset successful",
-          description: "You can now log in with your new password",
+          title: 'Password reset successful',
+          description: 'You can now log in with your new password',
         });
 
         // Redirect to login after 2 seconds
         setTimeout(() => {
-          navigate("/login");
+          navigate('/login');
         }, 2000);
       } else {
         toast({
-          title: data.error || "Failed to reset password",
-          variant: "destructive",
+          title: data.error || 'Failed to reset password',
+          variant: 'destructive',
         });
       }
     } catch (error) {
       toast({
-        title: "An error occurred",
-        description: "Please try again or request a new reset link",
-        variant: "destructive",
+        title: 'An error occurred',
+        description: 'Please try again or request a new reset link',
+        variant: 'destructive',
       });
     } finally {
       setIsLoading(false);
@@ -164,10 +164,10 @@ export default function ResetPasswordPage() {
           <CardTitle className="text-2xl">Reset Your Password</CardTitle>
           <CardDescription>
             {isValidating
-              ? "Validating your reset link..."
+              ? 'Validating your reset link...'
               : isTokenValid
-              ? "Enter your new password below"
-              : "There's an issue with your reset link"}
+                ? 'Enter your new password below'
+                : "There's an issue with your reset link"}
           </CardDescription>
         </CardHeader>
 
@@ -211,9 +211,7 @@ export default function ResetPasswordPage() {
               </div>
               <div className="space-y-2">
                 <h3 className="font-semibold">Password Reset Complete!</h3>
-                <p className="text-sm text-muted-foreground">
-                  Redirecting you to login...
-                </p>
+                <p className="text-sm text-muted-foreground">Redirecting you to login...</p>
               </div>
             </div>
           )}
@@ -256,7 +254,7 @@ export default function ResetPasswordPage() {
                     Resetting password...
                   </>
                 ) : (
-                  "Reset password"
+                  'Reset password'
                 )}
               </Button>
 

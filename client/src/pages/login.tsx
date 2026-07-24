@@ -1,39 +1,39 @@
-import { useState, useMemo } from "react";
-import { useLocation } from "wouter";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Progress } from "@/components/ui/progress";
-import { Checkbox } from "@/components/ui/checkbox";
-import { useAuth } from "@/lib/auth-context";
-import { useToast } from "@/hooks/use-toast";
-import { AppLogo } from "@/components/app-logo";
-import { Eye, EyeOff } from "lucide-react";
-import { Link } from "wouter";
+import { useState, useMemo } from 'react';
+import { useLocation } from 'wouter';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Progress } from '@/components/ui/progress';
+import { Checkbox } from '@/components/ui/checkbox';
+import { useAuth } from '@/lib/auth-context';
+import { useToast } from '@/hooks/use-toast';
+import { AppLogo } from '@/components/app-logo';
+import { Eye, EyeOff } from 'lucide-react';
+import { Link } from 'wouter';
 
 function passwordStrength(pw: string): { score: number; label: string } {
-  if (!pw) return { score: 0, label: "" };
+  if (!pw) return { score: 0, label: '' };
   let score = 0;
   if (pw.length >= 8) score++;
   if (pw.length >= 12) score++;
   if (/[a-z]/.test(pw) && /[A-Z]/.test(pw)) score++;
   if (/\d/.test(pw)) score++;
   if (/[^a-zA-Z0-9]/.test(pw)) score++;
-  const labels = ["", "Weak", "Fair", "Good", "Strong", "Very strong"];
+  const labels = ['', 'Weak', 'Fair', 'Good', 'Strong', 'Very strong'];
   return { score, label: labels[score] };
 }
 
 export default function LoginPage() {
-  const [email, setEmail] = useState("");
-  const [name, setName] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
+  const [email, setEmail] = useState('');
+  const [name, setName] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(() => {
-    if (typeof window === "undefined") return false;
-    return localStorage.getItem("tripsync_remember") === "true";
+    if (typeof window === 'undefined') return false;
+    return localStorage.getItem('tripsync_remember') === 'true';
   });
   const [isLoading, setIsLoading] = useState(false);
   const [termsAccepted, setTermsAccepted] = useState(false);
@@ -47,9 +47,9 @@ export default function LoginPage() {
 
     if (!email || !password) {
       toast({
-        title: "Missing information",
-        description: "Please enter both email and password",
-        variant: "destructive",
+        title: 'Missing information',
+        description: 'Please enter both email and password',
+        variant: 'destructive',
       });
       return;
     }
@@ -59,17 +59,19 @@ export default function LoginPage() {
     try {
       await login(email, password, rememberMe);
       toast({
-        title: "Welcome back!",
+        title: 'Welcome back!',
         description: "Let's plan your next adventure",
       });
-      const params = new URLSearchParams(typeof window !== "undefined" ? window.location.search : "");
-      const redirect = params.get("redirect");
-      setLocation(redirect && redirect.startsWith("/") ? redirect : "/dashboard");
+      const params = new URLSearchParams(
+        typeof window !== 'undefined' ? window.location.search : ''
+      );
+      const redirect = params.get('redirect');
+      setLocation(redirect && redirect.startsWith('/') ? redirect : '/dashboard');
     } catch (error) {
       toast({
-        title: "Login failed",
-        description: error instanceof Error ? error.message : "Invalid credentials",
-        variant: "destructive",
+        title: 'Login failed',
+        description: error instanceof Error ? error.message : 'Invalid credentials',
+        variant: 'destructive',
       });
     } finally {
       setIsLoading(false);
@@ -81,18 +83,18 @@ export default function LoginPage() {
 
     if (!email || !name || !password || !confirmPassword) {
       toast({
-        title: "Missing information",
-        description: "Please fill in all fields",
-        variant: "destructive",
+        title: 'Missing information',
+        description: 'Please fill in all fields',
+        variant: 'destructive',
       });
       return;
     }
 
     if (password.length < 8) {
       toast({
-        title: "Weak password",
-        description: "Password must be at least 8 characters",
-        variant: "destructive",
+        title: 'Weak password',
+        description: 'Password must be at least 8 characters',
+        variant: 'destructive',
       });
       return;
     }
@@ -100,17 +102,18 @@ export default function LoginPage() {
     if (password !== confirmPassword) {
       toast({
         title: "Passwords don't match",
-        description: "Please make sure both passwords are the same",
-        variant: "destructive",
+        description: 'Please make sure both passwords are the same',
+        variant: 'destructive',
       });
       return;
     }
 
     if (!termsAccepted) {
       toast({
-        title: "Please accept the Terms of Service",
-        description: "You must agree to the Terms of Service and Privacy Policy to create an account.",
-        variant: "destructive",
+        title: 'Please accept the Terms of Service',
+        description:
+          'You must agree to the Terms of Service and Privacy Policy to create an account.',
+        variant: 'destructive',
       });
       return;
     }
@@ -120,18 +123,22 @@ export default function LoginPage() {
     try {
       await register(email, name, password, rememberMe);
       toast({
-        title: "Account created!",
-        description: "Welcome to TripSync",
+        title: 'Account created!',
+        description: 'Welcome to TripSync',
       });
-      const params = new URLSearchParams(typeof window !== "undefined" ? window.location.search : "");
-      const redirect = params.get("redirect");
+      const params = new URLSearchParams(
+        typeof window !== 'undefined' ? window.location.search : ''
+      );
+      const redirect = params.get('redirect');
       // After signup, default to AI demo onboarding on the dashboard
-      setLocation(redirect && redirect.startsWith("/") ? redirect : "/dashboard?onboarding=ai-demo");
+      setLocation(
+        redirect && redirect.startsWith('/') ? redirect : '/dashboard?onboarding=ai-demo'
+      );
     } catch (error) {
       toast({
-        title: "Registration failed",
-        description: error instanceof Error ? error.message : "Something went wrong",
-        variant: "destructive",
+        title: 'Registration failed',
+        description: error instanceof Error ? error.message : 'Something went wrong',
+        variant: 'destructive',
       });
     } finally {
       setIsLoading(false);
@@ -140,7 +147,11 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen bg-background flex flex-col items-center justify-center p-4">
-      <Link href="/" className="flex items-center gap-2 mb-8 no-underline text-foreground hover:opacity-90 transition-opacity" data-testid="link-logo-home">
+      <Link
+        href="/"
+        className="flex items-center gap-2 mb-8 no-underline text-foreground hover:opacity-90 transition-opacity"
+        data-testid="link-logo-home"
+      >
         <AppLogo className="h-10 w-10 object-contain" />
         <span className="text-2xl font-bold">TripSync</span>
       </Link>
@@ -177,7 +188,7 @@ export default function LoginPage() {
                   <div className="relative">
                     <Input
                       id="login-password"
-                      type={showPassword ? "text" : "password"}
+                      type={showPassword ? 'text' : 'password'}
                       placeholder="••••••••"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
@@ -190,11 +201,7 @@ export default function LoginPage() {
                       className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
                       onClick={() => setShowPassword(!showPassword)}
                     >
-                      {showPassword ? (
-                        <EyeOff className="h-4 w-4" />
-                      ) : (
-                        <Eye className="h-4 w-4" />
-                      )}
+                      {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                     </Button>
                   </div>
                   <div className="flex items-center justify-between">
@@ -203,7 +210,7 @@ export default function LoginPage() {
                         checked={rememberMe}
                         onCheckedChange={(c) => {
                           setRememberMe(!!c);
-                          localStorage.setItem("tripsync_remember", c ? "true" : "false");
+                          localStorage.setItem('tripsync_remember', c ? 'true' : 'false');
                         }}
                       />
                       Remember me
@@ -215,8 +222,13 @@ export default function LoginPage() {
                     </Link>
                   </div>
                 </div>
-                <Button type="submit" className="w-full" disabled={isLoading} data-testid="button-submit-login">
-                  {isLoading ? "Signing in..." : "Sign In"}
+                <Button
+                  type="submit"
+                  className="w-full"
+                  disabled={isLoading}
+                  data-testid="button-submit-login"
+                >
+                  {isLoading ? 'Signing in...' : 'Sign In'}
                 </Button>
                 <Button
                   type="button"
@@ -224,20 +236,25 @@ export default function LoginPage() {
                   className="w-full mt-2"
                   disabled={isLoading}
                   onClick={async () => {
-                    setEmail("demo@tripsync.com");
-                    setPassword("password123");
+                    setEmail('demo@tripsync.com');
+                    setPassword('password123');
                     setIsLoading(true);
                     try {
-                      await login("demo@tripsync.com", "password123", rememberMe);
-                      toast({ title: "Welcome back!", description: "Let's plan your next adventure" });
-                      const params = new URLSearchParams(typeof window !== "undefined" ? window.location.search : "");
-                      const redirect = params.get("redirect");
-                      setLocation(redirect && redirect.startsWith("/") ? redirect : "/dashboard");
+                      await login('demo@tripsync.com', 'password123', rememberMe);
+                      toast({
+                        title: 'Welcome back!',
+                        description: "Let's plan your next adventure",
+                      });
+                      const params = new URLSearchParams(
+                        typeof window !== 'undefined' ? window.location.search : ''
+                      );
+                      const redirect = params.get('redirect');
+                      setLocation(redirect && redirect.startsWith('/') ? redirect : '/dashboard');
                     } catch (err) {
                       toast({
-                        title: "Login failed",
-                        description: err instanceof Error ? err.message : "Invalid credentials",
-                        variant: "destructive",
+                        title: 'Login failed',
+                        description: err instanceof Error ? err.message : 'Invalid credentials',
+                        variant: 'destructive',
                       });
                     } finally {
                       setIsLoading(false);
@@ -258,12 +275,7 @@ export default function LoginPage() {
                   </div>
                 </div>
                 <Link href="/register" className="block mt-4">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    className="w-full"
-                    disabled={isLoading}
-                  >
+                  <Button type="button" variant="outline" className="w-full" disabled={isLoading}>
                     Create New Account
                   </Button>
                 </Link>
@@ -283,7 +295,6 @@ export default function LoginPage() {
               </div>
             </TabsContent>
           </Tabs>
-
         </CardContent>
       </Card>
     </div>

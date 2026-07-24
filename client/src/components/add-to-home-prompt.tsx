@@ -1,16 +1,16 @@
-import { useEffect, useState } from "react";
-import { Button } from "@/components/ui/button";
+import { useEffect, useState } from 'react';
+import { Button } from '@/components/ui/button';
 
 type BeforeInstallPromptEvent = Event & {
   prompt: () => Promise<void>;
-  userChoice: Promise<{ outcome: "accepted" | "dismissed"; platform: string }>;
+  userChoice: Promise<{ outcome: 'accepted' | 'dismissed'; platform: string }>;
 };
 
-const DISMISS_KEY = "tripsync_pwa_prompt_dismissed_at";
+const DISMISS_KEY = 'tripsync_pwa_prompt_dismissed_at';
 const DISMISS_TTL_DAYS = 180;
 
 function shouldShowPrompt(): boolean {
-  if (typeof window === "undefined") return false;
+  if (typeof window === 'undefined') return false;
   try {
     const raw = localStorage.getItem(DISMISS_KEY);
     if (!raw) return true;
@@ -28,7 +28,7 @@ export function AddToHomePrompt() {
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
-    if (typeof window === "undefined") return;
+    if (typeof window === 'undefined') return;
     const isMobile = window.innerWidth < 768;
     if (!isMobile || !shouldShowPrompt()) return;
 
@@ -38,9 +38,9 @@ export function AddToHomePrompt() {
       setVisible(true);
     };
 
-    window.addEventListener("beforeinstallprompt", handler as any);
+    window.addEventListener('beforeinstallprompt', handler as any);
     return () => {
-      window.removeEventListener("beforeinstallprompt", handler as any);
+      window.removeEventListener('beforeinstallprompt', handler as any);
     };
   }, []);
 
@@ -65,12 +65,7 @@ export function AddToHomePrompt() {
           </span>
         </div>
         <div className="flex items-center gap-2">
-          <Button
-            size="sm"
-            variant="outline"
-            className="h-7 px-2 text-xs"
-            onClick={dismiss}
-          >
+          <Button size="sm" variant="outline" className="h-7 px-2 text-xs" onClick={dismiss}>
             Not now
           </Button>
           <Button
@@ -92,4 +87,3 @@ export function AddToHomePrompt() {
     </div>
   );
 }
-

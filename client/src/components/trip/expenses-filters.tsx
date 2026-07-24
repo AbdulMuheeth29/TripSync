@@ -1,13 +1,19 @@
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Calendar } from "@/components/ui/calendar";
-import { Badge } from "@/components/ui/badge";
-import { Filter, X, CalendarIcon, Download } from "lucide-react";
-import { format } from "date-fns";
+import { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Calendar } from '@/components/ui/calendar';
+import { Badge } from '@/components/ui/badge';
+import { Filter, X, CalendarIcon, Download } from 'lucide-react';
+import { format } from 'date-fns';
 
 export interface ExpensesFilters {
   category: string;
@@ -15,14 +21,14 @@ export interface ExpensesFilters {
   dateFrom: Date | null;
   dateTo: Date | null;
   settlementStatus: string;
-  sortBy: "date-desc" | "date-asc" | "amount-desc" | "amount-asc" | "category";
+  sortBy: 'date-desc' | 'date-asc' | 'amount-desc' | 'amount-asc' | 'category';
 }
 
 interface ExpensesFiltersProps {
   filters: ExpensesFilters;
   onFiltersChange: (filters: ExpensesFilters) => void;
   members: Array<{ id: string; name: string }>;
-  onExport?: (format: "csv" | "pdf") => void;
+  onExport?: (format: 'csv' | 'pdf') => void;
   canExport?: boolean;
 }
 
@@ -43,21 +49,21 @@ export function ExpensesFiltersComponent({
 
   const clearAllFilters = () => {
     onFiltersChange({
-      category: "all",
-      paidBy: "all",
+      category: 'all',
+      paidBy: 'all',
       dateFrom: null,
       dateTo: null,
-      settlementStatus: "all",
-      sortBy: "date-desc",
+      settlementStatus: 'all',
+      sortBy: 'date-desc',
     });
   };
 
   const activeFilterCount =
-    (filters.category !== "all" ? 1 : 0) +
-    (filters.paidBy !== "all" ? 1 : 0) +
+    (filters.category !== 'all' ? 1 : 0) +
+    (filters.paidBy !== 'all' ? 1 : 0) +
     (filters.dateFrom ? 1 : 0) +
     (filters.dateTo ? 1 : 0) +
-    (filters.settlementStatus !== "all" ? 1 : 0);
+    (filters.settlementStatus !== 'all' ? 1 : 0);
 
   const hasActiveFilters = activeFilterCount > 0;
 
@@ -98,7 +104,7 @@ export function ExpensesFiltersComponent({
                 <Label htmlFor="category-filter">Category</Label>
                 <Select
                   value={filters.category}
-                  onValueChange={(value) => updateFilter("category", value)}
+                  onValueChange={(value) => updateFilter('category', value)}
                 >
                   <SelectTrigger id="category-filter">
                     <SelectValue />
@@ -120,7 +126,7 @@ export function ExpensesFiltersComponent({
                 <Label htmlFor="paidby-filter">Paid By</Label>
                 <Select
                   value={filters.paidBy}
-                  onValueChange={(value) => updateFilter("paidBy", value)}
+                  onValueChange={(value) => updateFilter('paidBy', value)}
                 >
                   <SelectTrigger id="paidby-filter">
                     <SelectValue />
@@ -144,7 +150,7 @@ export function ExpensesFiltersComponent({
                     <PopoverTrigger asChild>
                       <Button variant="outline" className="justify-start text-left font-normal">
                         <CalendarIcon className="mr-2 h-4 w-4" />
-                        {filters.dateFrom ? format(filters.dateFrom, "PPP") : "From date"}
+                        {filters.dateFrom ? format(filters.dateFrom, 'PPP') : 'From date'}
                       </Button>
                     </PopoverTrigger>
                     <PopoverContent className="w-auto p-0">
@@ -152,7 +158,7 @@ export function ExpensesFiltersComponent({
                         mode="single"
                         selected={filters.dateFrom || undefined}
                         onSelect={(date) => {
-                          updateFilter("dateFrom", date || null);
+                          updateFilter('dateFrom', date || null);
                           setIsDateFromOpen(false);
                         }}
                       />
@@ -163,7 +169,7 @@ export function ExpensesFiltersComponent({
                     <PopoverTrigger asChild>
                       <Button variant="outline" className="justify-start text-left font-normal">
                         <CalendarIcon className="mr-2 h-4 w-4" />
-                        {filters.dateTo ? format(filters.dateTo, "PPP") : "To date"}
+                        {filters.dateTo ? format(filters.dateTo, 'PPP') : 'To date'}
                       </Button>
                     </PopoverTrigger>
                     <PopoverContent className="w-auto p-0">
@@ -171,12 +177,10 @@ export function ExpensesFiltersComponent({
                         mode="single"
                         selected={filters.dateTo || undefined}
                         onSelect={(date) => {
-                          updateFilter("dateTo", date || null);
+                          updateFilter('dateTo', date || null);
                           setIsDateToOpen(false);
                         }}
-                        disabled={(date) =>
-                          filters.dateFrom ? date < filters.dateFrom : false
-                        }
+                        disabled={(date) => (filters.dateFrom ? date < filters.dateFrom : false)}
                       />
                     </PopoverContent>
                   </Popover>
@@ -188,7 +192,7 @@ export function ExpensesFiltersComponent({
                 <Label htmlFor="settlement-filter">Settlement Status</Label>
                 <Select
                   value={filters.settlementStatus}
-                  onValueChange={(value) => updateFilter("settlementStatus", value)}
+                  onValueChange={(value) => updateFilter('settlementStatus', value)}
                 >
                   <SelectTrigger id="settlement-filter">
                     <SelectValue />
@@ -208,7 +212,7 @@ export function ExpensesFiltersComponent({
         {/* Sort Select */}
         <Select
           value={filters.sortBy}
-          onValueChange={(value) => updateFilter("sortBy", value as ExpensesFilters["sortBy"])}
+          onValueChange={(value) => updateFilter('sortBy', value as ExpensesFilters['sortBy'])}
         >
           <SelectTrigger className="w-[180px]">
             <SelectValue />
@@ -236,14 +240,14 @@ export function ExpensesFiltersComponent({
                 <Button
                   variant="ghost"
                   className="w-full justify-start"
-                  onClick={() => onExport("csv")}
+                  onClick={() => onExport('csv')}
                 >
                   Export as CSV
                 </Button>
                 <Button
                   variant="ghost"
                   className="w-full justify-start"
-                  onClick={() => onExport("pdf")}
+                  onClick={() => onExport('pdf')}
                 >
                   Export as PDF
                 </Button>
@@ -257,48 +261,42 @@ export function ExpensesFiltersComponent({
       {hasActiveFilters && (
         <div className="flex items-center gap-2 flex-wrap">
           <span className="text-sm text-muted-foreground">Active filters:</span>
-          {filters.category !== "all" && (
+          {filters.category !== 'all' && (
             <Badge variant="secondary" className="gap-1">
               Category: {filters.category}
               <X
                 className="h-3 w-3 cursor-pointer"
-                onClick={() => updateFilter("category", "all")}
+                onClick={() => updateFilter('category', 'all')}
               />
             </Badge>
           )}
-          {filters.paidBy !== "all" && (
+          {filters.paidBy !== 'all' && (
             <Badge variant="secondary" className="gap-1">
-              Paid by: {members.find(m => m.id === filters.paidBy)?.name || filters.paidBy}
-              <X
-                className="h-3 w-3 cursor-pointer"
-                onClick={() => updateFilter("paidBy", "all")}
-              />
+              Paid by: {members.find((m) => m.id === filters.paidBy)?.name || filters.paidBy}
+              <X className="h-3 w-3 cursor-pointer" onClick={() => updateFilter('paidBy', 'all')} />
             </Badge>
           )}
           {filters.dateFrom && (
             <Badge variant="secondary" className="gap-1">
-              From: {format(filters.dateFrom, "MMM d, yyyy")}
+              From: {format(filters.dateFrom, 'MMM d, yyyy')}
               <X
                 className="h-3 w-3 cursor-pointer"
-                onClick={() => updateFilter("dateFrom", null)}
+                onClick={() => updateFilter('dateFrom', null)}
               />
             </Badge>
           )}
           {filters.dateTo && (
             <Badge variant="secondary" className="gap-1">
-              To: {format(filters.dateTo, "MMM d, yyyy")}
-              <X
-                className="h-3 w-3 cursor-pointer"
-                onClick={() => updateFilter("dateTo", null)}
-              />
+              To: {format(filters.dateTo, 'MMM d, yyyy')}
+              <X className="h-3 w-3 cursor-pointer" onClick={() => updateFilter('dateTo', null)} />
             </Badge>
           )}
-          {filters.settlementStatus !== "all" && (
+          {filters.settlementStatus !== 'all' && (
             <Badge variant="secondary" className="gap-1">
               Settlement: {filters.settlementStatus}
               <X
                 className="h-3 w-3 cursor-pointer"
-                onClick={() => updateFilter("settlementStatus", "all")}
+                onClick={() => updateFilter('settlementStatus', 'all')}
               />
             </Badge>
           )}
@@ -309,16 +307,15 @@ export function ExpensesFiltersComponent({
 }
 
 // Helper function to apply filters to expenses
-export function applyExpensesFilters<T extends {
-  paidByUserId: string;
-  amount: number;
-  createdAt: Date | string;
-  isSettled: boolean | null;
-  description?: string;
-}>(
-  expenses: T[],
-  filters: ExpensesFilters
-): T[] {
+export function applyExpensesFilters<
+  T extends {
+    paidByUserId: string;
+    amount: number;
+    createdAt: Date | string;
+    isSettled: boolean | null;
+    description?: string;
+  },
+>(expenses: T[], filters: ExpensesFilters): T[] {
   let filtered = [...expenses];
 
   // Apply category filter - Disabled: expenses schema doesn't have category field
@@ -328,26 +325,26 @@ export function applyExpensesFilters<T extends {
   // }
 
   // Apply paid by filter
-  if (filters.paidBy !== "all") {
-    filtered = filtered.filter(exp => exp.paidByUserId === filters.paidBy);
+  if (filters.paidBy !== 'all') {
+    filtered = filtered.filter((exp) => exp.paidByUserId === filters.paidBy);
   }
 
   // Apply date range filters
   if (filters.dateFrom) {
-    filtered = filtered.filter(exp => new Date(exp.createdAt) >= filters.dateFrom!);
+    filtered = filtered.filter((exp) => new Date(exp.createdAt) >= filters.dateFrom!);
   }
   if (filters.dateTo) {
     const endOfDay = new Date(filters.dateTo);
     endOfDay.setHours(23, 59, 59, 999);
-    filtered = filtered.filter(exp => new Date(exp.createdAt) <= endOfDay);
+    filtered = filtered.filter((exp) => new Date(exp.createdAt) <= endOfDay);
   }
 
   // Apply settlement status filter
-  if (filters.settlementStatus !== "all") {
-    filtered = filtered.filter(exp => {
-      if (filters.settlementStatus === "settled") {
+  if (filters.settlementStatus !== 'all') {
+    filtered = filtered.filter((exp) => {
+      if (filters.settlementStatus === 'settled') {
         return exp.isSettled === true;
-      } else if (filters.settlementStatus === "unsettled") {
+      } else if (filters.settlementStatus === 'unsettled') {
         return !exp.isSettled;
       }
       return true;
@@ -357,13 +354,13 @@ export function applyExpensesFilters<T extends {
   // Apply sorting
   filtered.sort((a, b) => {
     switch (filters.sortBy) {
-      case "date-desc":
+      case 'date-desc':
         return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
-      case "date-asc":
+      case 'date-asc':
         return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
-      case "amount-desc":
+      case 'amount-desc':
         return b.amount - a.amount;
-      case "amount-asc":
+      case 'amount-asc':
         return a.amount - b.amount;
       // Category sorting disabled since schema doesn't have category
       // case "category":

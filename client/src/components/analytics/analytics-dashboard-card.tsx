@@ -1,9 +1,19 @@
-import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
-import { Separator } from "@/components/ui/separator";
-import { TrendingUp, TrendingDown, DollarSign, Calendar, Users, MessageCircle, CheckCircle2, BarChart3, ArrowRight } from "lucide-react";
+import { Card } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Progress } from '@/components/ui/progress';
+import { Separator } from '@/components/ui/separator';
+import {
+  TrendingUp,
+  TrendingDown,
+  DollarSign,
+  Calendar,
+  Users,
+  MessageCircle,
+  CheckCircle2,
+  BarChart3,
+  ArrowRight,
+} from 'lucide-react';
 
 interface CategorySpending {
   category: string;
@@ -30,7 +40,7 @@ interface AnalyticsDashboardCardProps {
     totalMessages: number;
     expenseCount: number;
     categorySpending: CategorySpending[];
-    spendingTrend: "up" | "down" | "stable";
+    spendingTrend: 'up' | 'down' | 'stable';
     trendPercentage: number;
     avgDailySpend: number;
     projectedFinalSpend: number;
@@ -43,14 +53,14 @@ export function AnalyticsDashboardCard({
   tripName,
   dateRange,
   analytics,
-  onViewDetails
+  onViewDetails,
 }: AnalyticsDashboardCardProps) {
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
       currency: analytics.currency,
       minimumFractionDigits: 0,
-      maximumFractionDigits: 0
+      maximumFractionDigits: 0,
     }).format(amount);
   };
 
@@ -59,20 +69,18 @@ export function AnalyticsDashboardCard({
   const activitiesPercentage = (analytics.completedActivities / analytics.totalActivities) * 100;
 
   const getTrendIcon = () => {
-    if (analytics.spendingTrend === "up") return <TrendingUp className="h-4 w-4" />;
-    if (analytics.spendingTrend === "down") return <TrendingDown className="h-4 w-4" />;
+    if (analytics.spendingTrend === 'up') return <TrendingUp className="h-4 w-4" />;
+    if (analytics.spendingTrend === 'down') return <TrendingDown className="h-4 w-4" />;
     return <span className="h-4 w-4">→</span>;
   };
 
   const getTrendColor = () => {
-    if (analytics.spendingTrend === "up") return "text-red-600";
-    if (analytics.spendingTrend === "down") return "text-green-600";
-    return "text-muted-foreground";
+    if (analytics.spendingTrend === 'up') return 'text-red-600';
+    if (analytics.spendingTrend === 'down') return 'text-green-600';
+    return 'text-muted-foreground';
   };
 
-  const topCategories = analytics.categorySpending
-    .sort((a, b) => b.amount - a.amount)
-    .slice(0, 3);
+  const topCategories = analytics.categorySpending.sort((a, b) => b.amount - a.amount).slice(0, 3);
 
   return (
     <Card className="p-6">
@@ -100,21 +108,24 @@ export function AnalyticsDashboardCard({
               <DollarSign className="h-4 w-4 text-muted-foreground" />
               <span className="text-sm font-medium">Budget Status</span>
             </div>
-            <Badge variant={isOverBudget ? "destructive" : "secondary"}>
+            <Badge variant={isOverBudget ? 'destructive' : 'secondary'}>
               {budgetPercentage.toFixed(0)}%
             </Badge>
           </div>
           <div className="flex items-baseline gap-2 mb-2">
             <span className="text-2xl font-bold">{formatCurrency(analytics.totalSpent)}</span>
-            <span className="text-sm text-muted-foreground">of {formatCurrency(analytics.budget)}</span>
+            <span className="text-sm text-muted-foreground">
+              of {formatCurrency(analytics.budget)}
+            </span>
           </div>
           <Progress
             value={Math.min(budgetPercentage, 100)}
-            className={`h-2 ${isOverBudget ? "bg-red-200" : ""}`}
+            className={`h-2 ${isOverBudget ? 'bg-red-200' : ''}`}
           />
           {analytics.projectedFinalSpend > analytics.budget && (
             <p className="text-xs text-red-600 mt-2">
-              Projected to exceed budget by {formatCurrency(analytics.projectedFinalSpend - analytics.budget)}
+              Projected to exceed budget by{' '}
+              {formatCurrency(analytics.projectedFinalSpend - analytics.budget)}
             </p>
           )}
         </div>
@@ -127,8 +138,8 @@ export function AnalyticsDashboardCard({
               <span className="text-xs text-muted-foreground">Spending Trend</span>
             </div>
             <div className={`text-lg font-bold ${getTrendColor()}`}>
-              {analytics.spendingTrend === "up" && "+"}
-              {analytics.spendingTrend === "down" && "-"}
+              {analytics.spendingTrend === 'up' && '+'}
+              {analytics.spendingTrend === 'down' && '-'}
               {analytics.trendPercentage}%
             </div>
           </div>
@@ -137,9 +148,7 @@ export function AnalyticsDashboardCard({
               <Calendar className="h-4 w-4 text-muted-foreground" />
               <span className="text-xs text-muted-foreground">Avg Daily Spend</span>
             </div>
-            <div className="text-lg font-bold">
-              {formatCurrency(analytics.avgDailySpend)}
-            </div>
+            <div className="text-lg font-bold">{formatCurrency(analytics.avgDailySpend)}</div>
           </div>
         </div>
 
@@ -151,10 +160,7 @@ export function AnalyticsDashboardCard({
               <div key={cat.category}>
                 <div className="flex items-center justify-between mb-1">
                   <div className="flex items-center gap-2">
-                    <div
-                      className="h-3 w-3 rounded-full"
-                      style={{ backgroundColor: cat.color }}
-                    />
+                    <div className="h-3 w-3 rounded-full" style={{ backgroundColor: cat.color }} />
                     <span className="text-sm">{cat.category}</span>
                   </div>
                   <span className="text-sm font-medium">{formatCurrency(cat.amount)}</span>

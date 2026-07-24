@@ -1,6 +1,6 @@
-import { ReactNode } from "react";
-import { usePullToRefresh } from "@/hooks/use-pull-to-refresh";
-import { Loader2 } from "lucide-react";
+import { ReactNode } from 'react';
+import { usePullToRefresh } from '@/hooks/use-pull-to-refresh';
+import { Loader2 } from 'lucide-react';
 
 interface PullToRefreshWrapperProps {
   onRefresh: () => Promise<void>;
@@ -13,7 +13,7 @@ export function PullToRefreshWrapper({
   onRefresh,
   children,
   threshold = 80,
-  enabled = true
+  enabled = true,
 }: PullToRefreshWrapperProps) {
   const {
     containerRef,
@@ -21,11 +21,11 @@ export function PullToRefreshWrapper({
     pullDistance,
     isTriggered,
     getContainerStyle,
-    getIndicatorStyle
+    getIndicatorStyle,
   } = usePullToRefresh({
     onRefresh,
     threshold,
-    enabled
+    enabled,
   });
 
   return (
@@ -35,16 +35,13 @@ export function PullToRefreshWrapper({
         <div
           className="absolute top-0 left-0 right-0 flex items-center justify-center z-50 pointer-events-none"
           style={{
-            height: `${Math.min(pullDistance, threshold)}px`
+            height: `${Math.min(pullDistance, threshold)}px`,
           }}
         >
-          <div
-            className="flex items-center justify-center"
-            style={getIndicatorStyle()}
-          >
+          <div className="flex items-center justify-center" style={getIndicatorStyle()}>
             <Loader2
               className={`h-6 w-6 text-primary ${
-                isRefreshing || isTriggered ? "animate-spin" : ""
+                isRefreshing || isTriggered ? 'animate-spin' : ''
               }`}
             />
           </div>
@@ -52,10 +49,7 @@ export function PullToRefreshWrapper({
       )}
 
       {/* Content Container */}
-      <div
-        ref={containerRef as any}
-        style={getContainerStyle()}
-      >
+      <div ref={containerRef as any} style={getContainerStyle()}>
         {children}
       </div>
     </div>

@@ -1,17 +1,29 @@
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
+import { useState } from 'react';
+import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { useToast } from "@/hooks/use-toast";
-import { Share2, Download, Lock, Unlock, Eye, EyeOff, Mail, Copy, Calendar, Settings, MoreVertical } from "lucide-react";
-import type { Trip } from "@shared/schema";
-import { ShareTripLinkModal } from "./share-trip-link-modal";
-import { TripSettingsModal } from "./trip-settings-modal";
+} from '@/components/ui/dropdown-menu';
+import { useToast } from '@/hooks/use-toast';
+import {
+  Share2,
+  Download,
+  Lock,
+  Unlock,
+  Eye,
+  EyeOff,
+  Mail,
+  Copy,
+  Calendar,
+  Settings,
+  MoreVertical,
+} from 'lucide-react';
+import type { Trip } from '@shared/schema';
+import { ShareTripLinkModal } from './share-trip-link-modal';
+import { TripSettingsModal } from './trip-settings-modal';
 
 interface TripHeaderActionsProps {
   trip: Trip;
@@ -35,16 +47,16 @@ export function TripHeaderActions({
     try {
       await onUpdateTrip({ isLocked: !trip.isLocked });
       toast({
-        title: trip.isLocked ? "Trip unlocked" : "Trip locked",
+        title: trip.isLocked ? 'Trip unlocked' : 'Trip locked',
         description: trip.isLocked
-          ? "Members can now edit the itinerary"
-          : "Only organizers can edit the itinerary",
+          ? 'Members can now edit the itinerary'
+          : 'Only organizers can edit the itinerary',
       });
     } catch (error) {
       toast({
-        title: "Failed to update",
-        description: error instanceof Error ? error.message : "Something went wrong",
-        variant: "destructive",
+        title: 'Failed to update',
+        description: error instanceof Error ? error.message : 'Something went wrong',
+        variant: 'destructive',
       });
     }
   };
@@ -72,8 +84,8 @@ export function TripHeaderActions({
     const shareUrl = `${window.location.origin}/join/${trip.shareCode}`;
     navigator.clipboard.writeText(shareUrl);
     toast({
-      title: "Link copied",
-      description: "Share link copied to clipboard",
+      title: 'Link copied',
+      description: 'Share link copied to clipboard',
     });
   };
 
@@ -89,19 +101,19 @@ export function TripHeaderActions({
   const handleExportCalendar = () => {
     // Generate .ics file
     const icsContent = generateICS(trip);
-    const blob = new Blob([icsContent], { type: "text/calendar;charset=utf-8" });
+    const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' });
     const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
+    const link = document.createElement('a');
     link.href = url;
-    link.download = `${(trip.title || trip.destination).replace(/\s+/g, "-")}.ics`;
+    link.download = `${(trip.title || trip.destination).replace(/\s+/g, '-')}.ics`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
     URL.revokeObjectURL(url);
 
     toast({
-      title: "Calendar exported",
-      description: "Trip added to your calendar",
+      title: 'Calendar exported',
+      description: 'Trip added to your calendar',
     });
   };
 
@@ -211,7 +223,7 @@ function generateICS(trip: Trip): string {
   const now = new Date();
   const formatDate = (date: string | Date) => {
     const d = new Date(date);
-    return d.toISOString().replace(/[-:]/g, "").split(".")[0] + "Z";
+    return d.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
   };
 
   const startDate = formatDate(trip.startDate);

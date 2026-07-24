@@ -1,22 +1,21 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery } from '@tanstack/react-query';
 
-const BASE = "USD";
-const CURRENCIES = ["USD", "EUR", "GBP", "CAD", "AUD", "JPY", "CHF", "MXN", "THB", "INR"] as const;
+const BASE = 'USD';
+const CURRENCIES = ['USD', 'EUR', 'GBP', 'CAD', 'AUD', 'JPY', 'CHF', 'MXN', 'THB', 'INR'] as const;
 
 async function fetchRates(): Promise<Record<string, number>> {
-  const currencies = CURRENCIES.filter((c) => c !== BASE).join(",");
-  const res = await fetch(
-    `https://api.frankfurter.app/latest?from=${BASE}&to=${currencies}`,
-    { signal: AbortSignal.timeout(5000) }
-  );
-  if (!res.ok) throw new Error("Exchange rates unavailable");
+  const currencies = CURRENCIES.filter((c) => c !== BASE).join(',');
+  const res = await fetch(`https://api.frankfurter.app/latest?from=${BASE}&to=${currencies}`, {
+    signal: AbortSignal.timeout(5000),
+  });
+  if (!res.ok) throw new Error('Exchange rates unavailable');
   const data = (await res.json()) as { rates: Record<string, number> };
   return { [BASE]: 1, ...data.rates };
 }
 
 export function useExchangeRates() {
   const query = useQuery({
-    queryKey: ["exchange-rates"],
+    queryKey: ['exchange-rates'],
     queryFn: fetchRates,
     staleTime: 1000 * 60 * 15,
     retry: 1,

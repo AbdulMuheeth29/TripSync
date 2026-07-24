@@ -1,21 +1,38 @@
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Sparkles, CloudRain, Cloud, Sun, CloudSnow, Wind, AlertTriangle, Droplets, Thermometer } from "lucide-react";
-import { format } from "date-fns";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import {
+  Sparkles,
+  CloudRain,
+  Cloud,
+  Sun,
+  CloudSnow,
+  Wind,
+  AlertTriangle,
+  Droplets,
+  Thermometer,
+} from 'lucide-react';
+import { format } from 'date-fns';
 
 interface WeatherDay {
   date: Date;
   high: number;
   low: number;
-  condition: "sunny" | "cloudy" | "rainy" | "snowy" | "windy";
+  condition: 'sunny' | 'cloudy' | 'rainy' | 'snowy' | 'windy';
   precipitation: number;
   humidity: number;
 }
 
 interface WeatherAlert {
-  severity: "info" | "warning" | "severe";
+  severity: 'info' | 'warning' | 'severe';
   title: string;
   description: string;
 }
@@ -27,7 +44,7 @@ interface WeatherAlertModalProps {
   forecast: WeatherDay[];
   alerts?: WeatherAlert[];
   recommendations: string[];
-  temperatureUnit?: "F" | "C";
+  temperatureUnit?: 'F' | 'C';
 }
 
 const WEATHER_ICONS: Record<WeatherDay['condition'], typeof Sun> = {
@@ -35,22 +52,23 @@ const WEATHER_ICONS: Record<WeatherDay['condition'], typeof Sun> = {
   cloudy: Cloud,
   rainy: CloudRain,
   snowy: CloudSnow,
-  windy: Wind
+  windy: Wind,
 };
 
 const WEATHER_COLORS: Record<WeatherDay['condition'], string> = {
-  sunny: "bg-yellow-100 text-yellow-800",
-  cloudy: "bg-gray-100 text-gray-800",
-  rainy: "bg-blue-100 text-blue-800",
-  snowy: "bg-cyan-100 text-cyan-800",
-  windy: "bg-slate-100 text-slate-800"
+  sunny: 'bg-yellow-100 text-yellow-800',
+  cloudy: 'bg-gray-100 text-gray-800',
+  rainy: 'bg-blue-100 text-blue-800',
+  snowy: 'bg-cyan-100 text-cyan-800',
+  windy: 'bg-slate-100 text-slate-800',
 };
 
-const ALERT_COLORS: Record<WeatherAlert['severity'], { bg: string; border: string; text: string }> = {
-  info: { bg: "bg-blue-50", border: "border-blue-200", text: "text-blue-900" },
-  warning: { bg: "bg-amber-50", border: "border-amber-200", text: "text-amber-900" },
-  severe: { bg: "bg-red-50", border: "border-red-200", text: "text-red-900" }
-};
+const ALERT_COLORS: Record<WeatherAlert['severity'], { bg: string; border: string; text: string }> =
+  {
+    info: { bg: 'bg-blue-50', border: 'border-blue-200', text: 'text-blue-900' },
+    warning: { bg: 'bg-amber-50', border: 'border-amber-200', text: 'text-amber-900' },
+    severe: { bg: 'bg-red-50', border: 'border-red-200', text: 'text-red-900' },
+  };
 
 export function WeatherAlertModal({
   isOpen,
@@ -59,7 +77,7 @@ export function WeatherAlertModal({
   forecast,
   alerts = [],
   recommendations,
-  temperatureUnit = "F"
+  temperatureUnit = 'F',
 }: WeatherAlertModalProps) {
   const formatTemp = (temp: number) => {
     return `${Math.round(temp)}°${temperatureUnit}`;
@@ -91,8 +109,8 @@ export function WeatherAlertModal({
                 <p className="text-sm font-medium text-primary mb-1">Atlas Weather Update</p>
                 <p className="text-sm text-muted-foreground">
                   {hasAlerts
-                    ? "There are weather alerts for your trip dates. Check below for details and recommendations."
-                    : "Weather looks good for your trip! Check the forecast below to plan your activities."}
+                    ? 'There are weather alerts for your trip dates. Check below for details and recommendations.'
+                    : 'Weather looks good for your trip! Check the forecast below to plan your activities.'}
                 </p>
               </div>
             </div>
@@ -111,7 +129,7 @@ export function WeatherAlertModal({
                         <div className="flex items-center gap-2 mb-1">
                           <h4 className={`font-semibold ${colors.text}`}>{alert.title}</h4>
                           <Badge
-                            variant={alert.severity === "severe" ? "destructive" : "secondary"}
+                            variant={alert.severity === 'severe' ? 'destructive' : 'secondary'}
                             className="uppercase text-xs"
                           >
                             {alert.severity}
@@ -137,11 +155,11 @@ export function WeatherAlertModal({
                 return (
                   <Card key={index} className="p-4">
                     <div className="text-center">
-                      <p className="text-sm font-medium mb-2">
-                        {format(day.date, "EEE, MMM d")}
-                      </p>
+                      <p className="text-sm font-medium mb-2">{format(day.date, 'EEE, MMM d')}</p>
 
-                      <div className={`inline-flex h-16 w-16 items-center justify-center rounded-full ${colorClass} mb-3`}>
+                      <div
+                        className={`inline-flex h-16 w-16 items-center justify-center rounded-full ${colorClass} mb-3`}
+                      >
                         <WeatherIcon className="h-8 w-8" />
                       </div>
 
@@ -193,8 +211,9 @@ export function WeatherAlertModal({
           {/* Weather Tips */}
           <Card className="p-3 bg-muted/50">
             <p className="text-xs text-muted-foreground">
-              <strong>Tip:</strong> Weather forecasts can change. Check back closer to your trip dates
-              for the most accurate information. I'll send you updates if there are significant changes.
+              <strong>Tip:</strong> Weather forecasts can change. Check back closer to your trip
+              dates for the most accurate information. I'll send you updates if there are
+              significant changes.
             </p>
           </Card>
         </div>

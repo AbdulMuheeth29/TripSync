@@ -7,29 +7,36 @@ Trip-Sync uses a hybrid AI model strategy to optimize costs while maintaining hi
 ## Model Strategy
 
 ### Claude Sonnet 4.5 (Premium Tier)
+
 **Use for**: Complex reasoning and multi-step planning
 
 **Pricing** (per 1M tokens):
+
 - Input: $3.00
 - Output: $15.00
 
 **Functions**:
+
 - ✅ `generateItinerary()` - Full trip itinerary generation with day-by-day planning
 
 **Why Sonnet?**
+
 - Requires deep reasoning about preferences, budget constraints, and travel logistics
 - Generates structured JSON with multiple nested levels
 - Must balance conflicting member preferences
 - Output quality directly impacts user satisfaction
 
 ### Claude 3.5 Haiku (Economy Tier)
+
 **Use for**: Simple suggestions, extraction, and content generation
 
 **Pricing** (per 1M tokens):
+
 - Input: $0.25 (12x cheaper)
 - Output: $1.25 (12x cheaper)
 
 **Functions**:
+
 - ✅ `suggestConflictResolution()` - 1-2 sentence compromise suggestions
 - ✅ `suggestBudgetOptimization()` - 2-3 bullet point tips
 - ✅ `conversationalPlanningSuggestion()` - Atlas AI assistant responses
@@ -38,6 +45,7 @@ Trip-Sync uses a hybrid AI model strategy to optimize costs while maintaining hi
 - ✅ `parseEmailForItinerary()` - Extract booking details from emails
 
 **Why Haiku?**
+
 - Tasks are simple and well-defined
 - Short outputs (256-1024 tokens)
 - No complex reasoning required
@@ -49,29 +57,29 @@ Trip-Sync uses a hybrid AI model strategy to optimize costs while maintaining hi
 
 Typical usage per 1,000 users/month:
 
-| Function | Calls | Avg Input | Avg Output | Cost |
-|----------|-------|-----------|------------|------|
-| generateItinerary | 500 | 1000 tokens | 4000 tokens | $61.50 |
-| suggestConflictResolution | 2000 | 150 tokens | 100 tokens | $6.90 |
-| suggestBudgetOptimization | 1500 | 200 tokens | 200 tokens | $7.50 |
-| conversationalPlanningSuggestion | 5000 | 400 tokens | 150 tokens | $17.25 |
-| generateTripRecap | 300 | 300 tokens | 500 tokens | $3.15 |
-| generatePackingList | 800 | 150 tokens | 200 tokens | $2.76 |
-| parseEmailForItinerary | 400 | 2000 tokens | 400 tokens | $4.80 |
-| **TOTAL** | **10,500** | - | - | **$103.86** |
+| Function                         | Calls      | Avg Input   | Avg Output  | Cost        |
+| -------------------------------- | ---------- | ----------- | ----------- | ----------- |
+| generateItinerary                | 500        | 1000 tokens | 4000 tokens | $61.50      |
+| suggestConflictResolution        | 2000       | 150 tokens  | 100 tokens  | $6.90       |
+| suggestBudgetOptimization        | 1500       | 200 tokens  | 200 tokens  | $7.50       |
+| conversationalPlanningSuggestion | 5000       | 400 tokens  | 150 tokens  | $17.25      |
+| generateTripRecap                | 300        | 300 tokens  | 500 tokens  | $3.15       |
+| generatePackingList              | 800        | 150 tokens  | 200 tokens  | $2.76       |
+| parseEmailForItinerary           | 400        | 2000 tokens | 400 tokens  | $4.80       |
+| **TOTAL**                        | **10,500** | -           | -           | **$103.86** |
 
 ### After Optimization (Hybrid Strategy)
 
-| Function | Model | Calls | Avg Input | Avg Output | Cost |
-|----------|-------|-------|-----------|------------|------|
-| generateItinerary | Sonnet 4.5 | 500 | 1000 tokens | 4000 tokens | $61.50 |
-| suggestConflictResolution | Haiku | 2000 | 150 tokens | 100 tokens | $0.58 |
-| suggestBudgetOptimization | Haiku | 1500 | 200 tokens | 200 tokens | $0.62 |
-| conversationalPlanningSuggestion | Haiku | 5000 | 400 tokens | 150 tokens | $1.44 |
-| generateTripRecap | Haiku | 300 | 300 tokens | 500 tokens | $0.26 |
-| generatePackingList | Haiku | 800 | 150 tokens | 200 tokens | $0.23 |
-| parseEmailForItinerary | Haiku | 400 | 2000 tokens | 400 tokens | $0.40 |
-| **TOTAL** | **Mixed** | **10,500** | - | - | **$65.03** |
+| Function                         | Model      | Calls      | Avg Input   | Avg Output  | Cost       |
+| -------------------------------- | ---------- | ---------- | ----------- | ----------- | ---------- |
+| generateItinerary                | Sonnet 4.5 | 500        | 1000 tokens | 4000 tokens | $61.50     |
+| suggestConflictResolution        | Haiku      | 2000       | 150 tokens  | 100 tokens  | $0.58      |
+| suggestBudgetOptimization        | Haiku      | 1500       | 200 tokens  | 200 tokens  | $0.62      |
+| conversationalPlanningSuggestion | Haiku      | 5000       | 400 tokens  | 150 tokens  | $1.44      |
+| generateTripRecap                | Haiku      | 300        | 300 tokens  | 500 tokens  | $0.26      |
+| generatePackingList              | Haiku      | 800        | 150 tokens  | 200 tokens  | $0.23      |
+| parseEmailForItinerary           | Haiku      | 400        | 2000 tokens | 400 tokens  | $0.40      |
+| **TOTAL**                        | **Mixed**  | **10,500** | -           | -           | **$65.03** |
 
 ### Savings
 
@@ -123,12 +131,14 @@ const AI_MODELS = {
 ### Quality Metrics
 
 **Haiku performs well on**:
+
 - Structured output (JSON arrays, pipe-delimited)
 - Short-form text (1-3 paragraphs)
 - Following explicit instructions
 - Speed-critical features (sub-second responses)
 
 **Haiku may struggle with**:
+
 - Complex multi-step reasoning
 - Balancing multiple conflicting constraints
 - Creative long-form content
@@ -260,10 +270,12 @@ if (dailyAICost > 100) {
 If even more powerful reasoning is needed:
 
 **Pricing** (per 1M tokens):
+
 - Input: $15.00 (5x more than Sonnet)
 - Output: $75.00 (5x more than Sonnet)
 
 **Use cases**:
+
 - Multi-day trip optimization with complex constraints
 - Advanced conflict resolution with 10+ members
 - Creative itinerary generation with unusual requests
@@ -281,27 +293,27 @@ If even more powerful reasoning is needed:
 
 ### Typical Token Counts
 
-| Content Type | Example | Approx Tokens |
-|-------------|---------|---------------|
-| Short suggestion | "Split the day: morning beach, afternoon museum" | 10-20 |
-| Budget tips | "1. Book activities in advance for 15% discount..." | 50-100 |
-| Trip recap | 3 paragraphs about the trip | 200-400 |
-| Packing list | JSON array of 20 items | 80-150 |
-| Full itinerary | 3-day trip with 15 activities | 2000-4000 |
+| Content Type     | Example                                             | Approx Tokens |
+| ---------------- | --------------------------------------------------- | ------------- |
+| Short suggestion | "Split the day: morning beach, afternoon museum"    | 10-20         |
+| Budget tips      | "1. Book activities in advance for 15% discount..." | 50-100        |
+| Trip recap       | 3 paragraphs about the trip                         | 200-400       |
+| Packing list     | JSON array of 20 items                              | 80-150        |
+| Full itinerary   | 3-day trip with 15 activities                       | 2000-4000     |
 
 ### Estimating Costs
 
 ```typescript
 // Formula
-const cost = (inputTokens / 1_000_000 * inputPricePerMTok) +
-             (outputTokens / 1_000_000 * outputPricePerMTok);
+const cost =
+  (inputTokens / 1_000_000) * inputPricePerMTok + (outputTokens / 1_000_000) * outputPricePerMTok;
 
 // Example: Haiku suggestion (150 input, 100 output)
-const cost = (150 / 1_000_000 * 0.25) + (100 / 1_000_000 * 1.25);
+const cost = (150 / 1_000_000) * 0.25 + (100 / 1_000_000) * 1.25;
 // = $0.000038 + $0.000125 = $0.000163 per call
 
 // Example: Sonnet itinerary (1000 input, 4000 output)
-const cost = (1000 / 1_000_000 * 3) + (4000 / 1_000_000 * 15);
+const cost = (1000 / 1_000_000) * 3 + (4000 / 1_000_000) * 15;
 // = $0.003 + $0.06 = $0.063 per call
 ```
 

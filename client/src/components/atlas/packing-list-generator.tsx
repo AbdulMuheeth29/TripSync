@@ -1,11 +1,11 @@
-import { useState } from "react";
-import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Badge } from "@/components/ui/badge";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Separator } from "@/components/ui/separator";
-import { Backpack, Save, Download, Printer, Sparkles, Check } from "lucide-react";
+import { useState } from 'react';
+import { Card } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Badge } from '@/components/ui/badge';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Separator } from '@/components/ui/separator';
+import { Backpack, Save, Download, Printer, Sparkles, Check } from 'lucide-react';
 
 interface PackingItem {
   id: string;
@@ -25,90 +25,90 @@ interface PackingListGeneratorProps {
   duration: number; // days
   activities: string[];
   onSave: (items: PackingItem[]) => void;
-  onExport?: (format: "pdf" | "txt") => void;
+  onExport?: (format: 'pdf' | 'txt') => void;
 }
 
 const PACKING_CATEGORIES: PackingCategory[] = [
   {
-    name: "Essentials",
-    icon: "📋",
+    name: 'Essentials',
+    icon: '📋',
     items: [
-      "Passport",
-      "Visa (if required)",
-      "Travel insurance documents",
-      "Vaccination records",
-      "Flight tickets/confirmations",
-      "Hotel reservations",
-      "Emergency contacts list",
-      "Copies of important documents",
-      "Cash & credit cards",
-      "Phone & charger"
-    ]
+      'Passport',
+      'Visa (if required)',
+      'Travel insurance documents',
+      'Vaccination records',
+      'Flight tickets/confirmations',
+      'Hotel reservations',
+      'Emergency contacts list',
+      'Copies of important documents',
+      'Cash & credit cards',
+      'Phone & charger',
+    ],
   },
   {
-    name: "Clothing",
-    icon: "👕",
+    name: 'Clothing',
+    icon: '👕',
     items: [
-      "T-shirts",
-      "Pants/jeans",
-      "Shorts",
-      "Underwear & socks",
-      "Sleepwear",
-      "Light jacket",
-      "Comfortable walking shoes",
-      "Sandals/flip-flops",
-      "Swimwear",
-      "Hat/cap for sun protection"
-    ]
+      'T-shirts',
+      'Pants/jeans',
+      'Shorts',
+      'Underwear & socks',
+      'Sleepwear',
+      'Light jacket',
+      'Comfortable walking shoes',
+      'Sandals/flip-flops',
+      'Swimwear',
+      'Hat/cap for sun protection',
+    ],
   },
   {
-    name: "Toiletries",
-    icon: "🧴",
+    name: 'Toiletries',
+    icon: '🧴',
     items: [
-      "Toothbrush & toothpaste",
-      "Shampoo & conditioner",
-      "Body wash/soap",
-      "Deodorant",
-      "Sunscreen (SPF 30+)",
-      "Moisturizer",
-      "Razor & shaving cream",
-      "Medications & prescriptions",
-      "First aid kit",
-      "Hand sanitizer"
-    ]
+      'Toothbrush & toothpaste',
+      'Shampoo & conditioner',
+      'Body wash/soap',
+      'Deodorant',
+      'Sunscreen (SPF 30+)',
+      'Moisturizer',
+      'Razor & shaving cream',
+      'Medications & prescriptions',
+      'First aid kit',
+      'Hand sanitizer',
+    ],
   },
   {
-    name: "Activities",
-    icon: "🎒",
+    name: 'Activities',
+    icon: '🎒',
     items: [
-      "Day backpack",
-      "Water bottle",
-      "Sunglasses",
-      "Camera & accessories",
-      "Portable charger/power bank",
-      "Travel adapter",
-      "Headphones",
-      "Books/e-reader",
-      "Travel pillow",
-      "Reusable shopping bag"
-    ]
+      'Day backpack',
+      'Water bottle',
+      'Sunglasses',
+      'Camera & accessories',
+      'Portable charger/power bank',
+      'Travel adapter',
+      'Headphones',
+      'Books/e-reader',
+      'Travel pillow',
+      'Reusable shopping bag',
+    ],
   },
   {
-    name: "Health & Safety",
-    icon: "🏥",
+    name: 'Health & Safety',
+    icon: '🏥',
     items: [
-      "Face masks",
-      "Pain relievers",
-      "Antihistamines",
-      "Anti-diarrheal medication",
-      "Motion sickness pills",
-      "Insect repellent",
-      "Band-aids & antiseptic",
-      "Prescription medications",
-      "Travel health insurance card",
-      "Emergency medication (EpiPen, etc.)"
-    ]
-  }
+      'Face masks',
+      'Pain relievers',
+      'Antihistamines',
+      'Anti-diarrheal medication',
+      'Motion sickness pills',
+      'Insect repellent',
+      'Band-aids & antiseptic',
+      'Prescription medications',
+      'Travel health insurance card',
+      'Emergency medication (EpiPen, etc.)',
+    ],
+  },
 ];
 
 export function PackingListGenerator({
@@ -116,7 +116,7 @@ export function PackingListGenerator({
   duration,
   activities,
   onSave,
-  onExport
+  onExport,
 }: PackingListGeneratorProps) {
   const [packingItems, setPackingItems] = useState<PackingItem[]>(
     PACKING_CATEGORIES.flatMap((category) =>
@@ -124,31 +124,29 @@ export function PackingListGenerator({
         id: `${category.name}-${index}`,
         name: item,
         checked: false,
-        category: category.name
+        category: category.name,
       }))
     )
   );
 
   const toggleItem = (itemId: string) => {
-    setPackingItems(items =>
-      items.map(item =>
-        item.id === itemId ? { ...item, checked: !item.checked } : item
-      )
+    setPackingItems((items) =>
+      items.map((item) => (item.id === itemId ? { ...item, checked: !item.checked } : item))
     );
   };
 
   const getCategoryItems = (categoryName: string) => {
-    return packingItems.filter(item => item.category === categoryName);
+    return packingItems.filter((item) => item.category === categoryName);
   };
 
   const getCategoryProgress = (categoryName: string) => {
     const items = getCategoryItems(categoryName);
-    const checked = items.filter(item => item.checked).length;
+    const checked = items.filter((item) => item.checked).length;
     return { checked, total: items.length };
   };
 
   const totalProgress = () => {
-    const checked = packingItems.filter(item => item.checked).length;
+    const checked = packingItems.filter((item) => item.checked).length;
     return { checked, total: packingItems.length };
   };
 
@@ -201,7 +199,8 @@ export function PackingListGenerator({
         <div className="mt-4 rounded-lg bg-blue-50 border border-blue-200 p-3 flex items-start gap-2">
           <Sparkles className="h-4 w-4 text-blue-600 mt-0.5" />
           <p className="text-sm text-blue-800">
-            This list was personalized for your {activities.join(", ")} trip based on the destination and duration.
+            This list was personalized for your {activities.join(', ')} trip based on the
+            destination and duration.
           </p>
         </div>
       </Card>
@@ -238,7 +237,7 @@ export function PackingListGenerator({
                       <label
                         htmlFor={item.id}
                         className={`flex-1 text-sm cursor-pointer ${
-                          item.checked ? "line-through text-muted-foreground" : ""
+                          item.checked ? 'line-through text-muted-foreground' : ''
                         }`}
                       >
                         {item.name}
@@ -261,11 +260,11 @@ export function PackingListGenerator({
           </Button>
           {onExport && (
             <>
-              <Button variant="outline" onClick={() => onExport("pdf")}>
+              <Button variant="outline" onClick={() => onExport('pdf')}>
                 <Download className="h-4 w-4 mr-2" />
                 Export PDF
               </Button>
-              <Button variant="outline" onClick={() => onExport("txt")}>
+              <Button variant="outline" onClick={() => onExport('txt')}>
                 <Printer className="h-4 w-4 mr-2" />
                 Print
               </Button>

@@ -1,5 +1,5 @@
-import { Button } from "@/components/ui/button";
-import { FaGoogle, FaApple, FaFacebook, FaMicrosoft } from "react-icons/fa";
+import { Button } from '@/components/ui/button';
+import { FaGoogle, FaApple, FaFacebook, FaMicrosoft } from 'react-icons/fa';
 
 interface SocialLoginButtonsProps {
   onGoogleLogin?: () => void;
@@ -16,7 +16,7 @@ export function SocialLoginButtons({
   onFacebookLogin,
   onMicrosoftLogin,
   isLoading = false,
-  disabled = false
+  disabled = false,
 }: SocialLoginButtonsProps) {
   return (
     <div className="space-y-3">
@@ -25,9 +25,7 @@ export function SocialLoginButtons({
           <span className="w-full border-t" />
         </div>
         <div className="relative flex justify-center text-xs uppercase">
-          <span className="bg-background px-2 text-muted-foreground">
-            Or continue with
-          </span>
+          <span className="bg-background px-2 text-muted-foreground">Or continue with</span>
         </div>
       </div>
 

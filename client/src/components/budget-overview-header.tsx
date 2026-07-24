@@ -1,7 +1,7 @@
-import { Progress } from "@/components/ui/progress";
-import { Card } from "@/components/ui/card";
-import { DollarSign, TrendingUp, AlertCircle, CheckCircle } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { Progress } from '@/components/ui/progress';
+import { Card } from '@/components/ui/card';
+import { DollarSign, TrendingUp, AlertCircle, CheckCircle } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 interface BudgetOverviewHeaderProps {
   totalBudget: number;
@@ -14,7 +14,7 @@ export function BudgetOverviewHeader({
   totalBudget,
   spent,
   peopleCount,
-  currency = "USD"
+  currency = 'USD',
 }: BudgetOverviewHeaderProps) {
   const remaining = totalBudget - spent;
   const percentageSpent = totalBudget > 0 ? (spent / totalBudget) * 100 : 0;
@@ -22,9 +22,9 @@ export function BudgetOverviewHeader({
   const perPersonSpent = spent / peopleCount;
 
   const getStatusColor = () => {
-    if (percentageSpent >= 100) return "text-red-600";
-    if (percentageSpent >= 80) return "text-amber-600";
-    return "text-green-600";
+    if (percentageSpent >= 100) return 'text-red-600';
+    if (percentageSpent >= 80) return 'text-amber-600';
+    return 'text-green-600';
   };
 
   const getStatusIcon = () => {
@@ -34,9 +34,9 @@ export function BudgetOverviewHeader({
   };
 
   const getProgressColor = () => {
-    if (percentageSpent >= 100) return "bg-red-500";
-    if (percentageSpent >= 80) return "bg-amber-500";
-    return "bg-green-500";
+    if (percentageSpent >= 100) return 'bg-red-500';
+    if (percentageSpent >= 80) return 'bg-amber-500';
+    return 'bg-green-500';
   };
 
   const formatCurrency = (amount: number) => {
@@ -59,24 +59,20 @@ export function BudgetOverviewHeader({
               Budget Overview
             </h3>
             <p className="text-sm text-muted-foreground mt-1">
-              {formatCurrency(perPersonBudget)}/person × {peopleCount} {peopleCount === 1 ? "person" : "people"}
+              {formatCurrency(perPersonBudget)}/person × {peopleCount}{' '}
+              {peopleCount === 1 ? 'person' : 'people'}
             </p>
           </div>
-          <div className={cn("flex items-center gap-2", getStatusColor())}>
+          <div className={cn('flex items-center gap-2', getStatusColor())}>
             {getStatusIcon()}
-            <span className="text-sm font-medium">
-              {percentageSpent.toFixed(0)}%
-            </span>
+            <span className="text-sm font-medium">{percentageSpent.toFixed(0)}%</span>
           </div>
         </div>
 
         {/* Progress Bar */}
         <div className="space-y-2">
           <div className="relative">
-            <Progress
-              value={Math.min(percentageSpent, 100)}
-              className="h-3"
-            />
+            <Progress value={Math.min(percentageSpent, 100)} className="h-3" />
             {percentageSpent > 100 && (
               <div
                 className="absolute top-0 left-0 h-3 bg-red-200 rounded-full"
@@ -98,42 +94,44 @@ export function BudgetOverviewHeader({
           </div>
           <div className="space-y-1">
             <p className="text-xs text-muted-foreground">Spent</p>
-            <p className={cn("text-lg font-semibold", getStatusColor())}>
-              {formatCurrency(spent)}
-            </p>
+            <p className={cn('text-lg font-semibold', getStatusColor())}>{formatCurrency(spent)}</p>
           </div>
           <div className="space-y-1">
             <p className="text-xs text-muted-foreground">Remaining</p>
-            <p className={cn(
-              "text-lg font-semibold",
-              remaining < 0 ? "text-red-600" : "text-green-600"
-            )}>
+            <p
+              className={cn(
+                'text-lg font-semibold',
+                remaining < 0 ? 'text-red-600' : 'text-green-600'
+              )}
+            >
               {formatCurrency(Math.abs(remaining))}
-              {remaining < 0 && " over"}
+              {remaining < 0 && ' over'}
             </p>
           </div>
         </div>
 
         {/* Warning Banner */}
         {percentageSpent >= 80 && (
-          <div className={cn(
-            "rounded-lg p-3 flex items-start gap-2",
-            percentageSpent >= 100
-              ? "bg-red-50 border border-red-200"
-              : "bg-amber-50 border border-amber-200"
-          )}>
-            <AlertCircle className={cn(
-              "h-4 w-4 mt-0.5",
-              percentageSpent >= 100 ? "text-red-600" : "text-amber-600"
-            )} />
-            <p className={cn(
-              "text-sm",
-              percentageSpent >= 100 ? "text-red-800" : "text-amber-800"
-            )}>
+          <div
+            className={cn(
+              'rounded-lg p-3 flex items-start gap-2',
+              percentageSpent >= 100
+                ? 'bg-red-50 border border-red-200'
+                : 'bg-amber-50 border border-amber-200'
+            )}
+          >
+            <AlertCircle
+              className={cn(
+                'h-4 w-4 mt-0.5',
+                percentageSpent >= 100 ? 'text-red-600' : 'text-amber-600'
+              )}
+            />
+            <p
+              className={cn('text-sm', percentageSpent >= 100 ? 'text-red-800' : 'text-amber-800')}
+            >
               {percentageSpent >= 100
                 ? `You're ${formatCurrency(spent - totalBudget)} over budget. Consider reviewing expenses.`
-                : `You've used ${percentageSpent.toFixed(0)}% of your budget. Monitor spending carefully.`
-              }
+                : `You've used ${percentageSpent.toFixed(0)}% of your budget. Monitor spending carefully.`}
             </p>
           </div>
         )}

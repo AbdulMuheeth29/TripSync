@@ -3,11 +3,11 @@
  * Reusable component for uploading files to cloud storage
  */
 
-import { useState, useRef, useId } from "react";
-import { Button } from "@/components/ui/button";
-import { Progress } from "@/components/ui/progress";
-import { useToast } from "@/hooks/use-toast";
-import { Upload, X, FileIcon, ImageIcon } from "lucide-react";
+import { useState, useRef, useId } from 'react';
+import { Button } from '@/components/ui/button';
+import { Progress } from '@/components/ui/progress';
+import { useToast } from '@/hooks/use-toast';
+import { Upload, X, FileIcon, ImageIcon } from 'lucide-react';
 
 export interface FileUploadProps {
   /**
@@ -48,14 +48,14 @@ export interface FileUploadProps {
 
 export function FileUpload({
   endpoint,
-  accept = "image/*",
+  accept = 'image/*',
   maxSizeMB = 10,
   multiple = false,
   onUploadComplete,
-  buttonText = "Upload File",
+  buttonText = 'Upload File',
   showPreview = true,
 }: FileUploadProps) {
-  const uniqueId = useId().replace(/:/g, "");
+  const uniqueId = useId().replace(/:/g, '');
   const inputId = `file-upload-input-${uniqueId}`;
   const [isUploading, setIsUploading] = useState(false);
   const [progress, setProgress] = useState(0);
@@ -72,15 +72,15 @@ export function FileUpload({
     const oversizedFiles = files.filter((f) => f.size > maxSizeBytes);
     if (oversizedFiles.length > 0) {
       toast({
-        title: "File too large",
+        title: 'File too large',
         description: `Maximum file size is ${maxSizeMB}MB`,
-        variant: "destructive",
+        variant: 'destructive',
       });
       return;
     }
 
     // Show previews for images
-    if (showPreview && files[0].type.startsWith("image/")) {
+    if (showPreview && files[0].type.startsWith('image/')) {
       const readers = files.map((file) => {
         return new Promise<string>((resolve) => {
           const reader = new FileReader();
@@ -105,11 +105,12 @@ export function FileUpload({
       for (let i = 0; i < files.length; i++) {
         const file = files[i];
         const formData = new FormData();
-        formData.append("file", file);
+        formData.append('file', file);
 
-        const token = localStorage.getItem("tripsync_token") ?? sessionStorage.getItem("tripsync_token");
+        const token =
+          localStorage.getItem('tripsync_token') ?? sessionStorage.getItem('tripsync_token');
         const response = await fetch(endpoint, {
-          method: "POST",
+          method: 'POST',
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -117,7 +118,7 @@ export function FileUpload({
         });
 
         if (!response.ok) {
-          throw new Error("Upload failed");
+          throw new Error('Upload failed');
         }
 
         const data = await response.json();
@@ -127,7 +128,7 @@ export function FileUpload({
       }
 
       toast({
-        title: "Upload successful",
+        title: 'Upload successful',
         description: `${files.length} file(s) uploaded`,
       });
 
@@ -140,14 +141,14 @@ export function FileUpload({
 
       // Reset file input
       if (fileInputRef.current) {
-        fileInputRef.current.value = "";
+        fileInputRef.current.value = '';
       }
     } catch (error) {
-      console.error("Upload error:", error);
+      console.error('Upload error:', error);
       toast({
-        title: "Upload failed",
-        description: error instanceof Error ? error.message : "Something went wrong",
-        variant: "destructive",
+        title: 'Upload failed',
+        description: error instanceof Error ? error.message : 'Something went wrong',
+        variant: 'destructive',
       });
     } finally {
       setIsUploading(false);
@@ -180,7 +181,7 @@ export function FileUpload({
             className="w-full"
           >
             <Upload className="h-4 w-4 mr-2" />
-            {isUploading ? "Uploading..." : buttonText}
+            {isUploading ? 'Uploading...' : buttonText}
           </Button>
         </label>
       </div>
@@ -244,9 +245,9 @@ export function BatchPhotoUpload({
     const oversized = files.filter((f) => f.size > maxSize);
     if (oversized.length > 0) {
       toast({
-        title: "Some files are too large",
-        description: "Maximum file size is 25MB per photo",
-        variant: "destructive",
+        title: 'Some files are too large',
+        description: 'Maximum file size is 25MB per photo',
+        variant: 'destructive',
       });
       return;
     }
@@ -272,12 +273,13 @@ export function BatchPhotoUpload({
     try {
       const formData = new FormData();
       files.forEach((file) => {
-        formData.append("files", file);
+        formData.append('files', file);
       });
 
-      const token = localStorage.getItem("tripsync_token") ?? sessionStorage.getItem("tripsync_token");
-      const response = await fetch("/api/upload/photos/batch", {
-        method: "POST",
+      const token =
+        localStorage.getItem('tripsync_token') ?? sessionStorage.getItem('tripsync_token');
+      const response = await fetch('/api/upload/photos/batch', {
+        method: 'POST',
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -285,13 +287,13 @@ export function BatchPhotoUpload({
       });
 
       if (!response.ok) {
-        throw new Error("Batch upload failed");
+        throw new Error('Batch upload failed');
       }
 
       const data = await response.json();
 
       toast({
-        title: "Upload successful",
+        title: 'Upload successful',
         description: `${data.count} photos uploaded`,
       });
 
@@ -301,14 +303,14 @@ export function BatchPhotoUpload({
 
       setPreviews([]);
       if (fileInputRef.current) {
-        fileInputRef.current.value = "";
+        fileInputRef.current.value = '';
       }
     } catch (error) {
-      console.error("Batch upload error:", error);
+      console.error('Batch upload error:', error);
       toast({
-        title: "Upload failed",
-        description: error instanceof Error ? error.message : "Something went wrong",
-        variant: "destructive",
+        title: 'Upload failed',
+        description: error instanceof Error ? error.message : 'Something went wrong',
+        variant: 'destructive',
       });
     } finally {
       setIsUploading(false);
@@ -337,7 +339,7 @@ export function BatchPhotoUpload({
             className="w-full"
           >
             <ImageIcon className="h-4 w-4 mr-2" />
-            {isUploading ? "Uploading..." : "Upload Photos"}
+            {isUploading ? 'Uploading...' : 'Upload Photos'}
           </Button>
         </label>
       </div>

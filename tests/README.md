@@ -35,6 +35,7 @@ npm run test:coverage
 ## Coverage Requirements
 
 The project maintains a minimum test coverage of 70% for:
+
 - Lines
 - Functions
 - Branches
@@ -86,6 +87,7 @@ describe('POST /api/auth/login', () => {
 ## Test Environment
 
 Tests run in a separate environment with:
+
 - `NODE_ENV=test`
 - In-memory database (no PostgreSQL required)
 - Isolated test data
@@ -94,6 +96,7 @@ Tests run in a separate environment with:
 ## Configuration
 
 Test configuration is defined in:
+
 - `vitest.config.ts` - Vitest test runner configuration
 - `tests/setup.ts` - Global test setup and teardown
 - `.env.test` - Test environment variables
@@ -141,6 +144,7 @@ When adding new features:
 Current status: **61 tests passing**
 
 Coverage targets by module:
+
 - ✅ Authentication: 70%+ (auth.ts)
 - ✅ Middleware: 42% (middleware.ts) - needs more tests
 - ⚠️ Storage: 0.3% (storage.ts, storage-pg.ts) - needs integration tests
@@ -149,6 +153,7 @@ Coverage targets by module:
 - ⚠️ Stripe Service: Not yet tested
 
 Next priorities:
+
 1. Add storage integration tests with test database
 2. Add routes integration tests for critical paths
 3. Add mock tests for AI service

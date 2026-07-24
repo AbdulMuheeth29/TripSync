@@ -4,22 +4,18 @@
  * Access: /admin/metrics (backend validates ADMIN_EMAILS).
  */
 
-import { useState, useCallback } from "react";
-import { Link } from "wouter";
-import { useQuery } from "@tanstack/react-query";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Switch } from "@/components/ui/switch";
-import { Label } from "@/components/ui/label";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
-import { useAuth } from "@/lib/auth-context";
-import { ThemeToggle } from "@/components/theme-toggle";
-import { AppHero } from "@/components/app-hero";
+import { useState, useCallback } from 'react';
+import { Link } from 'wouter';
+import { useQuery } from '@tanstack/react-query';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Switch } from '@/components/ui/switch';
+import { Label } from '@/components/ui/label';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { useAuth } from '@/lib/auth-context';
+import { ThemeToggle } from '@/components/theme-toggle';
+import { AppHero } from '@/components/app-hero';
 import {
   ArrowLeft,
   Users,
@@ -32,21 +28,21 @@ import {
   TabletSmartphone,
   ChevronDown,
   ChevronRight,
-} from "lucide-react";
+} from 'lucide-react';
 import {
   ALL_SECTIONS,
   getMetricToggles,
   setMetricToggle,
   type MetricDef,
   type MetricSection,
-} from "./metrics-config";
+} from './metrics-config';
 
-type MetricsPlatform = "web" | "ios" | "android";
+type MetricsPlatform = 'web' | 'ios' | 'android';
 
 const PLATFORM_OPTIONS: { value: MetricsPlatform; label: string; icon: typeof Monitor }[] = [
-  { value: "web", label: "Web", icon: Monitor },
-  { value: "ios", label: "iOS", icon: Smartphone },
-  { value: "android", label: "Android", icon: TabletSmartphone },
+  { value: 'web', label: 'Web', icon: Monitor },
+  { value: 'ios', label: 'iOS', icon: Smartphone },
+  { value: 'android', label: 'Android', icon: TabletSmartphone },
 ];
 
 interface AdminMetrics {
@@ -59,17 +55,17 @@ interface AdminMetrics {
 }
 
 function formatValue(value: number | string | undefined, format?: string): string {
-  if (value === undefined || value === null) return "—";
-  const n = typeof value === "number" ? value : parseFloat(String(value));
+  if (value === undefined || value === null) return '—';
+  const n = typeof value === 'number' ? value : parseFloat(String(value));
   if (isNaN(n)) return String(value);
   switch (format) {
-    case "percent":
+    case 'percent':
       return `${n.toFixed(1)}%`;
-    case "currency":
+    case 'currency':
       return `$${n.toLocaleString()}`;
-    case "time":
+    case 'time':
       return n < 60 ? `${n}s` : `${(n / 60).toFixed(1)}m`;
-    case "ratio":
+    case 'ratio':
       return `${n.toFixed(1)}:1`;
     default:
       return n.toLocaleString();
@@ -79,21 +75,21 @@ function formatValue(value: number | string | undefined, format?: string): strin
 function getMetricValue(id: string, data: AdminMetrics | null): number | string | undefined {
   if (!data) return undefined;
   const map: Record<string, number> = {
-    "total-users": data.totalUsers,
-    "total-trips": data.totalTrips,
-    "trips-per-week": data.totalTrips,
-    "completed-trips": data.totalTrips,
-    "p-completed-trips": data.totalTrips,
-    "ns-signups": data.totalUsers,
-    "p-signups": data.totalUsers,
-    "total-members": data.totalMembers,
-    "p-trip-creators": data.totalTrips,
-    "ns-trip-creators": data.totalTrips,
-    "ns-invites-accepted": data.totalMembers,
-    "ns-itineraries-generated": data.totalItineraryItems,
-    "expenses-per-trip": 0,
-    "docs-per-trip": 0,
-    "votes-per-item": 0,
+    'total-users': data.totalUsers,
+    'total-trips': data.totalTrips,
+    'trips-per-week': data.totalTrips,
+    'completed-trips': data.totalTrips,
+    'p-completed-trips': data.totalTrips,
+    'ns-signups': data.totalUsers,
+    'p-signups': data.totalUsers,
+    'total-members': data.totalMembers,
+    'p-trip-creators': data.totalTrips,
+    'ns-trip-creators': data.totalTrips,
+    'ns-invites-accepted': data.totalMembers,
+    'ns-itineraries-generated': data.totalItineraryItems,
+    'expenses-per-trip': 0,
+    'docs-per-trip': 0,
+    'votes-per-item': 0,
   };
   return map[id];
 }
@@ -115,7 +111,7 @@ function ToggleableMetricRow({
   return (
     <div
       className={`flex items-center justify-between py-2.5 px-3 rounded-lg hover:bg-muted/50 group ${
-        !isOn ? "opacity-50" : ""
+        !isOn ? 'opacity-50' : ''
       }`}
     >
       <div className="flex-1 min-w-0">
@@ -206,7 +202,7 @@ function MetricSectionCard({
 
 export default function MetricsDashboard() {
   const { user } = useAuth();
-  const [platform, setPlatform] = useState<MetricsPlatform>("web");
+  const [platform, setPlatform] = useState<MetricsPlatform>('web');
   const [toggles, setTogglesState] = useState<Record<string, boolean>>(getMetricToggles);
 
   const onToggle = useCallback((id: string, on: boolean) => {
@@ -215,11 +211,11 @@ export default function MetricsDashboard() {
   }, []);
 
   const { data, isLoading, error } = useQuery<AdminMetrics>({
-    queryKey: ["/api/admin/metrics", platform, user?.id],
+    queryKey: ['/api/admin/metrics', platform, user?.id],
     queryFn: async () => {
       const res = await fetch(
         `/api/admin/metrics?userId=${encodeURIComponent(user!.id)}&platform=${platform}`,
-        { credentials: "include" }
+        { credentials: 'include' }
       );
       if (!res.ok) {
         const err = await res.json().catch(() => ({}));
@@ -268,7 +264,8 @@ export default function MetricsDashboard() {
         <div className="mb-8">
           <h1 className="text-2xl font-heading font-semibold">Metrics Dashboard</h1>
           <CardDescription className="mt-1">
-            Track app metrics across Web, iOS, and Android. Toggle each metric on/off — preferences are saved.
+            Track app metrics across Web, iOS, and Android. Toggle each metric on/off — preferences
+            are saved.
           </CardDescription>
         </div>
 
@@ -286,7 +283,7 @@ export default function MetricsDashboard() {
                 return (
                   <Button
                     key={opt.value}
-                    variant={isActive ? "default" : "outline"}
+                    variant={isActive ? 'default' : 'outline'}
                     size="sm"
                     onClick={() => setPlatform(opt.value)}
                     className="gap-2"
@@ -320,7 +317,8 @@ export default function MetricsDashboard() {
         ) : (
           <div className="space-y-4">
             <p className="text-sm text-muted-foreground">
-              Platform: <strong>{platform}</strong> — Values shown from live data where available; others are placeholders (—) until wired.
+              Platform: <strong>{platform}</strong> — Values shown from live data where available;
+              others are placeholders (—) until wired.
             </p>
 
             {/* Core metrics row */}
@@ -330,7 +328,7 @@ export default function MetricsDashboard() {
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-xs text-muted-foreground">Users</p>
-                      <p className="text-xl font-bold">{data?.totalUsers ?? "—"}</p>
+                      <p className="text-xl font-bold">{data?.totalUsers ?? '—'}</p>
                     </div>
                     <Users className="h-8 w-8 text-muted-foreground/50" />
                   </div>
@@ -341,7 +339,7 @@ export default function MetricsDashboard() {
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-xs text-muted-foreground">Trips</p>
-                      <p className="text-xl font-bold">{data?.totalTrips ?? "—"}</p>
+                      <p className="text-xl font-bold">{data?.totalTrips ?? '—'}</p>
                     </div>
                     <Plane className="h-8 w-8 text-muted-foreground/50" />
                   </div>
@@ -352,7 +350,7 @@ export default function MetricsDashboard() {
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-xs text-muted-foreground">Itinerary items</p>
-                      <p className="text-xl font-bold">{data?.totalItineraryItems ?? "—"}</p>
+                      <p className="text-xl font-bold">{data?.totalItineraryItems ?? '—'}</p>
                     </div>
                     <Calendar className="h-8 w-8 text-muted-foreground/50" />
                   </div>
@@ -363,7 +361,7 @@ export default function MetricsDashboard() {
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-xs text-muted-foreground">Chat messages</p>
-                      <p className="text-xl font-bold">{data?.totalChatMessages ?? "—"}</p>
+                      <p className="text-xl font-bold">{data?.totalChatMessages ?? '—'}</p>
                     </div>
                     <MessageSquare className="h-8 w-8 text-muted-foreground/50" />
                   </div>
@@ -374,7 +372,7 @@ export default function MetricsDashboard() {
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-xs text-muted-foreground">Members</p>
-                      <p className="text-xl font-bold">{data?.totalMembers ?? "—"}</p>
+                      <p className="text-xl font-bold">{data?.totalMembers ?? '—'}</p>
                     </div>
                     <UserPlus className="h-8 w-8 text-muted-foreground/50" />
                   </div>

@@ -1,12 +1,12 @@
-import { useState } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { DollarSign, Check, AlertCircle } from "lucide-react";
-import { apiRequest } from "@/lib/queryClient";
-import { useToast } from "@/hooks/use-toast";
-import { Skeleton } from "@/components/ui/skeleton";
+import { useState } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { DollarSign, Check, AlertCircle } from 'lucide-react';
+import { apiRequest } from '@/lib/queryClient';
+import { useToast } from '@/hooks/use-toast';
+import { Skeleton } from '@/components/ui/skeleton';
 
 interface Settlement {
   from: string;
@@ -36,9 +36,9 @@ export function SettlementSummary({ tripId }: { tripId: string }) {
 
   // Fetch settlements from backend
   const { data, isLoading, error } = useQuery<SettlementData>({
-    queryKey: ["/api/trips", tripId, "settlements"],
+    queryKey: ['/api/trips', tripId, 'settlements'],
     queryFn: async () => {
-      const response = await apiRequest("GET", `/api/trips/${tripId}/expenses/settlements`);
+      const response = await apiRequest('GET', `/api/trips/${tripId}/expenses/settlements`);
       return response.json();
     },
   });
@@ -46,21 +46,21 @@ export function SettlementSummary({ tripId }: { tripId: string }) {
   // Mark all expenses as settled
   const settleAllMutation = useMutation({
     mutationFn: async () => {
-      return apiRequest("POST", `/api/trips/${tripId}/expenses/settle-all`);
+      return apiRequest('POST', `/api/trips/${tripId}/expenses/settle-all`);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/trips", tripId, "settlements"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/trips", tripId] });
+      queryClient.invalidateQueries({ queryKey: ['/api/trips', tripId, 'settlements'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/trips', tripId] });
       toast({
-        title: "All expenses settled",
-        description: "All expenses have been marked as settled",
+        title: 'All expenses settled',
+        description: 'All expenses have been marked as settled',
       });
     },
     onError: () => {
       toast({
-        title: "Error",
-        description: "Failed to settle expenses",
-        variant: "destructive",
+        title: 'Error',
+        description: 'Failed to settle expenses',
+        variant: 'destructive',
       });
     },
   });
@@ -128,17 +128,11 @@ export function SettlementSummary({ tripId }: { tripId: string }) {
                 <DollarSign className="h-5 w-5" />
                 Optimized settlement
               </CardTitle>
-              <CardDescription>
-                Minimum transactions — who pays whom to settle up
-              </CardDescription>
+              <CardDescription>Minimum transactions — who pays whom to settle up</CardDescription>
             </div>
             <div className="flex gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setShowBalances(!showBalances)}
-              >
-                {showBalances ? "Hide" : "Show"} balances
+              <Button variant="outline" size="sm" onClick={() => setShowBalances(!showBalances)}>
+                {showBalances ? 'Hide' : 'Show'} balances
               </Button>
               <Button
                 variant="default"
@@ -146,7 +140,7 @@ export function SettlementSummary({ tripId }: { tripId: string }) {
                 onClick={() => settleAllMutation.mutate()}
                 disabled={settleAllMutation.isPending}
               >
-                {settleAllMutation.isPending ? "Settling..." : "Mark all settled"}
+                {settleAllMutation.isPending ? 'Settling...' : 'Mark all settled'}
               </Button>
             </div>
           </div>
@@ -155,15 +149,13 @@ export function SettlementSummary({ tripId }: { tripId: string }) {
           {/* Settlement transactions */}
           <div className="space-y-2">
             <div className="text-sm font-medium text-muted-foreground mb-2">
-              {settlements.length} transaction{settlements.length !== 1 ? "s" : ""} to settle ${totalOutstanding.toFixed(2)}
+              {settlements.length} transaction{settlements.length !== 1 ? 's' : ''} to settle $
+              {totalOutstanding.toFixed(2)}
             </div>
             {settlements.map((s, i) => {
               const amountStr = (s.amount / 100).toFixed(2); // Convert from cents
               return (
-                <div
-                  key={i}
-                  className="flex flex-col gap-1 py-2 border-b last:border-0"
-                >
+                <div key={i} className="flex flex-col gap-1 py-2 border-b last:border-0">
                   <div className="flex items-center justify-between text-sm">
                     <span className="text-muted-foreground">
                       {s.fromName} owes {s.toName}
@@ -208,16 +200,14 @@ export function SettlementSummary({ tripId }: { tripId: string }) {
                         className="flex items-center justify-between p-2 rounded bg-background/50"
                       >
                         <div className="flex flex-col">
-                          <span className="text-sm font-medium">
-                            {balance.userName}
-                          </span>
+                          <span className="text-sm font-medium">{balance.userName}</span>
                           <span className="text-xs text-muted-foreground">
                             Paid: ${(balance.totalPaid / 100).toFixed(2)} · Owes: $
                             {(balance.totalOwed / 100).toFixed(2)}
                           </span>
                         </div>
-                        <Badge variant={isOwed ? "default" : "secondary"}>
-                          {isOwed ? "+" : "-"}${absBalance.toFixed(2)}
+                        <Badge variant={isOwed ? 'default' : 'secondary'}>
+                          {isOwed ? '+' : '-'}${absBalance.toFixed(2)}
                         </Badge>
                       </div>
                     );

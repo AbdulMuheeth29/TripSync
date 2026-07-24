@@ -1,9 +1,16 @@
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { CheckCircle2, Sparkles, ArrowRight, Gift } from "lucide-react";
-import confetti from "canvas-confetti";
-import { useEffect } from "react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+import { CheckCircle2, Sparkles, ArrowRight, Gift } from 'lucide-react';
+import confetti from 'canvas-confetti';
+import { useEffect } from 'react';
 
 interface EmailVerifiedSuccessModalProps {
   isOpen: boolean;
@@ -18,7 +25,7 @@ export function EmailVerifiedSuccessModal({
   onClose,
   onGetStarted,
   userName,
-  offerFreeTrial = true
+  offerFreeTrial = true,
 }: EmailVerifiedSuccessModalProps) {
   useEffect(() => {
     if (isOpen) {
@@ -34,14 +41,14 @@ export function EmailVerifiedSuccessModal({
           angle: 60,
           spread: 55,
           origin: { x: 0, y: 0.6 },
-          colors: colors
+          colors: colors,
         });
         confetti({
           particleCount: 2,
           angle: 120,
           spread: 55,
           origin: { x: 1, y: 0.6 },
-          colors: colors
+          colors: colors,
         });
 
         if (Date.now() < end) {
@@ -60,11 +67,9 @@ export function EmailVerifiedSuccessModal({
           <div className="mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-br from-green-400 to-emerald-600 shadow-lg">
             <CheckCircle2 className="h-10 w-10 text-white animate-bounce" />
           </div>
-          <DialogTitle className="text-center text-2xl">
-            Email Verified! 🎉
-          </DialogTitle>
+          <DialogTitle className="text-center text-2xl">Email Verified! 🎉</DialogTitle>
           <DialogDescription className="text-center">
-            {userName ? `Welcome aboard, ${userName}!` : "Welcome to TripSync!"}
+            {userName ? `Welcome aboard, ${userName}!` : 'Welcome to TripSync!'}
           </DialogDescription>
         </DialogHeader>
 
@@ -72,9 +77,7 @@ export function EmailVerifiedSuccessModal({
           {/* Success Message */}
           <Card className="p-5 bg-gradient-to-br from-green-50 to-emerald-50 border-green-200">
             <div className="text-center">
-              <h4 className="font-semibold text-green-900 mb-2">
-                Your account is all set!
-              </h4>
+              <h4 className="font-semibold text-green-900 mb-2">Your account is all set!</h4>
               <p className="text-sm text-green-800">
                 You can now access all features and start planning your first trip with your group.
               </p>
@@ -115,9 +118,7 @@ export function EmailVerifiedSuccessModal({
                   <Gift className="h-5 w-5 text-purple-600" />
                 </div>
                 <div>
-                  <h4 className="font-semibold text-purple-900 mb-1">
-                    Welcome Gift: Pro Trial
-                  </h4>
+                  <h4 className="font-semibold text-purple-900 mb-1">Welcome Gift: Pro Trial</h4>
                   <p className="text-sm text-purple-800 mb-3">
                     Get 14 days of TripSync Pro for free! Unlock unlimited trips, AI generations,
                     and premium features.

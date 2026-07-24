@@ -1,12 +1,32 @@
-import { Dialog, DialogContent, DialogDescription } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
-import { ChevronLeft, ChevronRight, X, Download, Trash2, User, Calendar, Edit2, Check } from "lucide-react";
-import { useState, useEffect } from "react";
-import { format } from "date-fns";
+import { Dialog, DialogContent, DialogDescription } from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
+import {
+  ChevronLeft,
+  ChevronRight,
+  X,
+  Download,
+  Trash2,
+  User,
+  Calendar,
+  Edit2,
+  Check,
+} from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { format } from 'date-fns';
 
 interface TripPhoto {
   id: string;
@@ -34,17 +54,17 @@ export function PhotoGalleryModal({
   initialPhotoId,
   currentUserId,
   onUpdateCaption,
-  onDeletePhoto
+  onDeletePhoto,
 }: PhotoGalleryModalProps) {
   const [currentIndex, setCurrentIndex] = useState(() => {
     if (initialPhotoId) {
-      const index = photos.findIndex(p => p.id === initialPhotoId);
+      const index = photos.findIndex((p) => p.id === initialPhotoId);
       return index >= 0 ? index : 0;
     }
     return 0;
   });
   const [isEditingCaption, setIsEditingCaption] = useState(false);
-  const [captionText, setCaptionText] = useState("");
+  const [captionText, setCaptionText] = useState('');
   const [imageLoaded, setImageLoaded] = useState(false);
 
   const currentPhoto = photos[currentIndex];
@@ -52,7 +72,7 @@ export function PhotoGalleryModal({
   useEffect(() => {
     if (currentPhoto) {
       setImageLoaded(false);
-      setCaptionText(currentPhoto.caption || "");
+      setCaptionText(currentPhoto.caption || '');
       setIsEditingCaption(false);
     }
   }, [currentPhoto]);
@@ -61,17 +81,17 @@ export function PhotoGalleryModal({
     const handleKeyDown = (e: KeyboardEvent) => {
       if (!isOpen) return;
 
-      if (e.key === "ArrowLeft") {
+      if (e.key === 'ArrowLeft') {
         handlePrevious();
-      } else if (e.key === "ArrowRight") {
+      } else if (e.key === 'ArrowRight') {
         handleNext();
-      } else if (e.key === "Escape") {
+      } else if (e.key === 'Escape') {
         onClose();
       }
     };
 
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isOpen, photos.length]);
 
   const handleNext = () => {
@@ -92,7 +112,12 @@ export function PhotoGalleryModal({
   };
 
   const getInitials = (name: string) => {
-    return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+    return name
+      .split(' ')
+      .map((n) => n[0])
+      .join('')
+      .toUpperCase()
+      .slice(0, 2);
   };
 
   const canDelete = currentPhoto && currentPhoto.userId === currentUserId;
@@ -117,7 +142,7 @@ export function PhotoGalleryModal({
                 <div>
                   <p className="text-sm font-medium">{currentPhoto.user.name}</p>
                   <p className="text-xs text-white/70">
-                    {format(new Date(currentPhoto.createdAt), "MMM d, yyyy")}
+                    {format(new Date(currentPhoto.createdAt), 'MMM d, yyyy')}
                   </p>
                 </div>
               </div>
@@ -147,7 +172,7 @@ export function PhotoGalleryModal({
             )}
             <img
               src={currentPhoto.url}
-              alt={currentPhoto.caption || "Trip photo"}
+              alt={currentPhoto.caption || 'Trip photo'}
               className={`max-w-full max-h-full object-contain transition-opacity duration-300 ${
                 imageLoaded ? 'opacity-100' : 'opacity-0'
               }`}
@@ -189,11 +214,11 @@ export function PhotoGalleryModal({
                     placeholder="Add a caption..."
                     className="flex-1 bg-white/10 border-white/20 text-white placeholder:text-white/50"
                     onKeyDown={(e) => {
-                      if (e.key === "Enter") {
+                      if (e.key === 'Enter') {
                         handleSaveCaption();
-                      } else if (e.key === "Escape") {
+                      } else if (e.key === 'Escape') {
                         setIsEditingCaption(false);
-                        setCaptionText(currentPhoto.caption || "");
+                        setCaptionText(currentPhoto.caption || '');
                       }
                     }}
                     autoFocus
@@ -210,7 +235,7 @@ export function PhotoGalleryModal({
                     variant="ghost"
                     onClick={() => {
                       setIsEditingCaption(false);
-                      setCaptionText(currentPhoto.caption || "");
+                      setCaptionText(currentPhoto.caption || '');
                     }}
                     className="text-white hover:bg-white/10"
                   >
@@ -275,7 +300,7 @@ export function PhotoGalleryModal({
                             onClick={async () => {
                               await onDeletePhoto(currentPhoto.id);
                               if (photos.length > 1) {
-                                setCurrentIndex(prev => Math.min(prev, photos.length - 2));
+                                setCurrentIndex((prev) => Math.min(prev, photos.length - 2));
                               } else {
                                 onClose();
                               }
@@ -290,9 +315,7 @@ export function PhotoGalleryModal({
                   )}
                 </div>
 
-                <p className="text-xs text-white/50">
-                  Use arrow keys to navigate • ESC to close
-                </p>
+                <p className="text-xs text-white/50">Use arrow keys to navigate • ESC to close</p>
               </div>
             </div>
           </div>
@@ -312,11 +335,7 @@ export function PhotoGalleryModal({
                           : 'border-white/30 hover:border-white/50'
                       }`}
                     >
-                      <img
-                        src={photo.url}
-                        alt=""
-                        className="w-full h-full object-cover"
-                      />
+                      <img src={photo.url} alt="" className="w-full h-full object-cover" />
                     </button>
                   ))}
                 </div>

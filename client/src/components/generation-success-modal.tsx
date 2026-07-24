@@ -1,8 +1,15 @@
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Check, Plane, Hotel, Utensils, Activity, Sparkles } from "lucide-react";
-import confetti from "canvas-confetti";
-import { useEffect } from "react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Check, Plane, Hotel, Utensils, Activity, Sparkles } from 'lucide-react';
+import confetti from 'canvas-confetti';
+import { useEffect } from 'react';
 
 interface GenerationSuccessModalProps {
   isOpen: boolean;
@@ -24,10 +31,9 @@ export function GenerationSuccessModal({
     flights: 2,
     hotels: 3,
     meals: 12,
-    activities: 18
-  }
+    activities: 18,
+  },
 }: GenerationSuccessModalProps) {
-
   useEffect(() => {
     if (isOpen) {
       // Trigger confetti when modal opens
@@ -35,7 +41,7 @@ export function GenerationSuccessModal({
         confetti({
           particleCount: 100,
           spread: 70,
-          origin: { y: 0.6 }
+          origin: { y: 0.6 },
         });
       } catch (e) {
         // Silently fail if confetti doesn't load
@@ -44,10 +50,10 @@ export function GenerationSuccessModal({
   }, [isOpen]);
 
   const generatedItems = [
-    { icon: Plane, label: "Flights", count: stats.flights || 0, color: "text-blue-500" },
-    { icon: Hotel, label: "Accommodations", count: stats.hotels || 0, color: "text-purple-500" },
-    { icon: Utensils, label: "Dining", count: stats.meals || 0, color: "text-orange-500" },
-    { icon: Activity, label: "Activities", count: stats.activities || 0, color: "text-green-500" },
+    { icon: Plane, label: 'Flights', count: stats.flights || 0, color: 'text-blue-500' },
+    { icon: Hotel, label: 'Accommodations', count: stats.hotels || 0, color: 'text-purple-500' },
+    { icon: Utensils, label: 'Dining', count: stats.meals || 0, color: 'text-orange-500' },
+    { icon: Activity, label: 'Activities', count: stats.activities || 0, color: 'text-green-500' },
   ];
 
   return (
@@ -59,9 +65,7 @@ export function GenerationSuccessModal({
               <Sparkles className="h-8 w-8 text-primary animate-pulse" />
             </div>
           </div>
-          <DialogTitle className="text-center text-2xl">
-            Your Trip is Ready! 🎉
-          </DialogTitle>
+          <DialogTitle className="text-center text-2xl">Your Trip is Ready! 🎉</DialogTitle>
           <DialogDescription className="text-center">
             AI has crafted a personalized itinerary based on your preferences
           </DialogDescription>
@@ -77,7 +81,9 @@ export function GenerationSuccessModal({
                   key={item.label}
                   className="flex items-center gap-3 p-3 rounded-lg bg-muted/50 border border-border"
                 >
-                  <div className={`flex h-10 w-10 items-center justify-center rounded-full bg-background ${item.color}`}>
+                  <div
+                    className={`flex h-10 w-10 items-center justify-center rounded-full bg-background ${item.color}`}
+                  >
                     <ItemIcon className="h-5 w-5" />
                   </div>
                   <div>
@@ -117,12 +123,7 @@ export function GenerationSuccessModal({
         </div>
 
         <DialogFooter>
-          <Button
-            variant="default"
-            onClick={onViewTrip}
-            className="w-full"
-            size="lg"
-          >
+          <Button variant="default" onClick={onViewTrip} className="w-full" size="lg">
             <Sparkles className="h-4 w-4 mr-2" />
             View Your Trip
           </Button>

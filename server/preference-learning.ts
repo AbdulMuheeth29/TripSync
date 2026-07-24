@@ -10,8 +10,8 @@
  * This is our competitive moat - data no other platform has.
  */
 
-import { storage } from "./storage";
-import type { AIGenerationFeedback, AIUserPreference, ItineraryItem } from "@shared/schema";
+import { storage } from './storage';
+import type { AIGenerationFeedback, AIUserPreference, ItineraryItem } from '@shared/schema';
 
 /**
  * Preference categories we learn
@@ -51,7 +51,17 @@ export async function recordFeedback(params: {
   changeMagnitude?: number;
 }): Promise<void> {
   try {
-    const { tripId, userId, generationId, itemId, feedbackType, originalSuggestion, userModification, fieldChanged, changeMagnitude } = params;
+    const {
+      tripId,
+      userId,
+      generationId,
+      itemId,
+      feedbackType,
+      originalSuggestion,
+      userModification,
+      fieldChanged,
+      changeMagnitude,
+    } = params;
 
     // Store feedback in database
     // TODO: Insert into ai_generation_feedback table
@@ -59,7 +69,14 @@ export async function recordFeedback(params: {
 
     // If this is an edit, learn from it immediately
     if (feedbackType === 'edited' && userModification && fieldChanged) {
-      await learnFromModification(userId, tripId, fieldChanged, originalSuggestion, userModification, changeMagnitude);
+      await learnFromModification(
+        userId,
+        tripId,
+        fieldChanged,
+        originalSuggestion,
+        userModification,
+        changeMagnitude
+      );
     }
 
     // If deleted, learn what user doesn't like
@@ -98,7 +115,7 @@ async function learnFromModification(
             key: 'price_sensitivity',
             value: { tendency: 'prefer_lower', magnitude: Math.abs(changeMagnitude) },
             confidence: 0.7,
-            sampleSize: 1
+            sampleSize: 1,
           });
         } else {
           // User increased price - willing to pay more for quality
@@ -107,7 +124,7 @@ async function learnFromModification(
             key: 'quality_preference',
             value: { tendency: 'prefer_higher_quality', magnitude: changeMagnitude },
             confidence: 0.7,
-            sampleSize: 1
+            sampleSize: 1,
           });
         }
       }
@@ -126,7 +143,7 @@ async function learnFromModification(
             key: 'activity_pace',
             value: { tendency: 'prefer_later', hourDiff },
             confidence: 0.6,
-            sampleSize: 1
+            sampleSize: 1,
           });
         } else if (hourDiff < 0) {
           // User moved activity earlier - prefers faster pace
@@ -135,7 +152,7 @@ async function learnFromModification(
             key: 'activity_pace',
             value: { tendency: 'prefer_earlier', hourDiff: Math.abs(hourDiff) },
             confidence: 0.6,
-            sampleSize: 1
+            sampleSize: 1,
           });
         }
       }
@@ -148,7 +165,7 @@ async function learnFromModification(
         key: `type_preference_${original.type}_to_${modified.type}`,
         value: { from: original.type, to: modified.type },
         confidence: 0.8,
-        sampleSize: 1
+        sampleSize: 1,
       });
       break;
 
@@ -184,7 +201,7 @@ async function learnFromDeletion(userId: string, tripId: string, deleted: any): 
       key: `dislike_${deleted.type}`,
       value: { type: deleted.type, reason: 'deleted' },
       confidence: 0.8,
-      sampleSize: 1
+      sampleSize: 1,
     });
   }
 
@@ -195,7 +212,7 @@ async function learnFromDeletion(userId: string, tripId: string, deleted: any): 
       key: 'max_acceptable_price',
       value: { threshold: deleted.pricePerPerson, exceeded: true },
       confidence: 0.6,
-      sampleSize: 1
+      sampleSize: 1,
     });
   }
 
@@ -207,13 +224,19 @@ async function learnFromDeletion(userId: string, tripId: string, deleted: any): 
 /**
  * Store or update learned preference
  */
-async function upsertPreference(userId: string, tripId: string, pref: LearnedPreference): Promise<void> {
+async function upsertPreference(
+  userId: string,
+  tripId: string,
+  pref: LearnedPreference
+): Promise<void> {
   try {
     // TODO: Query existing preference from ai_user_preferences table
     // If exists, update with Bayesian-style confidence adjustment
     // If new, insert
 
-    console.log(`💾 Storing preference: ${pref.category}/${pref.key} (confidence: ${pref.confidence})`);
+    console.log(
+      `💾 Storing preference: ${pref.category}/${pref.key} (confidence: ${pref.confidence})`
+    );
 
     // For now, just log (would insert into DB)
     // In production:
@@ -238,7 +261,9 @@ export async function getUserPreferences(
     // Filter by destination if provided (destination-specific preferences)
     // Return as structured object
 
-    console.log(`📖 Loading preferences for user ${userId}${destination ? ` (destination: ${destination})` : ''}`);
+    console.log(
+      `📖 Loading preferences for user ${userId}${destination ? ` (destination: ${destination})` : ''}`
+    );
 
     // Placeholder return
     return {
@@ -248,7 +273,7 @@ export async function getUserPreferences(
       activities: {},
       accommodation: {},
       pacing: {},
-      social: {}
+      social: {},
     };
   } catch (error) {
     console.error('Failed to get user preferences:', error);
@@ -281,8 +306,8 @@ export function applyPreferencesToPrompt(
   // Activity preferences
   if (preferences.activities) {
     const dislikes = Object.keys(preferences.activities)
-      .filter(k => k.startsWith('dislike_'))
-      .map(k => k.replace('dislike_', ''));
+      .filter((k) => k.startsWith('dislike_'))
+      .map((k) => k.replace('dislike_', ''));
     if (dislikes.length > 0) {
       preferenceHints.push(`User historically dislikes: ${dislikes.join(', ')}`);
     }
@@ -298,7 +323,7 @@ export function applyPreferencesToPrompt(
 
   // Add preferences to prompt
   if (preferenceHints.length > 0) {
-    enhancedPrompt += `\n\nLearned user preferences (personalize based on these):\n${preferenceHints.map(h => `- ${h}`).join('\n')}`;
+    enhancedPrompt += `\n\nLearned user preferences (personalize based on these):\n${preferenceHints.map((h) => `- ${h}`).join('\n')}`;
   }
 
   return enhancedPrompt;
@@ -368,8 +393,8 @@ export async function exportUserPreferences(userId: string): Promise<any> {
         totalPreferences: 0,
         averageConfidence: 0,
         learnedFromTrips: [],
-        exportedAt: new Date().toISOString()
-      }
+        exportedAt: new Date().toISOString(),
+      },
     };
   } catch (error) {
     console.error('Failed to export preferences:', error);
@@ -432,9 +457,9 @@ export async function getPreferenceAnalytics(): Promise<{
         activities: 0,
         accommodation: 0,
         pacing: 0,
-        social: 0
+        social: 0,
       },
-      topPatterns: []
+      topPatterns: [],
     };
   } catch (error) {
     console.error('Failed to get preference analytics:', error);

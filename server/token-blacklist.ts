@@ -105,7 +105,10 @@ class TokenBlacklistService {
    * Note: This marks a timestamp when all tokens before this time are invalid.
    * Individual token blacklisting still works as usual.
    */
-  async revokeAllUserTokens(userId: string, reason: BlacklistedToken['reason'] = 'security'): Promise<number> {
+  async revokeAllUserTokens(
+    userId: string,
+    reason: BlacklistedToken['reason'] = 'security'
+  ): Promise<number> {
     const now = new Date();
     const revokeTimestamp = now.getTime();
 
@@ -178,7 +181,9 @@ class TokenBlacklistService {
     // Note: Redis automatically handles expiration via TTL
     // so we don't need to track expired tokens there
     const storage = cache.isEnabled()
-      ? (this.fallbackBlacklist.size > 0 ? 'mixed' : 'redis')
+      ? this.fallbackBlacklist.size > 0
+        ? 'mixed'
+        : 'redis'
       : 'in-memory';
 
     return {
@@ -206,7 +211,9 @@ class TokenBlacklistService {
     }
 
     if (cleaned > 0) {
-      appLogger.debug('Cleaned up expired blacklisted tokens from fallback storage', { count: cleaned });
+      appLogger.debug('Cleaned up expired blacklisted tokens from fallback storage', {
+        count: cleaned,
+      });
     }
 
     return cleaned;
@@ -217,16 +224,18 @@ class TokenBlacklistService {
    */
   private startCleanupJob(): void {
     // Run cleanup every 5 minutes
-    this.cleanupInterval = setInterval(async () => {
-      try {
-        await this.cleanup();
-      } catch (error) {
-        appLogger.error(
-          error instanceof Error ? error : new Error(String(error)),
-          { context: 'token_blacklist_cleanup' }
-        );
-      }
-    }, 5 * 60 * 1000);
+    this.cleanupInterval = setInterval(
+      async () => {
+        try {
+          await this.cleanup();
+        } catch (error) {
+          appLogger.error(error instanceof Error ? error : new Error(String(error)), {
+            context: 'token_blacklist_cleanup',
+          });
+        }
+      },
+      5 * 60 * 1000
+    );
   }
 
   /**

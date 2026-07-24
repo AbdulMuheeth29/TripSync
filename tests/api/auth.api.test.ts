@@ -247,9 +247,7 @@ describe('Auth API Integration', () => {
     });
 
     it('should reject access without token', async () => {
-      const response = await request(app)
-        .get('/api/protected')
-        .expect(401);
+      const response = await request(app).get('/api/protected').expect(401);
 
       expect(response.body.code).toBe('AUTH_REQUIRED');
     });

@@ -1,15 +1,22 @@
-import { useEffect } from "react";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { CheckCircle2, Download, Mail, Sparkles } from "lucide-react";
-import confetti from "canvas-confetti";
-import { format } from "date-fns";
+import { useEffect } from 'react';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+import { CheckCircle2, Download, Mail, Sparkles } from 'lucide-react';
+import confetti from 'canvas-confetti';
+import { format } from 'date-fns';
 
 interface PaymentSuccessEnhancedProps {
   isOpen: boolean;
   onClose: () => void;
-  plan: "Pro" | "Teams";
+  plan: 'Pro' | 'Teams';
   amount: number;
   transactionId: string;
   nextBillingDate: Date;
@@ -25,7 +32,7 @@ export function PaymentSuccessEnhanced({
   transactionId,
   nextBillingDate,
   onDownloadReceipt,
-  onEmailReceipt
+  onEmailReceipt,
 }: PaymentSuccessEnhancedProps) {
   useEffect(() => {
     if (isOpen) {
@@ -39,14 +46,14 @@ export function PaymentSuccessEnhanced({
           angle: 60,
           spread: 55,
           origin: { x: 0 },
-          colors: ['#10b981', '#3b82f6', '#8b5cf6']
+          colors: ['#10b981', '#3b82f6', '#8b5cf6'],
         });
         confetti({
           particleCount: 3,
           angle: 120,
           spread: 55,
           origin: { x: 1 },
-          colors: ['#10b981', '#3b82f6', '#8b5cf6']
+          colors: ['#10b981', '#3b82f6', '#8b5cf6'],
         });
 
         if (Date.now() < end) {
@@ -65,12 +72,8 @@ export function PaymentSuccessEnhanced({
           <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-green-100 animate-bounce">
             <CheckCircle2 className="h-10 w-10 text-green-600" />
           </div>
-          <DialogTitle className="text-center text-2xl">
-            Payment Successful!
-          </DialogTitle>
-          <DialogDescription className="text-center">
-            Welcome to TripSync {plan}
-          </DialogDescription>
+          <DialogTitle className="text-center text-2xl">Payment Successful!</DialogTitle>
+          <DialogDescription className="text-center">Welcome to TripSync {plan}</DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4">
@@ -107,7 +110,7 @@ export function PaymentSuccessEnhanced({
               </div>
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Next Billing</span>
-                <span className="font-medium">{format(nextBillingDate, "MMM d, yyyy")}</span>
+                <span className="font-medium">{format(nextBillingDate, 'MMM d, yyyy')}</span>
               </div>
             </div>
           </Card>

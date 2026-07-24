@@ -11,6 +11,7 @@
 TripSync is an AI-first group travel planning platform that's already leveraging AI effectively in several key areas. This roadmap provides a comprehensive analysis of current AI usage, identifies new opportunities, and charts a practical path forward to make TripSync the smartest group travel tool on the market.
 
 **Key Findings:**
+
 - ✅ Strong foundation: 7 AI features already in production
 - ✅ Innovative "Atlas" proactive assistant with context awareness
 - ✅ Using Claude Sonnet 4.5 (cutting-edge model)
@@ -27,6 +28,7 @@ TripSync is an AI-first group travel planning platform that's already leveraging
 **Who uses it:** Friend groups, families, co-workers planning trips together (2-30 people per group)
 
 **Core value prop:**
+
 - Turn chaotic group chat planning into organized, collaborative trips
 - AI generates complete itineraries from preferences
 - Democratic voting on activities/restaurants
@@ -41,17 +43,18 @@ TripSync is an AI-first group travel planning platform that's already leveraging
 
 **Existing AI Features:**
 
-| Feature | Status | Model | Purpose | Quality |
-|---------|--------|-------|---------|---------|
-| **1. Itinerary Generation** | ✅ Production | Claude Sonnet 4.5 | Generate day-by-day trip plans with flights, hotels, activities, dining | High - includes pricing, booking links, member preferences |
-| **2. Atlas Conversational Assistant** | ✅ Production | Claude Sonnet 4.5 | Proactive trip planning help with rich context | High - understands trip state, budget, group dynamics |
-| **3. Conflict Resolution** | ✅ Production | Claude Sonnet 4.5 | Suggest compromises when votes are tied | Medium - simple suggestions, could be smarter |
-| **4. Budget Optimization** | ✅ Production | Claude Sonnet 4.5 | Find ways to reduce spending | Medium - generic advice, could be more actionable |
-| **5. Trip Recap** | ✅ Production | Claude Sonnet 4.5 | Generate narrative summaries post-trip | Medium - prose quality good, needs photo integration |
-| **6. Packing List** | ✅ Production | Claude Sonnet 4.5 | Smart packing suggestions by destination/season | Medium - functional but generic |
-| **7. Email Parsing** | ✅ Production | Claude Sonnet 4.5 | Extract booking details from confirmations | Medium - works but needs better structure extraction |
+| Feature                               | Status        | Model             | Purpose                                                                 | Quality                                                    |
+| ------------------------------------- | ------------- | ----------------- | ----------------------------------------------------------------------- | ---------------------------------------------------------- |
+| **1. Itinerary Generation**           | ✅ Production | Claude Sonnet 4.5 | Generate day-by-day trip plans with flights, hotels, activities, dining | High - includes pricing, booking links, member preferences |
+| **2. Atlas Conversational Assistant** | ✅ Production | Claude Sonnet 4.5 | Proactive trip planning help with rich context                          | High - understands trip state, budget, group dynamics      |
+| **3. Conflict Resolution**            | ✅ Production | Claude Sonnet 4.5 | Suggest compromises when votes are tied                                 | Medium - simple suggestions, could be smarter              |
+| **4. Budget Optimization**            | ✅ Production | Claude Sonnet 4.5 | Find ways to reduce spending                                            | Medium - generic advice, could be more actionable          |
+| **5. Trip Recap**                     | ✅ Production | Claude Sonnet 4.5 | Generate narrative summaries post-trip                                  | Medium - prose quality good, needs photo integration       |
+| **6. Packing List**                   | ✅ Production | Claude Sonnet 4.5 | Smart packing suggestions by destination/season                         | Medium - functional but generic                            |
+| **7. Email Parsing**                  | ✅ Production | Claude Sonnet 4.5 | Extract booking details from confirmations                              | Medium - works but needs better structure extraction       |
 
 **File Locations:**
+
 - AI Service: `server/ai-service.ts`
 - Atlas Frontend: `client/src/components/atlas/AtlasAgent.tsx`
 - Proactive Triggers: `client/src/hooks/atlas/useProactiveTriggers.ts`
@@ -62,6 +65,7 @@ TripSync is an AI-first group travel planning platform that's already leveraging
 ### WHY YOU'RE EXPLORING AI
 
 Based on codebase analysis:
+
 - ✅ **New capabilities possible** - AI unlocks trip planning automation impossible with traditional code
 - ✅ **Competitive pressure** - Travel planning space is crowded; AI differentiation is critical
 - ✅ **Customer requests** - Group coordination pain points (voting, budgets, preferences) are AI-solvable
@@ -72,19 +76,23 @@ Based on codebase analysis:
 ### CONSTRAINTS
 
 **Team:**
+
 - ✅ AI expertise: Good - using Anthropic SDK properly, structured prompts
 - ⚠️ Coverage: 7 features but some could be optimized (cost, quality)
 
 **Budget:**
+
 - Current: Using Claude Sonnet 4.5 for everything
 - Risk: Could get expensive at scale (8K token outputs for itineraries)
 - Opportunity: Switch some features to Haiku (60x cheaper) without quality loss
 
 **Timeline:**
+
 - Current: AI features are live and working
 - Next 6 months: Optimize existing + add 3-5 high-impact features
 
 **Data:**
+
 - ✅ Rich: Trip data, itineraries, votes, expenses, member preferences, photos
 - ✅ Opportunity: User behavior patterns for learning (saved in `userLearnedPreferences` table)
 - ✅ Conversation history: Atlas memories persist per trip
@@ -105,11 +113,13 @@ Using the framework: **Value to Users × Feasibility ÷ Cost**
 Automatically detect when trip days are unbalanced (day 2 has 8 activities, day 4 has 1) and suggest redistribution.
 
 **User value:**
+
 - **Saves them:** 20-30 minutes of manual rearranging
 - **Enables them to:** Create well-paced trips without planning expertise
 - **Improves:** Trip quality - prevents burnout from over-packed days
 
 **How it would work:**
+
 ```
 1. User views itinerary with unbalanced days
 2. Atlas proactive trigger: "Day 2 looks packed (8 activities). Want me to spread these across Day 3-4?"
@@ -119,21 +129,25 @@ Automatically detect when trip days are unbalanced (day 2 has 8 activities, day 
 ```
 
 **Feasibility:**
+
 - **Model capability:** ✅ Easy - models excel at scheduling optimization
 - **Data needed:** ✅ Already have - itinerary items with day numbers, times, locations
 - **Integration complexity:** Medium - needs drag-drop UI for reviewing suggestions
 
 **Rough cost:**
+
 - ~500 tokens input (itinerary) + 1000 tokens output = ~$0.01 per rebalance
 - At 100 rebalances/day = $1/day = $30/month
 
 **Risks:**
+
 - **Quality issues if:** Activities have dependencies (hotel check-in must be first, flight must align)
 - **Cost blowup if:** Users spam the feature
 
 **Priority:** 🔥 **HIGH** - Directly solves planning friction, low cost, easy to build
 
 **Location to implement:**
+
 - New function in `server/ai-service.ts`: `rebalanceItinerary()`
 - Add trigger in `useProactiveTriggers.ts`
 - Add UI button in trip detail page
@@ -146,11 +160,13 @@ Automatically detect when trip days are unbalanced (day 2 has 8 activities, day 
 When user enters destination, instantly show: best time to visit, visa requirements, weather forecast, local customs, safety tips.
 
 **User value:**
+
 - **Saves them:** 1-2 hours of Googling
 - **Enables them to:** Make informed decisions about dates
 - **Improves:** Trip safety and preparedness
 
 **How it would work:**
+
 ```
 1. User enters "Tokyo" as destination
 2. AI generates structured brief:
@@ -163,21 +179,25 @@ When user enters destination, instantly show: best time to visit, visa requireme
 ```
 
 **Feasibility:**
+
 - **Model capability:** ✅ Easy - Claude has strong general knowledge
 - **Data needed:** ✅ None - use model's built-in knowledge + weather API
 - **Integration complexity:** Easy - just add a card component
 
 **Rough cost:**
+
 - ~200 tokens input + 800 tokens output = ~$0.008 per destination
 - At 200 trips/day = $1.60/day = $48/month
 
 **Risks:**
+
 - **Quality issues if:** Visa/safety info becomes outdated (add disclaimer: "Verify official sources")
 - **Cost blowup if:** Users change destination repeatedly (cache by destination)
 
 **Priority:** 🔥 **HIGH** - Immediate value, very low cost, easy
 
 **Location to implement:**
+
 - New function: `generateDestinationBrief(destination: string)`
 - Add to trip creation wizard (`client/src/pages/create-trip.tsx`)
 
@@ -189,11 +209,13 @@ When user enters destination, instantly show: best time to visit, visa requireme
 Switch simple AI tasks from Sonnet ($3/M tokens) to Haiku ($0.05/M tokens) - 60x cheaper.
 
 **User value:**
+
 - **Saves them:** Nothing directly
 - **Enables TripSync to:** Reinvest savings into more AI features
 - **Improves:** Sustainability of AI features at scale
 
 **How it would work:**
+
 ```
 Current: All 7 features use Claude Sonnet 4.5
 
@@ -205,11 +227,13 @@ Reasoning: Simple extraction/classification tasks don't need frontier model
 ```
 
 **Feasibility:**
+
 - **Model capability:** ✅ Easy - Haiku is very capable for simple tasks
 - **Data needed:** ✅ None
 - **Integration complexity:** Easy - just change `model: "claude-sonnet-4-5"` to `model: "claude-haiku-4"`
 
 **Rough cost savings:**
+
 ```
 Current monthly (estimated 1000 requests/feature):
 - Packing lists: 1000 × 512 tokens × $3/M = $1.54
@@ -227,11 +251,13 @@ SAVINGS: $5.31/month (~98% reduction for these features)
 **At 100,000 users:** Saves $530/month = $6,360/year
 
 **Risks:**
+
 - **Quality issues if:** Haiku produces worse results (test thoroughly)
 
 **Priority:** 🔥 **HIGH** - No downside, pure efficiency gain
 
 **Implementation:**
+
 - Edit `server/ai-service.ts` functions: `suggestConflictResolution`, `generatePackingList`, `suggestBudgetOptimization`, `parseEmailForItinerary`
 - Change model parameter to `claude-haiku-4`
 - Add A/B test to compare quality
@@ -246,11 +272,13 @@ SAVINGS: $5.31/month (~98% reduction for these features)
 Learn from user's past trips to pre-fill trip wizard with their preferences.
 
 **User value:**
+
 - **Saves them:** 5 minutes per trip (pre-filled vibes, budget band, preferences)
 - **Enables them to:** Create trips faster on repeat use
 - **Improves:** Retention - users feel understood
 
 **How it would work:**
+
 ```
 1. User completes first trip to "Tokyo" (adventure, foodie vibes, $2000/person)
 2. System saves to userLearnedPreferences table
@@ -259,19 +287,23 @@ Learn from user's past trips to pre-fill trip wizard with their preferences.
 ```
 
 **Feasibility:**
+
 - **Model capability:** Easy - simple pattern matching, no AI needed (rule-based)
 - **Data needed:** ✅ Already have - `userLearnedPreferences` table exists in schema
 - **Integration complexity:** Medium - needs UI for "Use past preferences" button
 
 **Rough cost:**
+
 - $0 (rule-based, no AI)
 
 **Risks:**
+
 - **Quality issues if:** User's preferences change over time (add "Edit" option)
 
 **Priority:** 🟡 **MEDIUM** - Nice-to-have, improves UX but not game-changing
 
 **Location:**
+
 - Implement in `server/storage.ts`: `getUserLearnedPreferences()`
 - Add toggle in trip wizard
 
@@ -283,11 +315,13 @@ Learn from user's past trips to pre-fill trip wizard with their preferences.
 During a trip, suggest nearby restaurants/activities based on current location and time.
 
 **User value:**
+
 - **Saves them:** Decision fatigue - "what should we do now?"
 - **Enables them to:** Discover hidden gems on the fly
 - **Improves:** Trip spontaneity and local experiences
 
 **How it would work:**
+
 ```
 1. User shares location via location sharing feature
 2. Atlas: "You're near Le Marais. It's lunchtime - want recs for falafel or bistros?"
@@ -296,11 +330,13 @@ During a trip, suggest nearby restaurants/activities based on current location a
 ```
 
 **Feasibility:**
+
 - **Model capability:** Medium - needs location awareness + live data
 - **Data needed:** ⚠️ Need Google Places API or Yelp integration
 - **Integration complexity:** Hard - requires location permissions, API integration
 
 **Rough cost:**
+
 - Google Places API: $17 per 1000 requests
 - AI prompt: $0.01 per suggestion
 - Total: ~$0.027 per recommendation
@@ -308,12 +344,14 @@ During a trip, suggest nearby restaurants/activities based on current location a
 **At 10,000 active trips/month with 5 recs each = $1,350/month**
 
 **Risks:**
+
 - **Quality issues if:** API data is stale or irrelevant
 - **Cost blowup if:** Users spam recommendations
 
 **Priority:** 🟡 **MEDIUM** - High value but complex and pricey
 
 **Implementation:**
+
 - Integrate Google Places API
 - New function: `getRealtimeRecommendations(lat, lng, time, preferences)`
 - Add Atlas trigger for location-based suggestions
@@ -326,11 +364,13 @@ During a trip, suggest nearby restaurants/activities based on current location a
 Generate stunning, shareable trip summaries (think Spotify Wrapped for travel).
 
 **User value:**
+
 - **Saves them:** Time creating social media posts
 - **Enables them to:** Show off their trip in a polished way
 - **Improves:** Social sharing = viral growth
 
 **How it would work:**
+
 ```
 1. Trip ends
 2. "Generate Your Trip Story" button
@@ -344,15 +384,18 @@ Generate stunning, shareable trip summaries (think Spotify Wrapped for travel).
 ```
 
 **Feasibility:**
+
 - **Model capability:** ✅ Easy - Claude is great at creative writing
 - **Data needed:** ✅ Already have - itinerary, votes, expenses, photos, satisfaction
 - **Integration complexity:** Medium - needs design template + export
 
 **Rough cost:**
+
 - ~1000 tokens output = $0.003 per summary
 - At 1000 summaries/month = $3/month (negligible)
 
 **Risks:**
+
 - **Quality issues if:** AI gets tone wrong (let users edit before sharing)
 
 **Priority:** 🟡 **MEDIUM** - High viral potential, low cost, but requires design work
@@ -360,6 +403,7 @@ Generate stunning, shareable trip summaries (think Spotify Wrapped for travel).
 **Viral Multiplier:** Each share could bring 2-5 new users
 
 **Location:**
+
 - Extend `generateTripRecap()` in `ai-service.ts`
 - New UI: Trip summary card with social share buttons
 - Consider paid feature (Pro tier)
@@ -374,16 +418,19 @@ Generate stunning, shareable trip summaries (think Spotify Wrapped for travel).
 Predict final trip cost based on spending patterns halfway through.
 
 **User value:**
+
 - **Saves them:** Budget surprises
 - **Enables them to:** Adjust spending mid-trip
 - **Improves:** Financial peace of mind
 
 **Feasibility:**
+
 - **Model capability:** Medium - needs time-series analysis
 - **Data needed:** ✅ Have expenses, but need historical patterns
 - **Integration complexity:** Medium
 
 **Rough cost:**
+
 - $0.005 per prediction
 
 **Priority:** 🔵 **LOW** - Nice-to-have, but expense tracking already exists
@@ -396,16 +443,19 @@ Predict final trip cost based on spending patterns halfway through.
 Talk to Atlas instead of typing.
 
 **User value:**
+
 - **Saves them:** Typing time
 - **Enables them to:** Plan hands-free (while driving, cooking)
 - **Improves:** Accessibility
 
 **Feasibility:**
+
 - **Model capability:** ✅ Claude can process transcriptions
 - **Data needed:** Need speech-to-text API (Whisper, Deepgram)
 - **Integration complexity:** Hard - requires audio recording, streaming
 
 **Rough cost:**
+
 - Whisper API: $0.006/minute
 - At 1000 voice queries/month (avg 1 min each) = $6/month
 
@@ -419,16 +469,19 @@ Talk to Atlas instead of typing.
 Automatically suggest Pinterest/Instagram images for trip mood board.
 
 **User value:**
+
 - **Saves them:** Time searching for inspiration images
 - **Enables them to:** Build aesthetic mood boards faster
 - **Improves:** Trip excitement and alignment
 
 **Feasibility:**
+
 - **Model capability:** Easy - image search + filtering
 - **Data needed:** Need Pinterest/Unsplash API
 - **Integration complexity:** Medium
 
 **Rough cost:**
+
 - Unsplash API: Free
 - AI filtering: $0.002 per board
 
@@ -439,25 +492,28 @@ Automatically suggest Pinterest/Instagram images for trip mood board.
 ## PRIORITIZATION FRAMEWORK
 
 ### High Priority = Do First
-| Feature | User Value | Feasibility | Cost | Priority Score |
-|---------|-----------|-------------|------|----------------|
-| Smart Itinerary Rebalancing | High | Easy | Low | 🔥 **9/10** |
-| Destination Research | High | Easy | Low | 🔥 **9/10** |
-| Model Switching (Cost) | Medium (indirect) | Easy | Saves $ | 🔥 **9/10** |
+
+| Feature                     | User Value        | Feasibility | Cost    | Priority Score |
+| --------------------------- | ----------------- | ----------- | ------- | -------------- |
+| Smart Itinerary Rebalancing | High              | Easy        | Low     | 🔥 **9/10**    |
+| Destination Research        | High              | Easy        | Low     | 🔥 **9/10**    |
+| Model Switching (Cost)      | Medium (indirect) | Easy        | Saves $ | 🔥 **9/10**    |
 
 ### Medium Priority = Do Next
-| Feature | User Value | Feasibility | Cost | Priority Score |
-|---------|-----------|-------------|------|----------------|
-| Personalized Templates | Medium | Easy | Free | 🟡 **7/10** |
-| Real-Time Recommendations | High | Hard | High | 🟡 **6/10** |
-| Viral Trip Summaries | Medium | Medium | Low | 🟡 **8/10** |
+
+| Feature                   | User Value | Feasibility | Cost | Priority Score |
+| ------------------------- | ---------- | ----------- | ---- | -------------- |
+| Personalized Templates    | Medium     | Easy        | Free | 🟡 **7/10**    |
+| Real-Time Recommendations | High       | Hard        | High | 🟡 **6/10**    |
+| Viral Trip Summaries      | Medium     | Medium      | Low  | 🟡 **8/10**    |
 
 ### Low Priority = Maybe Later
-| Feature | User Value | Feasibility | Cost | Priority Score |
-|---------|-----------|-------------|------|----------------|
-| Predictive Expenses | Low | Medium | Low | 🔵 **5/10** |
-| Voice Atlas | Medium | Hard | Medium | 🔵 **5/10** |
-| AI Mood Board | Low | Medium | Low | 🔵 **4/10** |
+
+| Feature             | User Value | Feasibility | Cost   | Priority Score |
+| ------------------- | ---------- | ----------- | ------ | -------------- |
+| Predictive Expenses | Low        | Medium      | Low    | 🔵 **5/10**    |
+| Voice Atlas         | Medium     | Hard        | Medium | 🔵 **5/10**    |
+| AI Mood Board       | Low        | Medium      | Low    | 🔵 **4/10**    |
 
 ---
 
@@ -490,6 +546,7 @@ Automatically suggest Pinterest/Instagram images for trip mood board.
 **Budget:** $500-1000 for testing and initial usage
 
 **Team Allocation:**
+
 - 1 engineer full-time
 - Designer for 2 days (UI components)
 
@@ -579,6 +636,7 @@ Automatically suggest Pinterest/Instagram images for trip mood board.
 ## WHAT NOT TO DO
 
 **Don't:**
+
 - ❌ **Build AI chatbot as first project** - You already have Atlas, which is better
 - ❌ **Try to use AI for everything** - Some things (voting, expense splitting) are better as deterministic logic
 - ❌ **Ship without testing** - AI is unpredictable; always have fallbacks
@@ -591,12 +649,14 @@ Automatically suggest Pinterest/Instagram images for trip mood board.
 ## BUILD VS BUY DECISIONS
 
 ### When to use OpenAI/Anthropic APIs (Current Strategy ✅)
+
 - ✅ General capabilities (summarize, generate, classify)
 - ✅ Getting started
 - ✅ Don't have ML team
 - ✅ You're here now - stay with Anthropic APIs
 
 ### When to consider fine-tuning
+
 - ⚠️ Very specific task (e.g., extracting booking details from emails in exact format)
 - ⚠️ Lots of training data (1000+ examples)
 - ⚠️ Need lower cost at extreme scale (100K+ requests/day)
@@ -604,6 +664,7 @@ Automatically suggest Pinterest/Instagram images for trip mood board.
 - **Verdict:** Not yet - you're not at this scale
 
 ### When to build custom ML
+
 - ❌ Extremely high volume (millions of requests/day)
 - ❌ Latency critical (<50ms)
 - ❌ Offline/edge deployment needed
@@ -617,17 +678,20 @@ Automatically suggest Pinterest/Instagram images for trip mood board.
 ## SUCCESS METRICS
 
 **Don't just track:**
+
 - ❌ "AI feature usage" (vanity metric)
 
 **Track:**
 
 ### Engagement Metrics
+
 - **Atlas conversation rate:** % of trips with at least 1 Atlas message
 - **Atlas action rate:** % of Atlas suggestions that result in user action
 - **Feature adoption:** % of users who try each AI feature
 - **Repeat usage:** Do users come back to Atlas after first interaction?
 
 ### User Outcome Metrics
+
 - **Time saved:** Compare trip creation time with/without AI features
   - Target: AI users create trips 50% faster
 - **Completion rate:** % of trips that move from "planning" to "active"
@@ -636,6 +700,7 @@ Automatically suggest Pinterest/Instagram images for trip mood board.
   - Target: AI-generated itineraries get 4.5+ stars
 
 ### Quality Metrics
+
 - **AI accuracy:** % of AI suggestions accepted without edits
   - Itinerary generation: Target 70% acceptance
   - Budget optimization: Target 60% implemented
@@ -645,6 +710,7 @@ Automatically suggest Pinterest/Instagram images for trip mood board.
   - Target: 80% thumbs up
 
 ### Cost Efficiency Metrics
+
 - **Cost per trip:** Average AI spend per created trip
   - Current (estimated): $0.15/trip
   - Target after optimization: $0.06/trip (60% reduction)
@@ -654,6 +720,7 @@ Automatically suggest Pinterest/Instagram images for trip mood board.
   - Target: 10x ROI (if AI costs $1000/month, need $10K from Pro)
 
 ### Growth Metrics (Viral Sharing)
+
 - **Share rate:** % of completed trips that generate summaries
   - Target: 25%
 - **Viral coefficient:** New signups per shared trip summary
@@ -666,21 +733,22 @@ Automatically suggest Pinterest/Instagram images for trip mood board.
 ### Current Estimated Costs (Monthly)
 
 **Assumptions:**
+
 - 1,000 active trips/month
 - 50% use AI itinerary generation
 - 30% have 5+ Atlas interactions
 - 20% use other AI features
 
-| Feature | Requests/Month | Avg Tokens | Model | Cost |
-|---------|----------------|------------|-------|------|
-| Itinerary Generation | 500 | 8,000 | Sonnet 4.5 | $12.00 |
-| Atlas Conversations | 1,500 | 512 | Sonnet 4.5 | $2.30 |
-| Budget Optimization | 200 | 512 | Sonnet 4.5 | $0.31 |
-| Conflict Resolution | 300 | 256 | Sonnet 4.5 | $0.23 |
-| Packing Lists | 400 | 512 | Sonnet 4.5 | $0.61 |
-| Trip Recaps | 200 | 1024 | Sonnet 4.5 | $0.61 |
-| Email Parsing | 100 | 1024 | Sonnet 4.5 | $0.31 |
-| **TOTAL** | | | | **$16.37/month** |
+| Feature              | Requests/Month | Avg Tokens | Model      | Cost             |
+| -------------------- | -------------- | ---------- | ---------- | ---------------- |
+| Itinerary Generation | 500            | 8,000      | Sonnet 4.5 | $12.00           |
+| Atlas Conversations  | 1,500          | 512        | Sonnet 4.5 | $2.30            |
+| Budget Optimization  | 200            | 512        | Sonnet 4.5 | $0.31            |
+| Conflict Resolution  | 300            | 256        | Sonnet 4.5 | $0.23            |
+| Packing Lists        | 400            | 512        | Sonnet 4.5 | $0.61            |
+| Trip Recaps          | 200            | 1024       | Sonnet 4.5 | $0.61            |
+| Email Parsing        | 100            | 1024       | Sonnet 4.5 | $0.31            |
+| **TOTAL**            |                |            |            | **$16.37/month** |
 
 **Per user:** $0.016/user (at 1000 active users)
 
@@ -688,16 +756,16 @@ Automatically suggest Pinterest/Instagram images for trip mood board.
 
 ### After Optimization (Haiku for simple tasks)
 
-| Feature | Requests/Month | Model | Cost | Savings |
-|---------|----------------|-------|------|---------|
-| Itinerary Generation | 500 | Sonnet 4.5 | $12.00 | - |
-| Atlas Conversations | 1,500 | Sonnet 4.5 | $2.30 | - |
-| Budget Optimization | 200 | **Haiku** | $0.005 | -$0.30 |
-| Conflict Resolution | 300 | **Haiku** | $0.004 | -$0.23 |
-| Packing Lists | 400 | **Haiku** | $0.010 | -$0.60 |
-| Trip Recaps | 200 | Sonnet 4.5 | $0.61 | - |
-| Email Parsing | 100 | **Haiku** | $0.005 | -$0.30 |
-| **TOTAL** | | | **$14.93/month** | **-$1.44 (9%)** |
+| Feature              | Requests/Month | Model      | Cost             | Savings         |
+| -------------------- | -------------- | ---------- | ---------------- | --------------- |
+| Itinerary Generation | 500            | Sonnet 4.5 | $12.00           | -               |
+| Atlas Conversations  | 1,500          | Sonnet 4.5 | $2.30            | -               |
+| Budget Optimization  | 200            | **Haiku**  | $0.005           | -$0.30          |
+| Conflict Resolution  | 300            | **Haiku**  | $0.004           | -$0.23          |
+| Packing Lists        | 400            | **Haiku**  | $0.010           | -$0.60          |
+| Trip Recaps          | 200            | Sonnet 4.5 | $0.61            | -               |
+| Email Parsing        | 100            | **Haiku**  | $0.005           | -$0.30          |
+| **TOTAL**            |                |            | **$14.93/month** | **-$1.44 (9%)** |
 
 **Note:** 9% savings seems low because Itinerary + Atlas account for 87% of costs. As usage grows, savings will scale.
 
@@ -740,15 +808,16 @@ Automatically suggest Pinterest/Instagram images for trip mood board.
 **Improvements to Consider:**
 
 1. **Use System Prompts More**
+
    ```typescript
    // Current: Everything in user message
    const prompt = `You are a travel planner. Create itinerary for ${destination}...`;
 
    // Better: Separate system context
    const message = await anthropic.messages.create({
-     model: "claude-sonnet-4-5",
-     system: "You are a professional travel planner specializing in group trips...",
-     messages: [{ role: "user", content: `Create itinerary for ${destination}...` }]
+     model: 'claude-sonnet-4-5',
+     system: 'You are a professional travel planner specializing in group trips...',
+     messages: [{ role: 'user', content: `Create itinerary for ${destination}...` }],
    });
    ```
 
@@ -757,11 +826,12 @@ Automatically suggest Pinterest/Instagram images for trip mood board.
    - Improves accuracy by 20-30%
 
 3. **Structured Output with Prefill**
+
    ```typescript
    messages: [
-     { role: "user", content: "Generate packing list for Tokyo in summer" },
-     { role: "assistant", content: '{"items": [' } // Prefill for JSON
-   ]
+     { role: 'user', content: 'Generate packing list for Tokyo in summer' },
+     { role: 'assistant', content: '{"items": [' }, // Prefill for JSON
+   ];
    ```
 
 4. **Token Budgeting**
@@ -816,7 +886,7 @@ describe('AI Itinerary Generation', () => {
     const budget = 1000;
     const result = await generateItinerary(testTripId, {
       ...testTripData,
-      budgetPerPerson: budget
+      budgetPerPerson: budget,
     });
 
     expect(result.total_estimated_cost).toBeLessThan(budget * 1.2); // 20% tolerance
@@ -830,15 +900,16 @@ describe('AI Itinerary Generation', () => {
 
 ### How TripSync's AI Compares
 
-| Competitor | AI Features | TripSync Advantage |
-|------------|-------------|-------------------|
-| **Google Travel** | Itinerary suggestions, price tracking | ❌ No AI - basic search | ✅ Full AI generation |
-| **Wanderlog** | Manual planning, some suggestions | ⚠️ Limited AI | ✅ Atlas proactive assistant |
-| **TripIt** | Email parsing | ⚠️ Parsing only | ✅ Full AI planning |
-| **Roadtrippers** | Route optimization | ❌ No AI | ✅ Group coordination AI |
-| **Notion Travel Templates** | Manual | ❌ No AI | ✅ Everything automated |
+| Competitor                  | AI Features                           | TripSync Advantage      |
+| --------------------------- | ------------------------------------- | ----------------------- | ---------------------------- |
+| **Google Travel**           | Itinerary suggestions, price tracking | ❌ No AI - basic search | ✅ Full AI generation        |
+| **Wanderlog**               | Manual planning, some suggestions     | ⚠️ Limited AI           | ✅ Atlas proactive assistant |
+| **TripIt**                  | Email parsing                         | ⚠️ Parsing only         | ✅ Full AI planning          |
+| **Roadtrippers**            | Route optimization                    | ❌ No AI                | ✅ Group coordination AI     |
+| **Notion Travel Templates** | Manual                                | ❌ No AI                | ✅ Everything automated      |
 
 **TripSync's Unique AI Position:**
+
 - ✅ Only one with proactive AI assistant (Atlas)
 - ✅ Only one built for groups (voting, preferences, conflict resolution)
 - ✅ Only one with end-to-end AI (create → plan → book → recap)
@@ -850,21 +921,25 @@ describe('AI Itinerary Generation', () => {
 ## RECOMMENDATIONS SUMMARY
 
 ### Immediate Actions (This Week)
+
 1. ✅ Switch 4 features to Haiku (1 hour of work, start saving costs)
 2. ✅ Implement basic cost monitoring (log AI spend per feature)
 3. ✅ Add caching for destination briefs and packing lists
 
 ### Month 1-2 Focus
+
 1. Build Smart Itinerary Rebalancing
 2. Build Destination Research Brief
 3. Set up A/B testing for AI features
 
 ### Month 3-4 Focus
+
 1. Improve Atlas conversation quality (better prompts)
 2. Add Personalized Trip Templates
 3. Implement comprehensive evals
 
 ### Month 5-6 Focus
+
 1. Build Viral Trip Summary sharing
 2. Pilot Real-Time Activity Recommendations
 3. Scale infrastructure for growth
@@ -874,6 +949,7 @@ describe('AI Itinerary Generation', () => {
 ## APPENDIX: CODE LOCATIONS & FILES
 
 **AI Service (Backend):**
+
 - `server/ai-service.ts` - All AI functions
   - Line 21-123: `generateItinerary()`
   - Line 256-285: `suggestConflictResolution()`
@@ -884,13 +960,16 @@ describe('AI Itinerary Generation', () => {
   - Line 519-562: `parseEmailForItinerary()`
 
 **Atlas (Frontend):**
+
 - `client/src/components/atlas/AtlasAgent.tsx` - Main Atlas UI
 - `client/src/hooks/atlas/useProactiveTriggers.ts` - Proactive trigger logic
 
 **Schema:**
+
 - `shared/schema.ts` - Database models, includes `atlasConversations`, `userLearnedPreferences`
 
 **Routes:**
+
 - `server/routes.ts` - API endpoints (search for `ai-suggestions`)
 
 ---
@@ -907,11 +986,13 @@ TripSync is already ahead of most travel apps in AI integration. The opportunity
 **The goal isn't to add AI everywhere - it's to make the AI you have indispensable.**
 
 Focus on making Atlas so good that users say:
+
 > "I can't plan a group trip without Atlas anymore."
 
 ---
 
 **Next Steps:**
+
 1. Review this roadmap with team
 2. Prioritize Month 1-2 projects
 3. Set up cost monitoring dashboard
